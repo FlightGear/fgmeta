@@ -1,6 +1,7 @@
 [submodule "flightgear"]
 	path = flightgear
-	url = git@gitorious.org:fg/flightgear.git
+	url = git://gitorious.org/fg/flightgear.git
+	
 [submodule "simgear"]
 	path = simgear
-	url = git@gitorious.org:fg/simgear.git
+	url = git://gitorious.org/fg/simgear.git
