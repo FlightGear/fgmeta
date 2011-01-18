@@ -13,16 +13,8 @@ cd %WORKSPACE%\flightgear\projects\VC90
 msbuild FlightGear.sln /p:Configuration=Release /m
 
 
-REM FGRun
-
-cd %WORKSPACE%
-svn co https://fgrun.svn.sourceforge.net/svnroot/fgrun/trunk/fgrun fgrun
-
-cd %WORKSPACE%\fgrun\msvc\9.0
-msbuild fgrun.sln /p:Configuration=Release /m
-
-
 REM Installer
 
 cd %WORKSPACE%
-ECHo "Should build installer here"
+set PATH=%PATH%;C:\Program Files (x86)\NSIS;%WORKSPACE%\install\msvc90\OpenSceneGraph\bin
+makensis flightgear-release.nsi
