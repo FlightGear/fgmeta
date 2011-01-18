@@ -65,7 +65,7 @@ puts "Creating directory structure"
 `mkdir -p #{osgPluginsDir}`
 
 puts "Copying binaries"
-bins = ['fgfs', 'terrasync', 'fgjs']
+bins = ['fgfs', 'terrasync', 'fgjs', 'fgviewer']
 bins.each do |b|
   `cp #{prefixDir}/bin/#{b} #{macosDir}/#{b}`
   fix_install_names("#{macosDir}/#{b}")
@@ -94,7 +94,11 @@ end
 
 # Macflightgear launcher
 puts "Copying Macflightgear launcher files"
-`rsync -a --exclude=\".svn\" macflightgear/* #{resourcesDir}`
+
+Dir.chdir "macflightgear" do
+  `cp FlightGear #{macosDir}`
+  `rsync -a --exclude=\".svn\" *.rb *.lproj *.sh *.tiff #{resourcesDir}`
+end
 
 # Info.plist
 template = File.read("Info.plist.in")
