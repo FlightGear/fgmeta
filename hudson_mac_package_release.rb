@@ -65,10 +65,10 @@ puts "Creating directory structure"
 `mkdir -p #{osgPluginsDir}`
 
 puts "Copying binaries"
-bins = ['fgfs', 'terrasync', 'fgjs', 'fgviewer']
+bins = ['fgfs', 'terrasync']
 bins.each do |b|
-  `cp #{prefixDir}/bin/#{b} #{macosDir}/#{b}`
-  fix_install_names("#{macosDir}/#{b}")
+  `cp #{prefixDir}/bin/#{b} #{resourcesDir}/#{b}`
+  fix_install_names("#{resourcesDir}/#{b}")
 end
 
 puts "copying libraries"
