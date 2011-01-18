@@ -51,11 +51,12 @@ macosDir=contents + "/MacOS"
 frameworksDir=contents +"/Frameworks"
 resourcesDir=contents+"/Resources"
 osgPluginsDir=contents+"/PlugIns/osgPlugins-#{osgVersion}"
-volName="\"FlightGear #{VERSION}\""
 
-VERSION = File.read("#{srcDir}/version").strip
 
-dmgPath = Dir.pwd + "/fg_mac_#{VERSION}.dmg"
+fgVersion = File.read("#{srcDir}/version").strip
+volName="\"FlightGear #{fgVersion}\""
+
+dmgPath = Dir.pwd + "/fg_mac_#{fgVersion}.dmg"
 
 puts "Creating directory structure"
 `mkdir -p #{macosDir}`
@@ -92,10 +93,11 @@ end
 `ditto #{$alutSourcePath} #{frameworksDir}/ALUT.framework`
 
 # Macflightgear launcher
-
+puts "Copying Macflightgear launcher files"
+`rsync -a --exclude=\".svn\" macflightgear/* #{resourcesDir}`
 
 # Info.plist
-template = File.read("#{srcDir}/package/mac/nightly.plist.in")
+template = File.read("Info.plist.in")
 output = ERB.new(template).result(binding)
 
 File.open("#{contents}/Info.plist", 'w') { |f|
