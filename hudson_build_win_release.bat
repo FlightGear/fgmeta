@@ -1,6 +1,6 @@
 call "D:\Program Files (x86)\Microsoft Visual Studio 9.0\Common7\Tools\vsvars32.bat"
 
-ECHO #define SIMGEAR_VERSION "2.2.0" > %WORKSPACE%\simgear\version.h
+ECHO #define SIMGEAR_VERSION "2.2.0" > %WORKSPACE%\simgear\simgear\version.h
 cd %WORKSPACE%\simgear\projects\VC90
 msbuild SimGear.vcproj /p:Configuration=Release /m
 
@@ -16,5 +16,7 @@ msbuild FlightGear.sln /p:Configuration=Release /m
 REM Installer
 
 cd %WORKSPACE%
-set PATH=%PATH%;C:\Program Files (x86)\NSIS;%WORKSPACE%\install\msvc90\OpenSceneGraph\bin
-makensis flightgear-release.nsi
+
+
+REM set PATH=%PATH%;C:\Program Files (x86)\NSIS;%WORKSPACE%\install\msvc90\OpenSceneGraph\bin
+REM makensis flightgear-release.nsi
