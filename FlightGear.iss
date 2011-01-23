@@ -18,12 +18,16 @@
 ;     C:\> subst X: F:\
 ;
 
-#define FGVersion "2.2.0"
-;#define VCInstallDir GetEnv(VCINSTALLDIR)
-#define VCInstallDir "C:\Program Files\Microsoft Visual Studio 9.0\VC"
-#define OSGSoNumber "66"
+#include "InstallConfig.iss"
+
+#if GetEnv("VSINSTALLDIR") == ""
+  #define VSInstallDir "C:\Program Files\Microsoft Visual Studio 9.0"
+#else
+  #define VSInstallDir GetEnv("VSINSTALLDIR")
+#endif
+
+#define VCInstallDir VSInstallDir + "\VC"
 #define OSGInstallDir "X:\install\msvc90\OpenSceneGraph"
-#define OSGVersion "2.9.9"
 #define OSGPluginsDir OSGInstallDir + "\bin\osgPlugins-" + OSGVersion
 
 [Setup]
@@ -55,14 +59,18 @@ Name: "desktopicon"; Description: "Create a &desktop icon"; GroupDescription: "A
 ; NOTE: run subst X: F:\ (or whatever path the expanded tree resides at)
 ;Source: "X:\*.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: "X:\flightgear\projects\VC90\Win32\Release\*.exe"; DestDir: "{app}\bin\Win32"; Flags: ignoreversion 
+Source: "X:\flightgear\projects\VC90\x64\Release\*.exe"; DestDir: "{app}\bin\Win64"; Flags: ignoreversion skipifsourcedoesntexist
 
 Source: "X:\fgrun\msvc\9.0\Win32\Release\fgrun.exe"; DestDir: "{app}\bin\Win32"; Flags: ignoreversion 
 Source: "X:\fgrun\msvc\9.0\Win32\Release\locale\*"; DestDir: "{app}\bin\Win32\locale"; Flags: ignoreversion recursesubdirs
 
+Source: "X:\fgrun\msvc\9.0\x64\Release\fgrun.exe"; DestDir: "{app}\bin\Win64"; Flags: ignoreversion 
+Source: "X:\fgrun\msvc\9.0\Win32\Release\locale\*"; DestDir: "{app}\bin\Win64\locale"; Flags: ignoreversion recursesubdirs
+
 Source: "X:\3rdParty\bin\*.dll"; DestDir: "{app}\bin\Win32"
 Source: "{#VCInstallDir}\redist\x86\Microsoft.VC90.CRT\*.dll"; DestDir:  "{app}\bin\Win32"
 
-Source: "X:\data\*.*"; DestDir: "{app}\data"; Flags: ignoreversion recursesubdirs
+Source: "X:\data\*.*"; DestDir: "{app}\data"; Flags: ignoreversion recursesubdirs skipifsourcedoesntexist
 
 Source: "{#OSGInstallDir}\bin\osg{#OSGSoNumber}-osg.dll"; DestDir: "{app}\bin\Win32"
 Source: "{#OSGInstallDir}\bin\osg{#OSGSoNumber}-osgDB.dll"; DestDir: "{app}\bin\Win32"
