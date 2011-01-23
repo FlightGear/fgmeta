@@ -30,6 +30,9 @@
 #define OSGInstallDir "X:\install\msvc90\OpenSceneGraph"
 #define OSGPluginsDir OSGInstallDir + "\bin\osgPlugins-" + OSGVersion
 
+#define OSG64InstallDir "X:\install\msvc90-64\OpenSceneGraph"
+#define OSG64PluginsDir OSG64InstallDir + "\bin\osgPlugins-" + OSGVersion
+
 [Setup]
 AppId=FlightGear
 AppName=FlightGear
@@ -68,7 +71,10 @@ Source: "X:\fgrun\msvc\9.0\x64\Release\fgrun.exe"; DestDir: "{app}\bin\Win64"; F
 Source: "X:\fgrun\msvc\9.0\Win32\Release\locale\*"; DestDir: "{app}\bin\Win64\locale"; Flags: ignoreversion recursesubdirs
 
 Source: "X:\3rdParty\bin\*.dll"; DestDir: "{app}\bin\Win32"
+Source: "X:\3rdParty.x64\bin\*.dll"; DestDir: "{app}\bin\Win64"; Flags: skipifsourcedoesntexist;   Check: Is64BitInstallMode
+
 Source: "{#VCInstallDir}\redist\x86\Microsoft.VC90.CRT\*.dll"; DestDir:  "{app}\bin\Win32"
+Source: "{#VCInstallDir}\redist\x64\Microsoft.VC90.CRT\*.dll"; DestDir:  "{app}\bin\Win64";  Flags: skipifsourcedoesntexist;   Check: Is64BitInstallMode
 
 Source: "X:\data\*.*"; DestDir: "{app}\data"; Flags: ignoreversion recursesubdirs skipifsourcedoesntexist
 
@@ -92,6 +98,27 @@ Source: "{#OSGPluginsDir}\osgdb_jpeg.dll"; DestDir: "{app}\bin\Win32\osgPlugins-
 Source: "{#OSGPluginsDir}\osgdb_rgb.dll"; DestDir: "{app}\bin\Win32\osgPlugins-{#OSGVersion}"
 Source: "{#OSGPluginsDir}\osgdb_png.dll"; DestDir: "{app}\bin\Win32\osgPlugins-{#OSGVersion}"
 Source: "{#OSGPluginsDir}\osgdb_txf.dll"; DestDir: "{app}\bin\Win32\osgPlugins-{#OSGVersion}"
+
+Source: "{#OSG64InstallDir}\bin\osg{#OSGSoNumber}-osg.dll"; DestDir: "{app}\bin\Win64"; Flags: skipifsourcedoesntexist
+Source: "{#OSG64InstallDir}\bin\osg{#OSGSoNumber}-osgDB.dll"; DestDir: "{app}\bin\Win64"; Flags: skipifsourcedoesntexist
+Source: "{#OSG64InstallDir}\bin\osg{#OSGSoNumber}-osgGA.dll"; DestDir: "{app}\bin\Win64"; Flags: skipifsourcedoesntexist
+Source: "{#OSG64InstallDir}\bin\osg{#OSGSoNumber}-osgParticle.dll"; DestDir: "{app}\bin\Win64"; Flags: skipifsourcedoesntexist
+Source: "{#OSG64InstallDir}\bin\osg{#OSGSoNumber}-osgText.dll"; DestDir: "{app}\bin\Win64"; Flags: skipifsourcedoesntexist
+Source: "{#OSG64InstallDir}\bin\osg{#OSGSoNumber}-osgUtil.dll"; DestDir: "{app}\bin\Win64"; Flags: skipifsourcedoesntexist
+Source: "{#OSG64InstallDir}\bin\osg{#OSGSoNumber}-osgViewer.dll"; DestDir: "{app}\bin\Win64"; Flags: skipifsourcedoesntexist
+Source: "{#OSG64InstallDir}\bin\osg{#OSGSoNumber}-osgSim.dll"; DestDir: "{app}\bin\Win64"; Flags: skipifsourcedoesntexist
+Source: "{#OSG64InstallDir}\bin\osg{#OSGSoNumber}-osgFX.dll"; DestDir: "{app}\bin\Win64"; Flags: skipifsourcedoesntexist
+
+Source: "{#OSG64InstallDir}\bin\ot12-OpenThreads.dll"; DestDir: "{app}\bin\Win64"; Flags: skipifsourcedoesntexist
+
+Source: "{#OSG64PluginsDir}\osgdb_ac.dll"; DestDir: "{app}\bin\Win64\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist
+Source: "{#OSG64PluginsDir}\osgdb_osg.dll"; DestDir: "{app}\bin\Win64\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist
+Source: "{#OSG64PluginsDir}\osgdb_3ds.dll"; DestDir: "{app}\bin\Win64\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist
+Source: "{#OSG64PluginsDir}\osgdb_mdl.dll"; DestDir: "{app}\bin\Win64\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist
+Source: "{#OSG64PluginsDir}\osgdb_jpeg.dll"; DestDir: "{app}\bin\Win64\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist
+Source: "{#OSG64PluginsDir}\osgdb_rgb.dll"; DestDir: "{app}\bin\Win64\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist
+Source: "{#OSG64PluginsDir}\osgdb_png.dll"; DestDir: "{app}\bin\Win64\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist
+Source: "{#OSG64PluginsDir}\osgdb_txf.dll"; DestDir: "{app}\bin\Win64\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist
 
 [Dirs]
 ; Make the user installable scenery directory
