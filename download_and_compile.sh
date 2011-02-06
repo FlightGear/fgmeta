@@ -18,7 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-VERSION="1.1"
+VERSION="1.2"
 
 #COMPILE GIT FGFS
 
@@ -109,7 +109,7 @@ fi
 
 
 #######################################################
-# Last working revision
+# Last stable revision: currently FlightGear 2.0 with OSG 2.8.3
 PLIB_STABLE_REVISION="2163"
 OSG_STABLE_REVISION="http://www.openscenegraph.org/svn/osg/OpenSceneGraph/tags/OpenSceneGraph-2.8.3"
 SIMGEAR_STABLE_REVISION="937297561fcc4daadedd1f7c49efd39291ebd5df"
@@ -118,6 +118,9 @@ FGFS_DATA_STABLE_REVISION="061d4ec7f7037e4c71f7163d38d443e59225f399"
 FGRUN_STABLE_REVISION="554"
 FGCOM_STABLE_REVISION="234"
 FGCOMGUI_STABLE_REVISION="46"
+
+# Current developer revision: latest FlightGear GIT (2.3.0) with OSG 2.9.9
+OSG_UNSTABLE_REVISION="http://www.openscenegraph.org/svn/osg/OpenSceneGraph/tags/OpenSceneGraph-2.9.9"
 
 #######################################################
 # set script to stop if an error occours
@@ -425,7 +428,7 @@ then
 	echo "**************** OSG *******************" | tee -a $LOGFILE
 	echo "****************************************" | tee -a $LOGFILE
 
-	OSG_SVN="http://www.openscenegraph.org/svn/osg/OpenSceneGraph/trunk"
+	OSG_SVN=$OSG_UNSTABLE_REVISION
 	if [ "$STABLE" = "STABLE"  -o "Y" = "Y" ]
 	then
 		OSG_SVN=$OSG_STABLE_REVISION
@@ -434,7 +437,7 @@ then
 
 	if [ "$DOWNLOAD" = "y" ]
 	then
-		echo -n "SVN FROM http://www.openscenegraph.org/svn/osg/OpenSceneGraph/trunk ... " >> $LOGFILE
+		echo -n "SVN FROM $OSG_SVN ... " >> $LOGFILE
 		svn co "$OSG_SVN" OpenSceneGraph
 		echo " OK" >> $LOGFILE
 	fi
