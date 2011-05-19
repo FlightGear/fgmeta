@@ -1,8 +1,8 @@
 #!/bin/bash
 #* Written by Francesco Angelo Brisa, started January 2008.
 #
-# Copyright (C) 2008 Francesco Angelo Brisa - http://brisa.homelinux.net
-# email: francesco@brisa.homelinux.net   -   fbrisa@yahoo.it
+# Copyright (C) 2008 Francesco Angelo Brisa
+# email: fbrisa@gmail.com   -   fbrisa@yahoo.it
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-VERSION="1.2"
+VERSION="1.4"
 
 #COMPILE GIT FGFS
 
@@ -46,9 +46,11 @@ DOWNLOAD="y"
 
 
 JOPTION=""
+OOPTION=""
 DEBUG=""
+WITH_EVENT_INPUT=""
 
-while getopts "suhc:p:a:d:r:j:g" OPTION
+while getopts "suhc:p:a:d:r:j:O:ge" OPTION
 do
      case $OPTION in
          s)
@@ -78,11 +80,19 @@ do
          j)
              JOPTION=" -j"$OPTARG" "
              ;;
+	 O)
+	    OOPTION=" -O"$OPTARG" "
+	    ;;
          g)
              DEBUG="CXXFLAGS=-g"
              ;;
+         e)
+             WITH_EVENT_INPUT="--with-eventinput"
+             ;;
+
+
          ?)
-             echo "errore"
+             echo "error"
              WHATTOBUILD="--help"
              #exit
              ;;
@@ -132,19 +142,21 @@ if [ "$WHATTOBUILD" = "--help" ]
 then
 	echo "$0 Version $VERSION"
 	echo "Usage:"
-	echo "./$0 [-u] [-h] [-s] [-a y|n] [-c y|n] [-p y|n] [-d y|n] [-r y|n] [ALL|PLIB|OSG|SIMGEAR|FGFS|FGRUN|FGCOM|FGCOMGUI|ATLAS] [UPDATE]"
+	echo "./$0 [-u] [-h] [-s] [-e] [-g] [-a y|n] [-c y|n] [-p y|n] [-d y|n] [-r y|n] [ALL|PLIB|OSG|SIMGEAR|FGFS|FGRUN|FGCOM|FGCOMGUI|ATLAS] [UPDATE]"
 	echo "* without options it recompiles: PLIB,OSG,SIMGEAR,FGFS,FGRUN"
 	echo "* Using ALL compiles everything"
 	echo "* Adding UPDATE it does not rebuild all (faster but to use only after one successfull first compile)"
 	echo "Switches:"
 	echo "* -u  such as using UPDATE"
 	echo "* -h  show this help"
+	echo "* -e  compile FlightGear with --with-eventinput option (experimental)"
 	echo "* -g  compile with debug info for gcc"
 	echo "* -a y|n  y=do an apt-get update n=skip apt-get update                      	default=y"
 	echo "* -p y|n  y=download packages n=skip download packages                      	default=y"
 	echo "* -c y|n  y=compile programs  n=do not compile programs                     	default=y"
 	echo "* -d y|n  y=fetch programs from internet (cvs, svn, etc...)  n=do not fetch 	default=y"
-	echo "* -j X    Add -jX to the make compiolation                                  	default=None"
+	echo "* -j X    Add -jX to the make compilation		                             	default=None"
+	echo "* -O X    Add -OX to the make compilation	           				default=None"
 	echo "* -r y|n  y=reconfigure programs before compiling them  n=do not reconfigure	default=y"
 	echo "* -s compile only last stable known versions					default=y"
 	
@@ -159,7 +171,7 @@ fi
 echo "**************************************"
 echo "*                                    *"
 echo "* Warning, the compilation process   *"
-echo "* is going to use 7 or more Gbytes   *"
+echo "* is going to use 9 or more Gbytes   *"
 echo "* of space and at least a couple of  *"
 echo "* hours to download and build FG.    *"
 echo "*                                    *"
@@ -220,6 +232,7 @@ echo "COMPILE=$COMPILE" >> $LOGFILE
 echo "RECONFIGURE=$RECONFIGURE" >> $LOGFILE
 echo "DOWNLOAD=$DOWNLOAD" >> $LOGFILE
 echo "JOPTION=$JOPTION" >> $LOGFILE
+echo "OOPTION=$OOPTION" >> $LOGFILE
 echo "DEBUG=$DEBUG" >> $LOGFILE
 
 
@@ -394,8 +407,8 @@ then
 		if [ "$COMPILE" = "y" ]
 		then
 			echo "MAKE plib" >> $LOGFILE
-			echo "make $JOPTION" >> $LOGFILE
-			make $JOPTION 2>&1 | tee -a $LOGFILE
+			echo "make $JOPTION $OOPTION" >> $LOGFILE
+			make $JOPTION $OOPTION 2>&1 | tee -a $LOGFILE
 			
 	
 			if [ ! -d $INSTALL_DIR_PLIB ]
@@ -429,7 +442,7 @@ then
 	echo "****************************************" | tee -a $LOGFILE
 
 	OSG_SVN=$OSG_UNSTABLE_REVISION
-	if [ "$STABLE" = "STABLE"  -o "Y" = "Y" ]
+	if [ "$STABLE" = "STABLE" ]
 	then
 		OSG_SVN=$OSG_STABLE_REVISION
 	fi
@@ -462,7 +475,7 @@ then
 	if [ "$COMPILE" = "y" ]
 	then
 		echo "COMPILING OSG" >> $LOGFILE
-		make $JOPTION 2>&1 | tee -a $LOGFILE
+		make $JOPTION $OOPTION 2>&1 | tee -a $LOGFILE
 	
 		if [ ! -d $INSTALL_DIR_OSG ]
 		then
@@ -559,8 +572,8 @@ then
 	if [ "$COMPILE" = "y" ]
 	then
 		echo "MAKE SIMGEAR" >> $LOGFILE
-		echo "make $JOPTION" >> $LOGFILE
-		make $JOPTION 2>&1 | tee -a $LOGFILE
+		echo "make $JOPTION $OOPTION " >> $LOGFILE
+		make $JOPTION $OOPTION 2>&1 | tee -a $LOGFILE
 
 		echo "INSTALL SIMGEAR" >> $LOGFILE
 		make install 2>&1 | tee -a $LOGFILE
@@ -634,16 +647,16 @@ then
 				./autogen.sh 2>&1 | tee -a $LOGFILE
 
 				echo "CONFIGURE FGFS" >> $LOGFILE
-			   echo ./configure "$DEBUG" --with-eventinput --prefix=$INSTALL_DIR_FGFS --exec-prefix=$INSTALL_DIR_FGFS --with-osg="$INSTALL_DIR_OSG" --with-simgear="$INSTALL_DIR_SIMGEAR" --with-plib="$INSTALL_DIR_PLIB" 
-				./configure "$DEBUG" --with-eventinput --prefix=$INSTALL_DIR_FGFS --exec-prefix=$INSTALL_DIR_FGFS --with-osg="$INSTALL_DIR_OSG" --with-simgear="$INSTALL_DIR_SIMGEAR" --with-plib="$INSTALL_DIR_PLIB" 2>&1 | tee -a $LOGFILE
+			   echo ./configure "$DEBUG" $WITH_EVENT_INPUT --prefix=$INSTALL_DIR_FGFS --exec-prefix=$INSTALL_DIR_FGFS --with-osg="$INSTALL_DIR_OSG" --with-simgear="$INSTALL_DIR_SIMGEAR" --with-plib="$INSTALL_DIR_PLIB" 
+				./configure "$DEBUG" $WITH_EVENT_INPUT --prefix=$INSTALL_DIR_FGFS --exec-prefix=$INSTALL_DIR_FGFS --with-osg="$INSTALL_DIR_OSG" --with-simgear="$INSTALL_DIR_SIMGEAR" --with-plib="$INSTALL_DIR_PLIB" 2>&1 | tee -a $LOGFILE
 			fi
 		fi
 		
 		if [ "$COMPILE" = "y" ]
 		then
 			echo "MAKE FGFS" >> $LOGFILE
-			echo "make $JOPTION" >> $LOGFILE
-			make $JOPTION 2>&1 | tee -a $LOGFILE
+			echo "make $JOPTION $OOPTION" >> $LOGFILE
+			make $JOPTION $OOPTION 2>&1 | tee -a $LOGFILE
 
 			echo "INSTALL FGFS" >> $LOGFILE
 			make install 2>&1 | tee -a $LOGFILE
@@ -788,8 +801,8 @@ then
 	if [ "$COMPILE" = "y" ]
 	then
 		echo "MAKE FGRUN" >> $LOGFILE
-		echo "make $JOPTION" >> $LOGFILE
-		make $JOPTION 2>1 | tee -a $LOGFILE
+		echo "make $JOPTION $OOPTION" >> $LOGFILE
+		make $JOPTION $OOPTION 2>1 | tee -a $LOGFILE
 
 		echo "INSTALL FGRUN" >> $LOGFILE
 		make install 2>&1 | tee -a $LOGFILE
@@ -849,6 +862,7 @@ then
 	
 	if [ "$RECONFIGURE" = "y" ]
 	then
+        cp Makefile Makefile.original
 		cat Makefile | sed s/\\//MY_SLASH_HERE/g > Makefile_NOSLASHES
 	
 	
@@ -856,7 +870,7 @@ then
 	
 		# 1
 		INSTALL_DIR_PLIB_NO_SLASHES=$(echo "$INSTALL_DIR_PLIB" | sed -e 's/\//MY_SLASH_HERE/g')
-		cat Makefile_NOSLASHES | sed s/PLIB_PREFIX:=MY_SLASH_HEREusrMY_SLASH_HERElocalMY_SLASH_HEREsrcMY_SLASH_HEREfgfs-builderMY_SLASH_HEREinstall/PLIB_PREFIX:=$INSTALL_DIR_PLIB_NO_SLASHES/g > Makefile_temp
+		cat Makefile_NOSLASHES | sed s/PLIB_PREFIX\ *:=\ *MY_SLASH_HEREusrMY_SLASH_HERElocalMY_SLASH_HEREsrcMY_SLASH_HEREfgfs-builderMY_SLASH_HEREinstall/PLIB_PREFIX\ :=\ $INSTALL_DIR_PLIB_NO_SLASHES/g > Makefile_temp
 		mv -f Makefile_temp Makefile_NOSLASHES
 	
 		#2
@@ -864,7 +878,7 @@ then
 		CXXFLAGS2=$CXXFLAGS" -I $INSTALL_DIR_SIMGEAR/include -I $INSTALL_DIR_OSG/include" 
 		CXXFLAGS3=$(echo $CXXFLAGS2 | sed s/\\//MY_SLASH_HERE/g)
 	
-		cat Makefile_NOSLASHES | sed s/^CXXFLAGS.*/"$CXXFLAGS3"/g  > Makefile_temp
+		cat Makefile_NOSLASHES | sed s/^CXXFLAGS\ *:=.*/"$CXXFLAGS3"/g  > Makefile_temp
 		mv -f Makefile_temp Makefile_NOSLASHES	
 	
 		#3
@@ -879,10 +893,10 @@ then
 		INSTALL_DIR_FGCOM_NO_SLASHS=$(echo "$INSTALL_DIR_FGCOM" | sed -e 's/\//MY_SLASH_HERE/g')
 		INSTALL_BIN_FGCOM_NO_SLASHS="$INSTALL_DIR_FGCOM_NO_SLASHS""MY_SLASH_HEREbin"
 	
-		cat Makefile_NOSLASHES | sed s/INSTALL_BIN:=MY_SLASH_HEREusrMY_SLASH_HERElocalMY_SLASH_HEREbin/INSTALL_BIN:=$INSTALL_BIN_FGCOM_NO_SLASHS/g > Makefile_temp		
+		cat Makefile_NOSLASHES | sed s/INSTALL_BIN\ *:=\ *MY_SLASH_HEREusrMY_SLASH_HERElocalMY_SLASH_HEREbin/INSTALL_BIN\ :=\ $INSTALL_BIN_FGCOM_NO_SLASHS/g > Makefile_temp		
 		mv -f Makefile_temp Makefile_NOSLASHES	
 	
-		cat Makefile_NOSLASHES | sed s/INSTALL_DIR:=MY_SLASH_HEREusrMY_SLASH_HERElocal/INSTALL_DIR:=$INSTALL_DIR_FGCOM_NO_SLASHS/g > Makefile_temp		
+		cat Makefile_NOSLASHES | sed s/INSTALL_DIR\ *:=\ *MY_SLASH_HEREusrMY_SLASH_HERElocal/INSTALL_DIR\ :=\ $INSTALL_DIR_FGCOM_NO_SLASHS/g > Makefile_temp		
 		mv -f Makefile_temp Makefile_NOSLASHES	
 		
 	
@@ -898,8 +912,8 @@ then
 	if [ "$COMPILE" = "y" ]
 	then
 		echo "MAKE FGCOM" >> $LOGFILE
-		echo "make $JOPTION" >> $LOGFILE
-		make $JOPTION 2>&1 | tee -a $LOGFILE
+		echo "make $JOPTION $OOPTION" >> $LOGFILE
+		make $JOPTION $OOPTION 2>&1 | tee -a $LOGFILE
 
 		echo "INSTALL FGCOM" >> $LOGFILE
 		make install 2>&1 | tee -a $LOGFILE
@@ -1006,7 +1020,11 @@ then
 		#patch -p0 < atlas-CVS.diff
 		#cd ..
 		#echo " OK" >> $LOGFILE
-
+        echo "fixing old function name \".get_gbs_center2(\" in Subbucket.cxx"
+        cd Atlas/src
+        cp Subbucket.cxx Subbucket.cxx.original
+        cat Subbucket.cxx.original | sed s/\.get_gbs_center2\(/\.get_gbs_center\(/g > Subbucket.cxx
+        cd "$CBD"
 	fi
 	cd Atlas
 	#cd Atlas-0.3.0
@@ -1025,8 +1043,8 @@ then
 	if [ "$COMPILE" = "y" ]
 	then
 		echo "MAKE ATLAS" >> $LOGFILE
-		echo "make $JOPTION" >> $LOGFILE
-		make $JOPTION 2>&1 | tee -a $LOGFILE
+		echo "make $JOPTION $OOPTION" >> $LOGFILE
+		make $JOPTION $OOPTION 2>&1 | tee -a $LOGFILE
 
 		echo "INSTALL ATLAS" >> $LOGFILE
 		make install 2>&1 | tee -a $LOGFILE
