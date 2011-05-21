@@ -1,0 +1,7 @@
+dist
+.DS_Store
+install
+3rdParty
+boost_1_44_0
+InstallConfig.iss
+Output
