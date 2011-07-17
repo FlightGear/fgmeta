@@ -56,7 +56,7 @@ osgPluginsDir=contents+"/PlugIns/osgPlugins-#{osgVersion}"
 fgVersion = File.read("#{srcDir}/version").strip
 volName="\"FlightGear #{fgVersion}\""
 
-dmgOutDir = Dir.pwd + "output"
+dmgOutDir = Dir.pwd + "/output"
 dmgPath = "#{dmgOutDir}/#{fgVersion}/fg_mac_#{fgVersion}.dmg"
 `rm -rf #{dmgOutDir}`
 `mkdir -p #{dmgOutDir}/#{fgVersion}`
