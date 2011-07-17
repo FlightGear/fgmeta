@@ -56,7 +56,10 @@ osgPluginsDir=contents+"/PlugIns/osgPlugins-#{osgVersion}"
 fgVersion = File.read("#{srcDir}/version").strip
 volName="\"FlightGear #{fgVersion}\""
 
-dmgPath = Dir.pwd + "/fg_mac_#{fgVersion}.dmg"
+dmgOutDir = Dir.pwd + "output"
+dmgPath = "#{dmgOutDir}/#{fgVersion}/fg_mac_#{fgVersion}.dmg"
+`rm -rf #{dmgOutDir}`
+`mkdir -p #{dmgOutDir}/#{fgVersion}`
 
 puts "Creating directory structure"
 `mkdir -p #{macosDir}`
@@ -115,5 +118,4 @@ puts "Creating DMG"
 
 createArgs = "-format UDBZ -imagekey bzip2-level=9 -quiet -volname #{volName}"
 
-`rm #{dmgPath}`
 `hdiutil create -srcfolder #{dmgDir} #{createArgs} #{dmgPath}`
