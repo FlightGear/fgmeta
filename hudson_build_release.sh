@@ -42,6 +42,6 @@ popd
 # create output directory, suitable for archiving / uploading
 rm -rf output
 mkdir -p output/${FG_VERSION}
-mv simgear/simgear_${SG_VERSION}.tar.bz2 output/${FG_VERSION}/
-mv flightgear/flightgear_${FG_VERSION}.tar.bz2 output/${FG_VERSION}/
+mv simgear/simgear-${SG_VERSION}.tar.bz2 output/${FG_VERSION}/
+mv flightgear/flightgear-${FG_VERSION}.tar.bz2 output/${FG_VERSION}/
 
