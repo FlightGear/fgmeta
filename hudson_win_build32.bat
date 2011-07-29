@@ -1,7 +1,9 @@
 
 IF NOT DEFINED WORKSPACE SET WORKSPACE=%~dp0
 
-ECHO #define SIMGEAR_VERSION "2.2.0" > %WORKSPACE%\simgear\simgear\version.h
+SET /P SIMGEAR_VERSION=<%WORKSAPCE%\simgear\version
+ECHO #define SIMGEAR_VERSION "%SIMGEAR_VERSION%" > %WORKSPACE%\simgear\simgear\version.h
+
 cd %WORKSPACE%\simgear\projects\VC90
 msbuild SimGear.vcproj /p:Configuration=Release /m
 
