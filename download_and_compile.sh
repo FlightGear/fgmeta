@@ -18,7 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-VERSION="1.4"
+VERSION="1.4.1"
 
 #COMPILE GIT FGFS
 
@@ -129,8 +129,8 @@ FGRUN_STABLE_REVISION="554"
 FGCOM_STABLE_REVISION="234"
 FGCOMGUI_STABLE_REVISION="46"
 
-# Current developer revision: latest FlightGear GIT (2.3.0) with OSG 2.9.9
-OSG_UNSTABLE_REVISION="http://www.openscenegraph.org/svn/osg/OpenSceneGraph/tags/OpenSceneGraph-2.9.9"
+# Current developer revision: latest FlightGear GIT (2.5.0) with OSG 3.0.1
+OSG_UNSTABLE_REVISION="http://www.openscenegraph.org/svn/osg/OpenSceneGraph/tags/OpenSceneGraph-3.0.1"
 
 #######################################################
 # set script to stop if an error occours
