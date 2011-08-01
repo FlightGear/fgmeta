@@ -18,7 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-VERSION="1.4"
+VERSION="1.4.1"
 
 #COMPILE GIT FGFS
 
@@ -119,9 +119,9 @@ fi
 
 
 #######################################################
-# Last stable revision: currently FlightGear 2.4 with 3.0.0
+# Last stable revision: currently FlightGear 2.4 with 3.0.1
 PLIB_STABLE_REVISION="2163"
-OSG_STABLE_REVISION="http://www.openscenegraph.org/svn/osg/OpenSceneGraph/tags/OpenSceneGraph-3.0.0"
+OSG_STABLE_REVISION="http://www.openscenegraph.org/svn/osg/OpenSceneGraph/tags/OpenSceneGraph-3.0.1"
 SIMGEAR_STABLE_REVISION="feb0b83365fe83260ab8e9c032f20ce39fbbe883"
 FGFS_STABLE_REVISION="ee5f323d3ef487469347005fcec1d7cf4de501b8"
 FGFS_DATA_STABLE_REVISION="061d4ec7f7037e4c71f7163d38d443e59225f399"
@@ -129,8 +129,8 @@ FGRUN_STABLE_REVISION="554"
 FGCOM_STABLE_REVISION="234"
 FGCOMGUI_STABLE_REVISION="46"
 
-# Current developer revision: latest FlightGear GIT (2.3.0) with OSG 3.0.0
-OSG_UNSTABLE_REVISION="http://www.openscenegraph.org/svn/osg/OpenSceneGraph/tags/OpenSceneGraph-3.0.0"
+# Current developer revision: latest FlightGear GIT (2.5.0) with OSG 3.0.1
+OSG_UNSTABLE_REVISION="http://www.openscenegraph.org/svn/osg/OpenSceneGraph/tags/OpenSceneGraph-3.0.1"
 
 #######################################################
 # set script to stop if an error occours
