@@ -92,12 +92,26 @@ Source: "{#OSGInstallDir}\bin\ot12-OpenThreads.dll"; DestDir: "{app}\bin\Win32"
 
 Source: "{#OSGPluginsDir}\osgdb_ac.dll"; DestDir: "{app}\bin\Win32\osgPlugins-{#OSGVersion}"
 Source: "{#OSGPluginsDir}\osgdb_osg.dll"; DestDir: "{app}\bin\Win32\osgPlugins-{#OSGVersion}"
+Source: "{#OSGPluginsDir}\osgdb_osga.dll"; DestDir: "{app}\bin\Win32\osgPlugins-{#OSGVersion}"
 Source: "{#OSGPluginsDir}\osgdb_3ds.dll"; DestDir: "{app}\bin\Win32\osgPlugins-{#OSGVersion}"
 Source: "{#OSGPluginsDir}\osgdb_mdl.dll"; DestDir: "{app}\bin\Win32\osgPlugins-{#OSGVersion}"
 Source: "{#OSGPluginsDir}\osgdb_jpeg.dll"; DestDir: "{app}\bin\Win32\osgPlugins-{#OSGVersion}"
 Source: "{#OSGPluginsDir}\osgdb_rgb.dll"; DestDir: "{app}\bin\Win32\osgPlugins-{#OSGVersion}"
 Source: "{#OSGPluginsDir}\osgdb_png.dll"; DestDir: "{app}\bin\Win32\osgPlugins-{#OSGVersion}"
+Source: "{#OSGPluginsDir}\osgdb_dds.dll"; DestDir: "{app}\bin\Win32\osgPlugins-{#OSGVersion}"
 Source: "{#OSGPluginsDir}\osgdb_txf.dll"; DestDir: "{app}\bin\Win32\osgPlugins-{#OSGVersion}"
+Source: "{#OSGPluginsDir}\osgdb_serializers_osg.dll"; DestDir: "{app}\bin\Win32\osgPlugins-{#OSGVersion}"
+Source: "{#OSGPluginsDir}\osgdb_serializers_osganimation.dll"; DestDir: "{app}\bin\Win32\osgPlugins-{#OSGVersion}"
+Source: "{#OSGPluginsDir}\osgdb_serializers_osgfx.dll"; DestDir: "{app}\bin\Win32\osgPlugins-{#OSGVersion}"
+Source: "{#OSGPluginsDir}\osgdb_serializers_osgmanipulator.dll"; DestDir: "{app}\bin\Win32\osgPlugins-{#OSGVersion}"
+Source: "{#OSGPluginsDir}\osgdb_serializers_osgparticle.dll"; DestDir: "{app}\bin\Win32\osgPlugins-{#OSGVersion}"
+Source: "{#OSGPluginsDir}\osgdb_serializers_osgshadow.dll"; DestDir: "{app}\bin\Win32\osgPlugins-{#OSGVersion}"
+Source: "{#OSGPluginsDir}\osgdb_serializers_osgsim.dll"; DestDir: "{app}\bin\Win32\osgPlugins-{#OSGVersion}"
+Source: "{#OSGPluginsDir}\osgdb_serializers_osgterrain.dll"; DestDir: "{app}\bin\Win32\osgPlugins-{#OSGVersion}"
+Source: "{#OSGPluginsDir}\osgdb_serializers_osgtext.dll"; DestDir: "{app}\bin\Win32\osgPlugins-{#OSGVersion}"
+Source: "{#OSGPluginsDir}\osgdb_serializers_osgvolume.dll"; DestDir: "{app}\bin\Win32\osgPlugins-{#OSGVersion}"
+Source: "{#OSGPluginsDir}\osgdb_deprecated_osg.dll"; DestDir: "{app}\bin\Win32\osgPlugins-{#OSGVersion}"
+Source: "{#OSGPluginsDir}\osgdb_deprecated_osgparticle.dll"; DestDir: "{app}\bin\Win32\osgPlugins-{#OSGVersion}"
 
 Source: "{#OSG64InstallDir}\bin\osg{#OSGSoNumber}-osg.dll"; DestDir: "{app}\bin\Win64"; Flags: skipifsourcedoesntexist
 Source: "{#OSG64InstallDir}\bin\osg{#OSGSoNumber}-osgDB.dll"; DestDir: "{app}\bin\Win64"; Flags: skipifsourcedoesntexist
@@ -113,12 +127,26 @@ Source: "{#OSG64InstallDir}\bin\ot12-OpenThreads.dll"; DestDir: "{app}\bin\Win64
 
 Source: "{#OSG64PluginsDir}\osgdb_ac.dll"; DestDir: "{app}\bin\Win64\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist
 Source: "{#OSG64PluginsDir}\osgdb_osg.dll"; DestDir: "{app}\bin\Win64\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist
+Source: "{#OSG64PluginsDir}\osgdb_osga.dll"; DestDir: "{app}\bin\Win64\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist
 Source: "{#OSG64PluginsDir}\osgdb_3ds.dll"; DestDir: "{app}\bin\Win64\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist
 Source: "{#OSG64PluginsDir}\osgdb_mdl.dll"; DestDir: "{app}\bin\Win64\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist
 Source: "{#OSG64PluginsDir}\osgdb_jpeg.dll"; DestDir: "{app}\bin\Win64\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist
 Source: "{#OSG64PluginsDir}\osgdb_rgb.dll"; DestDir: "{app}\bin\Win64\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist
 Source: "{#OSG64PluginsDir}\osgdb_png.dll"; DestDir: "{app}\bin\Win64\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist
+Source: "{#OSG64PluginsDir}\osgdb_dds.dll"; DestDir: "{app}\bin\Win64\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist
 Source: "{#OSG64PluginsDir}\osgdb_txf.dll"; DestDir: "{app}\bin\Win64\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist
+Source: "{#OSG64InstallDir}\osgdb_serializers_osg.dll"; DestDir: "{app}\bin\Win64\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist
+Source: "{#OSG64InstallDir}\osgdb_serializers_osganimation.dll"; DestDir: "{app}\bin\Win64\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist
+Source: "{#OSG64InstallDir}\osgdb_serializers_osgfx.dll"; DestDir: "{app}\bin\Win64\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist
+Source: "{#OSG64InstallDir}\osgdb_serializers_osgmanipulator.dll"; DestDir: "{app}\bin\Win64\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist
+Source: "{#OSG64InstallDir}\osgdb_serializers_osgparticle.dll"; DestDir: "{app}\bin\Win64\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist
+Source: "{#OSG64InstallDir}\osgdb_serializers_osgshadow.dll"; DestDir: "{app}\bin\Win64\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist
+Source: "{#OSG64InstallDir}\osgdb_serializers_osgsim.dll"; DestDir: "{app}\bin\Win64\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist
+Source: "{#OSG64InstallDir}\osgdb_serializers_osgterrain.dll"; DestDir: "{app}\bin\Win64\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist
+Source: "{#OSG64InstallDir}\osgdb_serializers_osgtext.dll"; DestDir: "{app}\bin\Win64\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist
+Source: "{#OSG64InstallDir}\osgdb_serializers_osgvolume.dll"; DestDir: "{app}\bin\Win64\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist
+Source: "{#OSG64InstallDir}\osgdb_deprecated_osg.dll"; DestDir: "{app}\bin\Win64\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist
+Source: "{#OSG64InstallDir}\osgdb_deprecated_osgparticle.dll"; DestDir: "{app}\bin\Win64\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist
 
 [Dirs]
 ; Make the user installable scenery directory
