@@ -18,7 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-VERSION="1.4.2"
+VERSION="1.4.3"
 
 #COMPILE GIT FGFS
 
@@ -122,9 +122,19 @@ fi
 # Last stable revision: currently FlightGear 2.4.0 with 3.0.1
 PLIB_STABLE_REVISION="2163"
 OSG_STABLE_REVISION="http://www.openscenegraph.org/svn/osg/OpenSceneGraph/tags/OpenSceneGraph-3.0.1"
+
+# common stable branch for flightgear, simgear and fgdata
+FGSG_STABLE_GIT_BRANCH="release/2.4.0"
+
+# unstable branch: next for sg/fg, master for fgdata
+FGSG_UNSTABLE_GIT_BRANCH="next"
+FGDATA_UNSTABLE_GIT_BRANCH="master"
+
+# stable GIT revision: release tag
 SIMGEAR_STABLE_REVISION="version/2.4.0-final"
 FGFS_STABLE_REVISION="version/2.4.0-final"
 FGFS_DATA_STABLE_REVISION="version/2.4.0-final"
+
 FGRUN_STABLE_REVISION="625"
 FGCOM_STABLE_REVISION="234"
 FGCOMGUI_STABLE_REVISION="46"
@@ -538,16 +548,27 @@ then
 
 		cd simgear
 
+		git fetch origin
 		if [ "$STABLE" = "STABLE" ]
 		then
-			git pull origin
+			# switch to stable branch
+			# create local stable branch, ignore errors if it exists
+			git branch -f $FGSG_STABLE_GIT_BRANCH origin/$FGSG_STABLE_GIT_BRANCH 2> /dev/null
+			# switch to stable branch. No error is reported if we're already on the branch.
+			git checkout -f $FGSG_STABLE_GIT_BRANCH
+			# get indicated stable version
 			git reset --hard $SIMGEAR_STABLE_REVISION
+		else
+			# switch to unstable branch
+			# create local unstable branch, ignore errors if it exists
+			git branch -f $FGSG_UNSTABLE_GIT_BRANCH origin/$FGSG_UNSTABLE_GIT_BRANCH 2> /dev/null
+			# switch to unstable branch. No error is reported if we're already on the branch.
+			git checkout -f $FGSG_UNSTABLE_GIT_BRANCH
+			# pull latest version from the unstable branch
+			git pull
 		fi
 
-		git pull
 		cd ..	
-		
-
 
 		echo " OK" >> $LOGFILE
 		cd ..
@@ -623,14 +644,26 @@ then
 
 			cd flightgear
 
+			git fetch origin
 			if [ "$STABLE" = "STABLE" ]
 			then
-				git pull origin
+				# switch to stable branch
+				# create local stable branch, ignore errors if it exists
+				git branch -f $FGSG_STABLE_GIT_BRANCH origin/$FGSG_STABLE_GIT_BRANCH 2> /dev/null
+				# switch to stable branch. No error is reported if we're already on the branch.
+				git checkout -f $FGSG_STABLE_GIT_BRANCH
+				# get indicated stable version
 				git reset --hard $FGFS_STABLE_REVISION
+			else
+				# switch to unstable branch
+				# create local unstable branch, ignore errors if it exists
+				git branch -f $FGSG_UNSTABLE_GIT_BRANCH origin/$FGSG_UNSTABLE_GIT_BRANCH 2> /dev/null
+				# switch to unstable branch. No error is reported if we're already on the branch.
+				git checkout -f $FGSG_UNSTABLE_GIT_BRANCH
+				# pull latest version from the unstable branch
+				git pull
 			fi
 
-
-			git pull
 			cd ..	
 
 			echo " OK" >> $LOGFILE
@@ -679,21 +712,36 @@ then
 				#cvs -z5 -d :pserver:cvsguest@cvs.flightgear.org:/var/cvs/FlightGear-0.9 co data
 
 				if [ -d "fgdata" ]
-                                then
-                                        cd fgdata
-
-					if [ "$STABLE" = "STABLE" ]
-					then
-						git pull origin
-						git reset --hard $FGFS_DATA_STABLE_REVISION
-					fi
-
-                                        git pull
-                                        cd ..
-                                else
+				then
+					echo "fgdata exists already."
+				else
+					# no repository yet - need to clone a fresh one
 					git clone git://gitorious.org/fg/fgdata.git
-                                fi
+				fi
 
+				cd fgdata
+
+				git fetch origin
+				if [ "$STABLE" = "STABLE" ]
+				then
+					# switch to stable branch
+					# create local stable branch, ignore errors if it exists
+					git branch -f $FGSG_STABLE_GIT_BRANCH origin/$FGSG_STABLE_GIT_BRANCH 2> /dev/null
+					# switch to stable branch. No error is reported if we're already on the branch.
+					git checkout -f $FGSG_STABLE_GIT_BRANCH
+					# get indicated stable version
+					git reset --hard $FGFS_DATA_STABLE_REVISION
+				else
+					# switch to unstable branch
+					# create local unstable branch, ignore errors if it exists
+					git branch -f $FGDATA_UNSTABLE_GIT_BRANCH origin/$FGDATA_UNSTABLE_GIT_BRANCH 2> /dev/null
+					# switch to unstable branch. No error is reported if we're already on the branch.
+					git checkout -f $FGDATA_UNSTABLE_GIT_BRANCH
+					# pull latest version from the unstable branch
+					git pull
+				fi
+
+				cd ..
 
 				echo " OK" >> $LOGFILE
 				cd "$EXDIR"
