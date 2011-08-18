@@ -18,7 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-VERSION="1.4.1"
+VERSION="1.4.2"
 
 #COMPILE GIT FGFS
 
@@ -119,13 +119,13 @@ fi
 
 
 #######################################################
-# Last stable revision: currently FlightGear 2.0 with OSG 2.8.3
+# Last stable revision: currently FlightGear 2.4.0 with 3.0.1
 PLIB_STABLE_REVISION="2163"
-OSG_STABLE_REVISION="http://www.openscenegraph.org/svn/osg/OpenSceneGraph/tags/OpenSceneGraph-2.8.3"
-SIMGEAR_STABLE_REVISION="937297561fcc4daadedd1f7c49efd39291ebd5df"
-FGFS_STABLE_REVISION="a5017f218fe68fbfb05cfef9e85214b198ed8f0b"
-FGFS_DATA_STABLE_REVISION="061d4ec7f7037e4c71f7163d38d443e59225f399"
-FGRUN_STABLE_REVISION="554"
+OSG_STABLE_REVISION="http://www.openscenegraph.org/svn/osg/OpenSceneGraph/tags/OpenSceneGraph-3.0.1"
+SIMGEAR_STABLE_REVISION="version/2.4.0-final"
+FGFS_STABLE_REVISION="version/2.4.0-final"
+FGFS_DATA_STABLE_REVISION="version/2.4.0-final"
+FGRUN_STABLE_REVISION="625"
 FGCOM_STABLE_REVISION="234"
 FGCOMGUI_STABLE_REVISION="46"
 
