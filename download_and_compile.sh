@@ -553,7 +553,7 @@ then
 		then
 			# switch to stable branch
 			# create local stable branch, ignore errors if it exists
-			git branch -f $FGSG_STABLE_GIT_BRANCH origin/$FGSG_STABLE_GIT_BRANCH 2> /dev/null
+			git branch -f $FGSG_STABLE_GIT_BRANCH origin/$FGSG_STABLE_GIT_BRANCH 2> /dev/null || true
 			# switch to stable branch. No error is reported if we're already on the branch.
 			git checkout -f $FGSG_STABLE_GIT_BRANCH
 			# get indicated stable version
@@ -561,7 +561,7 @@ then
 		else
 			# switch to unstable branch
 			# create local unstable branch, ignore errors if it exists
-			git branch -f $FGSG_UNSTABLE_GIT_BRANCH origin/$FGSG_UNSTABLE_GIT_BRANCH 2> /dev/null
+			git branch -f $FGSG_UNSTABLE_GIT_BRANCH origin/$FGSG_UNSTABLE_GIT_BRANCH 2> /dev/null || true
 			# switch to unstable branch. No error is reported if we're already on the branch.
 			git checkout -f $FGSG_UNSTABLE_GIT_BRANCH
 			# pull latest version from the unstable branch
@@ -649,7 +649,7 @@ then
 			then
 				# switch to stable branch
 				# create local stable branch, ignore errors if it exists
-				git branch -f $FGSG_STABLE_GIT_BRANCH origin/$FGSG_STABLE_GIT_BRANCH 2> /dev/null
+				git branch -f $FGSG_STABLE_GIT_BRANCH origin/$FGSG_STABLE_GIT_BRANCH 2> /dev/null || true
 				# switch to stable branch. No error is reported if we're already on the branch.
 				git checkout -f $FGSG_STABLE_GIT_BRANCH
 				# get indicated stable version
@@ -657,7 +657,7 @@ then
 			else
 				# switch to unstable branch
 				# create local unstable branch, ignore errors if it exists
-				git branch -f $FGSG_UNSTABLE_GIT_BRANCH origin/$FGSG_UNSTABLE_GIT_BRANCH 2> /dev/null
+				git branch -f $FGSG_UNSTABLE_GIT_BRANCH origin/$FGSG_UNSTABLE_GIT_BRANCH 2> /dev/null || true
 				# switch to unstable branch. No error is reported if we're already on the branch.
 				git checkout -f $FGSG_UNSTABLE_GIT_BRANCH
 				# pull latest version from the unstable branch
@@ -726,7 +726,7 @@ then
 				then
 					# switch to stable branch
 					# create local stable branch, ignore errors if it exists
-					git branch -f $FGSG_STABLE_GIT_BRANCH origin/$FGSG_STABLE_GIT_BRANCH 2> /dev/null
+					git branch -f $FGSG_STABLE_GIT_BRANCH origin/$FGSG_STABLE_GIT_BRANCH 2> /dev/null || true
 					# switch to stable branch. No error is reported if we're already on the branch.
 					git checkout -f $FGSG_STABLE_GIT_BRANCH
 					# get indicated stable version
@@ -734,7 +734,7 @@ then
 				else
 					# switch to unstable branch
 					# create local unstable branch, ignore errors if it exists
-					git branch -f $FGDATA_UNSTABLE_GIT_BRANCH origin/$FGDATA_UNSTABLE_GIT_BRANCH 2> /dev/null
+					git branch -f $FGDATA_UNSTABLE_GIT_BRANCH origin/$FGDATA_UNSTABLE_GIT_BRANCH 2> /dev/null || true
 					# switch to unstable branch. No error is reported if we're already on the branch.
 					git checkout -f $FGDATA_UNSTABLE_GIT_BRANCH
 					# pull latest version from the unstable branch
