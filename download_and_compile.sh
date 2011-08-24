@@ -18,7 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-VERSION="1.4.3"
+VERSION="1.5"
 
 #COMPILE GIT FGFS
 
@@ -256,7 +256,7 @@ fi
 
 
 # default is hardy
-DISTRO_PACKAGES="libglut3-dev libopenal-dev libalut-dev libalut0  libfltk1.1-dev libfltk1.1 cvs subversion cmake make build-essential automake zlib1g-dev zlib1g libwxgtk2.8-0 libwxgtk2.8-dev fluid gawk gettext libjpeg62-dev libjpeg62  libxi-dev libxi6 libxmu-dev libxmu6 libboost-dev libasound2-dev libasound2 libpng12-dev libpng12-0 libjasper1 libjasper-dev libopenexr-dev libtiff4-dev libboost-serialization-dev git-core libhal-dev boost-build libqt4-dev scons"
+DISTRO_PACKAGES="libglut3-dev libopenal-dev libalut-dev libalut0  libfltk1.1-dev libfltk1.1 cvs subversion cmake make build-essential automake zlib1g-dev zlib1g libwxgtk2.8-0 libwxgtk2.8-dev fluid gawk gettext libjpeg62-dev libjpeg62  libxi-dev libxi6 libxmu-dev libxmu6 libboost-dev libasound2-dev libasound2 libpng12-dev libpng12-0 libjasper1 libjasper-dev libopenexr-dev libtiff4-dev libboost-serialization-dev git-core libhal-dev boost-build libqt4-dev scons python-tk python-imaging-tk"
 
 
 
@@ -786,6 +786,41 @@ ENDOFALL2
 fi
 
 
+#######################################################
+# FGO!
+#######################################################
+FGO_INSTALL_DIR=fgo
+INSTALL_DIR_FGO=$INSTALL_DIR/$FGO_INSTALL_DIR
+cd "$CBD"
+if [ "$WHATTOBUILD" = "" -o "$WHATTOBUILD" = "FGO" -o "$WHATTOBUILD" = "ALL" ]
+then
+	echo "****************************************" | tee -a $LOGFILE
+	echo "***************** FGO ******************" | tee -a $LOGFILE
+	echo "****************************************" | tee -a $LOGFILE
+
+	if [ "$DOWNLOAD" = "y" ]
+	then
+		wget http://sites.google.com/site/erobosprojects/flightgear/add-ons/fgo/download/fgo-1-3-1.tar.gz?attredirects=0 -O fgo-1-3-1.tar.gz
+		cd install
+		tar zxvf ../fgo-1-3-1.tar.gz
+
+		cat fgo/src/gui.py | sed s/"self.process = subprocess.Popen".*/"self.process = subprocess.Popen(self.options, cwd=self.FG_working_dir,env=os.environ)"/g > fgo/src/gui.py-new
+		mv fgo/src/gui.py-new fgo/src/gui.py
+		cd ..
+		
+	fi
+
+	SCRIPT=run_fgo.sh
+	echo "#!/bin/sh" > $SCRIPT
+	echo "cd \$(dirname \$0)" >> $SCRIPT
+	echo "cd $SUB_INSTALL_DIR" >> $SCRIPT
+	echo "p=\$(pwd)" >> $SCRIPT
+	echo "cd $FGO_INSTALL_DIR" >> $SCRIPT
+        echo "export LD_LIBRARY_PATH=\$p/plib/lib:\$p/OpenSceneGraph/lib:\$p/simgear/lib"  >> $SCRIPT
+	echo "python fgo" >> $SCRIPT
+	chmod 755 $SCRIPT
+
+fi
 
 
 #######################################################
