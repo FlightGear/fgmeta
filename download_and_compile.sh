@@ -18,7 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-VERSION="1.5"
+VERSION="1.5.1"
 
 #COMPILE GIT FGFS
 
@@ -256,16 +256,19 @@ fi
 
 
 # default is hardy
-DISTRO_PACKAGES="libglut3-dev libopenal-dev libalut-dev libalut0  libfltk1.1-dev libfltk1.1 cvs subversion cmake make build-essential automake zlib1g-dev zlib1g libwxgtk2.8-0 libwxgtk2.8-dev fluid gawk gettext libjpeg62-dev libjpeg62  libxi-dev libxi6 libxmu-dev libxmu6 libboost-dev libasound2-dev libasound2 libpng12-dev libpng12-0 libjasper1 libjasper-dev libopenexr-dev libtiff4-dev libboost-serialization-dev git-core libhal-dev boost-build libqt4-dev scons python-tk python-imaging-tk"
+DISTRO_PACKAGES="libopenal-dev libalut-dev libalut0  libfltk1.1-dev libfltk1.1 cvs subversion cmake make build-essential automake zlib1g-dev zlib1g libwxgtk2.8-0 libwxgtk2.8-dev fluid gawk gettext libxi-dev libxi6 libxmu-dev libxmu6 libboost-dev libasound2-dev libasound2 libpng12-dev libpng12-0 libjasper1 libjasper-dev libopenexr-dev libtiff4-dev libboost-serialization-dev git-core libhal-dev libqt4-dev scons python-tk python-imaging-tk"
 
-
+UBUNTU_PACKAGES="libglut3-dev libjpeg62-dev libjpeg62 boost-build"
+DEBIAN_PACKAGES="freeglut3-dev libjpeg8-dev libjpeg8 libboost1.46-dev"
 
 # checking linux distro and version to differ needed packages
 if [ "$DISTRIB_ID" = "Ubuntu" ]
 then
 	echo "$DISTRIB_ID $DISTRIB_RELEASE" >> $LOGFILE
+	DISTRO_PACKAGES="$DISTRO_PACKAGES $UBUNTU_PACKAGES"
 else
 	echo "DEBIAN I SUPPOUSE" >> $LOGFILE
+	DISTRO_PACKAGES="$DISTRO_PACKAGES $DEBIAN_PACKAGES"
 fi
 echo "$LOGSEP" >> $LOGFILE
 
