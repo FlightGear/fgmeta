@@ -18,7 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-VERSION="1.5.1"
+VERSION="1.6"
 
 #COMPILE GIT FGFS
 
@@ -256,9 +256,9 @@ fi
 
 
 # default is hardy
-DISTRO_PACKAGES="libopenal-dev libalut-dev libalut0  libfltk1.1-dev libfltk1.1 cvs subversion cmake make build-essential automake zlib1g-dev zlib1g libwxgtk2.8-0 libwxgtk2.8-dev fluid gawk gettext libxi-dev libxi6 libxmu-dev libxmu6 libboost-dev libasound2-dev libasound2 libpng12-dev libpng12-0 libjasper1 libjasper-dev libopenexr-dev libtiff4-dev libboost-serialization-dev git-core libhal-dev libqt4-dev scons python-tk python-imaging-tk"
+DISTRO_PACKAGES="libopenal-dev libalut-dev libalut0  libfltk1.1-dev libfltk1.1 cvs subversion cmake make build-essential automake zlib1g-dev zlib1g libwxgtk2.8-0 libwxgtk2.8-dev fluid gawk gettext libxi-dev libxi6 libxmu-dev libxmu6 libboost-dev libasound2-dev libasound2 libpng12-dev libpng12-0 libjasper1 libjasper-dev libopenexr-dev libtiff4-dev libboost-serialization-dev git-core libhal-dev libqt4-dev scons python-tk python-imaging-tk libsvn-dev"
 
-UBUNTU_PACKAGES="libglut3-dev libjpeg62-dev libjpeg62 boost-build"
+UBUNTU_PACKAGES="freeglut3-dev libjpeg62-dev libjpeg62 libboost1.46-dev libapr1-dev"
 DEBIAN_PACKAGES="freeglut3-dev libjpeg8-dev libjpeg8 libboost1.46-dev"
 
 # checking linux distro and version to differ needed packages
@@ -584,12 +584,21 @@ then
 	then
 		if [ "$RECONFIGURE" = "y" ]
 		then
-			echo "AUTOGEN SIMGEAR" >> $LOGFILE
-			./autogen.sh 2>&1 | tee -a $LOGFILE
+			#echo "AUTOGEN SIMGEAR" >> $LOGFILE
+			#./autogen.sh 2>&1 | tee -a $LOGFILE
+			#echo "CONFIGURE SIMGEAR" >> $LOGFILE
+			#./configure $DEBUG --prefix="$INSTALL_DIR_SIMGEAR" --exec-prefix="$INSTALL_DIR_SIMGEAR" --with-osg="$INSTALL_DIR_OSG" --with-plib="$INSTALL_DIR_PLIB" --with-jpeg-factory --with-boost-libdir=/usr/include/boost 2>&1 | tee -a $LOGFILE
 
-			echo "CONFIGURE SIMGEAR" >> $LOGFILE
-			echo ./configure $DEBUG --prefix="$INSTALL_DIR_SIMGEAR" --exec-prefix="$INSTALL_DIR_SIMGEAR" --with-osg="$INSTALL_DIR_OSG" --with-plib="$INSTALL_DIR_PLIB" --with-jpeg-factory --with-boost-libdir=/usr/include/boost
-			./configure $DEBUG --prefix="$INSTALL_DIR_SIMGEAR" --exec-prefix="$INSTALL_DIR_SIMGEAR" --with-osg="$INSTALL_DIR_OSG" --with-plib="$INSTALL_DIR_PLIB" --with-jpeg-factory --with-boost-libdir=/usr/include/boost  2>&1 | tee -a $LOGFILE
+			echo -n "RECONFIGURE SIMGEAR ... " >> $LOGFILE
+			rm -f CMakeCache.txt
+			
+			cmake -D CMAKE_BUILD_TYPE="Release" -D CMAKE_CXX_FLAGS="-O3 -D__STDC_CONSTANT_MACROS" -D CMAKE_C_FLAGS="-O3" -D CMAKE_INSTALL_PREFIX:PATH="$INSTALL_DIR_SIMGEAR" -D CMAKE_PREFIX_PATH=$INSTALL_DIR_OSG . 2>&1 | tee -a $LOGFILE
+
+			echo " OK" >> $LOGFILE
+
+			
+
+
 		fi
 	fi
 	
@@ -679,12 +688,24 @@ then
 		then
 			if [ "$RECONFIGURE" = "y" ]
 			then
-				echo "AUTOGEN FGFS" >> $LOGFILE
-				./autogen.sh 2>&1 | tee -a $LOGFILE
+				#echo "AUTOGEN FGFS" >> $LOGFILE
+				#./autogen.sh 2>&1 | tee -a $LOGFILE
+				#echo "CONFIGURE FGFS" >> $LOGFILE
+			   	#echo ./configure "$DEBUG" $WITH_EVENT_INPUT --prefix=$INSTALL_DIR_FGFS --exec-prefix=$INSTALL_DIR_FGFS --with-osg="$INSTALL_DIR_OSG" --with-simgear="$INSTALL_DIR_SIMGEAR" --with-plib="$INSTALL_DIR_PLIB" 
+				#./configure "$DEBUG" $WITH_EVENT_INPUT --prefix=$INSTALL_DIR_FGFS --exec-prefix=$INSTALL_DIR_FGFS --with-osg="$INSTALL_DIR_OSG" --with-simgear="$INSTALL_DIR_SIMGEAR" --with-plib="$INSTALL_DIR_PLIB" 2>&1 | tee -a $LOGFILE
 
-				echo "CONFIGURE FGFS" >> $LOGFILE
-			   echo ./configure "$DEBUG" $WITH_EVENT_INPUT --prefix=$INSTALL_DIR_FGFS --exec-prefix=$INSTALL_DIR_FGFS --with-osg="$INSTALL_DIR_OSG" --with-simgear="$INSTALL_DIR_SIMGEAR" --with-plib="$INSTALL_DIR_PLIB" 
-				./configure "$DEBUG" $WITH_EVENT_INPUT --prefix=$INSTALL_DIR_FGFS --exec-prefix=$INSTALL_DIR_FGFS --with-osg="$INSTALL_DIR_OSG" --with-simgear="$INSTALL_DIR_SIMGEAR" --with-plib="$INSTALL_DIR_PLIB" 2>&1 | tee -a $LOGFILE
+				echo -n "RECONFIGURE FGFS ... " >> $LOGFILE
+				rm -f CMakeCache.txt
+		
+				cmake -D CMAKE_BUILD_TYPE="Release" -D "WITH_FGPANEL=OFF" -D CMAKE_CXX_FLAGS="-O3 -D__STDC_CONSTANT_MACROS" -D CMAKE_C_FLAGS="-O3" -D CMAKE_INSTALL_PREFIX:PATH="$INSTALL_DIR_FGFS" -D "CMAKE_PREFIX_PATH=$INSTALL_DIR_OSG;$INSTALL_DIR_PLIB;$INSTALL_DIR_SIMGEAR" . 2>&1 | tee -a $LOGFILE
+
+				echo " OK" >> $LOGFILE
+
+
+
+
+
+
 			fi
 		fi
 		
