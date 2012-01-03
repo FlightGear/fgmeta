@@ -18,7 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-VERSION="1.6"
+VERSION="1.7"
 
 #COMPILE GIT FGFS
 
@@ -152,7 +152,7 @@ if [ "$WHATTOBUILD" = "--help" ]
 then
 	echo "$0 Version $VERSION"
 	echo "Usage:"
-	echo "./$0 [-u] [-h] [-s] [-e] [-g] [-a y|n] [-c y|n] [-p y|n] [-d y|n] [-r y|n] [ALL|PLIB|OSG|SIMGEAR|FGFS|FGRUN|FGCOM|FGCOMGUI|ATLAS] [UPDATE]"
+	echo "./$0 [-u] [-h] [-s] [-e] [-g] [-a y|n] [-c y|n] [-p y|n] [-d y|n] [-r y|n] [ALL|PLIB|OSG|SIMGEAR|FGFS|FGO|FGRUN|FGCOM|FGCOMGUI|ATLAS] [UPDATE]"
 	echo "* without options it recompiles: PLIB,OSG,SIMGEAR,FGFS,FGRUN"
 	echo "* Using ALL compiles everything"
 	echo "* Adding UPDATE it does not rebuild all (faster but to use only after one successfull first compile)"
@@ -256,7 +256,7 @@ fi
 
 
 # default is hardy
-DISTRO_PACKAGES="libopenal-dev libalut-dev libalut0  libfltk1.1-dev libfltk1.1 cvs subversion cmake make build-essential automake zlib1g-dev zlib1g libwxgtk2.8-0 libwxgtk2.8-dev fluid gawk gettext libxi-dev libxi6 libxmu-dev libxmu6 libboost-dev libasound2-dev libasound2 libpng12-dev libpng12-0 libjasper1 libjasper-dev libopenexr-dev libtiff4-dev libboost-serialization-dev git-core libhal-dev libqt4-dev scons python-tk python-imaging-tk libsvn-dev"
+DISTRO_PACKAGES="libopenal-dev libalut-dev libalut0  libfltk1.1-dev libfltk1.1 cvs subversion cmake make build-essential automake zlib1g-dev zlib1g libwxgtk2.8-0 libwxgtk2.8-dev fluid gawk gettext libxi-dev libxi6 libxmu-dev libxmu6 libboost-dev libasound2-dev libasound2 libpng12-dev libpng12-0 libjasper1 libjasper-dev libopenexr-dev libboost-serialization-dev git-core libhal-dev libqt4-dev scons python-tk python-imaging-tk libsvn-dev "
 
 UBUNTU_PACKAGES="freeglut3-dev libjpeg62-dev libjpeg62 libboost1.46-dev libapr1-dev"
 DEBIAN_PACKAGES="freeglut3-dev libjpeg8-dev libjpeg8 libboost1.46-dev"
@@ -732,15 +732,13 @@ then
 				EXDIR=$(pwd)
 				cd $INSTALL_DIR_FGFS
 				echo -n "GIT DATA FROM git://gitorious.org/fg/fgdata.git ... " >> $LOGFILE
-				#cvs -z5 -d :pserver:cvsguest:guest@cvs.flightgear.org:/var/cvs/FlightGear-0.9 login
-				#cvs -z5 -d :pserver:cvsguest@cvs.flightgear.org:/var/cvs/FlightGear-0.9 co data
 
 				if [ -d "fgdata" ]
 				then
 					echo "fgdata exists already."
 				else
 					# no repository yet - need to clone a fresh one
-					git clone git://gitorious.org/fg/fgdata.git
+					git clone git://gitorious.org/fg/fgdata.git fgdata
 				fi
 
 				cd fgdata
@@ -767,12 +765,46 @@ then
 
 				cd ..
 
+
+				#cd $INSTALL_DIR_FGFS
+				#echo -n "GIT DATA FROM git://gitorious.org/flightgear-aircraft/c172p.git ... " >> $LOGFILE
+
+				#if [ ! -d "aircrafts" ]
+				#then
+				#	mkdir "aircrafts"
+				#	ln ../fgdata/Aircraft/Generic/ . -s
+				#	ln ../fgdata/Aircraft/Instruments . -s
+				#	ln ../fgdata/Aircraft/Instruments-3d/ . -s
+				#fi
+
+				#cd aircrafts
+
+				#if [ -d "c172p" ]
+				#then
+				#	echo "c172p exists already."
+				#else
+#
+#					git clone git://gitorious.org/flightgear-aircraft/c172p.git
+#				fi
+#
+#				cd c172p
+#				git fetch origin
+
+
+
+
+
+
+
 				echo " OK" >> $LOGFILE
 				cd "$EXDIR"
 			fi
 		fi
 	fi
 
+
+	# IF SEPARATED FOLDER FOR AIRCRAFTS
+	# --fg-aircraft=\$PWD/../aircrafts
 	cat > run_fgfs.sh << ENDOFALL
 #!/bin/sh
 cd \$(dirname \$0)
@@ -791,13 +823,6 @@ export LD_LIBRARY_PATH=../../$PLIB_INSTALL_DIR/lib:../../$OSG_INSTALL_DIR/lib:..
 gdb  --directory="\$P1"/fgfs/source/src/ --args fgfs --fg-root=\$PWD/../fgdata/ \$@
 ENDOFALL2
 	chmod 755 run_fgfs_debug.sh
-
-	#echo "#!/bin/sh" > run_fgfs.sh
-	#echo "cd \$(dirname \$0)" >> run_fgfs.sh
-	#echo "cd $SUB_INSTALL_DIR/$FGFS_INSTALL_DIR/bin" >> run_fgfs.sh
-	#echo "export LD_LIBRARY_PATH=../../$PLIB_INSTALL_DIR/lib:../../$OSG_INSTALL_DIR/lib:../../$SIMGEAR_INSTALL_DIR/lib" >> run_fgfs.sh
-	#echo "./fgfs --fg-root=\$PWD/../fgdata/ \$@" >> run_fgfs.sh
-	#chmod 755 run_fgfs.sh
 
 	SCRIPT=run_terrasync.sh
 	echo "#!/bin/sh" > $SCRIPT
@@ -921,7 +946,8 @@ then
 	echo "cd \$(dirname \$0)" >> $SCRIPT
 	echo "cd $SUB_INSTALL_DIR/$FGRUN_INSTALL_DIR/bin" >> $SCRIPT
 	echo "export LD_LIBRARY_PATH=../../$PLIB_INSTALL_DIR/lib:../../$OSG_INSTALL_DIR/lib:../../$SIMGEAR_INSTALL_DIR/lib" >> $SCRIPT
-	echo "./fgrun --fg-exe=\$PWD/../../$FGFS_INSTALL_DIR/bin/fgfs --fg-root=\$PWD/../../$FGFS_INSTALL_DIR/fgdata \$@" >> $SCRIPT
+	#echo "export FG_AIRCRAFTS=\$PWD/../../$FGFS_INSTALL_DIR/aircrafts" >> $SCRIPT
+	echo "./fgrun --fg-exe=\$PWD/../../$FGFS_INSTALL_DIR/bin/fgfs --fg-root=\$PWD/../../$FGFS_INSTALL_DIR/fgdata   \$@" >> $SCRIPT
 	chmod 755 $SCRIPT
 
 
