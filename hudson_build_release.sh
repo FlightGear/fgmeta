@@ -1,10 +1,19 @@
 #!/bin/sh
 
-cd simgear
-cmake -DCMAKE_INSTALL_PREFIX:PATH=$WORKSPACE/dist
+# remove old and create fresh build directories
+rm -rf sgBuild
+rm -rf fgBuild
+mkdir -p sgBuild
+mkdir -p fgBuild
+mkdir -p output
+# clear output directory
+rm -rf output/*
 
-# first make source package (clean directory), finally compile
-make package_source
+echo "Starting on SimGear"
+cd sgBuild
+cmake -DCMAKE_INSTALL_PREFIX:PATH=$WORKSPACE/dist ../simgear
+
+# compile
 make
 
 if [ $? -ne '0' ]; then
@@ -14,13 +23,16 @@ fi
 
 make install
 
+# build source package and copy to output
+make package_source
+cp simgear-*.tar.bz2 ../output/.
+
 echo "Starting on FlightGear"
 
-cd ../flightgear
-cmake -DCMAKE_INSTALL_PREFIX:PATH=$WORKSPACE/dist
+cd ../fgBuild
+cmake -DCMAKE_INSTALL_PREFIX:PATH=$WORKSPACE/dist ../flightgear
 
-# first source package (clean directory), finally compile
-make package_source
+# compile
 make
 
 if [ $? -ne '0' ]; then
@@ -29,4 +41,7 @@ if [ $? -ne '0' ]; then
 fi
 
 make install
+
+# build source package and copy to output
+make package_source
 
