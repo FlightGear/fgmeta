@@ -1,8 +1,7 @@
 #!/bin/sh
 
 cd simgear
-./autogen.sh
-./configure --prefix=$WORKSPACE/dist --with-osg=$WORKSPACE/dist
+cmake -DCMAKE_INSTALL_PREFIX:PATH=$WORKSPACE/dist
 
 make
 
@@ -17,8 +16,7 @@ make dist
 echo "Starting on FlightGear"
 
 cd ../flightgear
-./autogen.sh
-./configure --prefix=$WORKSPACE/dist --with-osg=$WORKSPACE/dist
+cmake -DCMAKE_INSTALL_PREFIX:PATH=$WORKSPACE/dist
 make
 
 if [ $? -ne '0' ]; then
