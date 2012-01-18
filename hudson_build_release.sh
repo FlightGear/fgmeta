@@ -1,17 +1,23 @@
 #!/bin/sh
 
+if [ "$WORKSPACE" == "" ]; then
+    echo "ERROR: Missing WORKSPACE environment variable."
+    exit 1
+fi
+
+#####################################################################################
 # remove old and create fresh build directories
 rm -rf sgBuild
 rm -rf fgBuild
 mkdir -p sgBuild
 mkdir -p fgBuild
 mkdir -p output
-# clear output directory
 rm -rf output/*
 
+#####################################################################################
 echo "Starting on SimGear"
 cd sgBuild
-cmake -DCMAKE_INSTALL_PREFIX:PATH=$WORKSPACE/dist ../simgear
+cmake -DCMAKE_INSTALL_PREFIX:PATH=$WORKSPACE/dist -DSIMGEAR_SHARED:BOOL="ON" ../simgear
 
 # compile
 make
@@ -27,10 +33,10 @@ make install
 make package_source
 cp simgear-*.tar.bz2 ../output/.
 
+#####################################################################################
 echo "Starting on FlightGear"
-
 cd ../fgBuild
-cmake -DCMAKE_INSTALL_PREFIX:PATH=$WORKSPACE/dist ../flightgear
+cmake -DCMAKE_INSTALL_PREFIX:PATH=$WORKSPACE/dist -DSIMGEAR_SHARED:BOOL="ON" ../flightgear
 
 # compile
 make
