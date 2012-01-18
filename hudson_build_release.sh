@@ -13,6 +13,7 @@ mkdir -p sgBuild
 mkdir -p fgBuild
 mkdir -p output
 rm -rf output/*
+rm -rf $WORKSPACE/dist/include/simgear $WORKSPACE/dist/libSim* $WORKSPACE/dist/libsg*.a
 
 #####################################################################################
 echo "Starting on SimGear"
