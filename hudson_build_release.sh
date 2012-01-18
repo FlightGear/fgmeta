@@ -44,4 +44,5 @@ make install
 
 # build source package and copy to output
 make package_source
+cp flightgear-*.tar.bz2 ../output/.
 
