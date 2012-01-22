@@ -18,7 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-VERSION="1.7"
+VERSION="1.8"
 
 #COMPILE GIT FGFS
 
@@ -696,6 +696,12 @@ then
 
 				echo -n "RECONFIGURE FGFS ... " >> $LOGFILE
 				rm -f CMakeCache.txt
+
+				# REMOVING BAD LINES IN CMakeLists.txt
+				#echo "REMOVING BAD LINES IN CMakeLists.txt"
+				#cat utils/fgadmin/src/CMakeLists.txt  | sed /X11_Xft_LIB/d | sed /X11_Xinerama_LIB/d > utils/fgadmin/src/CMakeLists_without_err.txt
+				#cp -f  utils/fgadmin/src/CMakeLists_without_err.txt utils/fgadmin/src/CMakeLists.txt
+
 		
 				cmake -D CMAKE_BUILD_TYPE="Release" -D "WITH_FGPANEL=OFF" -D CMAKE_CXX_FLAGS="-O3 -D__STDC_CONSTANT_MACROS" -D CMAKE_C_FLAGS="-O3" -D CMAKE_INSTALL_PREFIX:PATH="$INSTALL_DIR_FGFS" -D "CMAKE_PREFIX_PATH=$INSTALL_DIR_OSG;$INSTALL_DIR_PLIB;$INSTALL_DIR_SIMGEAR" . 2>&1 | tee -a $LOGFILE
 
