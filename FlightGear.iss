@@ -21,16 +21,16 @@
 #include "InstallConfig.iss"
 
 #if GetEnv("VSINSTALLDIR") == ""
-  #define VSInstallDir "C:\Program Files\Microsoft Visual Studio 9.0"
+  #define VSInstallDir "C:\Program Files (x86)\Microsoft Visual Studio 10.0"
 #else
   #define VSInstallDir GetEnv("VSINSTALLDIR")
 #endif
 
 #define VCInstallDir VSInstallDir + "\VC"
-#define OSGInstallDir "X:\install\msvc90\OpenSceneGraph"
+#define OSGInstallDir "X:\install\msvc100\OpenSceneGraph"
 #define OSGPluginsDir OSGInstallDir + "\bin\osgPlugins-" + OSGVersion
 
-#define OSG64InstallDir "X:\install\msvc90-64\OpenSceneGraph"
+#define OSG64InstallDir "X:\install\msvc100-64\OpenSceneGraph"
 #define OSG64PluginsDir OSG64InstallDir + "\bin\osgPlugins-" + OSGVersion
 
 [Setup]
@@ -61,20 +61,20 @@ Name: "desktopicon"; Description: "Create a &desktop icon"; GroupDescription: "A
 [Files]
 ; NOTE: run subst X: F:\ (or whatever path the expanded tree resides at)
 ;Source: "X:\*.txt"; DestDir: "{app}"; Flags: ignoreversion
-Source: "X:\flightgear\projects\VC90\Win32\Release\*.exe"; DestDir: "{app}\bin\Win32"; Flags: ignoreversion 
-Source: "X:\flightgear\projects\VC90\x64\Release\*.exe"; DestDir: "{app}\bin\Win64"; Flags: ignoreversion skipifsourcedoesntexist
+Source: "X:\install\msvc100\FlightGear\bin\*.exe"; DestDir: "{app}\bin\Win32"; Flags: ignoreversion 
+Source: "X:\install\msvc100-64\FlightGear\bin\*.exe"; DestDir: "{app}\bin\Win64"; Flags: ignoreversion skipifsourcedoesntexist
 
-Source: "X:\fgrun\msvc\9.0\Win32\Release\fgrun.exe"; DestDir: "{app}\bin\Win32"; Flags: ignoreversion 
-Source: "X:\fgrun\msvc\9.0\Win32\Release\locale\*"; DestDir: "{app}\bin\Win32\locale"; Flags: ignoreversion recursesubdirs
+Source: "X:\install\msvc100\FGRun\bin\fgrun.exe"; DestDir: "{app}\bin\Win32"; Flags: ignoreversion 
+Source: "X:\install\msvc100\FGRun\share\locale\*"; DestDir: "{app}\bin\Win32\locale"; Flags: ignoreversion recursesubdirs
 
-Source: "X:\fgrun\msvc\9.0\x64\Release\fgrun.exe"; DestDir: "{app}\bin\Win64"; Flags: ignoreversion 
-Source: "X:\fgrun\msvc\9.0\Win32\Release\locale\*"; DestDir: "{app}\bin\Win64\locale"; Flags: ignoreversion recursesubdirs
+Source: "X:\install\msvc100-64\FGRun\bin\fgrun.exe"; DestDir: "{app}\bin\Win64"; Flags: ignoreversion 
+Source: "X:\install\msvc100-64\FGRun\share\locale\*"; DestDir: "{app}\bin\Win64\locale"; Flags: ignoreversion recursesubdirs
 
 Source: "X:\3rdParty\bin\*.dll"; DestDir: "{app}\bin\Win32"
 Source: "X:\3rdParty.x64\bin\*.dll"; DestDir: "{app}\bin\Win64"; Flags: skipifsourcedoesntexist;   Check: Is64BitInstallMode
 
-Source: "{#VCInstallDir}\redist\x86\Microsoft.VC90.CRT\*.dll"; DestDir:  "{app}\bin\Win32"
-Source: "{#VCInstallDir}\redist\x64\Microsoft.VC90.CRT\*.dll"; DestDir:  "{app}\bin\Win64";  Flags: skipifsourcedoesntexist;   Check: Is64BitInstallMode
+;Source: "{#VCInstallDir}\redist\x86\Microsoft.VC90.CRT\*.dll"; DestDir:  "{app}\bin\Win32"
+;Source: "{#VCInstallDir}\redist\x64\Microsoft.VC90.CRT\*.dll"; DestDir:  "{app}\bin\Win64";  Flags: skipifsourcedoesntexist;   Check: Is64BitInstallMode
 
 Source: "X:\data\*.*"; DestDir: "{app}\data"; Flags: ignoreversion recursesubdirs skipifsourcedoesntexist
 
@@ -100,6 +100,7 @@ Source: "{#OSGPluginsDir}\osgdb_rgb.dll"; DestDir: "{app}\bin\Win32\osgPlugins-{
 Source: "{#OSGPluginsDir}\osgdb_png.dll"; DestDir: "{app}\bin\Win32\osgPlugins-{#OSGVersion}"
 Source: "{#OSGPluginsDir}\osgdb_dds.dll"; DestDir: "{app}\bin\Win32\osgPlugins-{#OSGVersion}"
 Source: "{#OSGPluginsDir}\osgdb_txf.dll"; DestDir: "{app}\bin\Win32\osgPlugins-{#OSGVersion}"
+Source: "{#OSGPluginsDir}\osgdb_freetype.dll"; DestDir: "{app}\bin\Win32\osgPlugins-{#OSGVersion}"
 Source: "{#OSGPluginsDir}\osgdb_serializers_osg.dll"; DestDir: "{app}\bin\Win32\osgPlugins-{#OSGVersion}"
 Source: "{#OSGPluginsDir}\osgdb_serializers_osganimation.dll"; DestDir: "{app}\bin\Win32\osgPlugins-{#OSGVersion}"
 Source: "{#OSGPluginsDir}\osgdb_serializers_osgfx.dll"; DestDir: "{app}\bin\Win32\osgPlugins-{#OSGVersion}"
@@ -135,6 +136,7 @@ Source: "{#OSG64PluginsDir}\osgdb_rgb.dll"; DestDir: "{app}\bin\Win64\osgPlugins
 Source: "{#OSG64PluginsDir}\osgdb_png.dll"; DestDir: "{app}\bin\Win64\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist
 Source: "{#OSG64PluginsDir}\osgdb_dds.dll"; DestDir: "{app}\bin\Win64\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist
 Source: "{#OSG64PluginsDir}\osgdb_txf.dll"; DestDir: "{app}\bin\Win64\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist
+Source: "{#OSG64PluginsDir}\osgdb_freetype.dll"; DestDir: "{app}\bin\Win64\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist
 Source: "{#OSG64PluginsDir}\osgdb_serializers_osg.dll"; DestDir: "{app}\bin\Win64\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist
 Source: "{#OSG64PluginsDir}\osgdb_serializers_osganimation.dll"; DestDir: "{app}\bin\Win64\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist
 Source: "{#OSG64PluginsDir}\osgdb_serializers_osgfx.dll"; DestDir: "{app}\bin\Win64\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist
