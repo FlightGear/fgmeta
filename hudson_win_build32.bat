@@ -2,9 +2,8 @@
 IF NOT DEFINED WORKSPACE SET WORKSPACE=%~dp0
 
 ECHO #define SIMGEAR_VERSION "2.6.0" > %WORKSPACE%\simgear\simgear\version.h
-rem xcopy D:\FGFSHudson\boost_1_44_0\* D:\FGFSHudsonCMake\SimGear\boost_1_44_0\ /s /y /q
-set PATH=%PATH%;D:\Program Files (x86)\CMake 2.8\bin
-call "C:\Program Files (x86)\Microsoft Visual Studio 10.0\Common7\Tools\vsvars32.bat"
+rem set PATH=%PATH%;D:\Program Files (x86)\CMake 2.8\bin
+rem call "C:\Program Files (x86)\Microsoft Visual Studio 10.0\Common7\Tools\vsvars32.bat"
 md build-sg
 md build-fg
 cd build-sg
