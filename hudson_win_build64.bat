@@ -1,13 +1,15 @@
 
 IF NOT DEFINED WORKSPACE SET WORKSPACE=%~dp0
 
-ECHO #define SIMGEAR_VERSION "2.2.0" > %WORKSPACE%\simgear\simgear\version.h
-cd %WORKSPACE%\simgear\projects\VC90
-msbuild SimGear.vcproj /p:Configuration=Release /p:Platform=x64
+ECHO #define SIMGEAR_VERSION "2.6.0" > %WORKSPACE%\simgear\simgear\version.h
+rem set PATH=%PATH%;D:\Program Files (x86)\CMake 2.8\bin
+rem call "C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\vcvarsall.bat" amd64
+md build-sg64
+rem md build-fg64
+cd build-sg64
+cmake ..\SimGear -G "Visual Studio 10 Win64" -DMSVC_3RDPARTY_ROOT=%WORKSPACE% -DCMAKE_INSTALL_PREFIX:PATH=%WORKSPACE%/install/msvc100-64/SimGear
+cmake --build . --config Release --target INSTALL
 
-cd %WORKSPACE%\flightgear
-call scripts\tools\version.bat
-SET HAVE_VERSION_H=1
-cd %WORKSPACE%\flightgear\projects\VC90
-msbuild FlightGear.sln /p:Configuration=Release /p:Platform=x64
-
+rem cd ..\build-fg64
+rem cmake ..\flightgear -G "Visual Studio 10" -DMSVC_3RDPARTY_ROOT=%WORKSPACE% -DCMAKE_INSTALL_PREFIX:PATH=%WORKSPACE%/install/msvc100/FlightGear -DFLTK_FLUID_EXECUTABLE=%WORKSPACE%/3rdParty/bin/fluid.exe
+rem cmake --build . --config Release --target INSTALL
