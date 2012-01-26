@@ -67,8 +67,8 @@ Source: "X:\install\msvc100-64\FlightGear\bin\*.exe"; DestDir: "{app}\bin\Win64"
 Source: "X:\install\msvc100\FGRun\bin\fgrun.exe"; DestDir: "{app}\bin\Win32"; Flags: ignoreversion 
 Source: "X:\install\msvc100\FGRun\share\locale\*"; DestDir: "{app}\bin\Win32\locale"; Flags: ignoreversion recursesubdirs
 
-Source: "X:\install\msvc100-64\FGRun\bin\fgrun.exe"; DestDir: "{app}\bin\Win64"; Flags: ignoreversion 
-Source: "X:\install\msvc100-64\FGRun\share\locale\*"; DestDir: "{app}\bin\Win64\locale"; Flags: ignoreversion recursesubdirs
+Source: "X:\install\msvc100-64\FGRun\bin\fgrun.exe"; DestDir: "{app}\bin\Win64"; Flags: ignoreversion skipifsourcedoesntexist
+Source: "X:\install\msvc100-64\FGRun\share\locale\*"; DestDir: "{app}\bin\Win64\locale"; Flags: ignoreversion recursesubdirs skipifsourcedoesntexist
 
 Source: "X:\3rdParty\bin\*.dll"; DestDir: "{app}\bin\Win32"
 Source: "X:\3rdParty.x64\bin\*.dll"; DestDir: "{app}\bin\Win64"; Flags: skipifsourcedoesntexist;   Check: Is64BitInstallMode
