@@ -4,7 +4,7 @@ IF NOT DEFINED WORKSPACE SET WORKSPACE=%~dp0
 ECHO Packaging root is %WORKSPACE%
 
 subst X: /D
-subst X: %WORKSPACE%
+subst X: %WORKSPACE%.
 
 REM construct information file to be read by Inno-setup
 
