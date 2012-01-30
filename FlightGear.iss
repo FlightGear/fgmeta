@@ -59,6 +59,7 @@ ArchitecturesAllowed=x86 x64
 [Tasks]
 ; NOTE: The following entry contains English phrases ("Create a desktop icon" and "Additional icons"). You are free to translate them into another language if required.
 Name: "desktopicon"; Description: "Create a &desktop icon"; GroupDescription: "Additional icons:"
+Name: "insoal"; Description: "Install OpenAL (the sound engine)"
 Name: "force32"; Description: "Force 32bit install on 64bit system"; Check: Is64BitInstallMode
 
 [Files]
@@ -87,8 +88,12 @@ Source: "X:\install\msvc100-64\FGRun\share\locale\*"; DestDir: "{app}\bin\Win64\
 Source: "X:\3rdParty\bin\*.dll"; DestDir: "{app}\bin\Win32"; Check: not Is64BitInstallMode or IsTaskSelected('force32')
 Source: "X:\3rdParty.x64\bin\*.dll"; DestDir: "{app}\bin\Win64"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode and not IsTaskSelected('force32')
 
-Source: "{#VCInstallDir}\redist\x86\Microsoft.VC100.CRT\*.dll"; DestDir:  "{app}\bin\Win32"; Check: not Is64BitInstallMode or IsTaskSelected('force32')
+Source: "{#VCInstallDir}\redist\x86\Microsoft.VC100.CRT\*.dll"; DestDir:  "{app}\bin\Win32"
 Source: "{#VCInstallDir}\redist\x64\Microsoft.VC100.CRT\*.dll"; DestDir:  "{app}\bin\Win64";  Flags: skipifsourcedoesntexist;   Check: Is64BitInstallMode and not IsTaskSelected('force32')
+Source: "X:\3rdParty\bin\vcredist_x86.exe"; DestDir: "{app}\bin\Win32"; Flags: skipifsourcedoesntexist
+Source: "X:\3rdParty.x64\bin\vcredist_x64.exe"; DestDir: "{app}\bin\Win64"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode and not IsTaskSelected('force32')
+
+Source: "X:\3rdParty\bin\oalinst.exe"; DestDir: "{app}\bin\Win32"; Flags: ignoreversion skipifsourcedoesntexist
 
 Source: "X:\data\*.*"; DestDir: "{app}\data"; Flags: ignoreversion recursesubdirs skipifsourcedoesntexist
 
@@ -197,6 +202,11 @@ Name: "{group}\Tools\Explore Documentation Folder"; Filename: "{app}\data\Docs"
 ; Name: "{userdesktop}\FlightGear v2.0.0"; Filename: "{app}\bin\Win32\fgfs.exe"; Parameters: "--fg-root=."; WorkingDir: "{app}"; Tasks: desktopicon
 
 [Run]
+filename: "cmd.exe"; WorkingDir: "{app}\bin\Win32"; Parameters: "/C del msvc*.dll"; Check: FileExists(ExpandConstant('{app}\bin\Win32\vcredist_x86.exe'))
+filename: "cmd.exe"; WorkingDir: "{app}\bin\Win64"; Parameters: "/C del msvc*.dll"; Check: FileExists(ExpandConstant('{app}\bin\Win64\vcredist_x64.exe'))
+filename: "{app}\bin\Win32\vcredist_x86.exe"; WorkingDir: "{app}\bin\Win32"; Parameters: "/passive /norestart"; Description: "Installing MS Visual C++ runtime components"; Check: FileExists(ExpandConstant('{app}\bin\Win32\vcredist_x86.exe'))
+filename: "{app}\bin\Win64\vcredist_x64.exe"; WorkingDir: "{app}\bin\Win64"; Parameters: "/passive /norestart"; Description: "Installing MS Visual C++ runtime components"; Check: Is64BitInstallMode and not IsTaskSelected('force32') and FileExists(ExpandConstant('{app}\bin\Win64\vcredist_x64.exe'))
+filename: "{app}\bin\Win32\oalinst.exe"; WorkingDir: "{app}\bin\Win32"; Description: "Installing OpenAL"; Check: IsTaskSelected('insoal') and FileExists(ExpandConstant('{app}\bin\Win32\oalinst.exe'))
 
 ; Put installation directory into the fgrun.prefs
 filename: "{app}\bin\Win32\fgrun.exe"; WorkingDir: "{app}\bin\Win32"; Parameters: "--silent ""--fg-exe={app}\bin\Win32\fgfs.exe"" ""--ts-exe={app}\bin\Win32\terrasync.exe"" ""--fg-root={app}\data"" ""--fg-scenery={app}\data\Scenery;{app}\scenery;{code:TerrasyncDir}"" --ts-dir=3"; Check: not Is64BitInstallMode or IsTaskSelected('force32')
