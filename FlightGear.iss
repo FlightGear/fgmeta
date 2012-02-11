@@ -73,6 +73,7 @@ Source: "X:\install\msvc100\FlightGear\bin\fgadmin.exe"; DestDir: "{app}\bin\Win
 Source: "X:\install\msvc100\FlightGear\bin\terrasync.exe"; DestDir: "{app}\bin\Win32"; Flags: ignoreversion
 Source: "X:\install\msvc100\FlightGear\bin\js_demo.exe"; DestDir: "{app}\bin\Win32"; Flags: ignoreversion
 Source: "X:\install\msvc100\FlightGear\bin\fgjs.exe"; DestDir: "{app}\bin\Win32"; Flags: ignoreversion
+Source: "X:\install\msvc100\FlightGear\bin\fgpanel.exe"; DestDir: "{app}\bin\Win32"; Flags: ignoreversion
 Source: "X:\install\msvc100\FlightGear\bin\GPSsmooth.exe"; DestDir: "{app}\bin\Win32"; Flags: ignoreversion
 Source: "X:\install\msvc100\FlightGear\bin\UGsmooth.exe"; DestDir: "{app}\bin\Win32"; Flags: ignoreversion
 Source: "X:\install\msvc100\FlightGear\bin\MIDGsmooth.exe"; DestDir: "{app}\bin\Win32"; Flags: ignoreversion
@@ -195,6 +196,7 @@ Name: "{group}\Tools\UGsmooth"; Filename: "cmd"; Parameters: "/k ""{app}\bin\Win
 Name: "{group}\Tools\MIDGsmooth"; Filename: "cmd"; Parameters: "/k ""{app}\bin\Win32\MIDGsmooth.exe"" -h"; WorkingDir: "{app}\bin\Win32";
 Name: "{group}\Tools\metar"; Filename: "cmd"; Parameters: "/k ""{app}\bin\Win32\metar.exe"" -h"; WorkingDir: "{app}\bin\Win32";
 Name: "{group}\Tools\yasim"; Filename: "cmd"; Parameters: "/k ""{app}\bin\Win32\yasim.exe"" -h"; WorkingDir: "{app}\bin\Win32";
+Name: "{group}\Tools\fgpanel"; Filename: "cmd"; Parameters: "/k ""{app}\bin\Win32\fgpanel.exe"" -h"; WorkingDir: "{app}\bin\Win32";
 
 Name: "{group}\Tools\Explore Documentation Folder"; Filename: "{app}\data\Docs"
 
