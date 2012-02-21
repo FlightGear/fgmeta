@@ -18,7 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-VERSION="1.9"
+VERSION="1.10"
 
 #COMPILE GIT FGFS
 
@@ -124,19 +124,19 @@ PLIB_STABLE_REVISION="2163"
 OSG_STABLE_REVISION="http://www.openscenegraph.org/svn/osg/OpenSceneGraph/tags/OpenSceneGraph-3.0.1"
 
 # common stable branch for flightgear, simgear and fgdata
-FGSG_STABLE_GIT_BRANCH="release/2.4.0"
+FGSG_STABLE_GIT_BRANCH="release/2.6.0"
 
 # unstable branch: next for sg/fg, master for fgdata
 FGSG_UNSTABLE_GIT_BRANCH="next"
 FGDATA_UNSTABLE_GIT_BRANCH="master"
 
 # stable GIT revision: release tag
-SIMGEAR_STABLE_REVISION="version/2.4.0-final"
-FGFS_STABLE_REVISION="version/2.4.0-final"
-FGFS_DATA_STABLE_REVISION="version/2.4.0-final"
+SIMGEAR_STABLE_REVISION="version/2.6.0-final"
+FGFS_STABLE_REVISION="version/2.6.0-final"
+FGFS_DATA_STABLE_REVISION="version/2.6.0-final"
 
 FGRUN_STABLE_REVISION="625"
-FGCOM_STABLE_REVISION="234"
+FGCOM_STABLE_REVISION="261"
 FGCOMGUI_STABLE_REVISION="46"
 
 # Current developer revision: latest FlightGear GIT (2.5.0) with OSG 3.0.1
