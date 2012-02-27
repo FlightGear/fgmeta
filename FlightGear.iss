@@ -79,6 +79,7 @@ Source: "X:\install\msvc100\FlightGear\bin\UGsmooth.exe"; DestDir: "{app}\bin\Wi
 Source: "X:\install\msvc100\FlightGear\bin\MIDGsmooth.exe"; DestDir: "{app}\bin\Win32"; Flags: ignoreversion
 Source: "X:\install\msvc100\FlightGear\bin\metar.exe"; DestDir: "{app}\bin\Win32"; Flags: ignoreversion
 Source: "X:\install\msvc100\FlightGear\bin\yasim.exe"; DestDir: "{app}\bin\Win32"; Flags: ignoreversion
+Source: "X:\3rdParty\bin\*.dll"; DestDir: "{app}\bin\Win32"
 
 Source: "X:\install\msvc100\FGRun\bin\fgrun.exe"; DestDir: "{app}\bin\Win32"; Flags: ignoreversion ; Check: not Is64BitInstallMode or IsTaskSelected('force32')
 Source: "X:\install\msvc100\FGRun\share\locale\*"; DestDir: "{app}\bin\Win32\locale"; Flags: ignoreversion recursesubdirs; Check: not Is64BitInstallMode or IsTaskSelected('force32')
@@ -86,7 +87,6 @@ Source: "X:\install\msvc100\FGRun\share\locale\*"; DestDir: "{app}\bin\Win32\loc
 Source: "X:\install\msvc100-64\FGRun\bin\fgrun.exe"; DestDir: "{app}\bin\Win64"; Flags: ignoreversion skipifsourcedoesntexist; Check: Is64BitInstallMode and not IsTaskSelected('force32')
 Source: "X:\install\msvc100-64\FGRun\share\locale\*"; DestDir: "{app}\bin\Win64\locale"; Flags: ignoreversion recursesubdirs skipifsourcedoesntexist; Check: Is64BitInstallMode and not IsTaskSelected('force32')
 
-Source: "X:\3rdParty\bin\*.dll"; DestDir: "{app}\bin\Win32"; Check: not Is64BitInstallMode or IsTaskSelected('force32')
 Source: "X:\3rdParty.x64\bin\*.dll"; DestDir: "{app}\bin\Win64"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode and not IsTaskSelected('force32')
 
 Source: "{#VCInstallDir}\redist\x86\Microsoft.VC100.CRT\*.dll"; DestDir:  "{app}\bin\Win32"
@@ -212,7 +212,7 @@ filename: "{app}\bin\Win32\oalinst.exe"; WorkingDir: "{app}\bin\Win32"; Descript
 
 ; Put installation directory into the fgrun.prefs
 filename: "{app}\bin\Win32\fgrun.exe"; WorkingDir: "{app}\bin\Win32"; Parameters: "--silent ""--fg-exe={app}\bin\Win32\fgfs.exe"" ""--ts-exe={app}\bin\Win32\terrasync.exe"" ""--fg-root={app}\data"" ""--fg-scenery={app}\data\Scenery;{app}\scenery;{code:TerrasyncDir}"" --ts-dir=3"; Check: not Is64BitInstallMode or IsTaskSelected('force32')
-filename: "{app}\bin\Win64\fgrun.exe"; WorkingDir: "{app}\bin\Win64"; Parameters: "--silent ""--fg-exe={app}\bin\Win64\fgfs.exe"" ""--ts-exe={app}\bin\Win64\terrasync.exe"" ""--fg-root={app}\data"" ""--fg-scenery={app}\data\Scenery;{app}\scenery;{code:TerrasyncDir}"" --ts-dir=3"; Check: Is64BitInstallMode and not IsTaskSelected('force32')
+filename: "{app}\bin\Win64\fgrun.exe"; WorkingDir: "{app}\bin\Win64"; Parameters: "--silent ""--fg-exe={app}\bin\Win64\fgfs.exe"" ""--ts-exe={app}\bin\Win32\terrasync.exe"" ""--fg-root={app}\data"" ""--fg-scenery={app}\data\Scenery;{app}\scenery;{code:TerrasyncDir}"" --ts-dir=3"; Check: Is64BitInstallMode and not IsTaskSelected('force32')
 
 ; Put installation and source directories into the fgadmin.prefs
 filename: "{app}\bin\Win32\fgadmin.exe"; WorkingDir: "{app}\bin\Win32"; Parameters: "--silent ""--install-source={src}\..\Scenery"" ""--scenery-dest={app}\scenery"""
