@@ -1,9 +1,26 @@
 #!/bin/sh
 
-cd simgear
-./autogen.sh
-./configure --prefix=$WORKSPACE/dist --with-osg=$WORKSPACE/dist
+if [ "$WORKSPACE" == "" ]; then
+    echo "ERROR: Missing WORKSPACE environment variable."
+    exit 1
+fi
 
+#####################################################################################
+# remove old and create fresh build directories
+rm -rf sgBuild
+rm -rf fgBuild
+mkdir -p sgBuild
+mkdir -p fgBuild
+mkdir -p output
+rm -rf output/*
+rm -rf $WORKSPACE/dist/include/simgear $WORKSPACE/dist/libSim* $WORKSPACE/dist/libsg*.a
+
+#####################################################################################
+echo "Starting on SimGear"
+cd sgBuild
+cmake -DCMAKE_INSTALL_PREFIX:PATH=$WORKSPACE/dist -DSIMGEAR_SHARED:BOOL="ON" ../simgear
+
+# compile
 make
 
 if [ $? -ne '0' ]; then
@@ -12,13 +29,17 @@ if [ $? -ne '0' ]; then
 fi
 
 make install
-make dist
 
+# build source package and copy to output
+make package_source
+cp simgear-*.tar.bz2 ../output/.
+
+#####################################################################################
 echo "Starting on FlightGear"
+cd ../fgBuild
+cmake -DCMAKE_INSTALL_PREFIX:PATH=$WORKSPACE/dist -DSIMGEAR_SHARED:BOOL="ON" ../flightgear
 
-cd ../flightgear
-./autogen.sh
-./configure --prefix=$WORKSPACE/dist --with-osg=$WORKSPACE/dist
+# compile
 make
 
 if [ $? -ne '0' ]; then
@@ -27,4 +48,8 @@ if [ $? -ne '0' ]; then
 fi
 
 make install
-make dist
+
+# build source package and copy to output
+make package_source
+cp flightgear-*.tar.bz2 ../output/.
+
