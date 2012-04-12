@@ -18,7 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-VERSION="1.10"
+VERSION="1.21"
 
 #COMPILE GIT FGFS
 
@@ -27,6 +27,7 @@ VERSION="1.10"
 #######################################################
 # Special thanks to Alessandro Garosi for FGComGui and 
 # other patches
+# Thanks to "pac1" for patches for fgrun compilation
 
 
 
@@ -135,7 +136,7 @@ SIMGEAR_STABLE_REVISION="version/2.6.0-final"
 FGFS_STABLE_REVISION="version/2.6.0-final"
 FGFS_DATA_STABLE_REVISION="version/2.6.0-final"
 
-FGRUN_STABLE_REVISION="625"
+FGRUN_STABLE_REVISION="655"
 FGCOM_STABLE_REVISION="261"
 FGCOMGUI_STABLE_REVISION="46"
 
@@ -928,11 +929,19 @@ then
 	then
 		if [ "$RECONFIGURE" = "y" ]
 		then
-			echo "AUTOGEN FGRUN" >> $LOGFILE
-			./autogen.sh 2>&1 | tee -a $LOGFILE
-			echo "CONFIGURE FGRUN" >> $LOGFILE
+			echo -n "RECONFIGURE FGRUN ... " >> $LOGFILE
+			rm -f CMakeCache.txt
 			
-			./configure --prefix=$INSTALL_DIR_FGRUN --exec-prefix=$INSTALL_DIR_FGRUN --with-osg="$INSTALL_DIR_OSG" --with-simgear="$INSTALL_DIR_SIMGEAR" CPPFLAGS="-I$INSTALL_DIR_PLIB/include" LDFLAGS="-L$INSTALL_DIR_PLIB/lib" 2>&1 | tee -a $LOGFILE
+			cmake -D CMAKE_BUILD_TYPE="Release" -D CMAKE_CXX_FLAGS="-O3 -D__STDC_CONSTANT_MACROS" -D CMAKE_C_FLAGS="-O3" -D CMAKE_INSTALL_PREFIX:PATH="$INSTALL_DIR_FGRUN" -D "CMAKE_PREFIX_PATH=$INSTALL_DIR_OSG;$INSTALL_DIR_PLIB;$INSTALL_DIR_SIMGEAR" . 2>&1 | tee -a $LOGFILE
+
+			echo " OK" >> $LOGFILE
+
+
+		#	echo "AUTOGEN FGRUN" >> $LOGFILE
+		#	./autogen.sh 2>&1 | tee -a $LOGFILE
+		#	echo "CONFIGURE FGRUN" >> $LOGFILE
+			
+		#	./configure --prefix=$INSTALL_DIR_FGRUN --exec-prefix=$INSTALL_DIR_FGRUN --with-osg="$INSTALL_DIR_OSG" --with-simgear="$INSTALL_DIR_SIMGEAR" CPPFLAGS="-I$INSTALL_DIR_PLIB/include" LDFLAGS="-L$INSTALL_DIR_PLIB/lib" 2>&1 | tee -a $LOGFILE
 		fi
 	fi
 	
