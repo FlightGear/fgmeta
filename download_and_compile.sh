@@ -18,7 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-VERSION="1.21"
+VERSION="1.30"
 
 #COMPILE GIT FGFS
 
@@ -259,8 +259,8 @@ fi
 # default is hardy
 DISTRO_PACKAGES="libopenal-dev libalut-dev libalut0  libfltk1.1-dev libfltk1.1 cvs subversion cmake make build-essential automake zlib1g-dev zlib1g libwxgtk2.8-0 libwxgtk2.8-dev fluid gawk gettext libxi-dev libxi6 libxmu-dev libxmu6 libboost-dev libasound2-dev libasound2 libpng12-dev libpng12-0 libjasper1 libjasper-dev libopenexr-dev libboost-serialization-dev git-core libhal-dev libqt4-dev scons python-tk python-imaging-tk libsvn-dev libglew1.5-dev "
 
-UBUNTU_PACKAGES="freeglut3-dev libjpeg62-dev libjpeg62 libboost1.46-dev libapr1-dev"
-DEBIAN_PACKAGES="freeglut3-dev libjpeg8-dev libjpeg8 libboost1.46-dev"
+UBUNTU_PACKAGES="freeglut3-dev libjpeg62-dev libjpeg62 libapr1-dev "
+DEBIAN_PACKAGES="freeglut3-dev libjpeg8-dev libjpeg8 "
 
 # checking linux distro and version to differ needed packages
 if [ "$DISTRIB_ID" = "Ubuntu" ]
@@ -345,6 +345,10 @@ SUB_INSTALL_DIR=install
 INSTALL_DIR=$CBD/$SUB_INSTALL_DIR
 
 
+cd "$CBD"
+mkdir -p build
+
+
 #######################################################
 # PLIB
 #######################################################
@@ -355,7 +359,6 @@ INSTALL_DIR_PLIB=$INSTALL_DIR/$PLIB_INSTALL_DIR
 cd "$CBD"
 
 #svn co http://plib.svn.sourceforge.net/svnroot/plib/trunk plib
-#cd plib
 
 if [ "$WHATTOBUILD" = "" -o "$WHATTOBUILD" = "PLIB" -o "$WHATTOBUILD" = "ALL" ]
 then
@@ -369,27 +372,12 @@ then
 		echo "INSTALL_DIR_PLIB=$INSTALL_DIR_PLIB" >> $LOGFILE
 
 
-		#we rebuild plib only if not in update
-		#if [ "$DOWNLOAD" = "y" ]
-		#then
-			#echo -n "DOWNLOADING FROM http://plib.sourceforge.net/dist/plib-1.8.5.tar.gz ... " >> $LOGFILE
-			#wget -c http://plib.sourceforge.net/dist/plib-1.8.5.tar.gz
-			#echo " OK" >> $LOGFILE
-
-			#echo -n "UNPACKING plib-1.8.5.tar.gz ... " >> $LOGFILE
-			#tar zxvf plib-1.8.5.tar.gz
-			#echo " OK" >> $LOGFILE
-		#fi
-		#cd plib-1.8.5
-
-
 		PLIB_STABLE_REVISION_=""
 		if [ "$STABLE" = "STABLE" ]
 		then
 			PLIB_STABLE_REVISION_=" -r $PLIB_STABLE_REVISION"
 		fi
 
-		#we rebuild plib only if not in update, using svn version tagged 1.8.6
 		if [ "$DOWNLOAD" = "y" ]
 		then
 			if [ -d "plib/.svn" ]
@@ -410,20 +398,31 @@ then
 
 		if [ "$RECONFIGURE" = "y" ]
 		then
+
+			cd "$CBD"
+			mkdir -p build/plib
+
+
+			cd plib
+
 			echo "AUTOGEN plib" >> $LOGFILE
 			./autogen.sh 2>&1 | tee  -a $LOGFILE
 			echo "CONFIGURING plib" >> $LOGFILE
-			./configure --prefix="$INSTALL_DIR_PLIB" --exec-prefix="$INSTALL_DIR_PLIB" 2>&1 | tee -a $LOGFILE
+			cd "$CBD"/build/plib
+			../../plib/configure --prefix="$INSTALL_DIR_PLIB" --exec-prefix="$INSTALL_DIR_PLIB" 2>&1 | tee -a $LOGFILE
 		else
 			echo "NO RECONFIGURE FOR plib" >> $LOGFILE
 		fi
+
 		
 		if [ "$COMPILE" = "y" ]
 		then
+			
 			echo "MAKE plib" >> $LOGFILE
 			echo "make $JOPTION $OOPTION" >> $LOGFILE
-			make $JOPTION $OOPTION 2>&1 | tee -a $LOGFILE
 			
+			cd "$CBD"/build/plib
+			make $JOPTION $OOPTION 2>&1 | tee -a $LOGFILE
 	
 			if [ ! -d $INSTALL_DIR_PLIB ]
 			then
@@ -436,10 +435,9 @@ then
 			make install 2>&1 | tee -a $LOGFILE
 		fi
 
-		cd -
+		cd "$CBD"
 	fi
 fi
-
 
 
 #######################################################
@@ -474,12 +472,17 @@ then
 	then
 		if [ "$RECONFIGURE" = "y" ]
 		then
+			cd "$CBD"
+			mkdir -p build/osg
+			cd "$CBD"/build/osg		
 			echo -n "RECONFIGURE OSG ... " >> $LOGFILE
-			rm -f CMakeCache.txt
-			cmake .
+			rm -f ../../OpenSceneGraph/CMakeCache.txt
+			cmake ../../OpenSceneGraph/
 			echo " OK" >> $LOGFILE
 
-			cmake -D CMAKE_BUILD_TYPE="Release" -D CMAKE_CXX_FLAGS="-O3 -D__STDC_CONSTANT_MACROS" -D CMAKE_C_FLAGS="-O3" -D CMAKE_INSTALL_PREFIX:PATH="$INSTALL_DIR_OSG" . 2>&1 | tee -a $LOGFILE
+
+
+			cmake -D CMAKE_BUILD_TYPE="Release" -D CMAKE_CXX_FLAGS="-O3 -D__STDC_CONSTANT_MACROS" -D CMAKE_C_FLAGS="-O3" -D CMAKE_INSTALL_PREFIX:PATH="$INSTALL_DIR_OSG" ../../OpenSceneGraph/ 2>&1 | tee -a $LOGFILE
 			
 			echo "RECONFIGURE OSG DONE." >> $LOGFILE
 			
@@ -489,6 +492,7 @@ then
 	if [ "$COMPILE" = "y" ]
 	then
 		echo "COMPILING OSG" >> $LOGFILE
+		cd "$CBD"/build/osg
 		make $JOPTION $OOPTION 2>&1 | tee -a $LOGFILE
 	
 		if [ ! -d $INSTALL_DIR_OSG ]
@@ -513,6 +517,8 @@ then
 
 	cd -
 fi
+
+
 
 #######################################################
 # SIMGEAR
@@ -585,19 +591,15 @@ then
 	then
 		if [ "$RECONFIGURE" = "y" ]
 		then
-			#echo "AUTOGEN SIMGEAR" >> $LOGFILE
-			#./autogen.sh 2>&1 | tee -a $LOGFILE
-			#echo "CONFIGURE SIMGEAR" >> $LOGFILE
-			#./configure $DEBUG --prefix="$INSTALL_DIR_SIMGEAR" --exec-prefix="$INSTALL_DIR_SIMGEAR" --with-osg="$INSTALL_DIR_OSG" --with-plib="$INSTALL_DIR_PLIB" --with-jpeg-factory --with-boost-libdir=/usr/include/boost 2>&1 | tee -a $LOGFILE
 
+			cd "$CBD"
+			mkdir -p build/simgear
+			cd "$CBD"/build/simgear
 			echo -n "RECONFIGURE SIMGEAR ... " >> $LOGFILE
-			rm -f CMakeCache.txt
-			
-			cmake -D CMAKE_BUILD_TYPE="Release" -D CMAKE_CXX_FLAGS="-O3 -D__STDC_CONSTANT_MACROS" -D CMAKE_C_FLAGS="-O3" -D CMAKE_INSTALL_PREFIX:PATH="$INSTALL_DIR_SIMGEAR" -D CMAKE_PREFIX_PATH=$INSTALL_DIR_OSG . 2>&1 | tee -a $LOGFILE
-
+			rm -f ../../simgear/simgear/CMakeCache.txt
+			cmake -D CMAKE_BUILD_TYPE="Release" -D CMAKE_CXX_FLAGS="-O3 -D__STDC_CONSTANT_MACROS" -D CMAKE_C_FLAGS="-O3" -D CMAKE_INSTALL_PREFIX:PATH="$INSTALL_DIR_SIMGEAR" -D CMAKE_PREFIX_PATH=$INSTALL_DIR_OSG ../../simgear/simgear/ 2>&1 | tee -a $LOGFILE
 			echo " OK" >> $LOGFILE
 
-			
 
 
 		fi
@@ -605,6 +607,9 @@ then
 	
 	if [ "$COMPILE" = "y" ]
 	then
+
+
+		cd "$CBD"/build/simgear
 		echo "MAKE SIMGEAR" >> $LOGFILE
 		echo "make $JOPTION $OOPTION " >> $LOGFILE
 		make $JOPTION $OOPTION 2>&1 | tee -a $LOGFILE
@@ -695,8 +700,14 @@ then
 			   	#echo ./configure "$DEBUG" $WITH_EVENT_INPUT --prefix=$INSTALL_DIR_FGFS --exec-prefix=$INSTALL_DIR_FGFS --with-osg="$INSTALL_DIR_OSG" --with-simgear="$INSTALL_DIR_SIMGEAR" --with-plib="$INSTALL_DIR_PLIB" 
 				#./configure "$DEBUG" $WITH_EVENT_INPUT --prefix=$INSTALL_DIR_FGFS --exec-prefix=$INSTALL_DIR_FGFS --with-osg="$INSTALL_DIR_OSG" --with-simgear="$INSTALL_DIR_SIMGEAR" --with-plib="$INSTALL_DIR_PLIB" 2>&1 | tee -a $LOGFILE
 
+
+	                        cd "$CBD"
+       				mkdir -p build/fgfs
+	                        cd "$CBD"/build/fgfs
+
+
 				echo -n "RECONFIGURE FGFS ... " >> $LOGFILE
-				rm -f CMakeCache.txt
+				rm -f ../../fgfs/flightgear/CMakeCache.txt
 
 				# REMOVING BAD LINES IN CMakeLists.txt
 				#echo "REMOVING BAD LINES IN CMakeLists.txt"
@@ -704,7 +715,7 @@ then
 				#cp -f  utils/fgadmin/src/CMakeLists_without_err.txt utils/fgadmin/src/CMakeLists.txt
 
 		
-				cmake -D CMAKE_BUILD_TYPE="Release" -D "WITH_FGPANEL=OFF" -D CMAKE_CXX_FLAGS="-O3 -D__STDC_CONSTANT_MACROS" -D CMAKE_C_FLAGS="-O3" -D CMAKE_INSTALL_PREFIX:PATH="$INSTALL_DIR_FGFS" -D "CMAKE_PREFIX_PATH=$INSTALL_DIR_OSG;$INSTALL_DIR_PLIB;$INSTALL_DIR_SIMGEAR" . 2>&1 | tee -a $LOGFILE
+				cmake -D CMAKE_BUILD_TYPE="Release" -D "WITH_FGPANEL=OFF" -D CMAKE_CXX_FLAGS="-O3 -D__STDC_CONSTANT_MACROS" -D CMAKE_C_FLAGS="-O3" -D CMAKE_INSTALL_PREFIX:PATH="$INSTALL_DIR_FGFS" -D "CMAKE_PREFIX_PATH=$INSTALL_DIR_OSG;$INSTALL_DIR_PLIB;$INSTALL_DIR_SIMGEAR" ../../fgfs/flightgear 2>&1 | tee -a $LOGFILE
 
 				echo " OK" >> $LOGFILE
 
@@ -718,6 +729,10 @@ then
 		
 		if [ "$COMPILE" = "y" ]
 		then
+                        cd "$CBD"
+                        mkdir -p build/fgfs
+                        cd "$CBD"/build/fgfs
+
 			echo "MAKE FGFS" >> $LOGFILE
 			echo "make $JOPTION $OOPTION" >> $LOGFILE
 			make $JOPTION $OOPTION 2>&1 | tee -a $LOGFILE
@@ -841,7 +856,6 @@ ENDOFALL2
 
 fi
 
-
 #######################################################
 # FGO!
 #######################################################
@@ -906,47 +920,30 @@ then
 		svn $FGRUN_STABLE_REVISION_ co http://fgrun.svn.sourceforge.net/svnroot/fgrun/trunk fgrun
 		echo " OK" >> $LOGFILE
 
-		#echo -n "Patching fgrun ... " >> $LOGFILE
-		#cd fgrun/
-		
-		#MF=src/wizard_funcs.cxx && cat $MF | awk '{o=$0} /#include <plib\/netSocket.h>/ {o=o"\n#include <plib/sg.h>"} {print o}' > "$MF"2 && mv "$MF"2 "$MF"
-		#MF=src/AirportBrowser.cxx && cat $MF | awk '{o=$0} /#include <iomanip>/ {o=o"\n#include <math.h>"} {print o}' > "$MF"2 && mv "$MF"2 "$MF"		
-		#MF=src/run_posix.cxx && cat $MF | awk '{o=$0} /#include <string>/ {o=o"\n#include <string.h>"} {print o}' > "$MF"2 && mv "$MF"2 "$MF"		
-
-		#Thanks to Brandano.....
-		#if [ ! -e "compile-fix-20100102.patch" ]
-		#then
-		#	wget http://brisa.homelinux.net/fgfs/compile-fix-20100102.patch
-		#fi
-		#patch -p0 < compile-fix-20100102.patch
-    		
-		#cd -
 	fi
-	#cd fgrun/trunk/fgrun/
 	cd fgrun/fgrun/
 
 	if [ ! "$UPDATE" = "UPDATE" ]
 	then
 		if [ "$RECONFIGURE" = "y" ]
 		then
+                        cd "$CBD"
+                        mkdir -p build/fgrun
+                        cd "$CBD"/build/fgrun
+
 			echo -n "RECONFIGURE FGRUN ... " >> $LOGFILE
-			rm -f CMakeCache.txt
+			rm -f ../../fgrun/fgrun/CMakeCache.txt
 			
-			cmake -D CMAKE_BUILD_TYPE="Release" -D CMAKE_CXX_FLAGS="-O3 -D__STDC_CONSTANT_MACROS" -D CMAKE_C_FLAGS="-O3" -D CMAKE_INSTALL_PREFIX:PATH="$INSTALL_DIR_FGRUN" -D "CMAKE_PREFIX_PATH=$INSTALL_DIR_OSG;$INSTALL_DIR_PLIB;$INSTALL_DIR_SIMGEAR" . 2>&1 | tee -a $LOGFILE
+			cmake -D CMAKE_BUILD_TYPE="Release" -D CMAKE_CXX_FLAGS="-O3 -D__STDC_CONSTANT_MACROS" -D CMAKE_C_FLAGS="-O3" -D CMAKE_INSTALL_PREFIX:PATH="$INSTALL_DIR_FGRUN" -D "CMAKE_PREFIX_PATH=$INSTALL_DIR_OSG;$INSTALL_DIR_PLIB;$INSTALL_DIR_SIMGEAR" ../../fgrun/fgrun/ 2>&1 | tee -a $LOGFILE
 
 			echo " OK" >> $LOGFILE
-
-
-		#	echo "AUTOGEN FGRUN" >> $LOGFILE
-		#	./autogen.sh 2>&1 | tee -a $LOGFILE
-		#	echo "CONFIGURE FGRUN" >> $LOGFILE
-			
-		#	./configure --prefix=$INSTALL_DIR_FGRUN --exec-prefix=$INSTALL_DIR_FGRUN --with-osg="$INSTALL_DIR_OSG" --with-simgear="$INSTALL_DIR_SIMGEAR" CPPFLAGS="-I$INSTALL_DIR_PLIB/include" LDFLAGS="-L$INSTALL_DIR_PLIB/lib" 2>&1 | tee -a $LOGFILE
 		fi
 	fi
 	
 	if [ "$COMPILE" = "y" ]
 	then
+		cd "$CBD"/build/fgrun
+
 		echo "MAKE FGRUN" >> $LOGFILE
 		echo "make $JOPTION $OOPTION" >> $LOGFILE
 		make $JOPTION $OOPTION 2>1 | tee -a $LOGFILE
@@ -954,7 +951,8 @@ then
 		echo "INSTALL FGRUN" >> $LOGFILE
 		make install 2>&1 | tee -a $LOGFILE
 	fi
-	cd -
+
+	cd "$CBD"
 
 	SCRIPT=run_fgrun.sh
 	echo "#!/bin/sh" > $SCRIPT
@@ -1013,9 +1011,6 @@ then
         cp Makefile Makefile.original
 		cat Makefile | sed s/\\//MY_SLASH_HERE/g > Makefile_NOSLASHES
 	
-	
-	
-	
 		# 1
 		INSTALL_DIR_PLIB_NO_SLASHES=$(echo "$INSTALL_DIR_PLIB" | sed -e 's/\//MY_SLASH_HERE/g')
 		cat Makefile_NOSLASHES | sed s/PLIB_PREFIX\ *:=\ *MY_SLASH_HEREusrMY_SLASH_HERElocalMY_SLASH_HEREsrcMY_SLASH_HEREfgfs-builderMY_SLASH_HEREinstall/PLIB_PREFIX\ :=\ $INSTALL_DIR_PLIB_NO_SLASHES/g > Makefile_temp
@@ -1052,7 +1047,6 @@ then
 		cat Makefile_NOSLASHES | sed s/MY_SLASH_HERE/\\//g > Makefile
 
 	fi
-
 
 
 	mkdir -p "$INSTALL_DIR_FGCOM"/bin
@@ -1152,22 +1146,10 @@ then
 
 	if [ "$DOWNLOAD" = "y" ]
 	then
-		#echo "Downloading from http://ovh.dl.sourceforge.net/project/atlas/atlas/0.3.0/Atlas-0.3.0.tar.gz ... " >> $LOGFILE	
-		#wget -c http://ovh.dl.sourceforge.net/project/atlas/atlas/0.3.0/Atlas-0.3.0.tar.gz
-		#echo " OK" >> $LOGFILE
-		#tar zxvf Atlas-0.3.0.tar.gz
-
-		
 		echo -n "CSV FROM atlas.cvs.sourceforge.net:/cvsroot/atlas ... " >> $LOGFILE
 		cvs -z3 -d:pserver:anonymous@atlas.cvs.sourceforge.net:/cvsroot/atlas co Atlas
 		echo " OK" >> $LOGFILE
 
-		#echo -n "CSV PATCH FROM http://janodesbois.free.fr ... " >> $LOGFILE
-		#cd Atlas		
-		#wget http://janodesbois.free.fr/doc/atlas-CVS.diff
-		#patch -p0 < atlas-CVS.diff
-		#cd ..
-		#echo " OK" >> $LOGFILE
         echo "fixing old function name \".get_gbs_center2(\" in Subbucket.cxx"
         cd Atlas/src
         cp Subbucket.cxx Subbucket.cxx.original
@@ -1175,16 +1157,21 @@ then
         cd "$CBD"
 	fi
 	cd Atlas
-	#cd Atlas-0.3.0
 
 	if [ ! "$UPDATE" = "UPDATE" ]
 	then
 		if [ "$RECONFIGURE" = "y" ]
 		then
+
+			cd "$CBD"
+                        mkdir -p build/atlas
+
+			cd Atlas
 			echo "AUTOGEN ATLAS" >> $LOGFILE
 			./autogen.sh 2>&1 | tee -a $LOGFILE
 			echo "CONFIGURE ATLAS" >> $LOGFILE
-			./configure --prefix=$INSTALL_DIR_ATLAS --exec-prefix=$INSTALL_DIR_ATLAS  --with-plib=$INSTALL_DIR_PLIB --with-simgear="$INSTALL_DIR_SIMGEAR" --with-fgbase="$INSTALL_DIR_FGFS/fgdata" CXXFLAGS="$CXXFLAGS -I$CBD/OpenSceneGraph/include" 2>&1 | tee -a $LOGFILE
+			cd "$CBD"/build/atlas
+			../../Atlas/configure --prefix=$INSTALL_DIR_ATLAS --exec-prefix=$INSTALL_DIR_ATLAS  --with-plib=$INSTALL_DIR_PLIB --with-simgear="$INSTALL_DIR_SIMGEAR" --with-fgbase="$INSTALL_DIR_FGFS/fgdata" CXXFLAGS="$CXXFLAGS -I$CBD/OpenSceneGraph/include" 2>&1 | tee -a $LOGFILE
 			make clean
 		fi
 	fi
@@ -1192,6 +1179,8 @@ then
 	then
 		echo "MAKE ATLAS" >> $LOGFILE
 		echo "make $JOPTION $OOPTION" >> $LOGFILE
+		
+		cd "$CBD"/build/atlas
 		make $JOPTION $OOPTION 2>&1 | tee -a $LOGFILE
 
 		echo "INSTALL ATLAS" >> $LOGFILE
