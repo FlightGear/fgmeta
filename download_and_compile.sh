@@ -18,7 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-VERSION="1.30"
+VERSION="1.31"
 
 #COMPILE GIT FGFS
 
@@ -28,6 +28,7 @@ VERSION="1.30"
 # Special thanks to Alessandro Garosi for FGComGui and 
 # other patches
 # Thanks to "pac1" for patches for fgrun compilation
+# Thanks to "F-JJTH" for bug fixes and suggestions
 
 
 
@@ -824,6 +825,7 @@ then
 		fi
 	fi
 
+	cd "$CBD"
 
 	# IF SEPARATED FOLDER FOR AIRCRAFTS
 	# --fg-aircraft=\$PWD/../aircrafts
@@ -1060,7 +1062,7 @@ then
 		echo "INSTALL FGCOM" >> $LOGFILE
 		make install 2>&1 | tee -a $LOGFILE
 	fi
-	cd -
+	cd "$CBD"
 
 	echo "#!/bin/sh" > run_fgcom.sh
 	echo "cd \$(dirname \$0)" >> run_fgcom.sh
@@ -1116,7 +1118,7 @@ then
 		echo "INSTALL FGCOM" >> $LOGFILE
 		scons install 2>&1 | tee -a $LOGFILE
 	fi
-	cd -
+	cd "$CBD"
 
 	echo "#!/bin/sh" > run_fgcomgui.sh
 	echo "cd \$(dirname \$0)" >> run_fgcomgui.sh
@@ -1186,7 +1188,7 @@ then
 		echo "INSTALL ATLAS" >> $LOGFILE
 		make install 2>&1 | tee -a $LOGFILE
 	fi
-	cd -
+	cd "$CBD"
 
 	echo "#!/bin/sh" > run_atlas.sh
 	echo "cd \$(dirname \$0)" >> run_atlas.sh
