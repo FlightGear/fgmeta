@@ -1,7 +1,7 @@
 
 IF NOT DEFINED WORKSPACE SET WORKSPACE=%~dp0
 
-ECHO #define SIMGEAR_VERSION "2.6.0" > %WORKSPACE%\simgear\simgear\version.h
+ECHO #define SIMGEAR_VERSION "2.8.0" > %WORKSPACE%\simgear\simgear\version.h
 rem set PATH=%PATH%;D:\Program Files (x86)\CMake 2.8\bin
 rem call "C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\vcvarsall.bat" amd64
 md build-sg64
