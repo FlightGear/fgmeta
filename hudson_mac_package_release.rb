@@ -58,7 +58,7 @@ osgPluginsDir=contents+"/PlugIns/osgPlugins-#{osgVersion}"
 fgVersion = File.read("#{srcDir}/version").strip
 volName="\"FlightGear #{fgVersion}\""
 
-dmgPath = Dir.pwd + "/fg_mac_#{fgVersion}.dmg"
+dmgPath = Dir.pwd + "/output/fg_mac_#{fgVersion}.dmg"
 
 puts "Creating directory structure"
 `mkdir -p #{macosDir}`
