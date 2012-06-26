@@ -18,7 +18,7 @@ rm -rf $WORKSPACE/dist/include/simgear $WORKSPACE/dist/libSim* $WORKSPACE/dist/l
 ###############################################################################
 echo "Starting on SimGear"
 pushd sgBuild
-cmake -DCMAKE_INSTALL_PREFIX:PATH=$WORKSPACE/dist -G Xcode -DSIMGEAR_SHARED:BOOL="ON" ../simgear
+cmake -DCMAKE_INSTALL_PREFIX:PATH=$WORKSPACE/dist -G Xcode ../simgear
 
 # compile
 xcodebuild -configuration Release -target install  build
@@ -33,7 +33,7 @@ popd
 ################################################################################
 echo "Starting on FlightGear"
 pushd fgBuild
-cmake -DCMAKE_INSTALL_PREFIX:PATH=$WORKSPACE/dist -G Xcode -DSIMGEAR_SHARED:BOOL="ON" ../flightgear
+cmake -DCMAKE_INSTALL_PREFIX:PATH=$WORKSPACE/dist -G Xcode ../flightgear
 
 xcodebuild -configuration Release -target install  build
 
