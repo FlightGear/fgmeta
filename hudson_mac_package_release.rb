@@ -1,6 +1,8 @@
 #!/usr/bin/ruby
 
 require 'ERB'
+require 'fileutils' #I know, no underscore is not ruby-like
+include FileUtils
 
 $osgLibs = ['osgFX', 'osgParticle', 'osg', 'osgGA', 'osgText', 'osgUtil', 'osgSim', 'osgViewer', 'osgDB']
 $osgPlugins = ['ac', 'osg', 'freetype', 'qt', 'imageio', 'rgb', 'txf', 'mdl', '3ds']
@@ -84,8 +86,11 @@ libFile = "libOpenThreads.#{$openThreadsSoVersion}.dylib"
 
 $osgPlugins.each do |p|
   pluginFile = "osgdb_#{p}.so"
-  `cp #{prefixDir}/lib/osgPlugins-#{osgVersion}/#{pluginFile} #{osgPluginsDir}`
-  fix_install_names("#{osgPluginsDir}/#{pluginFile}")
+  sourcePath = "#{prefixDir}/lib/osgPlugins-#{osgVersion}/#{pluginFile}"
+  if File.exists?(sourcePath)
+      `cp #{sourcePath} #{osgPluginsDir}`
+      fix_install_names("#{osgPluginsDir}/#{pluginFile}")
+  end
 end
 
 # custom ALUT
