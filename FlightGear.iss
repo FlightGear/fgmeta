@@ -46,7 +46,7 @@ DefaultDirName={pf}\FlightGear
 DefaultGroupName=FlightGear {#FGVersion}
 LicenseFile=X:\flightgear\COPYING
 Uninstallable=yes
-SetupIconFile=X:\flightgear\projects\VC90\flightgear.ico
+SetupIconFile=X:\flightgear\package\flightgear.ico
 VersionInfoVersion={#FGVersion}.0
 WizardImageFile=X:\flightgear\package\Win32-Inno\setupimg.bmp
 WizardImageStretch=No
@@ -211,8 +211,8 @@ filename: "{app}\bin\Win64\vcredist_x64.exe"; WorkingDir: "{app}\bin\Win64"; Par
 filename: "{app}\bin\Win32\oalinst.exe"; WorkingDir: "{app}\bin\Win32"; Description: "Installing OpenAL"; Check: IsTaskSelected('insoal') and FileExists(ExpandConstant('{app}\bin\Win32\oalinst.exe'))
 
 ; Put installation directory into the fgrun.prefs
-filename: "{app}\bin\Win32\fgrun.exe"; WorkingDir: "{app}\bin\Win32"; Parameters: "--silent ""--fg-exe={app}\bin\Win32\fgfs.exe"" ""--ts-exe={app}\bin\Win32\terrasync.exe"" ""--fg-root={app}\data"" ""--fg-scenery={app}\data\Scenery;{app}\scenery;{code:TerrasyncDir}"" --ts-dir=3"; Check: not Is64BitInstallMode or IsTaskSelected('force32')
-filename: "{app}\bin\Win64\fgrun.exe"; WorkingDir: "{app}\bin\Win64"; Parameters: "--silent ""--fg-exe={app}\bin\Win64\fgfs.exe"" ""--ts-exe={app}\bin\Win32\terrasync.exe"" ""--fg-root={app}\data"" ""--fg-scenery={app}\data\Scenery;{app}\scenery;{code:TerrasyncDir}"" --ts-dir=3"; Check: Is64BitInstallMode and not IsTaskSelected('force32')
+filename: "{app}\bin\Win32\fgrun.exe"; WorkingDir: "{app}\bin\Win32"; Parameters: "--silent ""--fg-exe={app}\bin\Win32\fgfs.exe"" ""--ts-exe={app}\bin\Win32\terrasync.exe"" ""--fg-root={app}\data"" ""--fg-scenery={app}\data\Scenery;{app}\scenery;{code:TerrasyncDir}"" --ts-dir=3 --version={#FGVersion}"; Check: not Is64BitInstallMode or IsTaskSelected('force32')
+filename: "{app}\bin\Win64\fgrun.exe"; WorkingDir: "{app}\bin\Win64"; Parameters: "--silent ""--fg-exe={app}\bin\Win64\fgfs.exe"" ""--ts-exe={app}\bin\Win32\terrasync.exe"" ""--fg-root={app}\data"" ""--fg-scenery={app}\data\Scenery;{app}\scenery;{code:TerrasyncDir}"" --ts-dir=3 --version={#FGVersion}"; Check: Is64BitInstallMode and not IsTaskSelected('force32')
 
 ; Put installation and source directories into the fgadmin.prefs
 filename: "{app}\bin\Win32\fgadmin.exe"; WorkingDir: "{app}\bin\Win32"; Parameters: "--silent ""--install-source={src}\..\Scenery"" ""--scenery-dest={app}\scenery"""
