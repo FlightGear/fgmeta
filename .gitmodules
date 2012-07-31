@@ -4,3 +4,6 @@
 [submodule "flightgear"]
 	path = flightgear
 	url = git://gitorious.org/fg/flightgear.git
+[submodule "maclauncher"]
+	path = maclauncher
+	url = git://gitorious.org/fg/maclauncher.git
