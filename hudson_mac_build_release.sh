@@ -49,12 +49,10 @@ chmod +x $WORKSPACE/dist/bin/osgversion
 ################################################################################
 echo "Building Macflightgear launcher"
 
-SDK_PATH="/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.6.sdk"
-OSX_TARGET="10.6"
+SDK_PATH="/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.7.sdk"
+OSX_TARGET="10.7"
 
-svn co https://macflightgear.svn.sourceforge.net/svnroot/macflightgear/trunk/FlightGearOSX  macflightgear
-
-pushd macflightgear
+pushd maclauncher/FlightGearOSX
 
 # compile the stub executable
 gcc -o FlightGear -mmacosx-version-min=$OSX_TARGET -isysroot $SDK_PATH -arch i386 main.m \

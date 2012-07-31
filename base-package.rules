@@ -1,0 +1,38 @@
+- .git
+- *.xcf
+- *.tex
+
++ /data/Aircraft/Generic
++ /data/Aircraft/Instruments
++ /data/Aircraft/Instruments-3d
+
++ /data/Aircraft/UIUC
++ /data/Aircraft/c172p
++ /data/Aircraft/777
++ /data/Aircraft/777-200
++ /data/Aircraft/b1900d
++ /data/Aircraft/ufo
++ /data/Aircraft/CitationX
++ /data/Aircraft/ZLT-NT
++ /data/Aircraft/dhc2
++ /data/Aircraft/Cub
++ /data/Aircraft/sopwithCamel
++ /data/Aircraft/f-14b
++ /data/Aircraft/ASK13
++ /data/Aircraft/bo105
++ /data/Aircraft/Dragonfly
++ /data/Aircraft/SenecaII
++ /data/Aircraft/A6M2
+
+- /data/Aircraft/*
+
+- /data/Textures.high/*.new
+- /data/Textures.high/*.orig
+- /data/Textures.high/*.save
+- /data/Textures/Unused
+- /data/Textures/*.orig
+- /data/Docs/source
+- /data/Models/Airspace
+- /data/Models/MNUAV
+
+

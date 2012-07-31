@@ -67,10 +67,10 @@ puts "Creating directory structure"
 `mkdir -p #{osgPluginsDir}`
 
 puts "Copying binaries"
-bins = ['fgfs', 'terrasync']
+bins = ['fgfs', 'fgjs']
 bins.each do |b|
-  `cp #{prefixDir}/bin/#{b} #{resourcesDir}/#{b}`
-  fix_install_names("#{resourcesDir}/#{b}")
+  `cp #{prefixDir}/bin/#{b} #{macosDir}/#{b}`
+  fix_install_names("#{macosDir}/#{b}")
 end
 
 puts "copying libraries"
@@ -100,9 +100,9 @@ end
 # Macflightgear launcher
 puts "Copying Macflightgear launcher files"
 
-Dir.chdir "macflightgear" do
+Dir.chdir "maclauncher/FlightGearOSX" do
   `cp FlightGear #{macosDir}`
-  `rsync -a --exclude=\".svn\" *.rb *.lproj *.sh *.tiff #{resourcesDir}`
+  `rsync -a *.rb *.lproj *.sh *.tiff #{resourcesDir}`
 end
 
 # Info.plist
@@ -115,6 +115,7 @@ File.open("#{contents}/Info.plist", 'w') { |f|
 
 `cp #{srcDir}/package/mac/FlightGear.icns #{resourcesDir}/FlightGear.icns`
 `cp #{srcDir}/COPYING #{dmgDir}`
+`rsync -a --verbose --filter 'merge #{Dir.pwd}/base-package.rules' /Users/Shared/FGFS/data #{resourcesDir}`
 
 puts "Creating DMG"
 
