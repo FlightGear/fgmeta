@@ -60,5 +60,10 @@ gcc -o FlightGear -mmacosx-version-min=$OSX_TARGET -isysroot $SDK_PATH -arch i38
 
 popd
 
+################################################################################
+echo "Syncing base packages files from sphere.telascience.org"
+rsync -avz --filter 'merge base-package.rules' \
+ -e ssh jturner@sphere.telascience.org:/home/jturner/fgdata .
+
 echo "Running package script"
 ./hudson_mac_package_release.rb

@@ -2,37 +2,37 @@
 - *.xcf
 - *.tex
 
-+ /data/Aircraft/Generic
-+ /data/Aircraft/Instruments
-+ /data/Aircraft/Instruments-3d
++ /fgdata/Aircraft/Generic
++ /fgdata/Aircraft/Instruments
++ /fgdata/Aircraft/Instruments-3d
 
-+ /data/Aircraft/UIUC
-+ /data/Aircraft/c172p
-+ /data/Aircraft/777
-+ /data/Aircraft/777-200
-+ /data/Aircraft/b1900d
-+ /data/Aircraft/ufo
-+ /data/Aircraft/CitationX
-+ /data/Aircraft/ZLT-NT
-+ /data/Aircraft/dhc2
-+ /data/Aircraft/Cub
-+ /data/Aircraft/sopwithCamel
-+ /data/Aircraft/f-14b
-+ /data/Aircraft/ASK13
-+ /data/Aircraft/bo105
-+ /data/Aircraft/Dragonfly
-+ /data/Aircraft/SenecaII
-+ /data/Aircraft/A6M2
++ /fgdata/Aircraft/UIUC
++ /fgdata/Aircraft/c172p
++ /fgdata/Aircraft/777
++ /fgdata/Aircraft/777-200
++ /fgdata/Aircraft/b1900d
++ /fgdata/Aircraft/ufo
++ /fgdata/Aircraft/CitationX
++ /fgdata/Aircraft/ZLT-NT
++ /fgdata/Aircraft/dhc2
++ /fgdata/Aircraft/Cub
++ /fgdata/Aircraft/sopwithCamel
++ /fgdata/Aircraft/f-14b
++ /fgdata/Aircraft/ASK13
++ /fgdata/Aircraft/bo105
++ /fgdata/Aircraft/Dragonfly
++ /fgdata/Aircraft/SenecaII
++ /fgdata/Aircraft/A6M2
 
-- /data/Aircraft/*
+- /fgdata/Aircraft/*
 
-- /data/Textures.high/*.new
-- /data/Textures.high/*.orig
-- /data/Textures.high/*.save
-- /data/Textures/Unused
-- /data/Textures/*.orig
-- /data/Docs/source
-- /data/Models/Airspace
-- /data/Models/MNUAV
+- /fgdata/Textures.high/*.new
+- /fgdata/Textures.high/*.orig
+- /fgdata/Textures.high/*.save
+- /fgdata/Textures/Unused
+- /fgdata/Textures/*.orig
+- /fgdata/Docs/source
+- /fgdata/Models/Airspace
+- /fgdata/Models/MNUAV
 
 

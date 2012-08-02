@@ -115,7 +115,9 @@ File.open("#{contents}/Info.plist", 'w') { |f|
 
 `cp #{srcDir}/package/mac/FlightGear.icns #{resourcesDir}/FlightGear.icns`
 `cp #{srcDir}/COPYING #{dmgDir}`
-`rsync -a --verbose --filter 'merge #{Dir.pwd}/base-package.rules' /Users/Shared/FGFS/data #{resourcesDir}`
+
+puts "Copying base package files into the image"
+`rsync -a fgdata/ #{resourcesDir}/data`
 
 puts "Creating DMG"
 
