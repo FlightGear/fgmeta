@@ -4,3 +4,6 @@
 [submodule "flightgear"]
 	path = flightgear
 	url = git://gitorious.org/fg/flightgear.git
+[submodule "fgrun"]
+	path = fgrun
+	url = git://gitorious.org/fg/fgrun.git
