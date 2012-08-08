@@ -5,7 +5,7 @@ require 'fileutils' #I know, no underscore is not ruby-like
 include FileUtils
 
 $osgLibs = ['osgFX', 'osgParticle', 'osg', 'osgGA', 'osgText', 'osgUtil', 'osgSim', 'osgViewer', 'osgDB']
-$osgPlugins = ['ac', 'osg', 'freetype', 'qt', 'imageio', 'rgb', 'txf', 'mdl', '3ds']
+$osgPlugins = ['ac', 'osg', 'freetype', 'imageio', 'rgb', 'txf', 'mdl', '3ds']
 
 def runOsgVersion(option)
   env = "export DYLD_LIBRARY_PATH=#{Dir.pwd}/dist/lib"
@@ -20,6 +20,10 @@ $openThreadsSoVersion=runOsgVersion('openthreads-soversion-number')
 puts "osgVersion=#{osgVersion}, so-number=#{$osgSoVersion}"
 
 $alutSourcePath='/Library/Frameworks/ALUT.framework'
+
+$svnLibs = ['svn_client', 'svn_wc', 'svn_delta', 'svn_diff', 'svn_ra', 
+  'svn_ra_local', 'svn_repos', 'svn_fs', 'svn_fs_fs', 'svn_fs_util',
+  'svn_ra_svn', 'svn_subr']
 
 def fix_install_names(object)
   #puts "fixing install names for #{object}"
@@ -39,9 +43,34 @@ def fix_install_names(object)
   `install_name_tool -change #{$alutSourcePath}/#{alutLib} #{alutBundlePath}/#{alutLib} #{object}`
 end
 
-prefixDir=Dir.pwd + "/dist"
+$prefixDir=Dir.pwd + "/dist"
 dmgDir=Dir.pwd + "/image"
 srcDir=Dir.pwd + "/flightgear"
+
+def fix_svn_install_names(object)
+  $svnLibs.each do |l|
+    fileName = "lib#{l}-1.0.dylib"
+    oldName = "#{$prefixDir}/lib/#{fileName}"
+    newName = "@executable_path/../Frameworks/#{fileName}"
+    `install_name_tool -change #{oldName} #{newName} #{object}`
+  end
+end
+
+def copy_svn_libs()
+  puts "Copying Subversion client libraries"
+  $svnLibs.each do |l|
+    libFile = "lib#{l}-1.0.dylib"
+    path = "#{$frameworksDir}/#{libFile}"
+    `cp #{$prefixDir}/lib/#{libFile} #{$frameworksDir}`
+    fix_svn_install_names(path)
+    `install_name_tool -id #{libFile}  #{path}`    
+  end
+end
+
+def code_sign(path)
+  puts "Signing #{path}"
+  `codesign -s "Mac Developer: James Turner (3JTY4GZGL8)" #{path}`
+end
 
 
 puts "Erasing previous image dir"
@@ -50,7 +79,7 @@ puts "Erasing previous image dir"
 bundle=dmgDir + "/FlightGear.app"
 contents=bundle + "/Contents"
 macosDir=contents + "/MacOS"
-frameworksDir=contents +"/Frameworks"
+$frameworksDir=contents +"/Frameworks"
 resourcesDir=contents+"/Resources"
 osgPluginsDir=contents+"/PlugIns/osgPlugins-#{osgVersion}"
 
@@ -62,40 +91,47 @@ dmgPath = Dir.pwd + "/output/fg_mac_#{fgVersion}.dmg"
 
 puts "Creating directory structure"
 `mkdir -p #{macosDir}`
-`mkdir -p #{frameworksDir}`
+`mkdir -p #{$frameworksDir}`
 `mkdir -p #{resourcesDir}`
 `mkdir -p #{osgPluginsDir}`
 
 puts "Copying binaries"
-bins = ['fgfs', 'fgjs']
+bins = ['fgfs', 'fgjs', 'fgcom']
 bins.each do |b|
-  `cp #{prefixDir}/bin/#{b} #{macosDir}/#{b}`
-  fix_install_names("#{macosDir}/#{b}")
+  if !File.exist?("#{$prefixDir}/bin/#{b}")
+    next
+  end
+  
+  outPath = "#{macosDir}/#{b}"
+  `cp #{$prefixDir}/bin/#{b} #{outPath}`
+  fix_install_names(outPath)
+  fix_svn_install_names(outPath)
+  code_sign(outPath)
 end
 
 puts "copying libraries"
 $osgLibs.each do |l|
   libFile = "lib#{l}.#{$osgSoVersion}.dylib"
-  `cp #{prefixDir}/lib/#{libFile} #{frameworksDir}`
-  fix_install_names("#{frameworksDir}/#{libFile}")
+  `cp #{$prefixDir}/lib/#{libFile} #{$frameworksDir}`
+  fix_install_names("#{$frameworksDir}/#{libFile}")
 end
 
 # and not forgetting OpenThreads
 libFile = "libOpenThreads.#{$openThreadsSoVersion}.dylib"
-`cp #{prefixDir}/lib/#{libFile} #{frameworksDir}`
+`cp #{$prefixDir}/lib/#{libFile} #{$frameworksDir}`
 
 $osgPlugins.each do |p|
   pluginFile = "osgdb_#{p}.so"
-  sourcePath = "#{prefixDir}/lib/osgPlugins-#{osgVersion}/#{pluginFile}"
-  if File.exists?(sourcePath)
-      `cp #{sourcePath} #{osgPluginsDir}`
-      fix_install_names("#{osgPluginsDir}/#{pluginFile}")
-  end
+  `cp #{$prefixDir}/lib/osgPlugins-#{osgVersion}/#{pluginFile} #{osgPluginsDir}`
+  fix_install_names("#{osgPluginsDir}/#{pluginFile}")
 end
+
+# svn lib copying disabled for the moment
+# copy_svn_libs()
 
 # custom ALUT
 # must copy frameworks using ditto
-`ditto #{$alutSourcePath} #{frameworksDir}/ALUT.framework`
+`ditto #{$alutSourcePath} #{$frameworksDir}/ALUT.framework`
 
 # Macflightgear launcher
 puts "Copying Macflightgear launcher files"
@@ -104,6 +140,7 @@ Dir.chdir "maclauncher/FlightGearOSX" do
   `cp FlightGear #{macosDir}`
   `rsync -a *.rb *.lproj *.sh *.tiff #{resourcesDir}`
 end
+code_sign("#{macosDir}/FlightGear")
 
 # Info.plist
 template = File.read("Info.plist.in")
