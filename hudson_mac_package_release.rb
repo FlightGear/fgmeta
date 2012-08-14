@@ -26,7 +26,7 @@ $alutSourcePath='/Library/Frameworks/ALUT.framework'
 
 $svnLibs = ['svn_client', 'svn_wc', 'svn_delta', 'svn_diff', 'svn_ra', 
   'svn_ra_local', 'svn_repos', 'svn_fs', 'svn_fs_fs', 'svn_fs_util',
-  'svn_ra_svn', 'svn_subr']
+  'svn_ra_svn', 'svn_subr', 'svn_ra_neon']
 
 def fix_install_names(object)
   #puts "fixing install names for #{object}"
@@ -109,7 +109,6 @@ bins.each do |b|
   `cp #{$prefixDir}/bin/#{b} #{outPath}`
   fix_install_names(outPath)
   fix_svn_install_names(outPath)
-  code_sign(outPath)
 end
 
 puts "copying libraries"
@@ -148,8 +147,6 @@ if File.exist?("#{$prefixDir}/bin/fgcom-data")
   `ditto #{$prefixDir}/bin/fgcom-data #{resourcesDir}/fgcom-data`
 end
 
-code_sign("#{macosDir}/FlightGear")
-
 # Info.plist
 template = File.read("Info.plist.in")
 output = ERB.new(template).result(binding)
@@ -163,6 +160,15 @@ File.open("#{contents}/Info.plist", 'w') { |f|
 
 puts "Copying base package files into the image"
 `rsync -a fgdata/ #{resourcesDir}/data`
+
+# code sign all executables in MacOS dir. Do this last since reource
+# changes will invalidate the signature!
+Dir.foreach(macosDir) do |b|
+    if b == '.' or b == '..' then
+        next
+    end
+  code_sign("#{macosDir}/#{b}")
+end
 
 puts "Creating DMG"
 
