@@ -53,9 +53,8 @@ srcDir=Dir.pwd + "/flightgear"
 def fix_svn_install_names(object)
   $svnLibs.each do |l|
     fileName = "lib#{l}-1.0.dylib"
-    oldName = "#{$prefixDir}/lib/#{fileName}"
     newName = "@executable_path/../Frameworks/#{fileName}"
-    `install_name_tool -change #{oldName} #{newName} #{object}`
+    `install_name_tool -change #{fileName} #{newName} #{object}`
   end
 end
 
@@ -66,7 +65,7 @@ def copy_svn_libs()
     path = "#{$frameworksDir}/#{libFile}"
     `cp #{$prefixDir}/lib/#{libFile} #{$frameworksDir}`
     fix_svn_install_names(path)
-    `install_name_tool -id #{libFile}  #{path}`    
+   # `install_name_tool -id #{libFile}  #{path}`    
   end
 end
 
