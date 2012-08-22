@@ -49,8 +49,7 @@ chmod +x $WORKSPACE/dist/bin/osgversion
 ################################################################################
 echo "Building Macflightgear launcher"
 
-SDK_PATH="/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.7.sdk"
-OSX_TARGET="10.7"
+OSX_TARGET="10.6"
 
 pushd maclauncher/FlightGearOSX
 
@@ -67,7 +66,7 @@ rsync -avz --filter 'merge base-package.rules' \
 
 # run the unlock script now - we need to do this right before code-signing,
 # or the keychain may automatically re-lock after some period of time
-/Users/Shared/Hudson/unlock-keychain.sh
+unlock-keychain.sh
 
 echo "Running package script"
 ./hudson_mac_package_release.rb
