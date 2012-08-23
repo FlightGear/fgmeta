@@ -18,7 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-VERSION="1.31"
+VERSION="1.4"
 
 #COMPILE GIT FGFS
 
@@ -126,16 +126,16 @@ PLIB_STABLE_REVISION="2163"
 OSG_STABLE_REVISION="http://www.openscenegraph.org/svn/osg/OpenSceneGraph/tags/OpenSceneGraph-3.0.1"
 
 # common stable branch for flightgear, simgear and fgdata
-FGSG_STABLE_GIT_BRANCH="release/2.6.0"
+FGSG_STABLE_GIT_BRANCH="release/2.8.0"
 
 # unstable branch: next for sg/fg, master for fgdata
 FGSG_UNSTABLE_GIT_BRANCH="next"
 FGDATA_UNSTABLE_GIT_BRANCH="master"
 
 # stable GIT revision: release tag
-SIMGEAR_STABLE_REVISION="version/2.6.0-final"
-FGFS_STABLE_REVISION="version/2.6.0-final"
-FGFS_DATA_STABLE_REVISION="version/2.6.0-final"
+SIMGEAR_STABLE_REVISION="version/2.8.0-final"
+FGFS_STABLE_REVISION="version/2.8.0-final"
+FGFS_DATA_STABLE_REVISION="version/2.8.0-final"
 
 FGRUN_STABLE_REVISION="655"
 FGCOM_STABLE_REVISION="261"
@@ -183,7 +183,7 @@ fi
 echo "**************************************"
 echo "*                                    *"
 echo "* Warning, the compilation process   *"
-echo "* is going to use 9 or more Gbytes   *"
+echo "* is going to use 12 or more Gbytes  *"
 echo "* of space and at least a couple of  *"
 echo "* hours to download and build FG.    *"
 echo "*                                    *"
@@ -374,7 +374,8 @@ then
 
 
 		PLIB_STABLE_REVISION_=""
-		if [ "$STABLE" = "STABLE" ]
+		#if [ "$STABLE" = "STABLE" ]
+		if [ "STABLE" = "STABLE" ]
 		then
 			PLIB_STABLE_REVISION_=" -r $PLIB_STABLE_REVISION"
 		fi
