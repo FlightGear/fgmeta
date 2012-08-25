@@ -41,7 +41,7 @@ def fix_install_names(object)
   newName= "@executable_path/../Frameworks/#{oldName}"
   `install_name_tool -change #{oldName} #{newName} #{object}`
   
-  alutBundlePath = "@executable_path/../Frameworks/Alut.framework"
+  alutBundlePath = "@executable_path/../Frameworks/ALUT.framework"
   alutLib = "Versions/A/ALUT"
   `install_name_tool -change #{$alutSourcePath}/#{alutLib} #{alutBundlePath}/#{alutLib} #{object}`
 end
