@@ -85,6 +85,9 @@ $frameworksDir=contents +"/Frameworks"
 resourcesDir=contents+"/Resources"
 osgPluginsDir=contents+"/PlugIns/osgPlugins-#{osgVersion}"
 
+# for writing copyright year to Info.plist
+t = Time.new
+fgCurrentYear = t.year
 
 fgVersion = File.read("#{srcDir}/version").strip
 volName="\"FlightGear #{fgVersion}\""

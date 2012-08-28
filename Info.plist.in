@@ -9,7 +9,7 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleGetInfoString</key>
-	<string>FlightGear, the open-source flight simulator</string>
+	<string>FlightGear, the open-source flight simulator, <%= fgVersion %>. ©1996-<%= fgCurrentYear%>, The FlightGear Project</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleExecutable</key>
@@ -26,6 +26,8 @@
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
+    <key>NSHumanReadableCopyright</key>
+    <string>©1996-<%= fgCurrentYear%>, The FlightGear Project</string>
 </dict>
 </plist>
 
