@@ -101,7 +101,7 @@ puts "Creating directory structure"
 `mkdir -p #{osgPluginsDir}`
 
 puts "Copying binaries"
-bins = ['fgfs', 'fgjs', 'fgcom']
+bins = ['fgfs', 'fgjs', 'fgcom', 'fgviewer']
 bins.each do |b|
   if !File.exist?("#{$prefixDir}/bin/#{b}")
     next
