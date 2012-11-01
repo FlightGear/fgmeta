@@ -18,7 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-VERSION="1.4"
+VERSION="1.5"
 
 #COMPILE GIT FGFS
 
@@ -27,7 +27,7 @@ VERSION="1.4"
 #######################################################
 # Special thanks to Alessandro Garosi for FGComGui and 
 # other patches
-# Thanks to "pac1" for patches for fgrun compilation
+# Thanks to "Pat Callahan" for patches for fgrun compilation
 # Thanks to "F-JJTH" for bug fixes and suggestions
 
 
@@ -127,17 +127,18 @@ OSG_STABLE_REVISION="http://www.openscenegraph.org/svn/osg/OpenSceneGraph/tags/O
 
 # common stable branch for flightgear, simgear and fgdata
 FGSG_STABLE_GIT_BRANCH="release/2.8.0"
+FGRUN_STABLE_GIT_BRANCH="master"
 
 # unstable branch: next for sg/fg, master for fgdata
 FGSG_UNSTABLE_GIT_BRANCH="next"
 FGDATA_UNSTABLE_GIT_BRANCH="master"
+FGRUN_UNSTABLE_GIT_BRANCH="master"
 
 # stable GIT revision: release tag
 SIMGEAR_STABLE_REVISION="version/2.8.0-final"
 FGFS_STABLE_REVISION="version/2.8.0-final"
 FGFS_DATA_STABLE_REVISION="version/2.8.0-final"
 
-FGRUN_STABLE_REVISION="655"
 FGCOM_STABLE_REVISION="261"
 FGCOMGUI_STABLE_REVISION="46"
 
@@ -258,7 +259,7 @@ fi
 
 
 # default is hardy
-DISTRO_PACKAGES="libopenal-dev libalut-dev libalut0  libfltk1.1-dev libfltk1.1 cvs subversion cmake make build-essential automake zlib1g-dev zlib1g libwxgtk2.8-0 libwxgtk2.8-dev fluid gawk gettext libxi-dev libxi6 libxmu-dev libxmu6 libboost-dev libasound2-dev libasound2 libpng12-dev libpng12-0 libjasper1 libjasper-dev libopenexr-dev libboost-serialization-dev git-core libhal-dev libqt4-dev scons python-tk python-imaging-tk libsvn-dev libglew1.5-dev "
+DISTRO_PACKAGES="libopenal-dev libalut-dev libalut0  libfltk1.3-dev libfltk1.3 cvs subversion cmake make build-essential automake zlib1g-dev zlib1g libwxgtk2.8-0 libwxgtk2.8-dev fluid gawk gettext libxi-dev libxi6 libxmu-dev libxmu6 libboost-dev libasound2-dev libasound2 libpng12-dev libpng12-0 libjasper1 libjasper-dev libopenexr-dev libboost-serialization-dev git-core libhal-dev libqt4-dev scons python-tk python-imaging-tk libsvn-dev libglew1.5-dev  libxft2 libxft-dev libxinerama1 libxinerama-dev"
 
 UBUNTU_PACKAGES="freeglut3-dev libjpeg62-dev libjpeg62 libapr1-dev "
 DEBIAN_PACKAGES="freeglut3-dev libjpeg8-dev libjpeg8 "
@@ -909,22 +910,54 @@ then
 	echo "**************** FGRUN *****************" | tee -a $LOGFILE
 	echo "****************************************" | tee -a $LOGFILE
 
-	if [ "$DOWNLOAD" = "y" ]
-	then
 
-		FGRUN_STABLE_REVISION_=""
-		if [ "$STABLE" = "STABLE" ]
+		if [ "$DOWNLOAD" = "y" ]
 		then
-			FGRUN_STABLE_REVISION_=" -r $FGRUN_STABLE_REVISION"
+			#echo -n "CVS FROM cvs.flightgear.org:/var/cvs/FlightGear-0.9 ... " >> $LOGFILE
+			#cvs -z5 -d :pserver:cvsguest:guest@cvs.flightgear.org:/var/cvs/FlightGear-0.9 login
+			#cvs -z5 -d :pserver:cvsguest@cvs.flightgear.org:/var/cvs/FlightGear-0.9 co source
+
+			echo -n "GIT FROM git://gitorious.org/fg/fgrun.git ... " >> $LOGFILE
+			
+
+			if [ -d "fgrun" ]
+			then
+				echo "fgrun exists already."
+			else
+				git clone git://gitorious.org/fg/fgrun.git fgrun
+			fi
+
+			cd fgrun
+
+			git fetch origin
+			if [ "$STABLE" = "STABLE" ]
+			then
+				# switch to stable branch
+				# create local stable branch, ignore errors if it exists
+				ls
+				git branch -f $FGRUN_STABLE_GIT_BRANCH origin/$FGRUN_STABLE_GIT_BRANCH 2> /dev/null || true
+				# switch to stable branch. No error is reported if we're already on the branch.
+				git checkout -f $FGRUN_STABLE_GIT_BRANCH
+				# get indicated stable version
+				git reset --hard $FGRUN_STABLE_GIT_BRANCH
+			else
+				# switch to unstable branch
+				# create local unstable branch, ignore errors if it exists
+				git branch -f $FGRUN_UNSTABLE_GIT_BRANCH origin/$FGRUN_UNSTABLE_GIT_BRANCH 2> /dev/null || true
+				# switch to unstable branch. No error is reported if we're already on the branch.
+				git checkout -f $FGRUN_UNSTABLE_GIT_BRANCH
+				# pull latest version from the unstable branch
+				git pull
+			fi
+
+			cd ..	
+
+			echo " OK" >> $LOGFILE
+
 		fi
+		
+		cd fgrun
 
-
-		echo -n "SVN FROM http://fgrun.svn.sourceforge.net/svnroot/fgrun ... " >> $LOGFILE
-		svn $FGRUN_STABLE_REVISION_ co http://fgrun.svn.sourceforge.net/svnroot/fgrun/trunk fgrun
-		echo " OK" >> $LOGFILE
-
-	fi
-	cd fgrun/fgrun/
 
 	if [ ! "$UPDATE" = "UPDATE" ]
 	then
@@ -935,9 +968,9 @@ then
                         cd "$CBD"/build/fgrun
 
 			echo -n "RECONFIGURE FGRUN ... " >> $LOGFILE
-			rm -f ../../fgrun/fgrun/CMakeCache.txt
+			rm -f ../../fgrun/CMakeCache.txt
 			
-			cmake -D CMAKE_BUILD_TYPE="Release" -D CMAKE_CXX_FLAGS="-O3 -D__STDC_CONSTANT_MACROS" -D CMAKE_C_FLAGS="-O3" -D CMAKE_INSTALL_PREFIX:PATH="$INSTALL_DIR_FGRUN" -D "CMAKE_PREFIX_PATH=$INSTALL_DIR_OSG;$INSTALL_DIR_PLIB;$INSTALL_DIR_SIMGEAR" ../../fgrun/fgrun/ 2>&1 | tee -a $LOGFILE
+			cmake -D CMAKE_BUILD_TYPE="Release" -D CMAKE_CXX_FLAGS="-O3 -D__STDC_CONSTANT_MACROS" -D CMAKE_C_FLAGS="-O3" -D CMAKE_INSTALL_PREFIX:PATH="$INSTALL_DIR_FGRUN" -D "CMAKE_PREFIX_PATH=$INSTALL_DIR_OSG;$INSTALL_DIR_PLIB;$INSTALL_DIR_SIMGEAR" ../../fgrun/ 2>&1 | tee -a $LOGFILE
 
 			echo " OK" >> $LOGFILE
 		fi
