@@ -122,7 +122,7 @@ fi
 
 #######################################################
 # Last stable revision: currently FlightGear 2.4.0 with 3.0.1
-PLIB_STABLE_REVISION="2163"
+PLIB_STABLE_REVISION="2172"
 OSG_STABLE_REVISION="http://www.openscenegraph.org/svn/osg/OpenSceneGraph/tags/OpenSceneGraph-3.0.1"
 
 # common stable branch for flightgear, simgear and fgdata
@@ -375,8 +375,8 @@ then
 
 
 		PLIB_STABLE_REVISION_=""
-		#if [ "$STABLE" = "STABLE" ]
-		if [ "STABLE" = "STABLE" ]
+		if [ "$STABLE" = "STABLE" ]
+		#if [ "STABLE" = "STABLE" ]
 		then
 			PLIB_STABLE_REVISION_=" -r $PLIB_STABLE_REVISION"
 		fi
@@ -392,8 +392,8 @@ then
             		else
 				echo -n "DOWNLOADING FROM http://plib.svn.sourceforge.net ..." >> $LOGFILE
 				svn $PLIB_STABLE_REVISION_ co http://plib.svn.sourceforge.net/svnroot/plib/trunk plib 
-				cat plib/src/util/ul.h | sed s/"PLIB_TINY_VERSION  5"/"PLIB_TINY_VERSION  6"/g > ul.h-v1.8.6
-				mv ul.h-v1.8.6 plib/src/util/ul.h
+				#cat plib/src/util/ul.h | sed s/"PLIB_TINY_VERSION  5"/"PLIB_TINY_VERSION  6"/g > ul.h-v1.8.6
+				#mv ul.h-v1.8.6 plib/src/util/ul.h
 				echo " OK" >> $LOGFILE
             		fi
 		fi 
