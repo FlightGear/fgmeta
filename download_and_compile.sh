@@ -18,7 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-VERSION="1.5"
+VERSION="1.8"
 
 #COMPILE GIT FGFS
 
@@ -29,6 +29,7 @@ VERSION="1.5"
 # other patches
 # Thanks to "Pat Callahan" for patches for fgrun compilation
 # Thanks to "F-JJTH" for bug fixes and suggestions
+# Thanks again to "F-JJTH" for OpenRTI and FGX 
 
 
 
@@ -51,8 +52,9 @@ JOPTION=""
 OOPTION=""
 DEBUG=""
 WITH_EVENT_INPUT=""
+WITH_OPENRTI=""
 
-while getopts "suhc:p:a:d:r:j:O:ge" OPTION
+while getopts "suhc:p:a:d:r:j:O:gei" OPTION
 do
      case $OPTION in
          s)
@@ -91,6 +93,9 @@ do
          e)
              WITH_EVENT_INPUT="--with-eventinput"
              ;;
+         i)
+             WITH_OPENRTI="-D ENABLE_RTI=ON"
+             ;;
 
 
          ?)
@@ -128,18 +133,22 @@ OSG_STABLE_REVISION="http://www.openscenegraph.org/svn/osg/OpenSceneGraph/tags/O
 # common stable branch for flightgear, simgear and fgdata
 FGSG_STABLE_GIT_BRANCH="release/2.8.0"
 FGRUN_STABLE_GIT_BRANCH="master"
+OPENRTI_STABLE_GIT_BRANCH="release-0.3"
 
 # unstable branch: next for sg/fg, master for fgdata
 FGSG_UNSTABLE_GIT_BRANCH="next"
 FGDATA_UNSTABLE_GIT_BRANCH="master"
 FGRUN_UNSTABLE_GIT_BRANCH="master"
+OPENRTI_UNSTABLE_GIT_BRANCH="master"
 
 # stable GIT revision: release tag
 SIMGEAR_STABLE_REVISION="version/2.8.0-final"
 FGFS_STABLE_REVISION="version/2.8.0-final"
 FGFS_DATA_STABLE_REVISION="version/2.8.0-final"
+OPENRTI_STABLE_REVISION="OpenRTI-0.3.0"
 
-FGCOM_STABLE_REVISION="261"
+# FGCOM
+FGCOM_UNSTABLE_GIT_BRANCH="master"
 FGCOMGUI_STABLE_REVISION="46"
 
 # Current developer revision: latest FlightGear GIT (2.5.0) with OSG 3.0.1
@@ -155,14 +164,15 @@ if [ "$WHATTOBUILD" = "--help" ]
 then
 	echo "$0 Version $VERSION"
 	echo "Usage:"
-	echo "./$0 [-u] [-h] [-s] [-e] [-g] [-a y|n] [-c y|n] [-p y|n] [-d y|n] [-r y|n] [ALL|PLIB|OSG|SIMGEAR|FGFS|FGO|FGRUN|FGCOM|FGCOMGUI|ATLAS] [UPDATE]"
-	echo "* without options it recompiles: PLIB,OSG,SIMGEAR,FGFS,FGRUN"
+	echo "./$0 [-u] [-h] [-s] [-e] [-i] [-g] [-a y|n] [-c y|n] [-p y|n] [-d y|n] [-r y|n] [ALL|PLIB|OSG|OPENRTI|SIMGEAR|FGFS|FGO|FGX|FGRUN|FGCOM|FGCOMGUI|ATLAS] [UPDATE]"
+	echo "* without options it recompiles: PLIB,OSG,OPENRTI,SIMGEAR,FGFS,FGRUN"
 	echo "* Using ALL compiles everything"
 	echo "* Adding UPDATE it does not rebuild all (faster but to use only after one successfull first compile)"
 	echo "Switches:"
 	echo "* -u  such as using UPDATE"
 	echo "* -h  show this help"
 	echo "* -e  compile FlightGear with --with-eventinput option (experimental)"
+	echo "* -i  compile SimGear and FlightGear with -D ENABLE_RTI=ON option (experimental)"
 	echo "* -g  compile with debug info for gcc"
 	echo "* -a y|n  y=do an apt-get update n=skip apt-get update                      	default=y"
 	echo "* -p y|n  y=download packages n=skip download packages                      	default=y"
@@ -412,7 +422,7 @@ then
 			./autogen.sh 2>&1 | tee  -a $LOGFILE
 			echo "CONFIGURING plib" >> $LOGFILE
 			cd "$CBD"/build/plib
-			../../plib/configure --prefix="$INSTALL_DIR_PLIB" --exec-prefix="$INSTALL_DIR_PLIB" 2>&1 | tee -a $LOGFILE
+			../../plib/configure  --disable-pw --disable-sl --disable-psl --disable-ssg --disable-ssgaux  --prefix="$INSTALL_DIR_PLIB" --exec-prefix="$INSTALL_DIR_PLIB" 2>&1 | tee -a $LOGFILE
 		else
 			echo "NO RECONFIGURE FOR plib" >> $LOGFILE
 		fi
@@ -524,6 +534,104 @@ fi
 
 
 #######################################################
+# OPENRTI
+#######################################################
+OPENRTI_INSTALL_DIR=openrti
+INSTALL_DIR_OPENRTI=$INSTALL_DIR/$OPENRTI_INSTALL_DIR
+cd "$CBD"
+
+if [ ! -d "openrti" ]
+then
+	mkdir "openrti"
+fi
+
+if [ "$WHATTOBUILD" = "" -o "$WHATTOBUILD" = "OPENRTI" -o "$WHATTOBUILD" = "ALL" ]
+then
+	echo "****************************************" | tee -a $LOGFILE
+	echo "**************** OPENRTI ***************" | tee -a $LOGFILE
+	echo "****************************************" | tee -a $LOGFILE
+
+
+	if [ "$DOWNLOAD" = "y" ]
+	then
+		cd openrti
+
+		echo -n "git FROM git://gitorious.org/openrti/openrti.git ... " >> $LOGFILE
+
+		if [ -d "openrti" ]
+		then
+			echo "openrti exists already."
+		else
+			git clone git://gitorious.org/openrti/openrti.git
+		fi
+
+		cd openrti
+
+		git fetch origin
+		if [ "$STABLE" = "STABLE" ]
+		then
+			# switch to stable branch
+			# create local stable branch, ignore errors if it exists
+			git branch -f $OPENRTI_STABLE_GIT_BRANCH origin/$OPENRTI_STABLE_GIT_BRANCH 2> /dev/null || true
+			# switch to stable branch. No error is reported if we're already on the branch.
+			git checkout -f $OPENRTI_STABLE_GIT_BRANCH
+			# get indicated stable version
+			git reset --hard $OPENRTI_STABLE_REVISION
+		else
+			# switch to unstable branch
+			# create local unstable branch, ignore errors if it exists
+			git branch -f $OPENRTI_UNSTABLE_GIT_BRANCH origin/$OPENRTI_UNSTABLE_GIT_BRANCH 2> /dev/null || true
+			# switch to unstable branch. No error is reported if we're already on the branch.
+			git checkout -f $OPENRTI_UNSTABLE_GIT_BRANCH
+			# pull latest version from the unstable branch
+			git pull
+		fi
+
+		cd ..	
+
+		echo " OK" >> $LOGFILE
+		cd ..
+	
+	fi
+	
+	cd "openrti/openrti"
+	
+	if [ ! "$UPDATE" = "UPDATE" ]
+	then
+		if [ "$RECONFIGURE" = "y" ]
+		then
+
+			cd "$CBD"
+			mkdir -p build/openrti
+			cd "$CBD"/build/openrti
+			echo -n "RECONFIGURE OPENRTI ... " >> $LOGFILE
+			rm -f ../../openrti/openrti/CMakeCache.txt
+			cmake -D CMAKE_BUILD_TYPE="Release" -D CMAKE_CXX_FLAGS="-O3 -D__STDC_CONSTANT_MACROS" -D CMAKE_C_FLAGS="-O3" -D CMAKE_INSTALL_PREFIX:PATH="$INSTALL_DIR_OPENRTI" ../../openrti/openrti/ 2>&1 | tee -a $LOGFILE
+			echo " OK" >> $LOGFILE
+
+
+
+		fi
+	fi
+	
+	if [ "$COMPILE" = "y" ]
+	then
+
+
+		cd "$CBD"/build/openrti
+		echo "MAKE OPENRTI" >> $LOGFILE
+		echo "make $JOPTION $OOPTION " >> $LOGFILE
+		make $JOPTION $OOPTION 2>&1 | tee -a $LOGFILE
+
+		echo "INSTALL OPENRTI" >> $LOGFILE
+		make install 2>&1 | tee -a $LOGFILE
+	fi
+	cd -
+fi
+
+
+
+#######################################################
 # SIMGEAR
 #######################################################
 SIMGEAR_INSTALL_DIR=simgear
@@ -600,7 +708,7 @@ then
 			cd "$CBD"/build/simgear
 			echo -n "RECONFIGURE SIMGEAR ... " >> $LOGFILE
 			rm -f ../../simgear/simgear/CMakeCache.txt
-			cmake -D CMAKE_BUILD_TYPE="Release" -D CMAKE_CXX_FLAGS="-O3 -D__STDC_CONSTANT_MACROS" -D CMAKE_C_FLAGS="-O3" -D CMAKE_INSTALL_PREFIX:PATH="$INSTALL_DIR_SIMGEAR" -D CMAKE_PREFIX_PATH=$INSTALL_DIR_OSG ../../simgear/simgear/ 2>&1 | tee -a $LOGFILE
+			cmake -D CMAKE_BUILD_TYPE="Release" $WITH_OPENRTI -D CMAKE_CXX_FLAGS="-O3 -D__STDC_CONSTANT_MACROS" -D CMAKE_C_FLAGS="-O3" -D CMAKE_INSTALL_PREFIX:PATH="$INSTALL_DIR_SIMGEAR" -D CMAKE_PREFIX_PATH=$INSTALL_DIR_OSG ../../simgear/simgear/ 2>&1 | tee -a $LOGFILE
 			echo " OK" >> $LOGFILE
 
 
@@ -718,7 +826,7 @@ then
 				#cp -f  utils/fgadmin/src/CMakeLists_without_err.txt utils/fgadmin/src/CMakeLists.txt
 
 		
-				cmake -D CMAKE_BUILD_TYPE="Release" -D "WITH_FGPANEL=OFF" -D CMAKE_CXX_FLAGS="-O3 -D__STDC_CONSTANT_MACROS" -D CMAKE_C_FLAGS="-O3" -D CMAKE_INSTALL_PREFIX:PATH="$INSTALL_DIR_FGFS" -D "CMAKE_PREFIX_PATH=$INSTALL_DIR_OSG;$INSTALL_DIR_PLIB;$INSTALL_DIR_SIMGEAR" ../../fgfs/flightgear 2>&1 | tee -a $LOGFILE
+				cmake -D CMAKE_BUILD_TYPE="Release" $WITH_OPENRTI -D "WITH_FGPANEL=OFF" -D CMAKE_CXX_FLAGS="-O3 -D__STDC_CONSTANT_MACROS" -D CMAKE_C_FLAGS="-O3" -D CMAKE_INSTALL_PREFIX:PATH="$INSTALL_DIR_FGFS" -D "CMAKE_PREFIX_PATH=$INSTALL_DIR_OSG;$INSTALL_DIR_PLIB;$INSTALL_DIR_SIMGEAR" ../../fgfs/flightgear 2>&1 | tee -a $LOGFILE
 
 				echo " OK" >> $LOGFILE
 
@@ -835,7 +943,7 @@ then
 #!/bin/sh
 cd \$(dirname \$0)
 cd $SUB_INSTALL_DIR/$FGFS_INSTALL_DIR/bin
-export LD_LIBRARY_PATH=../../$PLIB_INSTALL_DIR/lib:../../$OSG_INSTALL_DIR/lib:../../$SIMGEAR_INSTALL_DIR/lib
+export LD_LIBRARY_PATH=../../$PLIB_INSTALL_DIR/lib:../../$OSG_INSTALL_DIR/lib:../../$SIMGEAR_INSTALL_DIR/lib:../../$OPENRTI_INSTALL_DIR/lib
 ./fgfs --fg-root=\$PWD/../fgdata/ \$@
 ENDOFALL
 	chmod 755 run_fgfs.sh
@@ -845,7 +953,7 @@ ENDOFALL
 cd \$(dirname \$0)
 P1=\$PWD
 cd $SUB_INSTALL_DIR/$FGFS_INSTALL_DIR/bin
-export LD_LIBRARY_PATH=../../$PLIB_INSTALL_DIR/lib:../../$OSG_INSTALL_DIR/lib:../../$SIMGEAR_INSTALL_DIR/lib
+export LD_LIBRARY_PATH=../../$PLIB_INSTALL_DIR/lib:../../$OSG_INSTALL_DIR/lib:../../$SIMGEAR_INSTALL_DIR/lib:../../$OPENRTI_INSTALL_DIR/lib
 gdb  --directory="\$P1"/fgfs/source/src/ --args fgfs --fg-root=\$PWD/../fgdata/ \$@
 ENDOFALL2
 	chmod 755 run_fgfs_debug.sh
@@ -892,6 +1000,102 @@ then
 	echo "cd $FGO_INSTALL_DIR" >> $SCRIPT
         echo "export LD_LIBRARY_PATH=\$p/plib/lib:\$p/OpenSceneGraph/lib:\$p/simgear/lib"  >> $SCRIPT
 	echo "python fgo" >> $SCRIPT
+	chmod 755 $SCRIPT
+
+fi
+
+
+#######################################################
+# FGx
+#######################################################
+FGX_INSTALL_DIR=fgx
+INSTALL_DIR_FGX=$INSTALL_DIR/$FGX_INSTALL_DIR
+cd "$CBD"
+if [ "$WHATTOBUILD" = "" -o "$WHATTOBUILD" = "FGX" ]
+then
+	echo "****************************************" | tee -a $LOGFILE
+	echo "***************** FGX ******************" | tee -a $LOGFILE
+	echo "****************************************" | tee -a $LOGFILE
+
+	if [ "$DOWNLOAD" = "y" ]
+	then
+
+		echo -n "git clone git://gitorious.org/fgx/fgx.git ... " >> $LOGFILE
+
+		if [ -d "fgx" ]
+		then
+			echo "fgx exists already."
+		else
+			git clone git://gitorious.org/fgx/fgx.git fgx
+		fi
+
+		echo " OK" >> $LOGFILE
+
+	fi
+
+	cd fgx/
+
+	git branch -f $FGX_STABLE_GIT_BRANCH origin/$FGX_STABLE_GIT_BRANCH 2> /dev/null || true
+	git checkout -f $FGX_STABLE_GIT_BRANCH
+	git pull
+
+	cd ..
+
+
+	cd fgx/src/
+
+	#Patch in order to pre-setting paths
+	cd resources/default/
+	cp x_default.ini x_default.ini.orig
+	cat x_default.ini | sed s/\\/usr\\/bin\\/fgfs/INSTALL_DIR_FGXMY_SLASH_HERE..MY_SLASH_HEREfgfsMY_SLASH_HEREbinMY_SLASH_HEREfgfs/g > tmp1
+	cat tmp1 | sed s/\\/usr\\/share\\/flightgear/INSTALL_DIR_FGXMY_SLASH_HERE..MY_SLASH_HEREfgfsMY_SLASH_HEREfgdata/g > tmp2
+	cat tmp2 | sed s/\\/usr\\/bin\\/terrasync/INSTALL_DIR_FGXMY_SLASH_HERE..MY_SLASH_HEREfgfsMY_SLASH_HEREbinMY_SLASH_HEREterrasync/g > tmp3
+	cat tmp3 | sed s/\\/usr\\/bin\\/fgcom/INSTALL_DIR_FGXMY_SLASH_HERE..MY_SLASH_HEREfgcomMY_SLASH_HEREbinMY_SLASH_HEREfgcom/g > tmp4
+	cat tmp4 | sed s/\\/usr\\/bin\\/js_demo/INSTALL_DIR_FGXMY_SLASH_HERE..MY_SLASH_HEREfgfsMY_SLASH_HEREbinMY_SLASH_HEREjs_demo/g > tmp5
+
+	INSTALL_DIR_FGX_NO_SLASHS=$(echo "$INSTALL_DIR_FGX" | sed -e 's/\//MY_SLASH_HERE/g')
+	cat tmp5 | sed s/INSTALL_DIR_FGX/"$INSTALL_DIR_FGX_NO_SLASHS"/g > tmp
+	cat tmp | sed s/MY_SLASH_HERE/\\//g > x_default.ini
+	rm tmp*
+
+	cd ..
+
+
+	if [ ! "$UPDATE" = "UPDATE" ]
+	then
+		if [ "$RECONFIGURE" = "y" ]
+		then
+
+			echo -n "RECONFIGURE FGX ... " >> $LOGFILE
+
+			mkdir -p $INSTALL_DIR_FGX
+			cd $INSTALL_DIR_FGX
+
+			qmake ../../fgx/src
+
+			echo " OK" >> $LOGFILE
+		fi
+	fi
+	
+	if [ "$COMPILE" = "y" ]
+	then
+		cd $INSTALL_DIR_FGX
+		echo "MAKE AND INSTALL FGX" >> $LOGFILE
+		echo "make $JOPTION $OOPTION " >> $LOGFILE
+		make $JOPTION $OOPTION | tee -a $LOGFILE
+		cd ..
+	fi
+
+	cd "$CBD"
+
+	SCRIPT=run_fgx.sh
+	echo "#!/bin/sh" > $SCRIPT
+	echo "cd \$(dirname \$0)" >> $SCRIPT
+	echo "cd $SUB_INSTALL_DIR" >> $SCRIPT
+	echo "p=\$(pwd)" >> $SCRIPT
+	echo "cd $FGX_INSTALL_DIR" >> $SCRIPT
+        echo "export LD_LIBRARY_PATH=\$p/plib/lib:\$p/OpenSceneGraph/lib:\$p/simgear/lib"  >> $SCRIPT
+	echo "./fgx" >> $SCRIPT
 	chmod 755 $SCRIPT
 
 fi
@@ -1028,10 +1232,39 @@ then
 			FGCOM_STABLE_REVISION_=" -r $FGCOM_STABLE_REVISION"
 		fi
 
+		echo -n "git://gitorious.org/fg/fgcom.git ... " >> $LOGFILE
 
-		echo -n "SVN FROM https://appfgcom.svn.sourceforge.net/svnroot/fgcom/trunk ... " >> $LOGFILE
-		svn $FGCOM_STABLE_REVISION_ co https://appfgcom.svn.sourceforge.net/svnroot/fgcom/trunk fgcom 
+		if [ -d "fgcom" ]
+		then 
+			echo "fgcom exists already."
+		else   
+	                git clone git://gitorious.org/fg/fgcom.git
+		fi
+
+		cd fgcom
+		git fetch origin
+		if [ "$STABLE" = "STABLE" ]
+		then
+			# switch to stable branch
+                        # create local stable branch, ignore errors if it exists
+                        git branch -f $FGCOM_STABLE_FGOM_BRANCH origin/$FGCOM_STABLE_FGCOM_BRANCH 2> /dev/null || true
+                        # switch to stable branch. No error is reported if we're already on the branch.
+                        git checkout -f $FGCOM_STABLE_FGCOM_BRANCH
+                        # get indicated stable version
+                        git reset --hard $FGCOM_STABLE_REVISION
+		else
+			# switch to unstable branch
+                        # create local unstable branch, ignore errors if it exists
+                        git branch -f $FGCOM_UNSTABLE_GIT_BRANCH origin/$FGCOM_UNSTABLE_GIT_BRANCH 2> /dev/null || true
+                        # switch to unstable branch. No error is reported if we're already on the branch.
+                        git checkout -f $FGCOM_UNSTABLE_GIT_BRANCH
+                        # pull latest version from the unstable branch
+                        git pull
+		fi
+		
 		echo " OK" >> $LOGFILE
+		cd ..
+		
 
 
 		
@@ -1040,11 +1273,22 @@ then
 		mv fgcom/iaxclient/lib/libiax2/src/iax_ok.c fgcom/iaxclient/lib/libiax2/src/iax.c
 	fi
 	
-	cd fgcom/src/
 	
 	if [ "$RECONFIGURE" = "y" ]
 	then
-        cp Makefile Makefile.original
+		cd "$CBD"
+		mkdir -p build/fgcom
+
+		cd "$CBD"/build/fgcom
+		echo -n "RECONFIGURE FGCOM ... " >> $LOGFILE
+		rm -f CMakeCache.txt
+		cmake -D CMAKE_BUILD_TYPE="Release" -D "CMAKE_PREFIX_PATH=$INSTALL_DIR_PLIB;$INSTALL_DIR_SIMGEAR"  -D "CMAKE_INSTALL_PREFIX:PATH=$INSTALL_DIR_FGCOM" "$CBD"/fgcom   2>&1  | tee -a $LOGFILE
+
+		echo " OK" >> $LOGFILE
+
+	        cd "$CBD"/fgcom/src/
+
+		cp Makefile Makefile.original
 		cat Makefile | sed s/\\//MY_SLASH_HERE/g > Makefile_NOSLASHES
 	
 		# 1
@@ -1084,17 +1328,18 @@ then
 
 	fi
 
+	cd "$CBD"/build/fgcom
 
 	mkdir -p "$INSTALL_DIR_FGCOM"/bin
 
 	if [ "$COMPILE" = "y" ]
 	then
 		echo "MAKE FGCOM" >> $LOGFILE
-		echo "make $JOPTION $OOPTION" >> $LOGFILE
-		make $JOPTION $OOPTION 2>&1 | tee -a $LOGFILE
-
+		echo "cmake --build . --config Release" >> $LOGFILE
+		cmake --build . --config Release 2>&1 | tee -a $LOGFILE
+		
 		echo "INSTALL FGCOM" >> $LOGFILE
-		make install 2>&1 | tee -a $LOGFILE
+		cmake -DBUILD_TYPE=Release -P cmake_install.cmake 2>&1 | tee -a $LOGFILE
 	fi
 	cd "$CBD"
 
