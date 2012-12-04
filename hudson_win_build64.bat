@@ -12,7 +12,7 @@ cmake ..\SimGear -G "Visual Studio 10 Win64" -DMSVC_3RDPARTY_ROOT=%WORKSPACE% -D
 cmake --build . --config Release --target INSTALL
 
 cd ..\build-fg64
-cmake ..\flightgear -G "Visual Studio 10 Win64" -DMSVC_3RDPARTY_ROOT=%WORKSPACE% -DCMAKE_INSTALL_PREFIX:PATH=%WORKSPACE%/install/msvc100-64/FlightGear -DFLTK_FLUID_EXECUTABLE=%WORKSPACE%/3rdParty/bin/fluid.exe -DBOOST_ROOT=%WORKSPACE%/Boost
+cmake ..\flightgear -G "Visual Studio 10 Win64" -DMSVC_3RDPARTY_ROOT=%WORKSPACE% -DCMAKE_INSTALL_PREFIX:PATH=%WORKSPACE%/install/msvc100-64/FlightGear -DFLTK_FLUID_EXECUTABLE=%WORKSPACE%/3rdParty/bin/fluid.exe -DBOOST_ROOT=%WORKSPACE%/Boost -DWITH_FGPANEL=OFF -DENABLE_PROFILE=OFF
 cmake --build . --config Release --target INSTALL
 
 cd ..\build-fgrun64
