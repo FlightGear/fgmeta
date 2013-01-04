@@ -49,12 +49,17 @@ chmod +x $WORKSPACE/dist/bin/osgversion
 ################################################################################
 echo "Building Macflightgear launcher"
 
-OSX_TARGET="10.6"
+#OSX_TARGET="10.6"
+# JMT - disabling setting the sysroot since it's breaking things on 
+# current build slave. Sinc ethe slave runs 10.6 natively, we don't 
+# actually need to set these. Real solution would be to use a proper
+# build system for the Mac-launcher of course.
+# -mmacosx-version-min=$OSX_TARGET -isysroot $SDK_PATH
 
 pushd maclauncher/FlightGearOSX
 
 # compile the stub executable
-gcc -o FlightGear -mmacosx-version-min=$OSX_TARGET -isysroot $SDK_PATH main.m \
+gcc -o FlightGear main.m \
     -framework Cocoa -framework RubyCocoa -framework Foundation -framework AppKit
 
 popd
