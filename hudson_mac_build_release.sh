@@ -54,7 +54,7 @@ OSX_TARGET="10.6"
 pushd maclauncher/FlightGearOSX
 
 # compile the stub executable
-gcc -o FlightGear -mmacosx-version-min=$OSX_TARGET -isysroot $SDK_PATH -arch i386 main.m \
+gcc -o FlightGear -mmacosx-version-min=$OSX_TARGET -isysroot $SDK_PATH main.m \
     -framework Cocoa -framework RubyCocoa -framework Foundation -framework AppKit
 
 popd
