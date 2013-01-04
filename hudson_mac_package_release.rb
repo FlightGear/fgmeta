@@ -22,8 +22,6 @@ puts "Code signing identity is #{$codeSignIdentity}"
 
 puts "osgVersion=#{osgVersion}, so-number=#{$osgSoVersion}"
 
-$alutSourcePath='/Library/Frameworks/ALUT.framework'
-
 $svnLibs = ['svn_client', 'svn_wc', 'svn_delta', 'svn_diff', 'svn_ra', 
   'svn_ra_local', 'svn_repos', 'svn_fs', 'svn_fs_fs', 'svn_fs_util',
   'svn_ra_svn', 'svn_subr', 'svn_ra_neon']
@@ -40,10 +38,6 @@ def fix_install_names(object)
   oldName = "libOpenThreads.#{$openThreadsSoVersion}.dylib"
   newName= "@executable_path/../Frameworks/#{oldName}"
   `install_name_tool -change #{oldName} #{newName} #{object}`
-  
-  alutBundlePath = "@executable_path/../Frameworks/ALUT.framework"
-  alutLib = "Versions/A/ALUT"
-  `install_name_tool -change #{$alutSourcePath}/#{alutLib} #{alutBundlePath}/#{alutLib} #{object}`
 end
 
 $prefixDir=Dir.pwd + "/dist"
@@ -131,10 +125,6 @@ $osgPlugins.each do |p|
 end
 
 copy_svn_libs()
-
-# custom ALUT
-# must copy frameworks using ditto
-`ditto #{$alutSourcePath} #{$frameworksDir}/ALUT.framework`
 
 # Macflightgear launcher
 puts "Copying Macflightgear launcher files"
