@@ -7,3 +7,6 @@
 [submodule "fgrun"]
 	path = fgrun
 	url = git://gitorious.org/fg/fgrun.git
+[submodule "maclauncher"]
+	path = maclauncher
+	url = git://gitorious.org/fg/maclauncher.git
