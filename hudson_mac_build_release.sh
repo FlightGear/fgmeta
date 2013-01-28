@@ -21,7 +21,7 @@ pushd sgBuild
 cmake -DCMAKE_INSTALL_PREFIX:PATH=$WORKSPACE/dist -G Xcode ../simgear
 
 # compile
-xcodebuild -configuration Release -target install  build
+xcodebuild -configuration RelWithDebInfo -target install  build
 
 if [ $? -ne '0' ]; then
     echo "make simgear failed"
@@ -35,7 +35,7 @@ echo "Starting on FlightGear"
 pushd fgBuild
 cmake -DCMAKE_INSTALL_PREFIX:PATH=$WORKSPACE/dist -G Xcode ../flightgear
 
-xcodebuild -configuration Release -target install  build
+xcodebuild -configuration RelWithDebInfo -target install  build
 
 if [ $? -ne '0' ]; then
     echo "make flightgear failed"
