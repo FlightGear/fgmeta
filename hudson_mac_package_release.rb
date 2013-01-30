@@ -150,6 +150,10 @@ File.open("#{contents}/Info.plist", 'w') { |f|
 `cp #{srcDir}/package/mac/FlightGear.icns #{resourcesDir}/FlightGear.icns`
 `cp #{srcDir}/COPYING #{dmgDir}`
 
+# move documentation to a public place
+`mv fgdata/Docs/FGShortRef.pdf #{dmgDir}`
+`mv fgdata/Docs/getstart.pdf #{dmgDir}`
+
 puts "Copying base package files into the image"
 `rsync -a fgdata/ #{resourcesDir}/data`
 
