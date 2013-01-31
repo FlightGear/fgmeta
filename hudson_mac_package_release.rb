@@ -131,7 +131,7 @@ puts "Copying Macflightgear launcher files"
 
 Dir.chdir "maclauncher/FlightGearOSX" do
   `cp FlightGear #{macosDir}`
-  `rsync -a *.rb *.lproj *.sh *.tiff #{resourcesDir}`
+  `rsync -a *.rb *.lproj *.sh *.tiff *.html #{resourcesDir}`
 end
 
 if File.exist?("#{$prefixDir}/bin/fgcom-data")
