@@ -86,7 +86,7 @@ fgCurrentYear = t.year
 fgVersion = File.read("#{srcDir}/version").strip
 volName="\"FlightGear #{fgVersion}\""
 
-dmgPath = Dir.pwd + "/output/fg_mac_#{fgVersion}.dmg"
+dmgPath = Dir.pwd + "/output/FlightGear-#{fgVersion}.dmg"
 
 puts "Creating directory structure"
 `mkdir -p #{macosDir}`
@@ -151,8 +151,8 @@ File.open("#{contents}/Info.plist", 'w') { |f|
 `cp #{srcDir}/COPYING #{dmgDir}`
 
 # move documentation to a public place
-`mv fgdata/Docs/FGShortRef.pdf #{dmgDir}`
-`mv fgdata/Docs/getstart.pdf #{dmgDir}`
+`mv fgdata/Docs/FGShortRef.pdf "#{dmgDir}/Quick Reference.pdf"`
+`mv fgdata/Docs/getstart.pdf "#{dmgDir}/Getting Started.pdf"`
 
 puts "Copying base package files into the image"
 `rsync -a fgdata/ #{resourcesDir}/data`
