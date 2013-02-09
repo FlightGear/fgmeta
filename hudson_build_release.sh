@@ -5,6 +5,8 @@ if [ "$WORKSPACE" == "" ]; then
     exit 1
 fi
 
+VERSION=`cat flightgear/version`
+
 #####################################################################################
 # remove old and create fresh build directories
 rm -rf sgBuild
@@ -52,4 +54,15 @@ make install
 # build source package and copy to output
 make package_source
 cp flightgear-*.tar.bz2 ../output/.
+
+#####################################################################################
+
+echo "Assembling base package"
+cd $WORKSPACE
+
+echo "Syncing base packages files from sphere.telascience.org"
+rsync -avz --filter 'merge base-package.rules' \
+ -e ssh jturner@sphere.telascience.org:/home/jturner/fgdata .
+
+tar cjf output/FlightGear-$VERSION-data.tar.bz fgdata/
 
