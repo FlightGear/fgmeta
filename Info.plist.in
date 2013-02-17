@@ -2,12 +2,14 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+    <key>CFBundleDevelopmentRegion</key>
+    <string>English</string>
 	<key>CFBundleIconFile</key>
 	<string>FlightGear.icns</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleGetInfoString</key>
-	<string>FlightGear nightly build</string>
+	<string>FlightGear, the open-source flight simulator, <%= fgVersion %>. ©1996-<%= fgCurrentYear%>, The FlightGear Project</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleExecutable</key>
@@ -19,11 +21,13 @@
 	<key>CFBundleShortVersionString</key>
 	<string><%= fgVersion %></string>
 	<key>LSMinimumSystemVersion</key>
-	<string>10.5.0</string>
+	<string>10.6.0</string>
 	<key>NSMainNibFile</key>
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
+    <key>NSHumanReadableCopyright</key>
+    <string>©1996-<%= fgCurrentYear%>, The FlightGear Project</string>
 </dict>
 </plist>
 

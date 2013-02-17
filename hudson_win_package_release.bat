@@ -4,12 +4,12 @@ IF NOT DEFINED WORKSPACE SET WORKSPACE=%~dp0
 ECHO Packaging root is %WORKSPACE%
 
 subst X: /D
-subst X: %WORKSPACE%
+subst X: %WORKSPACE%.
 
 REM construct information file to be read by Inno-setup
 
 
-set PATH=%WORKSPACE%\install\msvc90\OpenSceneGraph\bin;%PATH%
+set PATH=%WORKSPACE%\install\msvc100\OpenSceneGraph\bin;%PATH%
 REM indirect way to get command output into an environment variable
 osgversion --so-number > %TEMP%\osg-so-number.txt
 osgversion --version-number > %TEMP%\osg-version.txt

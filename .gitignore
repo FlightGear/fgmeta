@@ -5,3 +5,9 @@ install
 boost_1_44_0
 InstallConfig.iss
 Output
+output
+fgBuild
+sgBuild
+image
+macflightgear
+fgdata

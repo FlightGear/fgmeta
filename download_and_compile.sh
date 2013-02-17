@@ -18,7 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-VERSION="1.4"
+VERSION="1.9-4"
 
 #COMPILE GIT FGFS
 
@@ -27,6 +27,9 @@ VERSION="1.4"
 #######################################################
 # Special thanks to Alessandro Garosi for FGComGui and 
 # other patches
+# Thanks to "Pat Callahan" for patches for fgrun compilation
+# Thanks to "F-JJTH" for bug fixes and suggestions
+# Thanks again to "F-JJTH" for OpenRTI and FGX 
 
 
 
@@ -49,8 +52,9 @@ JOPTION=""
 OOPTION=""
 DEBUG=""
 WITH_EVENT_INPUT=""
+WITH_OPENRTI=""
 
-while getopts "suhc:p:a:d:r:j:O:ge" OPTION
+while getopts "suhc:p:a:d:r:j:O:gei" OPTION
 do
      case $OPTION in
          s)
@@ -89,6 +93,9 @@ do
          e)
              WITH_EVENT_INPUT="--with-eventinput"
              ;;
+         i)
+             WITH_OPENRTI="-D ENABLE_RTI=ON"
+             ;;
 
 
          ?)
@@ -119,18 +126,33 @@ fi
 
 
 #######################################################
-# Last stable revision: currently FlightGear 2.0 with OSG 2.8.3
-PLIB_STABLE_REVISION="2163"
-OSG_STABLE_REVISION="http://www.openscenegraph.org/svn/osg/OpenSceneGraph/tags/OpenSceneGraph-2.8.3"
-SIMGEAR_STABLE_REVISION="937297561fcc4daadedd1f7c49efd39291ebd5df"
-FGFS_STABLE_REVISION="a5017f218fe68fbfb05cfef9e85214b198ed8f0b"
-FGFS_DATA_STABLE_REVISION="061d4ec7f7037e4c71f7163d38d443e59225f399"
-FGRUN_STABLE_REVISION="554"
-FGCOM_STABLE_REVISION="234"
+# Last stable revision: currently FlightGear 2.4.0 with 3.0.1
+PLIB_STABLE_REVISION="2172"
+OSG_STABLE_REVISION="http://www.openscenegraph.org/svn/osg/OpenSceneGraph/tags/OpenSceneGraph-3.0.1"
+
+# common stable branch for flightgear, simgear and fgdata
+FGSG_STABLE_GIT_BRANCH="release/2.8.0"
+FGRUN_STABLE_GIT_BRANCH="master"
+OPENRTI_STABLE_GIT_BRANCH="release-0.3"
+
+# unstable branch: next for sg/fg, master for fgdata
+FGSG_UNSTABLE_GIT_BRANCH="next"
+FGDATA_UNSTABLE_GIT_BRANCH="master"
+FGRUN_UNSTABLE_GIT_BRANCH="master"
+OPENRTI_UNSTABLE_GIT_BRANCH="master"
+
+# stable GIT revision: release tag
+SIMGEAR_STABLE_REVISION="version/2.8.0-final"
+FGFS_STABLE_REVISION="version/2.8.0-final"
+FGFS_DATA_STABLE_REVISION="version/2.8.0-final"
+OPENRTI_STABLE_REVISION="OpenRTI-0.3.0"
+
+# FGCOM
+FGCOM_UNSTABLE_GIT_BRANCH="master"
 FGCOMGUI_STABLE_REVISION="46"
 
-# Current developer revision: latest FlightGear GIT (2.3.0) with OSG 2.9.9
-OSG_UNSTABLE_REVISION="http://www.openscenegraph.org/svn/osg/OpenSceneGraph/tags/OpenSceneGraph-2.9.9"
+# Current developer revision: latest FlightGear GIT (2.5.0) with OSG 3.0.1
+OSG_UNSTABLE_REVISION="http://www.openscenegraph.org/svn/osg/OpenSceneGraph/tags/OpenSceneGraph-3.0.1"
 
 #######################################################
 # set script to stop if an error occours
@@ -142,14 +164,15 @@ if [ "$WHATTOBUILD" = "--help" ]
 then
 	echo "$0 Version $VERSION"
 	echo "Usage:"
-	echo "./$0 [-u] [-h] [-s] [-e] [-g] [-a y|n] [-c y|n] [-p y|n] [-d y|n] [-r y|n] [ALL|PLIB|OSG|SIMGEAR|FGFS|FGRUN|FGCOM|FGCOMGUI|ATLAS] [UPDATE]"
-	echo "* without options it recompiles: PLIB,OSG,SIMGEAR,FGFS,FGRUN"
+	echo "./$0 [-u] [-h] [-s] [-e] [-i] [-g] [-a y|n] [-c y|n] [-p y|n] [-d y|n] [-r y|n] [ALL|PLIB|OSG|OPENRTI|SIMGEAR|FGFS|FGO|FGX|FGRUN|FGCOM|FGCOMGUI|ATLAS] [UPDATE]"
+	echo "* without options it recompiles: PLIB,OSG,OPENRTI,SIMGEAR,FGFS,FGRUN"
 	echo "* Using ALL compiles everything"
 	echo "* Adding UPDATE it does not rebuild all (faster but to use only after one successfull first compile)"
 	echo "Switches:"
 	echo "* -u  such as using UPDATE"
 	echo "* -h  show this help"
 	echo "* -e  compile FlightGear with --with-eventinput option (experimental)"
+	echo "* -i  compile SimGear and FlightGear with -D ENABLE_RTI=ON option (experimental)"
 	echo "* -g  compile with debug info for gcc"
 	echo "* -a y|n  y=do an apt-get update n=skip apt-get update                      	default=y"
 	echo "* -p y|n  y=download packages n=skip download packages                      	default=y"
@@ -171,7 +194,7 @@ fi
 echo "**************************************"
 echo "*                                    *"
 echo "* Warning, the compilation process   *"
-echo "* is going to use 9 or more Gbytes   *"
+echo "* is going to use 12 or more Gbytes  *"
 echo "* of space and at least a couple of  *"
 echo "* hours to download and build FG.    *"
 echo "*                                    *"
@@ -246,16 +269,19 @@ fi
 
 
 # default is hardy
-DISTRO_PACKAGES="libglut3-dev libopenal-dev libalut-dev libalut0  libfltk1.1-dev libfltk1.1 cvs subversion cmake make build-essential automake zlib1g-dev zlib1g libwxgtk2.8-0 libwxgtk2.8-dev fluid gawk gettext libjpeg62-dev libjpeg62  libxi-dev libxi6 libxmu-dev libxmu6 libboost-dev libasound2-dev libasound2 libpng12-dev libpng12-0 libjasper1 libjasper-dev libopenexr-dev libtiff4-dev libboost-serialization-dev git-core libhal-dev boost-build libqt4-dev scons"
+DISTRO_PACKAGES="libopenal-dev libalut-dev libalut0  libfltk1.3-dev libfltk1.3 cvs subversion cmake make build-essential automake zlib1g-dev zlib1g libwxgtk2.8-0 libwxgtk2.8-dev fluid gawk gettext libxi-dev libxi6 libxmu-dev libxmu6 libboost-dev libasound2-dev libasound2 libpng12-dev libpng12-0 libjasper1 libjasper-dev libopenexr-dev libboost-serialization-dev git-core libhal-dev libqt4-dev scons python-tk python-imaging-tk libsvn-dev libglew1.5-dev  libxft2 libxft-dev libxinerama1 libxinerama-dev"
 
-
+UBUNTU_PACKAGES="freeglut3-dev libjpeg62-dev libjpeg62 libapr1-dev libfltk1.3-dev libfltk1.3"
+DEBIAN_PACKAGES="freeglut3-dev libjpeg8-dev libjpeg8 libfltk-dev libfltk1.1"
 
 # checking linux distro and version to differ needed packages
-if [ "$DISTRIB_ID" = "Ubuntu" ]
+if [ "$DISTRIB_ID" = "Ubuntu" -o "$DISTRIB_ID" = "LinuxMint" ]
 then
 	echo "$DISTRIB_ID $DISTRIB_RELEASE" >> $LOGFILE
+	DISTRO_PACKAGES="$DISTRO_PACKAGES $UBUNTU_PACKAGES"
 else
 	echo "DEBIAN I SUPPOUSE" >> $LOGFILE
+	DISTRO_PACKAGES="$DISTRO_PACKAGES $DEBIAN_PACKAGES"
 fi
 echo "$LOGSEP" >> $LOGFILE
 
@@ -331,6 +357,10 @@ SUB_INSTALL_DIR=install
 INSTALL_DIR=$CBD/$SUB_INSTALL_DIR
 
 
+cd "$CBD"
+mkdir -p build
+
+
 #######################################################
 # PLIB
 #######################################################
@@ -341,7 +371,6 @@ INSTALL_DIR_PLIB=$INSTALL_DIR/$PLIB_INSTALL_DIR
 cd "$CBD"
 
 #svn co http://plib.svn.sourceforge.net/svnroot/plib/trunk plib
-#cd plib
 
 if [ "$WHATTOBUILD" = "" -o "$WHATTOBUILD" = "PLIB" -o "$WHATTOBUILD" = "ALL" ]
 then
@@ -355,27 +384,13 @@ then
 		echo "INSTALL_DIR_PLIB=$INSTALL_DIR_PLIB" >> $LOGFILE
 
 
-		#we rebuild plib only if not in update
-		#if [ "$DOWNLOAD" = "y" ]
-		#then
-			#echo -n "DOWNLOADING FROM http://plib.sourceforge.net/dist/plib-1.8.5.tar.gz ... " >> $LOGFILE
-			#wget -c http://plib.sourceforge.net/dist/plib-1.8.5.tar.gz
-			#echo " OK" >> $LOGFILE
-
-			#echo -n "UNPACKING plib-1.8.5.tar.gz ... " >> $LOGFILE
-			#tar zxvf plib-1.8.5.tar.gz
-			#echo " OK" >> $LOGFILE
-		#fi
-		#cd plib-1.8.5
-
-
 		PLIB_STABLE_REVISION_=""
 		if [ "$STABLE" = "STABLE" ]
+		#if [ "STABLE" = "STABLE" ]
 		then
 			PLIB_STABLE_REVISION_=" -r $PLIB_STABLE_REVISION"
 		fi
 
-		#we rebuild plib only if not in update, using svn version tagged 1.8.6
 		if [ "$DOWNLOAD" = "y" ]
 		then
 			if [ -d "plib/.svn" ]
@@ -387,8 +402,8 @@ then
             		else
 				echo -n "DOWNLOADING FROM http://plib.svn.sourceforge.net ..." >> $LOGFILE
 				svn $PLIB_STABLE_REVISION_ co http://plib.svn.sourceforge.net/svnroot/plib/trunk plib 
-				cat plib/src/util/ul.h | sed s/"PLIB_TINY_VERSION  5"/"PLIB_TINY_VERSION  6"/g > ul.h-v1.8.6
-				mv ul.h-v1.8.6 plib/src/util/ul.h
+				#cat plib/src/util/ul.h | sed s/"PLIB_TINY_VERSION  5"/"PLIB_TINY_VERSION  6"/g > ul.h-v1.8.6
+				#mv ul.h-v1.8.6 plib/src/util/ul.h
 				echo " OK" >> $LOGFILE
             		fi
 		fi 
@@ -396,20 +411,31 @@ then
 
 		if [ "$RECONFIGURE" = "y" ]
 		then
+
+			cd "$CBD"
+			mkdir -p build/plib
+
+
+			cd plib
+
 			echo "AUTOGEN plib" >> $LOGFILE
 			./autogen.sh 2>&1 | tee  -a $LOGFILE
 			echo "CONFIGURING plib" >> $LOGFILE
-			./configure --prefix="$INSTALL_DIR_PLIB" --exec-prefix="$INSTALL_DIR_PLIB" 2>&1 | tee -a $LOGFILE
+			cd "$CBD"/build/plib
+			../../plib/configure  --disable-pw --disable-sl --disable-psl --disable-ssg --disable-ssgaux  --prefix="$INSTALL_DIR_PLIB" --exec-prefix="$INSTALL_DIR_PLIB" 2>&1 | tee -a $LOGFILE
 		else
 			echo "NO RECONFIGURE FOR plib" >> $LOGFILE
 		fi
+
 		
 		if [ "$COMPILE" = "y" ]
 		then
+			
 			echo "MAKE plib" >> $LOGFILE
 			echo "make $JOPTION $OOPTION" >> $LOGFILE
-			make $JOPTION $OOPTION 2>&1 | tee -a $LOGFILE
 			
+			cd "$CBD"/build/plib
+			make $JOPTION $OOPTION 2>&1 | tee -a $LOGFILE
 	
 			if [ ! -d $INSTALL_DIR_PLIB ]
 			then
@@ -422,10 +448,9 @@ then
 			make install 2>&1 | tee -a $LOGFILE
 		fi
 
-		cd -
+		cd "$CBD"
 	fi
 fi
-
 
 
 #######################################################
@@ -460,12 +485,17 @@ then
 	then
 		if [ "$RECONFIGURE" = "y" ]
 		then
+			cd "$CBD"
+			mkdir -p build/osg
+			cd "$CBD"/build/osg		
 			echo -n "RECONFIGURE OSG ... " >> $LOGFILE
-			rm -f CMakeCache.txt
-			cmake .
+			rm -f ../../OpenSceneGraph/CMakeCache.txt
+			cmake ../../OpenSceneGraph/
 			echo " OK" >> $LOGFILE
 
-			cmake -D CMAKE_BUILD_TYPE="Release" -D CMAKE_CXX_FLAGS="-O3 -D__STDC_CONSTANT_MACROS" -D CMAKE_C_FLAGS="-O3" -D CMAKE_INSTALL_PREFIX:PATH="$INSTALL_DIR_OSG" . 2>&1 | tee -a $LOGFILE
+
+
+			cmake -D CMAKE_BUILD_TYPE="Release" -D CMAKE_CXX_FLAGS="-O3 -D__STDC_CONSTANT_MACROS" -D CMAKE_C_FLAGS="-O3" -D CMAKE_INSTALL_PREFIX:PATH="$INSTALL_DIR_OSG" ../../OpenSceneGraph/ 2>&1 | tee -a $LOGFILE
 			
 			echo "RECONFIGURE OSG DONE." >> $LOGFILE
 			
@@ -475,6 +505,7 @@ then
 	if [ "$COMPILE" = "y" ]
 	then
 		echo "COMPILING OSG" >> $LOGFILE
+		cd "$CBD"/build/osg
 		make $JOPTION $OOPTION 2>&1 | tee -a $LOGFILE
 	
 		if [ ! -d $INSTALL_DIR_OSG ]
@@ -499,6 +530,106 @@ then
 
 	cd -
 fi
+
+
+
+#######################################################
+# OPENRTI
+#######################################################
+OPENRTI_INSTALL_DIR=openrti
+INSTALL_DIR_OPENRTI=$INSTALL_DIR/$OPENRTI_INSTALL_DIR
+cd "$CBD"
+
+if [ ! -d "openrti" ]
+then
+	mkdir "openrti"
+fi
+
+if [ "$WHATTOBUILD" = "" -o "$WHATTOBUILD" = "OPENRTI" -o "$WHATTOBUILD" = "ALL" ]
+then
+	echo "****************************************" | tee -a $LOGFILE
+	echo "**************** OPENRTI ***************" | tee -a $LOGFILE
+	echo "****************************************" | tee -a $LOGFILE
+
+
+	if [ "$DOWNLOAD" = "y" ]
+	then
+		cd openrti
+
+		echo -n "git FROM git://gitorious.org/openrti/openrti.git ... " >> $LOGFILE
+
+		if [ -d "openrti" ]
+		then
+			echo "openrti exists already."
+		else
+			git clone git://gitorious.org/openrti/openrti.git
+		fi
+
+		cd openrti
+
+		git fetch origin
+		if [ "$STABLE" = "STABLE" ]
+		then
+			# switch to stable branch
+			# create local stable branch, ignore errors if it exists
+			git branch -f $OPENRTI_STABLE_GIT_BRANCH origin/$OPENRTI_STABLE_GIT_BRANCH 2> /dev/null || true
+			# switch to stable branch. No error is reported if we're already on the branch.
+			git checkout -f $OPENRTI_STABLE_GIT_BRANCH
+			# get indicated stable version
+			git reset --hard $OPENRTI_STABLE_REVISION
+		else
+			# switch to unstable branch
+			# create local unstable branch, ignore errors if it exists
+			git branch -f $OPENRTI_UNSTABLE_GIT_BRANCH origin/$OPENRTI_UNSTABLE_GIT_BRANCH 2> /dev/null || true
+			# switch to unstable branch. No error is reported if we're already on the branch.
+			git checkout -f $OPENRTI_UNSTABLE_GIT_BRANCH
+			# pull latest version from the unstable branch
+			git pull
+		fi
+
+		cd ..	
+
+		echo " OK" >> $LOGFILE
+		cd ..
+	
+	fi
+	
+	cd "openrti/openrti"
+	
+	if [ ! "$UPDATE" = "UPDATE" ]
+	then
+		if [ "$RECONFIGURE" = "y" ]
+		then
+
+			cd "$CBD"
+			mkdir -p build/openrti
+			cd "$CBD"/build/openrti
+			echo -n "RECONFIGURE OPENRTI ... " >> $LOGFILE
+			rm -f ../../openrti/openrti/CMakeCache.txt
+			cmake -D CMAKE_BUILD_TYPE="Release" -D CMAKE_CXX_FLAGS="-O3 -D__STDC_CONSTANT_MACROS" -D CMAKE_INSTALL_PREFIX:PATH="$INSTALL_DIR_OPENRTI" ../../openrti/openrti/ 2>&1 | tee -a $LOGFILE
+			echo " OK" >> $LOGFILE
+
+
+
+		fi
+	fi
+	
+	if [ "$COMPILE" = "y" ]
+	then
+
+
+		cd "$CBD"/build/openrti
+		echo "MAKE OPENRTI" >> $LOGFILE
+		echo "make $JOPTION $OOPTION " >> $LOGFILE
+		make $JOPTION $OOPTION 2>&1 | tee -a $LOGFILE
+
+		echo "INSTALL OPENRTI" >> $LOGFILE
+		make install 2>&1 | tee -a $LOGFILE
+	fi
+	cd -
+fi
+
+
 
 #######################################################
 # SIMGEAR
@@ -538,16 +669,27 @@ then
 
 		cd simgear
 
+		git fetch origin
 		if [ "$STABLE" = "STABLE" ]
 		then
-			git pull origin
+			# switch to stable branch
+			# create local stable branch, ignore errors if it exists
+			git branch -f $FGSG_STABLE_GIT_BRANCH origin/$FGSG_STABLE_GIT_BRANCH 2> /dev/null || true
+			# switch to stable branch. No error is reported if we're already on the branch.
+			git checkout -f $FGSG_STABLE_GIT_BRANCH
+			# get indicated stable version
 			git reset --hard $SIMGEAR_STABLE_REVISION
+		else
+			# switch to unstable branch
+			# create local unstable branch, ignore errors if it exists
+			git branch -f $FGSG_UNSTABLE_GIT_BRANCH origin/$FGSG_UNSTABLE_GIT_BRANCH 2> /dev/null || true
+			# switch to unstable branch. No error is reported if we're already on the branch.
+			git checkout -f $FGSG_UNSTABLE_GIT_BRANCH
+			# pull latest version from the unstable branch
+			git pull
 		fi
 
-		git pull
 		cd ..	
-		
-
 
 		echo " OK" >> $LOGFILE
 		cd ..
@@ -560,17 +702,25 @@ then
 	then
 		if [ "$RECONFIGURE" = "y" ]
 		then
-			echo "AUTOGEN SIMGEAR" >> $LOGFILE
-			./autogen.sh 2>&1 | tee -a $LOGFILE
 
-			echo "CONFIGURE SIMGEAR" >> $LOGFILE
-			echo ./configure $DEBUG --prefix="$INSTALL_DIR_SIMGEAR" --exec-prefix="$INSTALL_DIR_SIMGEAR" --with-osg="$INSTALL_DIR_OSG" --with-plib="$INSTALL_DIR_PLIB" --with-jpeg-factory --with-boost-libdir=/usr/include/boost
-			./configure $DEBUG --prefix="$INSTALL_DIR_SIMGEAR" --exec-prefix="$INSTALL_DIR_SIMGEAR" --with-osg="$INSTALL_DIR_OSG" --with-plib="$INSTALL_DIR_PLIB" --with-jpeg-factory --with-boost-libdir=/usr/include/boost  2>&1 | tee -a $LOGFILE
+			cd "$CBD"
+			mkdir -p build/simgear
+			cd "$CBD"/build/simgear
+			echo -n "RECONFIGURE SIMGEAR ... " >> $LOGFILE
+			rm -f ../../simgear/simgear/CMakeCache.txt
+			cmake -D CMAKE_BUILD_TYPE="Release" $WITH_OPENRTI -D CMAKE_CXX_FLAGS="-O3 -D__STDC_CONSTANT_MACROS" -D CMAKE_C_FLAGS="-O3" -D CMAKE_INSTALL_PREFIX:PATH="$INSTALL_DIR_SIMGEAR" -D "CMAKE_PREFIX_PATH=$INSTALL_DIR_OSG;$INSTALL_DIR_OPENRTI" ../../simgear/simgear/ 2>&1 | tee -a $LOGFILE
+			echo " OK" >> $LOGFILE
+
+
+
 		fi
 	fi
 	
 	if [ "$COMPILE" = "y" ]
 	then
+
+
+		cd "$CBD"/build/simgear
 		echo "MAKE SIMGEAR" >> $LOGFILE
 		echo "make $JOPTION $OOPTION " >> $LOGFILE
 		make $JOPTION $OOPTION 2>&1 | tee -a $LOGFILE
@@ -623,14 +773,26 @@ then
 
 			cd flightgear
 
+			git fetch origin
 			if [ "$STABLE" = "STABLE" ]
 			then
-				git pull origin
+				# switch to stable branch
+				# create local stable branch, ignore errors if it exists
+				git branch -f $FGSG_STABLE_GIT_BRANCH origin/$FGSG_STABLE_GIT_BRANCH 2> /dev/null || true
+				# switch to stable branch. No error is reported if we're already on the branch.
+				git checkout -f $FGSG_STABLE_GIT_BRANCH
+				# get indicated stable version
 				git reset --hard $FGFS_STABLE_REVISION
+			else
+				# switch to unstable branch
+				# create local unstable branch, ignore errors if it exists
+				git branch -f $FGSG_UNSTABLE_GIT_BRANCH origin/$FGSG_UNSTABLE_GIT_BRANCH 2> /dev/null || true
+				# switch to unstable branch. No error is reported if we're already on the branch.
+				git checkout -f $FGSG_UNSTABLE_GIT_BRANCH
+				# pull latest version from the unstable branch
+				git pull
 			fi
 
-
-			git pull
 			cd ..	
 
 			echo " OK" >> $LOGFILE
@@ -643,17 +805,45 @@ then
 		then
 			if [ "$RECONFIGURE" = "y" ]
 			then
-				echo "AUTOGEN FGFS" >> $LOGFILE
-				./autogen.sh 2>&1 | tee -a $LOGFILE
+				#echo "AUTOGEN FGFS" >> $LOGFILE
+				#./autogen.sh 2>&1 | tee -a $LOGFILE
+				#echo "CONFIGURE FGFS" >> $LOGFILE
+			   	#echo ./configure "$DEBUG" $WITH_EVENT_INPUT --prefix=$INSTALL_DIR_FGFS --exec-prefix=$INSTALL_DIR_FGFS --with-osg="$INSTALL_DIR_OSG" --with-simgear="$INSTALL_DIR_SIMGEAR" --with-plib="$INSTALL_DIR_PLIB" 
+				#./configure "$DEBUG" $WITH_EVENT_INPUT --prefix=$INSTALL_DIR_FGFS --exec-prefix=$INSTALL_DIR_FGFS --with-osg="$INSTALL_DIR_OSG" --with-simgear="$INSTALL_DIR_SIMGEAR" --with-plib="$INSTALL_DIR_PLIB" 2>&1 | tee -a $LOGFILE
 
-				echo "CONFIGURE FGFS" >> $LOGFILE
-			   echo ./configure "$DEBUG" $WITH_EVENT_INPUT --prefix=$INSTALL_DIR_FGFS --exec-prefix=$INSTALL_DIR_FGFS --with-osg="$INSTALL_DIR_OSG" --with-simgear="$INSTALL_DIR_SIMGEAR" --with-plib="$INSTALL_DIR_PLIB" 
-				./configure "$DEBUG" $WITH_EVENT_INPUT --prefix=$INSTALL_DIR_FGFS --exec-prefix=$INSTALL_DIR_FGFS --with-osg="$INSTALL_DIR_OSG" --with-simgear="$INSTALL_DIR_SIMGEAR" --with-plib="$INSTALL_DIR_PLIB" 2>&1 | tee -a $LOGFILE
+
+	                        cd "$CBD"
+       				mkdir -p build/fgfs
+	                        cd "$CBD"/build/fgfs
+
+
+				echo -n "RECONFIGURE FGFS ... " >> $LOGFILE
+				rm -f ../../fgfs/flightgear/CMakeCache.txt
+
+				# REMOVING BAD LINES IN CMakeLists.txt
+				#echo "REMOVING BAD LINES IN CMakeLists.txt"
+				#cat utils/fgadmin/src/CMakeLists.txt  | sed /X11_Xft_LIB/d | sed /X11_Xinerama_LIB/d > utils/fgadmin/src/CMakeLists_without_err.txt
+				#cp -f  utils/fgadmin/src/CMakeLists_without_err.txt utils/fgadmin/src/CMakeLists.txt
+
+		
+				cmake -D CMAKE_BUILD_TYPE="Release" $WITH_OPENRTI -D "WITH_FGPANEL=OFF" -D CMAKE_CXX_FLAGS="-O3 -D__STDC_CONSTANT_MACROS" -D CMAKE_C_FLAGS="-O3" -D CMAKE_INSTALL_PREFIX:PATH="$INSTALL_DIR_FGFS" -D "CMAKE_PREFIX_PATH=$INSTALL_DIR_OSG;$INSTALL_DIR_PLIB;$INSTALL_DIR_SIMGEAR;$INSTALL_DIR_OPENRTI" ../../fgfs/flightgear 2>&1 | tee -a $LOGFILE
+
+				echo " OK" >> $LOGFILE
+
+
+
+
+
+
 			fi
 		fi
 		
 		if [ "$COMPILE" = "y" ]
 		then
+                        cd "$CBD"
+                        mkdir -p build/fgfs
+                        cd "$CBD"/build/fgfs
+
 			echo "MAKE FGFS" >> $LOGFILE
 			echo "make $JOPTION $OOPTION" >> $LOGFILE
 			make $JOPTION $OOPTION 2>&1 | tee -a $LOGFILE
@@ -675,24 +865,68 @@ then
 				EXDIR=$(pwd)
 				cd $INSTALL_DIR_FGFS
 				echo -n "GIT DATA FROM git://gitorious.org/fg/fgdata.git ... " >> $LOGFILE
-				#cvs -z5 -d :pserver:cvsguest:guest@cvs.flightgear.org:/var/cvs/FlightGear-0.9 login
-				#cvs -z5 -d :pserver:cvsguest@cvs.flightgear.org:/var/cvs/FlightGear-0.9 co data
 
 				if [ -d "fgdata" ]
-                                then
-                                        cd fgdata
+				then
+					echo "fgdata exists already."
+				else
+					# no repository yet - need to clone a fresh one
+					git clone git://gitorious.org/fg/fgdata.git fgdata
+				fi
 
-					if [ "$STABLE" = "STABLE" ]
-					then
-						git pull origin
-						git reset --hard $FGFS_DATA_STABLE_REVISION
-					fi
+				cd fgdata
 
-                                        git pull
-                                        cd ..
-                                else
-					git clone git://gitorious.org/fg/fgdata.git
-                                fi
+				git fetch origin
+				if [ "$STABLE" = "STABLE" ]
+				then
+					# switch to stable branch
+					# create local stable branch, ignore errors if it exists
+					git branch -f $FGSG_STABLE_GIT_BRANCH origin/$FGSG_STABLE_GIT_BRANCH 2> /dev/null || true
+					# switch to stable branch. No error is reported if we're already on the branch.
+					git checkout -f $FGSG_STABLE_GIT_BRANCH
+					# get indicated stable version
+					git reset --hard $FGFS_DATA_STABLE_REVISION
+				else
+					# switch to unstable branch
+					# create local unstable branch, ignore errors if it exists
+					git branch -f $FGDATA_UNSTABLE_GIT_BRANCH origin/$FGDATA_UNSTABLE_GIT_BRANCH 2> /dev/null || true
+					# switch to unstable branch. No error is reported if we're already on the branch.
+					git checkout -f $FGDATA_UNSTABLE_GIT_BRANCH
+					# pull latest version from the unstable branch
+					git pull
+				fi
+
+				cd ..
+
+
+				#cd $INSTALL_DIR_FGFS
+				#echo -n "GIT DATA FROM git://gitorious.org/flightgear-aircraft/c172p.git ... " >> $LOGFILE
+
+				#if [ ! -d "aircrafts" ]
+				#then
+				#	mkdir "aircrafts"
+				#	ln ../fgdata/Aircraft/Generic/ . -s
+				#	ln ../fgdata/Aircraft/Instruments . -s
+				#	ln ../fgdata/Aircraft/Instruments-3d/ . -s
+				#fi
+
+				#cd aircrafts
+
+				#if [ -d "c172p" ]
+				#then
+				#	echo "c172p exists already."
+				#else
+#
+#					git clone git://gitorious.org/flightgear-aircraft/c172p.git
+#				fi
+#
+#				cd c172p
+#				git fetch origin
+
+
+
+
+
 
 
 				echo " OK" >> $LOGFILE
@@ -701,11 +935,15 @@ then
 		fi
 	fi
 
+	cd "$CBD"
+
+	# IF SEPARATED FOLDER FOR AIRCRAFTS
+	# --fg-aircraft=\$PWD/../aircrafts
 	cat > run_fgfs.sh << ENDOFALL
 #!/bin/sh
 cd \$(dirname \$0)
 cd $SUB_INSTALL_DIR/$FGFS_INSTALL_DIR/bin
-export LD_LIBRARY_PATH=../../$PLIB_INSTALL_DIR/lib:../../$OSG_INSTALL_DIR/lib:../../$SIMGEAR_INSTALL_DIR/lib
+export LD_LIBRARY_PATH=../../$PLIB_INSTALL_DIR/lib:../../$OSG_INSTALL_DIR/lib:../../$SIMGEAR_INSTALL_DIR/lib:../../$OPENRTI_INSTALL_DIR/lib
 ./fgfs --fg-root=\$PWD/../fgdata/ \$@
 ENDOFALL
 	chmod 755 run_fgfs.sh
@@ -715,17 +953,10 @@ ENDOFALL
 cd \$(dirname \$0)
 P1=\$PWD
 cd $SUB_INSTALL_DIR/$FGFS_INSTALL_DIR/bin
-export LD_LIBRARY_PATH=../../$PLIB_INSTALL_DIR/lib:../../$OSG_INSTALL_DIR/lib:../../$SIMGEAR_INSTALL_DIR/lib
+export LD_LIBRARY_PATH=../../$PLIB_INSTALL_DIR/lib:../../$OSG_INSTALL_DIR/lib:../../$SIMGEAR_INSTALL_DIR/lib:../../$OPENRTI_INSTALL_DIR/lib
 gdb  --directory="\$P1"/fgfs/source/src/ --args fgfs --fg-root=\$PWD/../fgdata/ \$@
 ENDOFALL2
 	chmod 755 run_fgfs_debug.sh
-
-	#echo "#!/bin/sh" > run_fgfs.sh
-	#echo "cd \$(dirname \$0)" >> run_fgfs.sh
-	#echo "cd $SUB_INSTALL_DIR/$FGFS_INSTALL_DIR/bin" >> run_fgfs.sh
-	#echo "export LD_LIBRARY_PATH=../../$PLIB_INSTALL_DIR/lib:../../$OSG_INSTALL_DIR/lib:../../$SIMGEAR_INSTALL_DIR/lib" >> run_fgfs.sh
-	#echo "./fgfs --fg-root=\$PWD/../fgdata/ \$@" >> run_fgfs.sh
-	#chmod 755 run_fgfs.sh
 
 	SCRIPT=run_terrasync.sh
 	echo "#!/bin/sh" > $SCRIPT
@@ -737,7 +968,137 @@ ENDOFALL2
 
 fi
 
+#######################################################
+# FGO!
+#######################################################
+FGO_INSTALL_DIR=fgo
+INSTALL_DIR_FGO=$INSTALL_DIR/$FGO_INSTALL_DIR
+cd "$CBD"
+if [ "$WHATTOBUILD" = "" -o "$WHATTOBUILD" = "FGO" -o "$WHATTOBUILD" = "ALL" ]
+then
+	echo "****************************************" | tee -a $LOGFILE
+	echo "***************** FGO ******************" | tee -a $LOGFILE
+	echo "****************************************" | tee -a $LOGFILE
 
+	if [ "$DOWNLOAD" = "y" ]
+	then
+		wget http://sites.google.com/site/erobosprojects/flightgear/add-ons/fgo/download/fgo-1-3-1.tar.gz?attredirects=0 -O fgo-1-3-1.tar.gz
+		cd install
+		tar zxvf ../fgo-1-3-1.tar.gz
+
+		cat fgo/src/gui.py | sed s/"self.process = subprocess.Popen".*/"self.process = subprocess.Popen(self.options, cwd=self.FG_working_dir,env=os.environ)"/g > fgo/src/gui.py-new
+		mv fgo/src/gui.py-new fgo/src/gui.py
+		cd ..
+		
+	fi
+
+	SCRIPT=run_fgo.sh
+	echo "#!/bin/sh" > $SCRIPT
+	echo "cd \$(dirname \$0)" >> $SCRIPT
+	echo "cd $SUB_INSTALL_DIR" >> $SCRIPT
+	echo "p=\$(pwd)" >> $SCRIPT
+	echo "cd $FGO_INSTALL_DIR" >> $SCRIPT
+        echo "export LD_LIBRARY_PATH=\$p/plib/lib:\$p/OpenSceneGraph/lib:\$p/simgear/lib"  >> $SCRIPT
+	echo "python fgo" >> $SCRIPT
+	chmod 755 $SCRIPT
+
+fi
+
+
+#######################################################
+# FGx
+#######################################################
+FGX_INSTALL_DIR=fgx
+INSTALL_DIR_FGX=$INSTALL_DIR/$FGX_INSTALL_DIR
+cd "$CBD"
+if [ "$WHATTOBUILD" = "" -o "$WHATTOBUILD" = "FGX" ]
+then
+	echo "****************************************" | tee -a $LOGFILE
+	echo "***************** FGX ******************" | tee -a $LOGFILE
+	echo "****************************************" | tee -a $LOGFILE
+
+	if [ "$DOWNLOAD" = "y" ]
+	then
+
+		echo -n "git clone git://gitorious.org/fgx/fgx.git ... " >> $LOGFILE
+
+		if [ -d "fgx" ]
+		then
+			echo "fgx exists already."
+		else
+			git clone git://gitorious.org/fgx/fgx.git fgx
+		fi
+
+		echo " OK" >> $LOGFILE
+
+	fi
+
+	cd fgx/
+
+	git branch -f $FGX_STABLE_GIT_BRANCH origin/$FGX_STABLE_GIT_BRANCH 2> /dev/null || true
+	git checkout -f $FGX_STABLE_GIT_BRANCH
+	git pull
+
+	cd ..
+
+
+	cd fgx/src/
+
+	#Patch in order to pre-setting paths
+	cd resources/default/
+	cp x_default.ini x_default.ini.orig
+	cat x_default.ini | sed s/\\/usr\\/bin\\/fgfs/INSTALL_DIR_FGXMY_SLASH_HERE..MY_SLASH_HEREfgfsMY_SLASH_HEREbinMY_SLASH_HEREfgfs/g > tmp1
+	cat tmp1 | sed s/\\/usr\\/share\\/flightgear/INSTALL_DIR_FGXMY_SLASH_HERE..MY_SLASH_HEREfgfsMY_SLASH_HEREfgdata/g > tmp2
+	cat tmp2 | sed s/\\/usr\\/bin\\/terrasync/INSTALL_DIR_FGXMY_SLASH_HERE..MY_SLASH_HEREfgfsMY_SLASH_HEREbinMY_SLASH_HEREterrasync/g > tmp3
+	cat tmp3 | sed s/\\/usr\\/bin\\/fgcom/INSTALL_DIR_FGXMY_SLASH_HERE..MY_SLASH_HEREfgcomMY_SLASH_HEREbinMY_SLASH_HEREfgcom/g > tmp4
+	cat tmp4 | sed s/\\/usr\\/bin\\/js_demo/INSTALL_DIR_FGXMY_SLASH_HERE..MY_SLASH_HEREfgfsMY_SLASH_HEREbinMY_SLASH_HEREjs_demo/g > tmp5
+
+	INSTALL_DIR_FGX_NO_SLASHS=$(echo "$INSTALL_DIR_FGX" | sed -e 's/\//MY_SLASH_HERE/g')
+	cat tmp5 | sed s/INSTALL_DIR_FGX/"$INSTALL_DIR_FGX_NO_SLASHS"/g > tmp
+	cat tmp | sed s/MY_SLASH_HERE/\\//g > x_default.ini
+	rm tmp*
+
+	cd ..
+
+
+	if [ ! "$UPDATE" = "UPDATE" ]
+	then
+		if [ "$RECONFIGURE" = "y" ]
+		then
+
+			echo -n "RECONFIGURE FGX ... " >> $LOGFILE
+
+			mkdir -p $INSTALL_DIR_FGX
+			cd $INSTALL_DIR_FGX
+
+			qmake ../../fgx/src
+
+			echo " OK" >> $LOGFILE
+		fi
+	fi
+	
+	if [ "$COMPILE" = "y" ]
+	then
+		cd $INSTALL_DIR_FGX
+		echo "MAKE AND INSTALL FGX" >> $LOGFILE
+		echo "make $JOPTION $OOPTION " >> $LOGFILE
+		make $JOPTION $OOPTION | tee -a $LOGFILE
+		cd ..
+	fi
+
+	cd "$CBD"
+
+	SCRIPT=run_fgx.sh
+	echo "#!/bin/sh" > $SCRIPT
+	echo "cd \$(dirname \$0)" >> $SCRIPT
+	echo "cd $SUB_INSTALL_DIR" >> $SCRIPT
+	echo "p=\$(pwd)" >> $SCRIPT
+	echo "cd $FGX_INSTALL_DIR" >> $SCRIPT
+        echo "export LD_LIBRARY_PATH=\$p/plib/lib:\$p/OpenSceneGraph/lib:\$p/simgear/lib"  >> $SCRIPT
+	echo "./fgx" >> $SCRIPT
+	chmod 755 $SCRIPT
+
+fi
 
 
 #######################################################
@@ -753,53 +1114,76 @@ then
 	echo "**************** FGRUN *****************" | tee -a $LOGFILE
 	echo "****************************************" | tee -a $LOGFILE
 
-	if [ "$DOWNLOAD" = "y" ]
-	then
 
-		FGRUN_STABLE_REVISION_=""
-		if [ "$STABLE" = "STABLE" ]
+		if [ "$DOWNLOAD" = "y" ]
 		then
-			FGRUN_STABLE_REVISION_=" -r $FGRUN_STABLE_REVISION"
+			#echo -n "CVS FROM cvs.flightgear.org:/var/cvs/FlightGear-0.9 ... " >> $LOGFILE
+			#cvs -z5 -d :pserver:cvsguest:guest@cvs.flightgear.org:/var/cvs/FlightGear-0.9 login
+			#cvs -z5 -d :pserver:cvsguest@cvs.flightgear.org:/var/cvs/FlightGear-0.9 co source
+
+			echo -n "GIT FROM git://gitorious.org/fg/fgrun.git ... " >> $LOGFILE
+			
+
+			if [ -d "fgrun" ]
+			then
+				echo "fgrun exists already."
+			else
+				git clone git://gitorious.org/fg/fgrun.git fgrun
+			fi
+
+			cd fgrun
+
+			git fetch origin
+			if [ "$STABLE" = "STABLE" ]
+			then
+				# switch to stable branch
+				# create local stable branch, ignore errors if it exists
+				ls
+				git branch -f $FGRUN_STABLE_GIT_BRANCH origin/$FGRUN_STABLE_GIT_BRANCH 2> /dev/null || true
+				# switch to stable branch. No error is reported if we're already on the branch.
+				git checkout -f $FGRUN_STABLE_GIT_BRANCH
+				# get indicated stable version
+				git reset --hard $FGRUN_STABLE_GIT_BRANCH
+			else
+				# switch to unstable branch
+				# create local unstable branch, ignore errors if it exists
+				git branch -f $FGRUN_UNSTABLE_GIT_BRANCH origin/$FGRUN_UNSTABLE_GIT_BRANCH 2> /dev/null || true
+				# switch to unstable branch. No error is reported if we're already on the branch.
+				git checkout -f $FGRUN_UNSTABLE_GIT_BRANCH
+				# pull latest version from the unstable branch
+				git pull
+			fi
+
+			cd ..	
+
+			echo " OK" >> $LOGFILE
+
 		fi
-
-
-		echo -n "SVN FROM http://fgrun.svn.sourceforge.net/svnroot/fgrun ... " >> $LOGFILE
-		svn $FGRUN_STABLE_REVISION_ co http://fgrun.svn.sourceforge.net/svnroot/fgrun/trunk fgrun
-		echo " OK" >> $LOGFILE
-
-		#echo -n "Patching fgrun ... " >> $LOGFILE
-		#cd fgrun/
 		
-		#MF=src/wizard_funcs.cxx && cat $MF | awk '{o=$0} /#include <plib\/netSocket.h>/ {o=o"\n#include <plib/sg.h>"} {print o}' > "$MF"2 && mv "$MF"2 "$MF"
-		#MF=src/AirportBrowser.cxx && cat $MF | awk '{o=$0} /#include <iomanip>/ {o=o"\n#include <math.h>"} {print o}' > "$MF"2 && mv "$MF"2 "$MF"		
-		#MF=src/run_posix.cxx && cat $MF | awk '{o=$0} /#include <string>/ {o=o"\n#include <string.h>"} {print o}' > "$MF"2 && mv "$MF"2 "$MF"		
+		cd fgrun
 
-		#Thanks to Brandano.....
-		#if [ ! -e "compile-fix-20100102.patch" ]
-		#then
-		#	wget http://brisa.homelinux.net/fgfs/compile-fix-20100102.patch
-		#fi
-		#patch -p0 < compile-fix-20100102.patch
-    		
-		#cd -
-	fi
-	#cd fgrun/trunk/fgrun/
-	cd fgrun/fgrun/
 
 	if [ ! "$UPDATE" = "UPDATE" ]
 	then
 		if [ "$RECONFIGURE" = "y" ]
 		then
-			echo "AUTOGEN FGRUN" >> $LOGFILE
-			./autogen.sh 2>&1 | tee -a $LOGFILE
-			echo "CONFIGURE FGRUN" >> $LOGFILE
+                        cd "$CBD"
+                        mkdir -p build/fgrun
+                        cd "$CBD"/build/fgrun
+
+			echo -n "RECONFIGURE FGRUN ... " >> $LOGFILE
+			rm -f ../../fgrun/CMakeCache.txt
 			
-			./configure --prefix=$INSTALL_DIR_FGRUN --exec-prefix=$INSTALL_DIR_FGRUN --with-osg="$INSTALL_DIR_OSG" --with-simgear="$INSTALL_DIR_SIMGEAR" CPPFLAGS="-I$INSTALL_DIR_PLIB/include" LDFLAGS="-L$INSTALL_DIR_PLIB/lib" 2>&1 | tee -a $LOGFILE
+			cmake -D CMAKE_BUILD_TYPE="Release" -D CMAKE_CXX_FLAGS="-O3 -D__STDC_CONSTANT_MACROS" -D CMAKE_C_FLAGS="-O3" -D CMAKE_INSTALL_PREFIX:PATH="$INSTALL_DIR_FGRUN" -D "CMAKE_PREFIX_PATH=$INSTALL_DIR_OSG;$INSTALL_DIR_PLIB;$INSTALL_DIR_SIMGEAR" ../../fgrun/ 2>&1 | tee -a $LOGFILE
+
+			echo " OK" >> $LOGFILE
 		fi
 	fi
 	
 	if [ "$COMPILE" = "y" ]
 	then
+		cd "$CBD"/build/fgrun
+
 		echo "MAKE FGRUN" >> $LOGFILE
 		echo "make $JOPTION $OOPTION" >> $LOGFILE
 		make $JOPTION $OOPTION 2>1 | tee -a $LOGFILE
@@ -807,14 +1191,16 @@ then
 		echo "INSTALL FGRUN" >> $LOGFILE
 		make install 2>&1 | tee -a $LOGFILE
 	fi
-	cd -
+
+	cd "$CBD"
 
 	SCRIPT=run_fgrun.sh
 	echo "#!/bin/sh" > $SCRIPT
 	echo "cd \$(dirname \$0)" >> $SCRIPT
 	echo "cd $SUB_INSTALL_DIR/$FGRUN_INSTALL_DIR/bin" >> $SCRIPT
 	echo "export LD_LIBRARY_PATH=../../$PLIB_INSTALL_DIR/lib:../../$OSG_INSTALL_DIR/lib:../../$SIMGEAR_INSTALL_DIR/lib" >> $SCRIPT
-	echo "./fgrun --fg-exe=\$PWD/../../$FGFS_INSTALL_DIR/bin/fgfs --fg-root=\$PWD/../../$FGFS_INSTALL_DIR/fgdata \$@" >> $SCRIPT
+	#echo "export FG_AIRCRAFTS=\$PWD/../../$FGFS_INSTALL_DIR/aircrafts" >> $SCRIPT
+	echo "./fgrun --fg-exe=\$PWD/../../$FGFS_INSTALL_DIR/bin/fgfs --fg-root=\$PWD/../../$FGFS_INSTALL_DIR/fgdata   \$@" >> $SCRIPT
 	chmod 755 $SCRIPT
 
 
@@ -846,10 +1232,39 @@ then
 			FGCOM_STABLE_REVISION_=" -r $FGCOM_STABLE_REVISION"
 		fi
 
+		echo -n "git://gitorious.org/fg/fgcom.git ... " >> $LOGFILE
 
-		echo -n "SVN FROM https://appfgcom.svn.sourceforge.net/svnroot/fgcom/trunk ... " >> $LOGFILE
-		svn $FGCOM_STABLE_REVISION_ co https://appfgcom.svn.sourceforge.net/svnroot/fgcom/trunk fgcom 
+		if [ -d "fgcom" ]
+		then 
+			echo "fgcom exists already."
+		else   
+	                git clone git://gitorious.org/fg/fgcom.git
+		fi
+
+		cd fgcom
+		git fetch origin
+		if [ "$STABLE" = "STABLE" ]
+		then
+			# switch to stable branch
+                        # create local stable branch, ignore errors if it exists
+                        git branch -f $FGCOM_STABLE_FGOM_BRANCH origin/$FGCOM_STABLE_FGCOM_BRANCH 2> /dev/null || true
+                        # switch to stable branch. No error is reported if we're already on the branch.
+                        git checkout -f $FGCOM_STABLE_FGCOM_BRANCH
+                        # get indicated stable version
+                        git reset --hard $FGCOM_STABLE_REVISION
+		else
+			# switch to unstable branch
+                        # create local unstable branch, ignore errors if it exists
+                        git branch -f $FGCOM_UNSTABLE_GIT_BRANCH origin/$FGCOM_UNSTABLE_GIT_BRANCH 2> /dev/null || true
+                        # switch to unstable branch. No error is reported if we're already on the branch.
+                        git checkout -f $FGCOM_UNSTABLE_GIT_BRANCH
+                        # pull latest version from the unstable branch
+                        git pull
+		fi
+		
 		echo " OK" >> $LOGFILE
+		cd ..
+		
 
 
 		
@@ -858,15 +1273,23 @@ then
 		mv fgcom/iaxclient/lib/libiax2/src/iax_ok.c fgcom/iaxclient/lib/libiax2/src/iax.c
 	fi
 	
-	cd fgcom/src/
 	
 	if [ "$RECONFIGURE" = "y" ]
 	then
-        cp Makefile Makefile.original
+		cd "$CBD"
+		mkdir -p build/fgcom
+
+		cd "$CBD"/build/fgcom
+		echo -n "RECONFIGURE FGCOM ... " >> $LOGFILE
+		rm -f CMakeCache.txt
+		cmake -D CMAKE_BUILD_TYPE="Release" -D "CMAKE_PREFIX_PATH=$INSTALL_DIR_PLIB;$INSTALL_DIR_SIMGEAR"  -D "CMAKE_INSTALL_PREFIX:PATH=$INSTALL_DIR_FGCOM" "$CBD"/fgcom   2>&1  | tee -a $LOGFILE
+
+		echo " OK" >> $LOGFILE
+
+	        cd "$CBD"/fgcom/src/
+
+		cp Makefile Makefile.original
 		cat Makefile | sed s/\\//MY_SLASH_HERE/g > Makefile_NOSLASHES
-	
-	
-	
 	
 		# 1
 		INSTALL_DIR_PLIB_NO_SLASHES=$(echo "$INSTALL_DIR_PLIB" | sed -e 's/\//MY_SLASH_HERE/g')
@@ -905,20 +1328,20 @@ then
 
 	fi
 
-
+	cd "$CBD"/build/fgcom
 
 	mkdir -p "$INSTALL_DIR_FGCOM"/bin
 
 	if [ "$COMPILE" = "y" ]
 	then
 		echo "MAKE FGCOM" >> $LOGFILE
-		echo "make $JOPTION $OOPTION" >> $LOGFILE
-		make $JOPTION $OOPTION 2>&1 | tee -a $LOGFILE
-
+		echo "cmake --build . --config Release" >> $LOGFILE
+		cmake --build . --config Release 2>&1 | tee -a $LOGFILE
+		
 		echo "INSTALL FGCOM" >> $LOGFILE
-		make install 2>&1 | tee -a $LOGFILE
+		cmake -DBUILD_TYPE=Release -P cmake_install.cmake 2>&1 | tee -a $LOGFILE
 	fi
-	cd -
+	cd "$CBD"
 
 	echo "#!/bin/sh" > run_fgcom.sh
 	echo "cd \$(dirname \$0)" >> run_fgcom.sh
@@ -974,7 +1397,7 @@ then
 		echo "INSTALL FGCOM" >> $LOGFILE
 		scons install 2>&1 | tee -a $LOGFILE
 	fi
-	cd -
+	cd "$CBD"
 
 	echo "#!/bin/sh" > run_fgcomgui.sh
 	echo "cd \$(dirname \$0)" >> run_fgcomgui.sh
@@ -1004,22 +1427,10 @@ then
 
 	if [ "$DOWNLOAD" = "y" ]
 	then
-		#echo "Downloading from http://ovh.dl.sourceforge.net/project/atlas/atlas/0.3.0/Atlas-0.3.0.tar.gz ... " >> $LOGFILE	
-		#wget -c http://ovh.dl.sourceforge.net/project/atlas/atlas/0.3.0/Atlas-0.3.0.tar.gz
-		#echo " OK" >> $LOGFILE
-		#tar zxvf Atlas-0.3.0.tar.gz
-
-		
 		echo -n "CSV FROM atlas.cvs.sourceforge.net:/cvsroot/atlas ... " >> $LOGFILE
 		cvs -z3 -d:pserver:anonymous@atlas.cvs.sourceforge.net:/cvsroot/atlas co Atlas
 		echo " OK" >> $LOGFILE
 
-		#echo -n "CSV PATCH FROM http://janodesbois.free.fr ... " >> $LOGFILE
-		#cd Atlas		
-		#wget http://janodesbois.free.fr/doc/atlas-CVS.diff
-		#patch -p0 < atlas-CVS.diff
-		#cd ..
-		#echo " OK" >> $LOGFILE
         echo "fixing old function name \".get_gbs_center2(\" in Subbucket.cxx"
         cd Atlas/src
         cp Subbucket.cxx Subbucket.cxx.original
@@ -1027,16 +1438,21 @@ then
         cd "$CBD"
 	fi
 	cd Atlas
-	#cd Atlas-0.3.0
 
 	if [ ! "$UPDATE" = "UPDATE" ]
 	then
 		if [ "$RECONFIGURE" = "y" ]
 		then
+
+			cd "$CBD"
+                        mkdir -p build/atlas
+
+			cd Atlas
 			echo "AUTOGEN ATLAS" >> $LOGFILE
 			./autogen.sh 2>&1 | tee -a $LOGFILE
 			echo "CONFIGURE ATLAS" >> $LOGFILE
-			./configure --prefix=$INSTALL_DIR_ATLAS --exec-prefix=$INSTALL_DIR_ATLAS  --with-plib=$INSTALL_DIR_PLIB --with-simgear="$INSTALL_DIR_SIMGEAR" --with-fgbase="$INSTALL_DIR_FGFS/fgdata" CXXFLAGS="$CXXFLAGS -I$CBD/OpenSceneGraph/include" 2>&1 | tee -a $LOGFILE
+			cd "$CBD"/build/atlas
+			../../Atlas/configure --prefix=$INSTALL_DIR_ATLAS --exec-prefix=$INSTALL_DIR_ATLAS  --with-plib=$INSTALL_DIR_PLIB --with-simgear="$INSTALL_DIR_SIMGEAR" --with-fgbase="$INSTALL_DIR_FGFS/fgdata" CXXFLAGS="$CXXFLAGS -I$CBD/OpenSceneGraph/include" 2>&1 | tee -a $LOGFILE
 			make clean
 		fi
 	fi
@@ -1044,12 +1460,14 @@ then
 	then
 		echo "MAKE ATLAS" >> $LOGFILE
 		echo "make $JOPTION $OOPTION" >> $LOGFILE
+		
+		cd "$CBD"/build/atlas
 		make $JOPTION $OOPTION 2>&1 | tee -a $LOGFILE
 
 		echo "INSTALL ATLAS" >> $LOGFILE
 		make install 2>&1 | tee -a $LOGFILE
 	fi
-	cd -
+	cd "$CBD"
 
 	echo "#!/bin/sh" > run_atlas.sh
 	echo "cd \$(dirname \$0)" >> run_atlas.sh

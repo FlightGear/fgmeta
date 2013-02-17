@@ -1,6 +1,12 @@
 [submodule "simgear"]
 	path = simgear
-	url = http://git.gitorious.org/fg/simgear.git
+	url = git://gitorious.org/fg/simgear.git
 [submodule "flightgear"]
 	path = flightgear
-	url = http://git.gitorious.org/fg/flightgear.git
+	url = git://gitorious.org/fg/flightgear.git
+[submodule "fgrun"]
+	path = fgrun
+	url = git://gitorious.org/fg/fgrun.git
+[submodule "maclauncher"]
+	path = maclauncher
+	url = git://gitorious.org/fg/maclauncher.git
