@@ -14,8 +14,9 @@ outputDir = sys.argv[2]
 
 existingCatalogPath = os.path.join(outputDir, 'catalog.xml')
 existingCatalog = None
+print 'existing ctalog path:' + existingCatalogPath
 if os.path.exists(existingCatalogPath):
-    existingCatalogPath = ET.parse(existingCatalogPath)
+    existingCatalog = ET.parse(existingCatalogPath)
 
 for file in os.listdir(outputDir):
     if fnmatch.fnmatch(file, '*.tar.gz'):
@@ -27,8 +28,14 @@ shutil.rmtree(thumbsDir)
 os.makedirs(thumbsDir)
 
 def setProperty(node, id, value):
-    s = ET.SubElement(node, id)
+    s = node.find(id) # check for existing
+    if s is None: 
+        s = ET.SubElement(node, id)
     s.text = value
+
+def clearChildren(node, tag):
+    for c in node.findall(tag):
+        node.remove(c)
 
 def parse_setXml(path):
     tree = ET.parse(path)
@@ -103,20 +110,22 @@ def process_aircraft(acft, path):
         if digest != previousMd5:
             print acft + ": MD5 has changed"
             revision = previousRevsion + 1
+        else:
+            print acft + ": MD5 is unchanged"
     else:    
         existingPackages[acft] = ET.Element('package')
-        
-    setProperty(existingPackages[acft], 'id', acft)
+        setProperty(existingPackages[acft], 'id', acft)
+    
     setProperty(existingPackages[acft], 'revision', str(revision))
     setProperty(existingPackages[acft], 'md5', digest)
     setProperty(existingPackages[acft], 'description', aircraft[0]['desc'])
-    
-    #setProperty(existingPackages[acft], 'thumbnails', thumbnailNames)
-    
+        
+    clearChildren(existingPackages[acft], 'thumbnail')
     for t in thumbnailNames:
         tn = ET.SubElement(existingPackages[acft], 'thumbnail')
         tn.text = 'thumbs/' + t
-        
+    
+    clearChildren(existingPackages[acft], 'rating')
     existingPackages[acft].append(aircraft[0]['ratings'])
     
     print "wrote tarfile, digest is " + digest
@@ -135,8 +144,13 @@ if (existingCatalog is not None):
     root.append(existingCatalog.find('id'))
     
     # existing data (for revision incrementing)
-    for n in existingCatalog.findall('package/id'):
-        existingPackages[n.text] = n;
+    for n in existingCatalog.findall('package'):
+        idNode = n.find('id')
+        if idNode is None:
+            print 'Missing <id> tag on package'
+            continue
+            
+        existingPackages[idNode.text] = n;
         
 #licenseElement = ET.SubElement(root, 'license')
 #licenseElement.text = 'gpl'
