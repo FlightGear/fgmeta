@@ -30,12 +30,16 @@ endif()  # of Linux
 
 if (APPLE)
     SET(SDKROOT /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.7.sdk)
-    SET(OSG_CMAKE_ARGS -DCMAKE_OSX_SYSROOT=${SDKROOT} -DOSG_USE_QT=0)
+    # force disable Qt and Jasper, and ensure an SDKROOT is set, or
+    # osgViewer system detection goes wrongh
+    SET(OSG_CMAKE_ARGS -DCMAKE_OSX_SYSROOT=${SDKROOT} -DOSG_USE_QT=0 -DJASPER_LIBRARY= -DCMAKE_OSX_ARCHITECTURES=x86_64)
     # OSG with some patches applied for Mac
-    SET(OSG_SOURCE GIT_REPOSITORY git://gitorious.org/+flightgear-developers/openscenegraph/mac-release-osg.git)
+#    SET(OSG_SOURCE GIT_REPOSITORY git://gitorious.org/+flightgear-developers/openscenegraph/mac-release-osg.git)
+    SET(OSG_SOURCE SVN_REPOSITORY http://www.openscenegraph.org/svn/osg/OpenSceneGraph/tags/OpenSceneGraph-3.1.4)
+
 else()
     # normal OSG
-    SET(OSG_SOURCE SVN_REPOSITORY http://www.openscenegraph.org/svn/osg/OpenSceneGraph/tags/OpenSceneGraph-3.1.2)
+    SET(OSG_SOURCE SVN_REPOSITORY http://www.openscenegraph.org/svn/osg/OpenSceneGraph/tags/OpenSceneGraph-3.1.4)
 endif()
 
 if (WIN32)
@@ -49,9 +53,19 @@ ExternalProject_Add(OSG
     CMAKE_ARGS ${OSG_CMAKE_ARGS} -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
     )
 
+ExternalProject_Add(OpenRTI
+    PREFIX ${CMAKE_BINARY_DIR}
+    DOWNLOAD_COMMAND GIT_REPOSITORY git://gitorious.org/openrti/openrti.git
+    BINARY_DIR rtibuild 
+    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+    )
+
+set(SG_CMAKE_ARGS -DENABLE_RTI=1 -DENABLE_PACKAGE=1)
+set(FG_CMAKE_ARGS -DENABLE_RTI=1)
+
 ExternalProject_Add(SimGear 
     PREFIX ${CMAKE_BINARY_DIR}
-    DEPENDS OSG Boost Archive
+    DEPENDS OSG Boost Archive OpenRTI
     DOWNLOAD_COMMAND ""     # no need to download
     UPDATE_COMMAND       ""    # or update.
     SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/simgear
