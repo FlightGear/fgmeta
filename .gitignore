@@ -11,3 +11,10 @@ sgBuild
 image
 macflightgear
 fgdata
+src
+tmp
+Makefile
+CMakeFiles
+archivebuild
+osgbuild
+CMakeCache.txt
