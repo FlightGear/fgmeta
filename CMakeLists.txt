@@ -32,14 +32,19 @@ if (APPLE)
     SET(SDKROOT /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.7.sdk)
     # force disable Qt and Jasper, and ensure an SDKROOT is set, or
     # osgViewer system detection goes wrongh
-    SET(OSG_CMAKE_ARGS -DCMAKE_OSX_SYSROOT=${SDKROOT} -DOSG_USE_QT=0 -DJASPER_LIBRARY= -DCMAKE_OSX_ARCHITECTURES=x86_64)
+    SET(OSG_CMAKE_ARGS -DCMAKE_OSX_SYSROOT=${SDKROOT} 
+        -DOSG_USE_QT=0 
+        -DJASPER_LIBRARY= 
+        -DCMAKE_OSX_ARCHITECTURES=x86_64
+        -DCMAKE_OSX_DEPLOYMENT_TARGET=10.7
+    )
     # OSG with some patches applied for Mac
 #    SET(OSG_SOURCE GIT_REPOSITORY git://gitorious.org/+flightgear-developers/openscenegraph/mac-release-osg.git)
-    SET(OSG_SOURCE SVN_REPOSITORY http://www.openscenegraph.org/svn/osg/OpenSceneGraph/tags/OpenSceneGraph-3.1.4)
+    SET(OSG_SOURCE URL http://www.openscenegraph.org/downloads/developer_releases/OpenSceneGraph-3.1.4.zip)
 
 else()
     # normal OSG
-    SET(OSG_SOURCE SVN_REPOSITORY http://www.openscenegraph.org/svn/osg/OpenSceneGraph/tags/OpenSceneGraph-3.1.4)
+    SET(OSG_SOURCE URL http://www.openscenegraph.org/downloads/developer_releases/OpenSceneGraph-3.1.4.zip)
 endif()
 
 if (WIN32)
