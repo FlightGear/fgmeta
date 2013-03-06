@@ -6,6 +6,7 @@ REM using this bat file.
 
 echo %CD%
 
-xcopy /Y /E winDeps .
+md 3rdParty
+xcopy /Y /E winDeps/3rdParty 3rdParty
 
 echo "Done copying Windows deps"

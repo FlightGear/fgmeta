@@ -78,7 +78,7 @@ elseif(MSVC)
 	# for compatability with MSVC directory layout
 	set(OSG_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/install/${OSG_MSVC}/OpenSceneGraph)
 	SET(OSG_SOURCE URL http://www.openscenegraph.org/downloads/developer_releases/OpenSceneGraph-3.1.4.zip)
-    
+	
     list(APPEND OSG_DEPS WinDeps)
 else()
     # normal OSG
@@ -97,7 +97,16 @@ if (MSVC)
 		INSTALL_COMMAND ""
 	)
     
-    
+	ExternalProject_Add(Boost
+		DOWNLOAD_COMMAND URL http://flightgear.simpits.org:8080/job/Boost-Win/lastSuccessfulBuild/artifact/Boost/boost/*zip*/boost.zip
+		SOURCE_DIR ${CMAKE_BINARY_DIR}/Boost/boost
+        CONFIGURE_COMMAND ""
+        BUILD_COMMAND ""
+        INSTALL_COMMAND ""
+    )
+	
+	list(APPEND SG_DEPS Boost)
+	
 	list(APPEND SG_CMAKE_ARGS -DBOOST_ROOT=${CMAKE_BINARY_DIR})
 	list(APPEND FG_CMAKE_ARGS -DBOOST_ROOT=${CMAKE_BINARY_DIR})
 endif(MSVC) # of Windows
@@ -160,4 +169,5 @@ ExternalProject_Add(FlightGear
     UPDATE_COMMAND       ""    # or update.
     SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/flightgear
     BINARY_DIR fgbuild 
-    CMAKE_ARGS ${FG_CMAKE_ARGS} -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX} )
+    CMAKE_ARGS ${FG_CMAKE_ARGS} -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+	)
