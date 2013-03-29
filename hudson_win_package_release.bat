@@ -10,6 +10,10 @@ REM construct information file to be read by Inno-setup
 
 
 set PATH=%WORKSPACE%\install\msvc100\OpenSceneGraph\bin;%PATH%
+
+REM add 7-zip to the PATH
+set PATH=%PATH%;C:\Program Files\7-zip
+
 REM indirect way to get command output into an environment variable
 osgversion --so-number > %TEMP%\osg-so-number.txt
 osgversion --version-number > %TEMP%\osg-version.txt
@@ -22,9 +26,11 @@ ECHO #define FGVersion "%FLIGHTGEAR_VERSION%" > InstallConfig.iss
 ECHO #define OSGVersion "%OSG_VERSION%" >> InstallConfig.iss
 ECHO #define OSGSoNumber "%OSG_SO_NUMBER%" >> InstallConfig.iss
 
+set DATA_FILE=FlightGear-%FLIGHTGEAR_VERSION%-data
+
+REM extract the data files
+7z e -aoa %DATA_FILE%.tar.bz && 7z x -aoa %DATA_FILE%.tar
+
 REM run Inno-setup!
 
 Compil32 /cc FlightGear.iss
-
-
-

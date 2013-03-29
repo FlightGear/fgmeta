@@ -97,6 +97,9 @@ Source: "X:\3rdParty.x64\bin\vcredist_x64.exe"; DestDir: "{app}\bin\Win64"; Flag
 Source: "X:\3rdParty\bin\oalinst.exe"; DestDir: "{app}\bin\Win32"; Flags: ignoreversion skipifsourcedoesntexist
 
 Source: "X:\data\*.*"; DestDir: "{app}\data"; Flags: ignoreversion recursesubdirs skipifsourcedoesntexist
+; NOTE: tar.gz file uses name 'fgdata', to avoid renaming it, look for both names.
+; assuming no setup has both names and hence we don't package twice :)
+Source: "X:\fgdata\*.*"; DestDir: "{app}\data"; Flags: ignoreversion recursesubdirs skipifsourcedoesntexist
 
 Source: "{#OSGInstallDir}\bin\osg{#OSGSoNumber}-osg.dll"; DestDir: "{app}\bin\Win32"; Check: not Is64BitInstallMode or IsTaskSelected('force32')
 Source: "{#OSGInstallDir}\bin\osg{#OSGSoNumber}-osgDB.dll"; DestDir: "{app}\bin\Win32"; Check: not Is64BitInstallMode or IsTaskSelected('force32')
