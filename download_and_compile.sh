@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-VERSION="1.9-10"
+VERSION="1.9-12"
 
 #COMPILE GIT FGFS
 
@@ -30,6 +30,17 @@ VERSION="1.9-10"
 # Thanks to "F-JJTH" for bug fixes and suggestions
 # Thanks again to "F-JJTH" for OpenRTI and FGX 
 # Thanks to André, ( taureau89_9 ) for debian stable packages fixes
+
+# ---------------------------------------------------------
+# Script Section: Script and Option Initialization
+# ---------------------------------------------------------
+echo $0 $* >rebuild
+chmod +x rebuild
+
+
+function SET_WINDOW_TITLE(){
+	echo -ne "\033]0;Build Flightgear:  -  ${CBD} - $1\007"
+}
 
 LOGFILE=compilation_log.txt
 LOGSEP="***********************************"
@@ -51,14 +62,37 @@ OOPTION=""
 DEBUG=""
 WITH_EVENT_INPUT=""
 WITH_OPENRTI=""
+FG_SG_BRANCH="next"
+FG_SG_REVISION="HEAD"
+OSG_VERSION="3.0.1"
+# ---------------------------------------------------------
+# Script Section: Option Interpretation
+# ---------------------------------------------------------
+SET_WINDOW_TITLE "Script and Option Initialization"
 
-while getopts "suhgeixvwc:p:a:d:r:j:O:" OPTION
+while getopts "suhgeixvwc:p:a:d:r:j:O:B:R:G:" OPTION
 do
      case $OPTION in
          s)
-             STABLE="STABLE"
+	     STABLE="STABLE"
+             FG_SG_BRANCH="2.10.0"
+	     FG_SG_REVISION="HEAD"
              ;;
-         u)
+         B)
+             FG_SG_BRANCH=$OPTARG
+             ;;
+         R)
+             FG_SG_REVISION=$OPTARG
+             ;;
+         G)
+	     OSG_VERSION=${OPTARG^^} #3.0.1, 3.0.1d 3.1.9 3.1.9d, next nextd, etc
+	     OSG_DEBUG_OR_RELEASE='Release'
+	     if [[ ${OSG_VERSION%d} != ${OSG_VERSION} ]]
+	     then
+		    OSG_DEBUG_OR_RELEASE='Debug'
+		    OSG_VERSION= ${OSG_VERSION%d}
+	     fi
+	     ;;          u)
              UPDATE="UPDATE"
              ;;
          h)
@@ -110,6 +144,14 @@ do
              ;;
      esac
 done
+
+
+# ---------------------------------------------------------
+# Script Section: Build Argument Interpretation
+# ---------------------------------------------------------
+SET_WINDOW_TITLE "Option Interpretation"
+
+
 shift $(($OPTIND - 1))
 #printf "Remaining arguments are: %s\n" "$*"
 #printf "Num: %d\n" "$#"
@@ -137,38 +179,59 @@ fi
 
 #printf "%s\n" "${WHATTOBUILD[@]}"
 
-#######################################################
-# Last stable revision: currently FlightGear 2.4.0 with 3.0.1
+# ---------------------------------------------------------
+# Script Section: Set Source Archive Version Variables
+# ---------------------------------------------------------
+
+# Last stable revision: currently FlightGear 2.10.0 with 3.0.1
 PLIB_STABLE_REVISION="2172"
-OSG_STABLE_REVISION="http://svn.openscenegraph.org/osg/OpenSceneGraph/tags/OpenSceneGraph-3.0.1/"
+OSG_SVN="http://svn.openscenegraph.org/osg/OpenSceneGraph/tags/OpenSceneGraph-${OSG_VERSION}/"
 
-# common stable branch for flightgear, simgear and fgdata
-FGSG_STABLE_GIT_BRANCH="release/2.8.0"
-FGRUN_STABLE_GIT_BRANCH="master"
-OPENRTI_STABLE_GIT_BRANCH="release-0.3"
+declare -A OPENRTI_MAP
+declare -A FGSG_MAP
+FGSG_MAP=( [next]="next HEAD 2.99.9"  \
+		[master]="master HEAD 2.12.0"  \
+		[2.12.0]="release/2.12.0 HEAD 2.12.0"  \
+		[2.10.0]="release/2.10.0 HEAD 2.10.0"  \
+		[2.8.0]="release/2.8.0 version/2.8.0-final 2.8.0" )
 
-# unstable branch: next for sg/fg, master for fgdata
-FGSG_UNSTABLE_GIT_BRANCH="next"
-FGDATA_UNSTABLE_GIT_BRANCH="master"
-FGRUN_UNSTABLE_GIT_BRANCH="master"
-OPENRTI_UNSTABLE_GIT_BRANCH="master"
+OPENRTI_MAP=( [next]="master HEAD" \
+		[master]="master HEAD"	\
+		[2.12.0]="master HEAD"  \
+		[2.10.0]="master HEAD"  \
+		[2.8.0]="release-0.3 OpenRTI-0.3.0" )
 
-# stable GIT revision: release tag
-SIMGEAR_STABLE_REVISION="version/2.8.0-final"
-FGFS_STABLE_REVISION="version/2.8.0-final"
-FGFS_DATA_STABLE_REVISION="version/2.8.0-final"
-OPENRTI_STABLE_REVISION="OpenRTI-0.3.0"
+FG_SG_VERSION=${FG_SG_BRANCH##*/}
+
+MAP_ITEM=( ${FGSG_MAP[${FG_SG_VERSION}]} )
+FG_SG_BRANCH=${MAP_ITEM[0]}
+FG_SG_REVISION=${MAP_ITEM[1]}
+FGDATA_BRANCH=${MAP_ITEM[0]}
+FGDATA_REVISION=${MAP_ITEM[1]}
+FGDATA_VERSION=${MAP_ITEM[2]}
+
+MAP_ITEM=( ${OPENRTI_MAP[${FG_SG_VERSION}]} )
+OPENRTI_BRANCH=${MAP_ITEM[0]}
+OPENRTI_REVISION=${MAP_ITEM[1]}
 
 # FGCOM
-FGCOM_UNSTABLE_GIT_BRANCH="master"
+FGCOM_BRANCH="master"
 FGCOMGUI_STABLE_REVISION="46"
 
-# Current developer revision: latest FlightGear GIT (2.5.0) with OSG 3.0.1
-OSG_UNSTABLE_REVISION="http://svn.openscenegraph.org/osg/OpenSceneGraph/tags/OpenSceneGraph-3.0.1/"
+#OpenRadar
+OR_STABLE_RELEASE="http://wagnerw.de/OpenRadar.zip"
 
-#######################################################
-# set script to stop if an error occours
+
+
+# ---------------------------------------------------------
+# Script Section: set script to stop if an error occours
+# ---------------------------------------------------------
+
 set -e
+
+# ---------------------------------------------------------
+# Script Section: Display Script Help
+# ---------------------------------------------------------
 
 if [ "$HELP" = "HELP" ]
 then
@@ -192,12 +255,17 @@ then
 	echo "* -O X    Add -OX to the make compilation	           				default=None"
 	echo "* -r y|n  y=reconfigure programs before compiling them  n=do not reconfigure	default=y"
 	echo "* -s compile only last stable known versions					default=y"
+	echo "* -w cmake verbose option"
+	echo "* -x set -x bash option"
+	echo "* -v set -v bash option"
+	echo "* -B branch"
+	echo "* -R revision"
+	echo "* -G osg version"
 	
 	exit
 fi
 
-#######################################################
-#######################################################
+# --------------------------------------------
 # Warning about compilation time and size
 # Idea from Jester
 echo "**************************************"
@@ -211,8 +279,12 @@ echo "* Please, be patient ......          *"
 echo "*                                    *"
 echo "**************************************"
 
-#######################################################
-#######################################################
+
+# ---------------------------------------------------------
+# Script Section: Debian Backports
+# ---------------------------------------------------------
+
+
 # Debian 4.0rX (Etch) backports.org
 # From D-HUND
 
@@ -249,9 +321,12 @@ if [ "$ISSUE" = "Debian GNU/Linux 4.0 \n \l" ]; then
 		exit 0
 	fi
 fi
-#######################################################
-#######################################################
 
+# ---------------------------------------------------------
+# Script Section: Display Options Chosen
+# ---------------------------------------------------------
+
+ 
 echo $0 $* > $LOGFILE
 
 echo "APT_GET_UPDATE=$APT_GET_UPDATE" >> $LOGFILE
@@ -264,8 +339,10 @@ echo "OOPTION=$OOPTION" >> $LOGFILE
 echo "DEBUG=$DEBUG" >> $LOGFILE
 
 echo "$LOGSEP" >> $LOGFILE
+# ---------------------------------------------------------
+# Script Section: Determine Linux Distribution
+# ---------------------------------------------------------
 
-# discovering linux
 if [ -e /etc/lsb-release ]
 then
 	. /etc/lsb-release
@@ -298,6 +375,12 @@ else
 	DISTRO_PACKAGES="$DISTRO_PACKAGES $DEBIAN_PACKAGES"
 fi
 echo "$LOGSEP" >> $LOGFILE
+
+# ---------------------------------------------------------
+# Script Section: Install Prerequisite Development Packages
+# ---------------------------------------------------------
+SET_WINDOW_TITLE "Install Prerequisite Development Packages"
+
 
 if [ "$DOWNLOAD_PACKAGES" = "y" ]
 then
@@ -334,6 +417,12 @@ then
 	echo " OK" >> $LOGFILE
 fi
 
+
+# -------------------------------------------------------------
+# Script Section: Create Required Build and install Directories
+# -------------------------------------------------------------
+SET_WINDOW_TITLE "Create Required Build and install Directories"
+
 COMPILE_BASE_DIR=.
 
 #cd into compile base directory
@@ -347,10 +436,7 @@ LOGFILE=$CBD/$LOGFILE
 echo "DIRECTORY= $CBD" >> $LOGFILE
 echo "$LOGSEP" >> $LOGFILE
 
-if [ ! -d install ]
-then
-	mkdir install
-fi
+mkdir -p install
 
 SUB_INSTALL_DIR=install
 INSTALL_DIR=$CBD/$SUB_INSTALL_DIR
@@ -358,6 +444,11 @@ INSTALL_DIR=$CBD/$SUB_INSTALL_DIR
 
 cd "$CBD"
 mkdir -p build
+
+
+# ---------------------------------------------------------
+# Script Section: Build Components
+# ---------------------------------------------------------
 
 #######################################################
 # PLIB
@@ -376,6 +467,7 @@ then
 		echo "****************************************" | tee -a $LOGFILE
 		echo "**************** PLIB ******************" | tee -a $LOGFILE
 		echo "****************************************" | tee -a $LOGFILE
+		SET_WINDOW_TITLE "Building PLIB"
 
 		echo "COMPILING PLIB" >> $LOGFILE
 		echo "INSTALL_DIR_PLIB=$INSTALL_DIR_PLIB" >> $LOGFILE
@@ -452,6 +544,7 @@ fi
 #######################################################
 # OpenSceneGraph
 #######################################################
+SET_WINDOW_TITLE "Building OpenSceneGraph"
 OSG_INSTALL_DIR=OpenSceneGraph
 INSTALL_DIR_OSG=$INSTALL_DIR/$OSG_INSTALL_DIR
 cd "$CBD"
@@ -461,13 +554,6 @@ then
 	echo "****************************************" | tee -a $LOGFILE
 	echo "**************** OSG *******************" | tee -a $LOGFILE
 	echo "****************************************" | tee -a $LOGFILE
-
-	OSG_SVN=$OSG_UNSTABLE_REVISION
-	if [ "$STABLE" = "STABLE" ]
-	then
-		OSG_SVN=$OSG_STABLE_REVISION
-	fi
-
 
 	if [ "$DOWNLOAD" = "y" ]
 	then
@@ -530,6 +616,7 @@ fi
 #######################################################
 # OPENRTI
 #######################################################
+SET_WINDOW_TITLE "Building OPENRTI"
 OPENRTI_INSTALL_DIR=openrti
 INSTALL_DIR_OPENRTI=$INSTALL_DIR/$OPENRTI_INSTALL_DIR
 cd "$CBD"
@@ -566,17 +653,17 @@ then
 		then
 			# switch to stable branch
 			# create local stable branch, ignore errors if it exists
-			git branch -f $OPENRTI_STABLE_GIT_BRANCH origin/$OPENRTI_STABLE_GIT_BRANCH 2> /dev/null || true
+			git branch -f $OPENRTI_BRANCH origin/$OPENRTI_BRANCH 2> /dev/null || true
 			# switch to stable branch. No error is reported if we're already on the branch.
-			git checkout -f $OPENRTI_STABLE_GIT_BRANCH
+			git checkout -f $OPENRTI_BRANCH
 			# get indicated stable version
-			git reset --hard $OPENRTI_STABLE_REVISION
+			git reset --hard $OPENRTI_REVISION
 		else
 			# switch to unstable branch
 			# create local unstable branch, ignore errors if it exists
-			git branch -f $OPENRTI_UNSTABLE_GIT_BRANCH origin/$OPENRTI_UNSTABLE_GIT_BRANCH 2> /dev/null || true
+			git branch -f $OPENRTI_BRANCH origin/$OPENRTI_BRANCH 2> /dev/null || true
 			# switch to unstable branch. No error is reported if we're already on the branch.
-			git checkout -f $OPENRTI_UNSTABLE_GIT_BRANCH
+			git checkout -f $OPENRTI_BRANCH
 			# pull latest version from the unstable branch
 			git pull
 		fi
@@ -626,6 +713,7 @@ fi
 #######################################################
 # SIMGEAR
 #######################################################
+SET_WINDOW_TITLE "Building Simgear"
 SIMGEAR_INSTALL_DIR=simgear
 INSTALL_DIR_SIMGEAR=$INSTALL_DIR/$SIMGEAR_INSTALL_DIR
 cd "$CBD"
@@ -666,17 +754,17 @@ then
 		then
 			# switch to stable branch
 			# create local stable branch, ignore errors if it exists
-			git branch -f $FGSG_STABLE_GIT_BRANCH origin/$FGSG_STABLE_GIT_BRANCH 2> /dev/null || true
+			git branch -f $FGSG_BRANCH origin/$FGSG_BRANCH 2> /dev/null || true
 			# switch to stable branch. No error is reported if we're already on the branch.
-			git checkout -f $FGSG_STABLE_GIT_BRANCH
+			git checkout -f $FGSG_BRANCH
 			# get indicated stable version
 			git reset --hard $SIMGEAR_STABLE_REVISION
 		else
 			# switch to unstable branch
 			# create local unstable branch, ignore errors if it exists
-			git branch -f $FGSG_UNSTABLE_GIT_BRANCH origin/$FGSG_UNSTABLE_GIT_BRANCH 2> /dev/null || true
+			git branch -f $FGSG_BRANCH origin/$FGSG_BRANCH 2> /dev/null || true
 			# switch to unstable branch. No error is reported if we're already on the branch.
-			git checkout -f $FGSG_UNSTABLE_GIT_BRANCH
+			git checkout -f $FGSG_BRANCH
 			# pull latest version from the unstable branch
 			git pull
 		fi
@@ -726,6 +814,7 @@ fi
 #######################################################
 # FGFS
 #######################################################
+SET_WINDOW_TITLE "Building Flightgear"
 FGFS_INSTALL_DIR=fgfs
 INSTALL_DIR_FGFS=$INSTALL_DIR/$FGFS_INSTALL_DIR
 cd "$CBD"
@@ -770,17 +859,17 @@ then
 			then
 				# switch to stable branch
 				# create local stable branch, ignore errors if it exists
-				git branch -f $FGSG_STABLE_GIT_BRANCH origin/$FGSG_STABLE_GIT_BRANCH 2> /dev/null || true
+				git branch -f $FGSG_BRANCH origin/$FGSG_BRANCH 2> /dev/null || true
 				# switch to stable branch. No error is reported if we're already on the branch.
-				git checkout -f $FGSG_STABLE_GIT_BRANCH
+				git checkout -f $FGSG_BRANCH
 				# get indicated stable version
 				git reset --hard $FGFS_STABLE_REVISION
 			else
 				# switch to unstable branch
 				# create local unstable branch, ignore errors if it exists
-				git branch -f $FGSG_UNSTABLE_GIT_BRANCH origin/$FGSG_UNSTABLE_GIT_BRANCH 2> /dev/null || true
+				git branch -f $FGSG_BRANCH origin/$FGSG_BRANCH 2> /dev/null || true
 				# switch to unstable branch. No error is reported if we're already on the branch.
-				git checkout -f $FGSG_UNSTABLE_GIT_BRANCH
+				git checkout -f $FGSG_BRANCH
 				# pull latest version from the unstable branch
 				git pull
 			fi
@@ -847,6 +936,20 @@ then
 		then
 			if [ "$DOWNLOAD" = "y" ]
 			then
+				SET_WINDOW_TITLE " FGDATA"
+				if [[  -e ../fgdata_${FGDATA_VERSION} ]]
+				then
+					FGDATA_DIR=../fgdata_${FGDATA_VERSION}
+				fi
+				if [[  -e ../../fgdata_${FGDATA_VERSION} ]]
+				then
+					FGDATA_DIR=../../fgdata_${FGDATA_VERSION}
+				fi
+				if [[ ! -e $INSTALL_DIR_FGFS/fgdata && -e ${FGDATA_DIR} ]]
+				then
+					ln -s ${FGDATA_DIR} $INSTALL_DIR_FGFS/fgdata
+					ls -lah $INSTALL_DIR_FGFS/fgdata
+				fi
 				EXDIR=$(pwd)
 				cd $INSTALL_DIR_FGFS
 				echo -n "GIT DATA FROM git://gitorious.org/fg/fgdata.git ... " >> $LOGFILE
@@ -866,17 +969,17 @@ then
 				then
 					# switch to stable branch
 					# create local stable branch, ignore errors if it exists
-					git branch -f $FGSG_STABLE_GIT_BRANCH origin/$FGSG_STABLE_GIT_BRANCH 2> /dev/null || true
+					git branch -f $FGSG_BRANCH origin/$FGSG_BRANCH 2> /dev/null || true
 					# switch to stable branch. No error is reported if we're already on the branch.
-					git checkout -f $FGSG_STABLE_GIT_BRANCH
+					git checkout -f $FGSG_BRANCH
 					# get indicated stable version
-					git reset --hard $FGFS_DATA_STABLE_REVISION
+					git reset --hard $FGSG_BRANCH
 				else
 					# switch to unstable branch
 					# create local unstable branch, ignore errors if it exists
-					git branch -f $FGDATA_UNSTABLE_GIT_BRANCH origin/$FGDATA_UNSTABLE_GIT_BRANCH 2> /dev/null || true
+					git branch -f $FGSG_BRANCH origin/$FGSG_BRANCH 2> /dev/null || true
 					# switch to unstable branch. No error is reported if we're already on the branch.
-					git checkout -f $FGDATA_UNSTABLE_GIT_BRANCH
+					git checkout -f $FGSG_BRANCH
 					# pull latest version from the unstable branch
 					git pull
 				fi
@@ -925,6 +1028,7 @@ fi
 #######################################################
 # FGO!
 #######################################################
+SET_WINDOW_TITLE "Building FGO"
 FGO_INSTALL_DIR=fgo
 INSTALL_DIR_FGO=$INSTALL_DIR/$FGO_INSTALL_DIR
 cd "$CBD"
@@ -961,6 +1065,7 @@ fi
 #######################################################
 # FGx
 #######################################################
+SET_WINDOW_TITLE "Building FGX"
 FGX_INSTALL_DIR=fgx
 INSTALL_DIR_FGX=$INSTALL_DIR/$FGX_INSTALL_DIR
 cd "$CBD"
@@ -988,8 +1093,8 @@ then
 
 	cd fgx/
 
-	git branch -f $FGX_STABLE_GIT_BRANCH origin/$FGX_STABLE_GIT_BRANCH 2> /dev/null || true
-	git checkout -f $FGX_STABLE_GIT_BRANCH
+	git branch -f $FGX_BRANCH origin/$FGX_BRANCH 2> /dev/null || true
+	git checkout -f $FGX_BRANCH
 	git pull
 
 	cd ..
@@ -1055,6 +1160,7 @@ fi
 #######################################################
 # FGRUN
 #######################################################
+SET_WINDOW_TITLE "Building FGRUN"
 FGRUN_INSTALL_DIR=fgrun
 INSTALL_DIR_FGRUN=$INSTALL_DIR/$FGRUN_INSTALL_DIR
 cd "$CBD"
@@ -1090,17 +1196,17 @@ then
 				# switch to stable branch
 				# create local stable branch, ignore errors if it exists
 				ls
-				git branch -f $FGRUN_STABLE_GIT_BRANCH origin/$FGRUN_STABLE_GIT_BRANCH 2> /dev/null || true
+				git branch -f $FGRUN_BRANCH origin/$FGRUN_BRANCH 2> /dev/null || true
 				# switch to stable branch. No error is reported if we're already on the branch.
-				git checkout -f $FGRUN_STABLE_GIT_BRANCH
+				git checkout -f $FGRUN_BRANCH
 				# get indicated stable version
-				git reset --hard $FGRUN_STABLE_GIT_BRANCH
+				git reset --hard $FGRUN_BRANCH
 			else
 				# switch to unstable branch
 				# create local unstable branch, ignore errors if it exists
-				git branch -f $FGRUN_UNSTABLE_GIT_BRANCH origin/$FGRUN_UNSTABLE_GIT_BRANCH 2> /dev/null || true
+				git branch -f $FGRUN_BRANCH origin/$FGRUN_BRANCH 2> /dev/null || true
 				# switch to unstable branch. No error is reported if we're already on the branch.
-				git checkout -f $FGRUN_UNSTABLE_GIT_BRANCH
+				git checkout -f $FGRUN_BRANCH
 				# pull latest version from the unstable branch
 				git pull
 			fi
@@ -1160,6 +1266,7 @@ fi
 #######################################################
 # FGCOM
 #######################################################
+SET_WINDOW_TITLE "Building FGCOM"
 FGCOM_INSTALL_DIR=fgcom
 INSTALL_DIR_FGCOM=$INSTALL_DIR/$FGCOM_INSTALL_DIR
 cd "$CBD"
@@ -1204,9 +1311,9 @@ then
 		else
 			# switch to unstable branch
                         # create local unstable branch, ignore errors if it exists
-                        git branch -f $FGCOM_UNSTABLE_GIT_BRANCH origin/$FGCOM_UNSTABLE_GIT_BRANCH 2> /dev/null || true
+                        git branch -f $FGCOM_BRANCH origin/$FGCOM_BRANCH 2> /dev/null || true
                         # switch to unstable branch. No error is reported if we're already on the branch.
-                        git checkout -f $FGCOM_UNSTABLE_GIT_BRANCH
+                        git checkout -f $FGCOM_BRANCH
                         # pull latest version from the unstable branch
                         git pull
 		fi
@@ -1303,6 +1410,7 @@ fi
 #######################################################
 # FGCOMGUI
 #######################################################
+SET_WINDOW_TITLE "Building FGCOMGUI"
 FGCOMGUI_INSTALL_DIR=fgcomgui
 INSTALL_DIR_FGCOMGUI=$INSTALL_DIR/$FGCOMGUI_INSTALL_DIR
 cd "$CBD"
@@ -1355,10 +1463,41 @@ then
 	fi
 fi
 
+#######################################################
+# OPENRADAR
+#######################################################
+SET_WINDOW_TITLE "Building OPENRADAR"
+OR_INSTALL_DIR=openradar
+INSTALL_DIR_OR=$INSTALL_DIR/$OR_INSTALL_DIR
+cd "$CBD"
+
+if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="OPENRADAR"' ]]
+then
+	echo "****************************************" 
+	echo "************** OPENRADAR ***************" 
+	echo "****************************************" 
+
+
+	if [ "$DOWNLOAD" = "y" ]
+	then
+		wget $OR_STABLE_RELEASE -O OpenRadar.zip
+		cd install
+		unzip ../OpenRadar.zip
+		cd ..
+	fi
+
+	echo "#!/bin/sh" > run_openradar.sh
+	echo "cd \$(dirname \$0)" >> run_openradar.sh
+	echo "cd install/OpenRadar" >> run_openradar.sh
+	echo "java -jar OpenRadar.jar" >> run_openradar.sh
+	chmod 755 run_openradar.sh
+fi
+
 
 #######################################################
 # ATLAS
 #######################################################
+SET_WINDOW_TITLE "Building ATLAS"
 ATLAS_INSTALL_DIR=atlas
 INSTALL_DIR_ATLAS=$INSTALL_DIR/$ATLAS_INSTALL_DIR
 cd "$CBD"
@@ -1424,6 +1563,7 @@ then
 		chmod 755 run_atlas.sh
 	fi
 fi
+SET_WINDOW_TITLE "Finished Building"
 
 echo "To start fgfs, run the run_fgfs.sh file"
 echo "To start terrasync, run the run_terrasync.sh file"
