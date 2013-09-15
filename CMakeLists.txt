@@ -40,6 +40,8 @@ endif()  # of Apple
 set (OSG_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
 
 # OpenSceneGraph configuration
+SET(OSG_SOURCE URL http://www.openscenegraph.org/downloads/developer_releases/OpenSceneGraph-3.2.0.zip)
+
 if (APPLE)
     SET(SDKROOT /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.7.sdk)
     # force disable Qt and Jasper, and ensure an SDKROOT is set, or
@@ -53,7 +55,7 @@ if (APPLE)
     )
     # OSG with some patches applied for Mac
 #    SET(OSG_SOURCE GIT_REPOSITORY git://gitorious.org/+flightgear-developers/openscenegraph/mac-release-osg.git)
-    SET(OSG_SOURCE URL http://www.openscenegraph.org/downloads/developer_releases/OpenSceneGraph-3.1.4.zip)
+ #   SET(OSG_SOURCE URL http://www.openscenegraph.org/downloads/developer_releases/OpenSceneGraph-3.2.0.zip)
 
 elseif(MSVC)
 	set( OSG_MSVC "msvc" )
@@ -77,16 +79,14 @@ elseif(MSVC)
 	
 	# for compatability with MSVC directory layout
 	set(OSG_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/install/${OSG_MSVC}/OpenSceneGraph)
-	SET(OSG_SOURCE URL http://www.openscenegraph.org/downloads/developer_releases/OpenSceneGraph-3.1.4.zip)
-	
     list(APPEND OSG_DEPS WinDeps)
 else()
     # normal OSG
-    SET(OSG_SOURCE URL http://www.openscenegraph.org/downloads/developer_releases/OpenSceneGraph-3.1.4.zip)
+    
 endif()
 
 if (MSVC)
-# download 3rdparty dependeancies zip, including boost
+# download 3rdparty dependencies zip, including boost
 	ExternalProject_Add(WinDeps
 		DOWNLOAD_COMMAND URL http://files.goneabitbursar.com/fg/fgfs-win32-VS100-3rdParty+OSG-20120411.zip
 # extract to current root
@@ -115,13 +115,14 @@ ExternalProject_Add(OSG
 	DEPENDS ${OSG_DEPS}
     PREFIX ${CMAKE_BINARY_DIR}
     ${OSG_SOURCE}
+	URL_HASH MD5=4980f8692712a24d4c99f363f80c6814
     BINARY_DIR osgbuild
     CMAKE_ARGS ${OSG_CMAKE_ARGS} -DCMAKE_INSTALL_PREFIX=${OSG_INSTALL_PREFIX}
 # force Release build of OpenSceneGraph
 #	BUILD_COMMAND "cmake --build . --config Release"
 )
 
-set(SG_CMAKE_ARGS -DENABLE_PACKAGE=1)
+set(SG_CMAKE_ARGS -DSG_SVN_CLIENT=1)
 set(FG_CMAKE_ARGS "")
 
 # FIXME install of OpenRTI is failing on Windows, files in PREFIX/share which
@@ -155,6 +156,7 @@ if (NOT WIN32)
 	ExternalProject_Add(PLIB 
 		PREFIX ${CMAKE_BINARY_DIR}
 		URL http://plib.sourceforge.net/dist/plib-1.8.5.tar.gz
+		URL_HASH MD5=47a6fbf63668c1eed631024038b2ea90
 		CONFIGURE_COMMAND <SOURCE_DIR>/configure --prefix=${CMAKE_INSTALL_PREFIX} ${PLIB_ARGS}
 		BUILD_IN_SOURCE 1
 	)
