@@ -35,5 +35,6 @@ REM extract the data files
 7z e -aoa %DATA_FILE%.tar.bz && 7z x -aoa %DATA_FILE%.tar
 
 REM run Inno-setup!
+REM use iscc instead of compil32 for better error reporting
 
-Compil32 /cc FlightGear.iss
+iscc FlightGear.iss
