@@ -111,7 +111,7 @@ Source: "{#OSGInstallDir}\bin\osg{#OSGSoNumber}-osgViewer.dll"; DestDir: "{app}\
 Source: "{#OSGInstallDir}\bin\osg{#OSGSoNumber}-osgSim.dll"; DestDir: "{app}\bin\Win32"; Check: not Is64BitInstallMode or IsTaskSelected('force32')
 Source: "{#OSGInstallDir}\bin\osg{#OSGSoNumber}-osgFX.dll"; DestDir: "{app}\bin\Win32"; Check: not Is64BitInstallMode or IsTaskSelected('force32')
 
-Source: "{#OSGInstallDir}\bin\ot12-OpenThreads.dll"; DestDir: "{app}\bin\Win32"; Check: not Is64BitInstallMode or IsTaskSelected('force32')
+Source: "{#OSGInstallDir}\bin\ot{#OTSoNumber}-OpenThreads.dll"; DestDir: "{app}\bin\Win32"; Check: not Is64BitInstallMode or IsTaskSelected('force32')
 
 Source: "{#OSGPluginsDir}\osgdb_ac.dll"; DestDir: "{app}\bin\Win32\osgPlugins-{#OSGVersion}"; Check: not Is64BitInstallMode or IsTaskSelected('force32')
 Source: "{#OSGPluginsDir}\osgdb_osg.dll"; DestDir: "{app}\bin\Win32\osgPlugins-{#OSGVersion}"; Check: not Is64BitInstallMode or IsTaskSelected('force32')
@@ -147,7 +147,7 @@ Source: "{#OSG64InstallDir}\bin\osg{#OSGSoNumber}-osgViewer.dll"; DestDir: "{app
 Source: "{#OSG64InstallDir}\bin\osg{#OSGSoNumber}-osgSim.dll"; DestDir: "{app}\bin\Win64"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode and not IsTaskSelected('force32')
 Source: "{#OSG64InstallDir}\bin\osg{#OSGSoNumber}-osgFX.dll"; DestDir: "{app}\bin\Win64"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode and not IsTaskSelected('force32')
 
-Source: "{#OSG64InstallDir}\bin\ot12-OpenThreads.dll"; DestDir: "{app}\bin\Win64"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode and not IsTaskSelected('force32')
+Source: "{#OSG64InstallDir}\bin\ot{#OTSoNumber}-OpenThreads.dll"; DestDir: "{app}\bin\Win64"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode and not IsTaskSelected('force32')
 
 Source: "{#OSG64PluginsDir}\osgdb_ac.dll"; DestDir: "{app}\bin\Win64\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode and not IsTaskSelected('force32')
 Source: "{#OSG64PluginsDir}\osgdb_osg.dll"; DestDir: "{app}\bin\Win64\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode and not IsTaskSelected('force32')
