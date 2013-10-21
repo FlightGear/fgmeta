@@ -4,6 +4,11 @@ include (ExternalProject)
 
 project(FlightGear-Meta)
 
+if(NOT CMAKE_INSTALL_PREFIX)
+	set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/install)
+    message(STATUS "Default install dir to ${CMAKE_INSTALL_PREFIX}")
+endif()
+
 if (UNIX)
     set(BOOST_BOOTSTRAP "./bootstrap.sh" --prefix=${CMAKE_INSTALL_PREFIX})
 else()
@@ -12,6 +17,8 @@ endif()
 
 set(SG_DEPS OSG)
 set(FG_DEPS SimGear)
+set(SG_CMAKE_ARGS "")
+set(FG_CMAKE_ARGS "")
 
 if(APPLE)
 
@@ -24,17 +31,8 @@ if(APPLE)
            BUILD_COMMAND ./bjam ${BOOST_ARGS}
            BUILD_IN_SOURCE 1
            INSTALL_COMMAND ./b2 install ${BOOST_ARGS})
-           
-           
-    ExternalProject_Add(libSvn
-        DOWNLOAD_COMMAND URL http://flightgear.simpits.org:8080/job/Mac-Subversion-libs/lastSuccessfulBuild/artifact/dist/*zip*/dist.zip
-        PREFIX ${CMAKE_BINARY_DIR}
-        CONFIGURE_COMMAND ""
-        BUILD_COMMAND ""
-        INSTALL_COMMAND cp -r ${CMAKE_BINARY_DIR}/src/libSvn/include ${CMAKE_INSTALL_PREFIX} && cp -r ${CMAKE_BINARY_DIR}/src/libSvn/lib ${CMAKE_INSTALL_PREFIX}
-    )
-           
-    list(APPEND SG_DEPS Boost libSvn)
+              
+    list(APPEND SG_DEPS Boost)
 endif()  # of Apple
 
 set (OSG_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
@@ -96,21 +94,29 @@ if (MSVC)
 		BUILD_COMMAND ${CMAKE_SOURCE_DIR}/installWinDeps.bat
 		INSTALL_COMMAND ""
 	)
-    
-	ExternalProject_Add(Boost
-		DOWNLOAD_COMMAND URL http://flightgear.simpits.org:8080/job/Boost-Win/lastSuccessfulBuild/artifact/Boost/boost/*zip*/boost.zip
-		SOURCE_DIR ${CMAKE_BINARY_DIR}/Boost/boost
-        CONFIGURE_COMMAND ""
-        BUILD_COMMAND ""
-        INSTALL_COMMAND ""
-    )
 	
+	set(BOOST_ARGS link=static stage --with-system)
+	set( Boost_Version 1.54.0 )
+	string( REPLACE "." "_" Boost_Version_Underscore ${Boost_Version} )
+
+	ExternalProject_Add(Boost
+                PREFIX ${CMAKE_BINARY_DIR}
+                URL http://downloads.sourceforge.net/project/boost/boost/${Boost_Version}/boost_${Boost_Version_Underscore}.zip
+				URL_MD5 78a35834c45220a6164310e280abe675
+                UPDATE_COMMAND "bootstrap.bat"
+                CONFIGURE_COMMAND ""
+                BUILD_COMMAND bjam --with-program_options ${BOOST_ARGS}
+                BUILD_IN_SOURCE 1
+                INSTALL_COMMAND ""
+				)
+				
 	list(APPEND SG_DEPS Boost)
 	
-	list(APPEND SG_CMAKE_ARGS -DBOOST_ROOT=${CMAKE_BINARY_DIR})
-	list(APPEND FG_CMAKE_ARGS -DBOOST_ROOT=${CMAKE_BINARY_DIR})
+	list(APPEND SG_CMAKE_ARGS -DBOOST_ROOT=${CMAKE_BINARY_DIR}/src/Boost)
+	list(APPEND FG_CMAKE_ARGS -DBOOST_ROOT=${CMAKE_BINARY_DIR}/src/Boost)
 endif(MSVC) # of Windows
 
+message(STATUS "OSG install prefix is ${OSG_INSTALL_PREFIX}")
 ExternalProject_Add(OSG
 	DEPENDS ${OSG_DEPS}
     PREFIX ${CMAKE_BINARY_DIR}
@@ -121,9 +127,6 @@ ExternalProject_Add(OSG
 # force Release build of OpenSceneGraph
 #	BUILD_COMMAND "cmake --build . --config Release"
 )
-
-set(SG_CMAKE_ARGS -DSG_SVN_CLIENT=1)
-set(FG_CMAKE_ARGS "")
 
 # FIXME install of OpenRTI is failing on Windows, files in PREFIX/share which
 # are ending up in C:/Program Files/OpenRTI
@@ -147,9 +150,9 @@ ExternalProject_Add(SimGear
     UPDATE_COMMAND       ""    # or update.
     SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/simgear
     BINARY_DIR sgbuild 
-    CMAKE_ARGS ${SG_CMAKE_ARGS} -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX})
+    CMAKE_ARGS ${SG_CMAKE_ARGS} -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX} -DCMAKE_PREFIX_PATH=${OSG_INSTALL_PREFIX})
 
-# on Windows, PLIB is in the 3rd-party dependancies zip
+# on Windows, PLIB is in the 3rd-party dependencies zip
 if (NOT WIN32)
 	SET(PLIB_ARGS --disable-pw --disable-sl --disable-psl --disable-ssg --disable-ssgaux)
 
