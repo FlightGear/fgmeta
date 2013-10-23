@@ -64,5 +64,5 @@ echo "Syncing base packages files from sphere.telascience.org"
 rsync -avz --filter 'merge base-package.rules' \
  -e ssh jturner@sphere.telascience.org:/home/jturner/fgdata .
 
-tar cjf output/FlightGear-$VERSION-data.tar.bz fgdata/
+tar cjf output/FlightGear-$VERSION-data.tar.bz2 fgdata/
 
