@@ -134,9 +134,9 @@ Dir.chdir "maclauncher/FlightGearOSX" do
   `rsync -a *.rb *.lproj *.sh *.tiff *.html #{resourcesDir}`
 end
 
-if File.exist?("#{$prefixDir}/bin/fgcom-data")
+if File.exist?("#{$prefixDir}/share/flightgear")
   puts "Copying FGCom data files"
-  `ditto #{$prefixDir}/bin/fgcom-data #{resourcesDir}/fgcom-data`
+  `ditto #{$prefixDir}/share/flightgear #{resourcesDir}`
 end
 
 # Info.plist
