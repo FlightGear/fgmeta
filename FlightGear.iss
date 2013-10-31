@@ -81,6 +81,10 @@ Source: "X:\install\msvc100\FlightGear\bin\metar.exe"; DestDir: "{app}\bin\Win32
 Source: "X:\install\msvc100\FlightGear\bin\yasim.exe"; DestDir: "{app}\bin\Win32"; Flags: ignoreversion
 Source: "X:\3rdParty\bin\*.dll"; DestDir: "{app}\bin\Win32"
 
+Source: "X:\install\msvc100\FlightGear\bin\fgcom.exe"; DestDir: "{app}\bin\Win32"; Flags: ignoreversion
+Source: "X:\install\msvc100\FlightGear\share\flightgear\positions.txt"; DestDir: "{app}\share\flightgear"
+Source: "X:\install\msvc100\FlightGear\share\flightgear\special_frequencies.txt"; DestDir: "{app}\share\flightgear"
+
 Source: "X:\install\msvc100\FGRun\bin\fgrun.exe"; DestDir: "{app}\bin\Win32"; Flags: ignoreversion ; Check: not Is64BitInstallMode or IsTaskSelected('force32')
 Source: "X:\install\msvc100\FGRun\share\locale\*"; DestDir: "{app}\bin\Win32\locale"; Flags: ignoreversion recursesubdirs; Check: not Is64BitInstallMode or IsTaskSelected('force32')
 
@@ -200,6 +204,8 @@ Name: "{group}\Tools\MIDGsmooth"; Filename: "cmd"; Parameters: "/k ""{app}\bin\W
 Name: "{group}\Tools\metar"; Filename: "cmd"; Parameters: "/k ""{app}\bin\Win32\metar.exe"" -h"; WorkingDir: "{app}\bin\Win32";
 Name: "{group}\Tools\yasim"; Filename: "cmd"; Parameters: "/k ""{app}\bin\Win32\yasim.exe"" -h"; WorkingDir: "{app}\bin\Win32";
 Name: "{group}\Tools\fgpanel"; Filename: "cmd"; Parameters: "/k ""{app}\bin\Win32\fgpanel.exe"" -h"; WorkingDir: "{app}\bin\Win32";
+Name: "{group}\Tools\FGCom"; Filename: "{app}\bin\Win32\fgcom.exe"; Parameters: "--positions=""{app}\share\flightgear\positions.txt"" --special=""{app}\share\flightgear\special_frequencies.txt"""; WorkingDir: "{app}\bin\Win32";
+Name: "{group}\Tools\FGCom-testing"; Filename: "{app}\bin\Win32\fgcom.exe"; Parameters: "-f910 --positions=""{app}\share\flightgear\positions.txt"" --special=""{app}\share\flightgear\special_frequencies.txt"""; WorkingDir: "{app}\bin\Win32";
 
 Name: "{group}\Tools\Explore Documentation Folder"; Filename: "{app}\data\Docs"
 
