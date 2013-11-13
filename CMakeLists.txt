@@ -65,14 +65,19 @@ elseif(MSVC)
     endif (${MSVC_VERSION} EQUAL 1700)
     if (CMAKE_CL_64)
         set(OSG_MSVC ${OSG_MSVC}-64)
+        set(WIN_TAG x64)
+        set(RDPARTY_DIR 3rdParty)
+    else ()
+        set(WIN_TAG win32)
+        set(RDPARTY_DIR 3rdParty.x64)
     endif (CMAKE_CL_64)
   
     SET(OSG_CMAKE_ARGS
-        -DACTUAL_3RDPARTY_DIR:PATH=${CMAKE_BINARY_DIR}/3rdParty
+        -DACTUAL_3RDPARTY_DIR:PATH=${CMAKE_BINARY_DIR}/${RDPARTY_DIR}
         -DBUILD_OSG_APPLICATIONS:BOOL=ON
         -DCMAKE_INSTALL_PREFIX:PATH=
         -DOSG_PLUGIN_SEARCH_INSTALL_DIR_FOR_PLUGINS:BOOL=OFF
-        -DFREETYPE_LIBRARY:FILEPATH=${CMAKE_BINARY_DIR}/3rdParty/lib/freetype243.lib
+        -DFREETYPE_LIBRARY:FILEPATH=${CMAKE_BINARY_DIR}/${RDPARTY_DIR}/lib/freetype243.lib
         -DGDAL_INCLUDE_DIR:PATH=
         -DGDAL_LIBRARY:FILEPATH=
     )
@@ -86,9 +91,11 @@ else()
 endif()
 
 if (MSVC)
+
+
     # download 3rdparty dependencies zip, including boost
     ExternalProject_Add(WinDeps
-        DOWNLOAD_COMMAND URL http://files.goneabitbursar.com/fg/fgfs-win32-VS100-3rdParty+OSG-20120411.zip
+        DOWNLOAD_COMMAND URL http://files.goneabitbursar.com/fg/fgfs-${WIN_TAG}-VS100-3rdParty+OSG-20120411.zip
         # extract to current root
         SOURCE_DIR ${CMAKE_BINARY_DIR}/winDeps 
         BINARY_DIR ${CMAKE_BINARY_DIR} 
