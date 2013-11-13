@@ -35,6 +35,8 @@ if(APPLE)
 endif()  # of Apple
 
 set(OSG_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
+set(SG_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
+set(FG_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
 
 # OpenSceneGraph configuration
 set(OSG_SOURCE URL http://www.openscenegraph.org/downloads/developer_releases/OpenSceneGraph-3.2.0.zip)
@@ -84,6 +86,8 @@ elseif(MSVC)
 
     # for compatability with MSVC directory layout
     set(OSG_INSTALL_PREFIX ${OSG_INSTALL_PREFIX}/${OSG_MSVC}/OpenSceneGraph)
+    set(FG_INSTALL_PREFIX ${FG_INSTALL_PREFIX}/${OSG_MSVC}/FlightGear)
+    set(SG_INSTALL_PREFIX ${SG_INSTALL_PREFIX}/${OSG_MSVC}/SimGear)
     list(APPEND OSG_DEPS WinDeps)
 else()
     # normal OSG
@@ -159,7 +163,7 @@ ExternalProject_Add(SimGear
     UPDATE_COMMAND ""      # or update.
     SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/simgear
     BINARY_DIR sgbuild 
-    CMAKE_ARGS ${SG_CMAKE_ARGS} -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}/${OSG_MSVC}/SimGear -DCMAKE_PREFIX_PATH=${OSG_INSTALL_PREFIX}
+    CMAKE_ARGS ${SG_CMAKE_ARGS} -DCMAKE_INSTALL_PREFIX=${SG_INSTALL_PREFIX} -DCMAKE_PREFIX_PATH=${OSG_INSTALL_PREFIX}
 )
 
 # on Windows, PLIB is in the 3rd-party dependencies zip
@@ -184,5 +188,5 @@ ExternalProject_Add(FlightGear
     UPDATE_COMMAND ""      # or update.
     SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/flightgear
     BINARY_DIR fgbuild 
-    CMAKE_ARGS ${FG_CMAKE_ARGS} -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}/${OSG_MSVC}/FlightGear -DCMAKE_PREFIX_PATH=${OSG_INSTALL_PREFIX}
+    CMAKE_ARGS ${FG_CMAKE_ARGS} -DCMAKE_INSTALL_PREFIX=${FG_INSTALL_PREFIX} -DCMAKE_PREFIX_PATH=${OSG_INSTALL_PREFIX};${SG_INSTALL_PREFIX}
 )
