@@ -68,10 +68,10 @@ elseif(MSVC)
     if (CMAKE_CL_64)
         set(OSG_MSVC ${OSG_MSVC}-64)
         set(WIN_TAG x64)
-        set(RDPARTY_DIR 3rdParty)
+        set(RDPARTY_DIR 3rdParty.x64)
     else ()
         set(WIN_TAG win32)
-        set(RDPARTY_DIR 3rdParty.x64)
+        set(RDPARTY_DIR 3rdParty)
     endif (CMAKE_CL_64)
   
     SET(OSG_CMAKE_ARGS
@@ -91,12 +91,12 @@ elseif(MSVC)
     list(APPEND OSG_DEPS WinDeps)
 else()
     # normal OSG
-    
+    set(OSG_INSTALL_PREFIX ${OSG_INSTALL_PREFIX}/OpenSceneGraph)
+    set(FG_INSTALL_PREFIX ${FG_INSTALL_PREFIX}/FlightGear)
+    set(SG_INSTALL_PREFIX ${SG_INSTALL_PREFIX}/SimGear)
 endif()
 
 if (MSVC)
-
-
     # download 3rdparty dependencies zip, including boost
     ExternalProject_Add(WinDeps
         DOWNLOAD_COMMAND URL http://files.goneabitbursar.com/fg/fgfs-${WIN_TAG}-VS100-3rdParty+OSG-20120411.zip
@@ -188,5 +188,5 @@ ExternalProject_Add(FlightGear
     UPDATE_COMMAND ""      # or update.
     SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/flightgear
     BINARY_DIR fgbuild 
-    CMAKE_ARGS ${FG_CMAKE_ARGS} -DCMAKE_INSTALL_PREFIX=${FG_INSTALL_PREFIX} -DCMAKE_PREFIX_PATH=${OSG_INSTALL_PREFIX};${SG_INSTALL_PREFIX}
+    CMAKE_ARGS ${FG_CMAKE_ARGS} -DCMAKE_INSTALL_PREFIX=${FG_INSTALL_PREFIX} -DCMAKE_PREFIX_PATH="${OSG_INSTALL_PREFIX};${SG_INSTALL_PREFIX}"
 )
