@@ -37,6 +37,7 @@ endif()  # of Apple
 set(OSG_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
 set(SG_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
 set(FG_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
+set(FGRUN_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
 
 # OpenSceneGraph configuration
 set(OSG_SOURCE URL http://www.openscenegraph.org/downloads/developer_releases/OpenSceneGraph-3.2.0.zip)
@@ -86,6 +87,7 @@ elseif(MSVC)
 
     # for compatability with MSVC directory layout
     set(OSG_INSTALL_PREFIX ${OSG_INSTALL_PREFIX}/${OSG_MSVC}/OpenSceneGraph)
+    set(FGRUN_INSTALL_PREFIX ${FGRUN_INSTALL_PREFIX}/${OSG_MSVC}/FGRun)
     set(FG_INSTALL_PREFIX ${FG_INSTALL_PREFIX}/${OSG_MSVC}/FlightGear)
     set(SG_INSTALL_PREFIX ${SG_INSTALL_PREFIX}/${OSG_MSVC}/SimGear)
     list(APPEND OSG_DEPS WinDeps)
@@ -179,6 +181,19 @@ if (NOT WIN32)
     )
     
     list(APPEND FG_DEPS PLIB)
+endif()
+
+# Only compile FGRun for Windows
+if (MSVC)
+    ExternalProject_Add(FGRun
+        PREFIX ${CMAKE_BINARY_DIR}
+        DEPENDS ${FG_DEPS}
+        DOWNLOAD_COMMAND ""    # no need to download
+        UPDATE_COMMAND ""      # or update.
+        SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/fgrun
+        BINARY_DIR fgrunbuild
+        CMAKE_ARGS ${FG_CMAKE_ARGS} -DCMAKE_INSTALL_PREFIX=${FGRUN_INSTALL_PREFIX} -DCMAKE_PREFIX_PATH=${OSG_INSTALL_PREFIX} -DADDITIONAL_LIBRARY_PATHS=${SG_INSTALL_PREFIX}
+    )
 endif()
 
 ExternalProject_Add(FlightGear
