@@ -115,9 +115,12 @@ if (MSVC)
     )
 
     set(BOOST_ARGS link=static stage --with-system)
+    set(Boost_Version 1.54.0)
+    string(REPLACE "." "_" Boost_Version_Underscore ${Boost_Version})
     ExternalProject_Add(Boost
         PREFIX ${CMAKE_BINARY_DIR}
-        SVN_REPOSITORY http://svn.boost.org/svn/boost/tags/release/Boost_1_54_0
+        URL http://downloads.sourceforge.net/project/boost/boost/${Boost_Version}/boost_${Boost_Version_Underscore}.zip
+        URL_MD5 78a35834c45220a6164310e280abe675
         UPDATE_COMMAND ${BOOST_BOOTSTRAP}
         CONFIGURE_COMMAND ""
         BUILD_COMMAND bjam --with-program_options ${BOOST_ARGS}
