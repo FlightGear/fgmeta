@@ -102,33 +102,30 @@ endif()
 
 if (MSVC)
     # download 3rdparty dependencies zip, including boost
+    string(TOLOWER ${RDPARTY_DIR} Rd_Party_Lower)
     ExternalProject_Add(WinDeps
-        DOWNLOAD_COMMAND URL http://files.goneabitbursar.com/fg/fgfs-${WIN_TAG}-VS100-3rdParty+OSG-20120411.zip
+        SVN_REPOSITORY http://fgfs.goneabitbursar.com/fgwin3rdparty/trunk/msvc100/${Rd_Party_Lower}
         # extract to current root
-        SOURCE_DIR ${CMAKE_BINARY_DIR}/winDeps 
-        BINARY_DIR ${CMAKE_BINARY_DIR} 
+        SOURCE_DIR ${CMAKE_BINARY_DIR}/winDeps/${RDPARTY_DIR}
+        BINARY_DIR ${CMAKE_BINARY_DIR}
+        UPDATE_COMMAND ""
         CONFIGURE_COMMAND ""
         BUILD_COMMAND ${CMAKE_SOURCE_DIR}/installWinDeps.bat
         INSTALL_COMMAND ""
     )
-	
-    set(BOOST_ARGS link=static stage --with-system)
-    set( Boost_Version 1.54.0 )
-    string( REPLACE "." "_" Boost_Version_Underscore ${Boost_Version} )
 
+    set(BOOST_ARGS link=static stage --with-system)
     ExternalProject_Add(Boost
         PREFIX ${CMAKE_BINARY_DIR}
-        URL http://downloads.sourceforge.net/project/boost/boost/${Boost_Version}/boost_${Boost_Version_Underscore}.zip
-        URL_MD5 78a35834c45220a6164310e280abe675
-        UPDATE_COMMAND "bootstrap.bat"
+        SVN_REPOSITORY http://svn.boost.org/svn/boost/tags/release/Boost_1_54_0
+        UPDATE_COMMAND ${BOOST_BOOTSTRAP}
         CONFIGURE_COMMAND ""
         BUILD_COMMAND bjam --with-program_options ${BOOST_ARGS}
         BUILD_IN_SOURCE 1
         INSTALL_COMMAND ""
     )
-				
+
     list(APPEND SG_DEPS Boost)
-	
     list(APPEND SG_CMAKE_ARGS -DBOOST_ROOT=${CMAKE_BINARY_DIR}/src/Boost)
     list(APPEND FG_CMAKE_ARGS -DBOOST_ROOT=${CMAKE_BINARY_DIR}/src/Boost)
     list(APPEND FGRUN_CMAKE_ARGS -DBOOST_ROOT=${CMAKE_BINARY_DIR}/src/Boost)
