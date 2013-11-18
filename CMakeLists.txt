@@ -38,10 +38,12 @@ endif()  # of Apple
 set(OSG_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
 set(SG_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
 set(FG_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
+set(PLIB_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
+set(RTI_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
 set(FGRUN_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
 
 # OpenSceneGraph configuration
-set(OSG_SOURCE URL http://www.openscenegraph.org/downloads/developer_releases/OpenSceneGraph-3.2.0.zip)
+set(OSG_SOURCE http://www.openscenegraph.org/downloads/developer_releases/OpenSceneGraph-3.2.0.zip)
 
 if (APPLE)
     set(SDKROOT /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.7.sdk)
@@ -80,7 +82,6 @@ elseif(MSVC)
     SET(OSG_CMAKE_ARGS
         -DACTUAL_3RDPARTY_DIR:PATH=${CMAKE_BINARY_DIR}/${RDPARTY_DIR}
         -DBUILD_OSG_APPLICATIONS:BOOL=ON
-        -DCMAKE_INSTALL_PREFIX:PATH=
         -DOSG_PLUGIN_SEARCH_INSTALL_DIR_FOR_PLUGINS:BOOL=OFF
         -DFREETYPE_LIBRARY:FILEPATH=${CMAKE_BINARY_DIR}/${RDPARTY_DIR}/lib/freetype243.lib
         -DGDAL_INCLUDE_DIR:PATH=
@@ -95,9 +96,6 @@ elseif(MSVC)
     list(APPEND OSG_DEPS WinDeps)
 else()
     # normal OSG
-    set(OSG_INSTALL_PREFIX ${OSG_INSTALL_PREFIX}/OpenSceneGraph)
-    set(FG_INSTALL_PREFIX ${FG_INSTALL_PREFIX}/FlightGear)
-    set(SG_INSTALL_PREFIX ${SG_INSTALL_PREFIX}/SimGear)
 endif()
 
 if (MSVC)
@@ -134,17 +132,23 @@ if (MSVC)
     list(APPEND FGRUN_CMAKE_ARGS -DBOOST_ROOT=${CMAKE_BINARY_DIR}/src/Boost)
 endif(MSVC) # of Windows
 
-message(STATUS "OSG install prefix is ${OSG_INSTALL_PREFIX}")
 ExternalProject_Add(OSG
     DEPENDS ${OSG_DEPS}
     PREFIX ${CMAKE_BINARY_DIR}
-    ${OSG_SOURCE}
+    URL ${OSG_SOURCE}
     URL_HASH MD5=4980f8692712a24d4c99f363f80c6814
     BINARY_DIR osgbuild
     CMAKE_ARGS ${OSG_CMAKE_ARGS} -DCMAKE_INSTALL_PREFIX=${OSG_INSTALL_PREFIX}
-    # force Release build of OpenSceneGraph
-    # BUILD_COMMAND "cmake --build . --config Release"
 )
+
+# Because OSG install the libraries in lib64/ instead of lib/
+if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+    ExternalProject_Add_Step(OSG after_install
+        COMMAND ${CMAKE_COMMAND} -E copy_directory ${OSG_INSTALL_PREFIX}/lib64 ${OSG_INSTALL_PREFIX}/lib
+        COMMAND ${CMAKE_COMMAND} -E remove_directory ${OSG_INSTALL_PREFIX}/lib64
+        DEPENDEES install
+    )
+endif(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 
 # FIXME install of OpenRTI is failing on Windows, files in PREFIX/share which
 # are ending up in C:/Program Files/OpenRTI
@@ -153,7 +157,7 @@ if (NOT MSVC)
         PREFIX ${CMAKE_BINARY_DIR}
         DOWNLOAD_COMMAND GIT_REPOSITORY git://gitorious.org/openrti/openrti.git
         BINARY_DIR rtibuild 
-        CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+        CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${RTI_INSTALL_PREFIX}
     )
 	
     list(APPEND SG_DEPS OpenRTI)
@@ -173,13 +177,13 @@ ExternalProject_Add(SimGear
 
 # on Windows, PLIB is in the 3rd-party dependencies zip
 if (NOT WIN32)
-    SET(PLIB_ARGS --disable-pw --disable-sl --disable-psl --disable-ssg --disable-ssgaux)
+    set(PLIB_ARGS --disable-pw --disable-sl --disable-psl --disable-ssg --disable-ssgaux)
 
     ExternalProject_Add(PLIB 
         PREFIX ${CMAKE_BINARY_DIR}
         URL http://plib.sourceforge.net/dist/plib-1.8.5.tar.gz
         URL_HASH MD5=47a6fbf63668c1eed631024038b2ea90
-        CONFIGURE_COMMAND <SOURCE_DIR>/configure --prefix=${CMAKE_INSTALL_PREFIX} ${PLIB_ARGS}
+        CONFIGURE_COMMAND <SOURCE_DIR>/configure --prefix=${PLIB_INSTALL_PREFIX} ${PLIB_ARGS}
         BUILD_IN_SOURCE 1
     )
     
