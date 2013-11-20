@@ -71,11 +71,9 @@ elseif(MSVC)
     endif (${MSVC_VERSION} EQUAL 1700)
     if (CMAKE_CL_64)
         set(OSG_MSVC ${OSG_MSVC}-64)
-        set(WIN_TAG x64)
         set(RDPARTY_DIR 3rdParty.x64)
         list(APPEND FG_CMAKE_ARGS -DWITH_FGPANEL=OFF)
     else ()
-        set(WIN_TAG win32)
         set(RDPARTY_DIR 3rdParty)
     endif (CMAKE_CL_64)
   
@@ -100,9 +98,8 @@ endif()
 
 if (MSVC)
     # download 3rdparty dependencies zip, including boost
-    string(TOLOWER ${RDPARTY_DIR} Rd_Party_Lower)
     ExternalProject_Add(WinDeps
-        SVN_REPOSITORY http://fgfs.goneabitbursar.com/fgwin3rdparty/trunk/msvc100/${Rd_Party_Lower}
+        SVN_REPOSITORY http://fgfs.goneabitbursar.com/fgwin3rdparty/trunk/msvc100/3rdparty
         # extract to current root
         SOURCE_DIR ${CMAKE_BINARY_DIR}/winDeps/${RDPARTY_DIR}
         BINARY_DIR ${CMAKE_BINARY_DIR}
