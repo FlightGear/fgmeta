@@ -99,7 +99,7 @@ endif()
 if (MSVC)
     # download 3rdparty dependencies zip, including boost
     ExternalProject_Add(WinDeps
-        SVN_REPOSITORY http://fgfs.goneabitbursar.com/fgwin3rdparty/trunk/msvc100/3rdparty
+        SVN_REPOSITORY http://fgfs.goneabitbursar.com/fgwin3rdparty/trunk/msvc100/${RDPARTY_DIR}
         # extract to current root
         SOURCE_DIR ${CMAKE_BINARY_DIR}/winDeps/${RDPARTY_DIR}
         BINARY_DIR ${CMAKE_BINARY_DIR}
