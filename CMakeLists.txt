@@ -116,8 +116,8 @@ if (MSVC)
         PREFIX ${CMAKE_BINARY_DIR}
         URL http://downloads.sourceforge.net/project/boost/boost/${Boost_Version}/boost_${Boost_Version_Underscore}.zip
         URL_MD5 78a35834c45220a6164310e280abe675
-        UPDATE_COMMAND ${BOOST_BOOTSTRAP}
-        CONFIGURE_COMMAND ""
+        UPDATE_COMMAND ""
+        CONFIGURE_COMMAND ${BOOST_BOOTSTRAP}
         BUILD_COMMAND bjam --with-program_options ${BOOST_ARGS}
         BUILD_IN_SOURCE 1
         INSTALL_COMMAND ""
@@ -172,6 +172,15 @@ ExternalProject_Add(SimGear
     CMAKE_ARGS ${SG_CMAKE_ARGS} -DCMAKE_INSTALL_PREFIX=${SG_INSTALL_PREFIX} -DCMAKE_PREFIX_PATH=${OSG_INSTALL_PREFIX}
 )
 
+# because we download SimGear externally (via Git submodules),
+# the change-detection doesn't work. Ensure we always change
+# for changes
+ExternalProject_Add_Step(SimGear forcebuild
+        ALWAYS 1
+		COMMAND ${CMAKE_COMMAND} -E echo foo
+        DEPENDERS build
+    )
+	
 # on Windows, PLIB is in the 3rd-party dependencies zip
 if (NOT WIN32)
     set(PLIB_ARGS --disable-pw --disable-sl --disable-psl --disable-ssg --disable-ssgaux)
@@ -213,3 +222,12 @@ ExternalProject_Add(FlightGear
     BINARY_DIR fgbuild 
     CMAKE_ARGS ${FG_CMAKE_ARGS} -DCMAKE_INSTALL_PREFIX=${FG_INSTALL_PREFIX} -DCMAKE_PREFIX_PATH=${OSG_INSTALL_PREFIX} -DADDITIONAL_LIBRARY_PATHS=${SG_INSTALL_PREFIX}
 )
+
+# because we download FlightGear externally (via Git submodules),
+# the change-detection doesn't work. Ensure we always change
+# for changes
+ExternalProject_Add_Step(FlightGear forcebuild
+        ALWAYS 1
+		COMMAND ${CMAKE_COMMAND} -E echo foo
+        DEPENDERS build
+    )
