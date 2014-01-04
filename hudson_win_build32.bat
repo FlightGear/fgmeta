@@ -1,9 +1,11 @@
-
 IF NOT DEFINED WORKSPACE SET WORKSPACE=%~dp0
 
-ECHO #define SIMGEAR_VERSION "2.9.0" > %WORKSPACE%\simgear\simgear\version.h
+SET /P SIMGEAR_VERSION=<%WORKSPACE%\simgear\version
+ECHO #define SIMGEAR_VERSION "%SIMGEAR_VERSION%" > %WORKSPACE%\simgear\simgear\version.h
+
 rem set PATH=%PATH%;D:\Program Files (x86)\CMake 2.8\bin
 rem call "C:\Program Files (x86)\Microsoft Visual Studio 10.0\Common7\Tools\vsvars32.bat"
+
 md build-sg
 md build-fg
 md build-fgrun

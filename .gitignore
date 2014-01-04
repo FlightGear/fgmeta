@@ -9,6 +9,7 @@ output
 fgBuild
 sgBuild
 image
+build
 macflightgear
 fgdata
 src

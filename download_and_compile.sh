@@ -17,7 +17,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-VERSION="1.9-12" 
+VERSION="1.9-13" 
+#compatibility with UBUNTU 13.10 - libhal no longer in ubuntu 13.10 
+#symbolic link error when using data directories in higher directories
+#fixed array index on FGDATA version picker
+#fixed fgdata directory reference when using parent or grandparent directories to store master copies.
+#fixed rebuild command
 
 #COMPILE GIT FGFS
 
@@ -48,6 +53,23 @@ function write_log(){
 function write_log_and_exec(){
 	write_log "$1 $2"
 	$1
+}
+function write_log_and_exec_subprocess(){
+	write_log "$1 $2"
+	if [[ "$3" = "noerror" ]]
+	then
+		$1 2>/dev/null || true
+	else
+		$1
+	fi
+}	
+function git_check_branch_or_tag(){
+	if [[ "$1" != "" ]]
+	then
+		branch="$(git branch |sed "s/* //" |grep $1)"
+		tag="$(git tag |sed "s/* //" |grep $1)"
+		echo $branch$tag
+	fi
 }
 function SET_WINDOW_TITLE(){
 	echo -ne "\033]0;Build Flightgear:  -  ${CBD} - $1\007"
@@ -333,9 +355,9 @@ FGSG_MAP=( [next]="next HEAD"  \
 		[2.12.0]="release/2.12.0 HEAD"  \
 		[2.10.0]="release/2.10.0 HEAD "  \
 		[2.8.0]="release/2.8.0 version/2.8.0-final" )
-FGDATA_MAP=([next]="next HEAD 2.99.9"  \
-		[master]="master HEAD 2.12.1"  \
-		[master]="master HEAD 2.12.0"  \
+FGDATA_MAP=([next]="master HEAD 2.99.9"  \
+		[master]="master HEAD 2.99.9"  \
+		[2.12.1]="release/2.12.0 HEAD 2.12.0"  \
 		[2.12.0]="release/2.12.0 HEAD 2.12.0"  \
 		[2.10.0]="release/2.10.0 HEAD 2.10.0"  \
 		[2.8.0]="release/2.8.0 HEAD 2.8.0" )
@@ -354,9 +376,9 @@ FGSG_BRANCH=${MAP_ITEM[0]}
 FGSG_REVISION=${MAP_ITEM[1]}
 
 MAP_ITEM=( ${FGDATA_MAP[${FG_SG_VERSION}]} )
-FGDATA_BRANCH=${MAP_ITEM[1]}
-FGDATA_REVISION=${MAP_ITEM[2]}
-FGDATA_VERSION=${MAP_ITEM[3]}
+FGDATA_BRANCH=${MAP_ITEM[0]}
+FGDATA_REVISION=${MAP_ITEM[1]}
+FGDATA_VERSION=${MAP_ITEM[2]}
 
 MAP_ITEM=( ${OPENRTI_MAP[${FG_SG_VERSION}]} )
 OPENRTI_BRANCH=${MAP_ITEM[0]}
@@ -499,10 +521,14 @@ then
 fi
 
 # default is hardy
-DISTRO_PACKAGES="libopenal-dev libalut-dev libalut0 cvs subversion cmake make build-essential automake zlib1g-dev zlib1g libwxgtk2.8-0 libwxgtk2.8-dev fluid gawk gettext libxi-dev libxi6 libxmu-dev libxmu6 libboost-dev libasound2-dev libasound2 libpng12-dev libpng12-0 libjasper1 libjasper-dev libopenexr-dev libboost-serialization-dev git-core libhal-dev libqt4-dev scons python-tk python-imaging-tk libsvn-dev libglew1.5-dev  libxft2 libxft-dev libxinerama1 libxinerama-dev"
+DISTRO_PACKAGES="libopenal-dev libalut-dev libalut0 cvs subversion cmake make build-essential automake zlib1g-dev zlib1g libwxgtk2.8-0 libwxgtk2.8-dev fluid gawk gettext libxi-dev libxi6 libxmu-dev libxmu6 libboost-dev libasound2-dev libasound2 libpng12-dev libpng12-0 libjasper1 libjasper-dev libopenexr-dev libboost-serialization-dev git-core libqt4-dev scons python-tk python-imaging-tk libsvn-dev libglew1.5-dev  libxft2 libxft-dev libxinerama1 libxinerama-dev"
 
 UBUNTU_PACKAGES="freeglut3-dev libjpeg62-dev libjpeg62 libapr1-dev libfltk1.3-dev libfltk1.3"
 
+if [[ ( "$DISTRIB_ID" = "Ubuntu" || "$DISTRIB_ID" = "LinuxMint" ) &&  "$DISTRIB_RELEASE" < "13.10" ]]
+then	
+	UBUNTU_PACKAGES="$UBUNTU_PACKAGES libhal-dev"
+fi
 DEBIAN_PACKAGES_STABLE="freeglut3-dev libjpeg8-dev libjpeg8 libfltk1.1-dev libfltk1.1"
 DEBIAN_PACKAGES_TESTING="freeglut3-dev libjpeg8-dev libjpeg8 libfltk1.3-dev libfltk1.3"
 DEBIAN_PACKAGES_UNSTABLE="freeglut3-dev libjpeg8-dev libjpeg8 libfltk1.3-dev libfltk1.3"
@@ -709,8 +735,19 @@ then
 	if [ "$DOWNLOAD" = "y" ]
 	then
 		echo -n "SVN FROM $OSG_SVN ... " >> $LOGFILE
-		svn co "$OSG_SVN" OpenSceneGraph
-		echo " OK" >> $LOGFILE
+		if [ -d "OpenSceneGraph/.svn" ]
+		then
+			echo -n "updating OpenSceneGraph svn"
+			cd OpenSceneGraph
+			svn update
+			cd -
+            	else
+			echo -n "downloadING FROM $OSG_SVN ..."
+			svn co "$OSG_SVN" OpenSceneGraph
+			echo " OK"
+            	fi
+		echo " OK" >> $LOGFILE		
+
 	fi
 	cd OpenSceneGraph
 
@@ -1114,12 +1151,13 @@ fi
 				SET_WINDOW_TITLE " FGDATA"
 				if [[  -e ../fgdata_${FGDATA_VERSION} ]]
 				then
-					FGDATA_DIR=../fgdata_${FGDATA_VERSION}
+					FGDATA_DIR=$(cd $(dirname ../fgdata_${FGDATA_VERSION}/fgdata); pwd)/$(basename ../fgdata_${FGDATA_VERSION}/fgdata)
 				fi
 				if [[  -e ../../fgdata_${FGDATA_VERSION} ]]
 				then
-					FGDATA_DIR=../../fgdata_${FGDATA_VERSION}
+					FGDATA_DIR=$(cd $(dirname ../../fgdata_${FGDATA_VERSION}/fgdata); pwd)/$(basename ../../fgdata_${FGDATA_VERSION}/fgdata)
 				fi
+				
 				if [[ ! -e $INSTALL_DIR_FGFS/fgdata && -e ${FGDATA_DIR} ]]
 				then
 					ln -s ${FGDATA_DIR} $INSTALL_DIR_FGFS/fgdata
@@ -1129,7 +1167,7 @@ fi
 				cd $INSTALL_DIR_FGFS
 				echo -n "GIT DATA FROM $fgdata_git  ... " |tee -a $LOGFILE
 
-				if [ -d "fgdata" ]
+				if [ -e "fgdata" ]
 				then
 					echo "fgdata exists already."
 				else
@@ -1144,19 +1182,30 @@ fi
 				then
 					# switch to stable branch
 					# create local stable branch, ignore errors if it exists
-					git branch -f $FGSG_BRANCH origin/$FGSG_BRANCH 2> /dev/null || true
+					if [[ "$(git_check_branch_or_tag $FGSG_BRANCH)" = "" ]]
+					then
+						write_log_and_exec
+						  "git branch -f $FGSG_BRANCH origin/$FGSG_BRANCH" 
+					fi
 					# switch to stable branch. No error is reported if we're already on the branch.
-					git checkout -f $FGSG_BRANCH
+					write_log_and_exec "git checkout -f $FGSG_BRANCH"
+ 
 					# get indicated stable version
-					git reset --hard $FGSG_BRANCH
+					
+					write_log_and_exec  "git reset --hard $FGSG_BRANCH"
 				else
 					# switch to unstable branch
 					# create local unstable branch, ignore errors if it exists
-					git branch -f $FGDATA_BRANCH origin/$FGDATA_BRANCH 2> /dev/null || true
+					$(git_check_branch_or_tag)
+					if [[ "$(git_check_branch_or_tag $FGDATA_BRANCH)" = "" ]]
+					then
+						write_log_and_exec
+						  "git branch -f $FGDATA_BRANCH origin/$FGDATA_BRANCH" 
+					fi
 					# switch to unstable branch. No error is reported if we're already on the branch.
-					git checkout -f $FGDATA_BRANCH
+					write_log_and_exec  "git checkout -f $FGDATA_BRANCH"
 					# pull latest version from the unstable branch
-					git pull
+					write_log_and_exec  "git pull"
 				fi
 
 				cd ..
@@ -1729,7 +1778,7 @@ then
 else
 	echo "Usage: $0 -h"
 	echo "for help"
-	echo "$rebuild"  >rebuild
+	echo "$rebuild_command"  >rebuild
 	chmod +x rebuild
 fi
 
