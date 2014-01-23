@@ -22,10 +22,6 @@ puts "Code signing identity is #{$codeSignIdentity}"
 
 puts "osgVersion=#{osgVersion}, so-number=#{$osgSoVersion}"
 
-$svnLibs = ['svn_client', 'svn_wc', 'svn_delta', 'svn_diff', 'svn_ra', 
-  'svn_ra_local', 'svn_repos', 'svn_fs', 'svn_fs_fs', 'svn_fs_util',
-  'svn_ra_svn', 'svn_subr', 'svn_ra_neon']
-
 def fix_install_names(object)
   #puts "fixing install names for #{object}"
   
@@ -44,30 +40,10 @@ $prefixDir=Dir.pwd + "/dist"
 dmgDir=Dir.pwd + "/image"
 srcDir=Dir.pwd + "/flightgear"
 
-def fix_svn_install_names(object)
-  $svnLibs.each do |l|
-    fileName = "lib#{l}-1.0.dylib"
-    newName = "@executable_path/../Frameworks/#{fileName}"
-    `install_name_tool -change #{fileName} #{newName} #{object}`
-  end
-end
-
-def copy_svn_libs()
-  puts "Copying Subversion client libraries"
-  $svnLibs.each do |l|
-    libFile = "lib#{l}-1.0.dylib"
-    path = "#{$frameworksDir}/#{libFile}"
-    `cp #{$prefixDir}/lib/#{libFile} #{$frameworksDir}`
-    fix_svn_install_names(path)
-   # `install_name_tool -id #{libFile}  #{path}`    
-  end
-end
-
 def code_sign(path)
   puts "Signing #{path}"
   `codesign -s "#{$codeSignIdentity}" #{path}`
 end
-
 
 puts "Erasing previous image dir"
 `rm -rf #{dmgDir}`
@@ -105,7 +81,6 @@ bins.each do |b|
   outPath = "#{macosDir}/#{b}"
   `cp #{$prefixDir}/bin/#{b} #{outPath}`
   fix_install_names(outPath)
-  fix_svn_install_names(outPath)
 end
 
 puts "copying libraries"
@@ -124,8 +99,6 @@ $osgPlugins.each do |p|
   `cp #{$prefixDir}/lib/osgPlugins-#{osgVersion}/#{pluginFile} #{osgPluginsDir}`
   fix_install_names("#{osgPluginsDir}/#{pluginFile}")
 end
-
-copy_svn_libs()
 
 # Macflightgear launcher
 puts "Copying Macflightgear launcher files"
