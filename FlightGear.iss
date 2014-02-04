@@ -187,7 +187,6 @@ Source: "{#OSG64PluginsDir}\osgdb_deprecated_osgparticle.dll"; DestDir: "{app}\b
 
 [Dirs]
 ; Make the user installable scenery directory
-Name: "{code:TerrasyncDir}"; Permissions: everyone-modify
 Name: "{userdocs}\FlightGear\Aircraft"; Permissions: everyone-modify
 Name: "{userdocs}\FlightGear\TerraSync"; Permissions: everyone-modify
 Name: "{userdocs}\FlightGear\Custom Scenery"; Permissions: everyone-modify
@@ -220,14 +219,11 @@ filename: "{app}\bin\vcredist_x86.exe"; WorkingDir: "{app}\bin"; Parameters: "/p
 filename: "{app}\bin\vcredist_x64.exe"; WorkingDir: "{app}\bin"; Parameters: "/passive /norestart"; Description: "Installing MS Visual C++ runtime components"; Check: Is64BitInstallMode and not IsTaskSelected('force32') and FileExists(ExpandConstant('{app}\bin\vcredist_x64.exe'))
 filename: "{app}\bin\oalinst.exe"; WorkingDir: "{app}\bin"; Description: "Installing OpenAL"; Check: IsTaskSelected('insoal') and FileExists(ExpandConstant('{app}\bin\oalinst.exe'))
 ; Put installation directory into the fgrun.prefs
-filename: "{app}\bin\fgrun.exe"; WorkingDir: "{app}\bin"; Parameters: "--silent ""--fg-exe={app}\bin\fgfs.exe"" ""--fg-root={app}\data"" ""--fg-scenery={userdocs}\FlightGear\Custom Scenery;{app}\data\Scenery"" ""--fg-aircraft={userdocs}\FlightGear\Aircraft"" ""--terrasync-dir={code:TerrasyncDir}"" --version={#FGVersion}"
+filename: "{app}\bin\fgrun.exe"; WorkingDir: "{app}\bin"; Parameters: "--silent ""--fg-exe={app}\bin\fgfs.exe"" ""--fg-root={app}\data"" ""--fg-scenery={userdocs}\FlightGear\Custom Scenery;{app}\data\Scenery"" ""--fg-aircraft={userdocs}\FlightGear\Aircraft"" ""--terrasync-dir={userdocs}\FlightGear\TerraSync"" --version={#FGVersion}"
 ; Put installation and source directories into the fgadmin.prefs
 filename: "{app}\bin\fgadmin.exe"; WorkingDir: "{app}\bin"; Parameters: "--silent ""--install-source={src}\..\Scenery"" ""--scenery-dest={userdocs}\FlightGear\Custom Scenery"""
 
 [Code]
-var
-  TerrasyncDirPage: TInputDirWizardPage;
-
 procedure URLLabelOnClick(Sender: TObject);
 var
   ErrorCode: Integer;
@@ -251,44 +247,12 @@ begin
   URLLabel.Left := ScaleX(20);
 end;
 
-procedure InitializeWizard();
-begin
-  TerrasyncDirPage := CreateInputDirPage(wpSelectDir,
-    'Select Terrasync Directory', 'Where should scenery downloaded by Terrasync be put?',
-    'Select the folder in which Terrasync would download additional scenery, then click Next.',
-    False, 'Terrasync Folder');
-  TerrasyncDirPage.Add('');
-
-  CreateURLLabel(WizardForm, WizardForm.CancelButton);
-end;
-
-function NextButtonClick(CurPageID: Integer): Boolean;
-begin
-  if CurPageID = wpSelectDir then begin
-    TerrasyncDirPage.Values[0] := GetPreviousData( 'TerrasyncDir', ExpandConstant('{userdocs}\FlightGear\TerraSync') );
-  end;
-  Result := True;
-end;
-
-function TerrasyncDir(Param: String): String;
-begin
-  Result := TerrasyncDirPage.Values[0];
-end;
-
-procedure RegisterPreviousData(PreviousDataKey: Integer);
-begin
-  { Store the settings so we can restore them next time }
-  SetPreviousData(PreviousDataKey, 'TerrasyncDir', TerrasyncDirPage.Values[0]);
-end;
-
 function UpdateReadyMemo(Space, NewLine, MemoUserInfoInfo, MemoDirInfo, MemoTypeInfo, MemoComponentsInfo, MemoGroupInfo, MemoTasksInfo: String): String;
 var
   S: String;
 begin
   S := '';
   S := S + MemoDirInfo + NewLine + NewLine;
-  S := S + 'Terrasync folder:' + NewLine;
-  S := S + Space + TerrasyncDirPage.Values[0] + NewLine + NewLine;
   S := S + MemoGroupInfo + NewLine + NewLine;
   S := S + MemoTasksInfo + NewLine + NewLine;
 
