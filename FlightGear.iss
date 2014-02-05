@@ -73,7 +73,6 @@ Source: "X:\install\msvc100\FlightGear\bin\fgadmin.exe"; DestDir: "{app}\bin"; F
 Source: "X:\install\msvc100\FlightGear\bin\terrasync.exe"; DestDir: "{app}\bin"; Flags: ignoreversion; Check: not Is64BitInstallMode or IsTaskSelected('force32')
 Source: "X:\install\msvc100\FlightGear\bin\js_demo.exe"; DestDir: "{app}\bin"; Flags: ignoreversion; Check: not Is64BitInstallMode or IsTaskSelected('force32')
 Source: "X:\install\msvc100\FlightGear\bin\fgjs.exe"; DestDir: "{app}\bin"; Flags: ignoreversion; Check: not Is64BitInstallMode or IsTaskSelected('force32')
-Source: "X:\install\msvc100\FlightGear\bin\fgpanel.exe"; DestDir: "{app}\bin"; Flags: ignoreversion; Check: not Is64BitInstallMode or IsTaskSelected('force32')
 Source: "X:\install\msvc100\FlightGear\bin\GPSsmooth.exe"; DestDir: "{app}\bin"; Flags: ignoreversion; Check: not Is64BitInstallMode or IsTaskSelected('force32')
 Source: "X:\install\msvc100\FlightGear\bin\UGsmooth.exe"; DestDir: "{app}\bin"; Flags: ignoreversion; Check: not Is64BitInstallMode or IsTaskSelected('force32')
 Source: "X:\install\msvc100\FlightGear\bin\MIDGsmooth.exe"; DestDir: "{app}\bin"; Flags: ignoreversion; Check: not Is64BitInstallMode or IsTaskSelected('force32')
@@ -106,6 +105,8 @@ Source: "X:\3rdParty.x64\bin\vcredist_x64.exe"; DestDir: "{app}\bin"; Flags: ski
 Source: "{#VCInstallDir}\redist\x64\Microsoft.VC100.CRT\*.dll"; DestDir: "{app}\bin"; Check: Is64BitInstallMode and not IsTaskSelected('force32')
 
 ; 32/64 bits install
+;NOTE: FGPanel has no 64 bits equivalent, so we are using the 32 bits binary for 32&64 bits OS
+Source: "X:\install\msvc100\FlightGear\bin\fgpanel.exe"; DestDir: "{app}\bin"; Flags: ignoreversion
 Source: "X:\install\msvc100\FlightGear\share\flightgear\positions.txt"; DestDir: "{app}\share\flightgear"
 Source: "X:\install\msvc100\FlightGear\share\flightgear\special_frequencies.txt"; DestDir: "{app}\share\flightgear"
 Source: "X:\3rdParty\bin\oalinst.exe"; DestDir: "{app}\bin"; Flags: ignoreversion skipifsourcedoesntexist
@@ -187,9 +188,9 @@ Source: "{#OSG64PluginsDir}\osgdb_deprecated_osgparticle.dll"; DestDir: "{app}\b
 
 [Dirs]
 ; Make the user installable scenery directory
-Name: "{userdocs}\FlightGear\Aircraft"; Permissions: everyone-modify
-Name: "{userdocs}\FlightGear\TerraSync"; Permissions: everyone-modify
-Name: "{userdocs}\FlightGear\Custom Scenery"; Permissions: everyone-modify
+Name: "{userdocs}\FlightGear\Aircraft"; Permissions: everyone-modify; Check: not DirExists(ExpandConstant('{userdocs}\FlightGear\Aircraft'))
+Name: "{userdocs}\FlightGear\TerraSync"; Permissions: everyone-modify; Check: not DirExists(ExpandConstant('{userdocs}\FlightGear\TerraSync'))
+Name: "{userdocs}\FlightGear\Custom Scenery"; Permissions: everyone-modify; Check: not DirExists(ExpandConstant('{userdocs}\FlightGear\Custom Scenery'))
 
 [Icons]
 Name: "{userdesktop}\FlightGear {#FGVersion}"; Filename: "{app}\bin\fgrun.exe"; WorkingDir: "{app}"; Tasks: desktopicon;
