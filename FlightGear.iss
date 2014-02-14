@@ -48,6 +48,7 @@ LicenseFile=X:\flightgear\COPYING
 Uninstallable=yes
 SetupIconFile=X:\flightgear\package\flightgear.ico
 VersionInfoVersion={#FGVersion}.0
+InfoBeforeFile=X:\flightgear\package\Win32-Inno\infobefore.txt
 WizardImageFile=X:\flightgear\package\Win32-Inno\setupimg.bmp
 WizardImageStretch=No
 WizardSmallImageFile=X:\flightgear\package\Win32-Inno\setupsmall.bmp
