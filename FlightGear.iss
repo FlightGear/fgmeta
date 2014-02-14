@@ -48,6 +48,7 @@ LicenseFile=X:\flightgear\COPYING
 Uninstallable=yes
 SetupIconFile=X:\flightgear\package\flightgear.ico
 VersionInfoVersion={#FGVersion}.0
+InfoBeforeFile=X:\flightgear\package\Win32-Inno\infobefore.txt
 WizardImageFile=X:\flightgear\package\Win32-Inno\setupimg.bmp
 WizardImageStretch=No
 WizardSmallImageFile=X:\flightgear\package\Win32-Inno\setupsmall.bmp
@@ -55,54 +56,52 @@ VersionInfoCompany=The FlightGear Team
 UninstallDisplayIcon={app}\bin\fgfs.exe
 ArchitecturesInstallIn64BitMode=x64
 ArchitecturesAllowed=x86 x64
-InfoBeforeFile=X:\flightgear\package\Win32-Inno\infobefore.txt
 
 
 [Tasks]
 ; NOTE: The following entry contains English phrases ("Create a desktop icon" and "Additional icons"). You are free to translate them into another language if required.
 Name: "desktopicon"; Description: "Create a &desktop icon"; GroupDescription: "Additional icons:"
 Name: "insoal"; Description: "Install OpenAL (the sound engine)"
-Name: "force32"; Description: "Force 32bit install on 64bit system"; Check: Is64BitInstallMode; Flags: unchecked
 
 [Files]
 ; NOTE: run subst X: F:\ (or whatever path the expanded tree resides at)
 ;Source: "X:\*.txt"; DestDir: "{app}"; Flags: ignoreversion
 ; 32 bits install
-Source: "X:\install\msvc100\FlightGear\bin\fgfs.exe"; DestDir: "{app}\bin"; Flags: ignoreversion; Check: not Is64BitInstallMode or IsTaskSelected('force32')
-Source: "X:\install\msvc100\FlightGear\bin\fgadmin.exe"; DestDir: "{app}\bin"; Flags: ignoreversion; Check: not Is64BitInstallMode or IsTaskSelected('force32')
-Source: "X:\install\msvc100\FlightGear\bin\terrasync.exe"; DestDir: "{app}\bin"; Flags: ignoreversion; Check: not Is64BitInstallMode or IsTaskSelected('force32')
-Source: "X:\install\msvc100\FlightGear\bin\js_demo.exe"; DestDir: "{app}\bin"; Flags: ignoreversion; Check: not Is64BitInstallMode or IsTaskSelected('force32')
-Source: "X:\install\msvc100\FlightGear\bin\fgjs.exe"; DestDir: "{app}\bin"; Flags: ignoreversion; Check: not Is64BitInstallMode or IsTaskSelected('force32')
-Source: "X:\install\msvc100\FlightGear\bin\GPSsmooth.exe"; DestDir: "{app}\bin"; Flags: ignoreversion; Check: not Is64BitInstallMode or IsTaskSelected('force32')
-Source: "X:\install\msvc100\FlightGear\bin\UGsmooth.exe"; DestDir: "{app}\bin"; Flags: ignoreversion; Check: not Is64BitInstallMode or IsTaskSelected('force32')
-Source: "X:\install\msvc100\FlightGear\bin\MIDGsmooth.exe"; DestDir: "{app}\bin"; Flags: ignoreversion; Check: not Is64BitInstallMode or IsTaskSelected('force32')
-Source: "X:\install\msvc100\FlightGear\bin\metar.exe"; DestDir: "{app}\bin"; Flags: ignoreversion; Check: not Is64BitInstallMode or IsTaskSelected('force32')
-Source: "X:\install\msvc100\FlightGear\bin\yasim.exe"; DestDir: "{app}\bin"; Flags: ignoreversion; Check: not Is64BitInstallMode or IsTaskSelected('force32')
-Source: "X:\install\msvc100\FlightGear\bin\fgcom.exe"; DestDir: "{app}\bin"; Flags: ignoreversion; Check: not Is64BitInstallMode or IsTaskSelected('force32')
-Source: "X:\install\msvc100\FGRun\bin\fgrun.exe"; DestDir: "{app}\bin"; Flags: ignoreversion ; Check: not Is64BitInstallMode or IsTaskSelected('force32')
-Source: "X:\install\msvc100\FGRun\share\locale\*"; DestDir: "{app}\bin\locale"; Flags: ignoreversion recursesubdirs; Check: not Is64BitInstallMode or IsTaskSelected('force32')
-Source: "X:\3rdParty\bin\*.dll"; DestDir: "{app}\bin"; Check: not Is64BitInstallMode or IsTaskSelected('force32')
-Source: "{#VCInstallDir}\redist\x86\Microsoft.VC100.CRT\*.dll"; DestDir:  "{app}\bin"; Check: not Is64BitInstallMode or IsTaskSelected('force32')
-Source: "X:\3rdParty\bin\vcredist_x86.exe"; DestDir: "{app}\bin"; Flags: skipifsourcedoesntexist; Check: not Is64BitInstallMode or IsTaskSelected('force32')
+Source: "X:\install\msvc100\FlightGear\bin\fgfs.exe"; DestDir: "{app}\bin"; Flags: ignoreversion; Check: not Is64BitInstallMode
+Source: "X:\install\msvc100\FlightGear\bin\fgadmin.exe"; DestDir: "{app}\bin"; Flags: ignoreversion; Check: not Is64BitInstallMode
+Source: "X:\install\msvc100\FlightGear\bin\terrasync.exe"; DestDir: "{app}\bin"; Flags: ignoreversion; Check: not Is64BitInstallMode
+Source: "X:\install\msvc100\FlightGear\bin\js_demo.exe"; DestDir: "{app}\bin"; Flags: ignoreversion; Check: not Is64BitInstallMode
+Source: "X:\install\msvc100\FlightGear\bin\fgjs.exe"; DestDir: "{app}\bin"; Flags: ignoreversion; Check: not Is64BitInstallMode
+Source: "X:\install\msvc100\FlightGear\bin\GPSsmooth.exe"; DestDir: "{app}\bin"; Flags: ignoreversion; Check: not Is64BitInstallMode
+Source: "X:\install\msvc100\FlightGear\bin\UGsmooth.exe"; DestDir: "{app}\bin"; Flags: ignoreversion; Check: not Is64BitInstallMode
+Source: "X:\install\msvc100\FlightGear\bin\MIDGsmooth.exe"; DestDir: "{app}\bin"; Flags: ignoreversion; Check: not Is64BitInstallMode
+Source: "X:\install\msvc100\FlightGear\bin\metar.exe"; DestDir: "{app}\bin"; Flags: ignoreversion; Check: not Is64BitInstallMode
+Source: "X:\install\msvc100\FlightGear\bin\yasim.exe"; DestDir: "{app}\bin"; Flags: ignoreversion; Check: not Is64BitInstallMode
+Source: "X:\install\msvc100\FlightGear\bin\fgcom.exe"; DestDir: "{app}\bin"; Flags: ignoreversion; Check: not Is64BitInstallMode
+Source: "X:\install\msvc100\FGRun\bin\fgrun.exe"; DestDir: "{app}\bin"; Flags: ignoreversion ; Check: not Is64BitInstallMode
+Source: "X:\install\msvc100\FGRun\share\locale\*"; DestDir: "{app}\bin\locale"; Flags: ignoreversion recursesubdirs; Check: not Is64BitInstallMode
+Source: "X:\3rdParty\bin\*.dll"; DestDir: "{app}\bin"; Check: not Is64BitInstallMode
+Source: "{#VCInstallDir}\redist\x86\Microsoft.VC100.CRT\*.dll"; DestDir:  "{app}\bin"; Check: not Is64BitInstallMode
+Source: "X:\3rdParty\bin\vcredist_x86.exe"; DestDir: "{app}\bin"; Flags: skipifsourcedoesntexist; Check: not Is64BitInstallMode
 
 ; 64 bits install
-Source: "X:\install\msvc100-64\FlightGear\bin\fgfs.exe"; DestDir: "{app}\bin"; Flags: ignoreversion; Check: Is64BitInstallMode and not IsTaskSelected('force32')
-Source: "X:\install\msvc100-64\FlightGear\bin\fgfs.exe"; DestDir: "{app}\bin"; Flags: ignoreversion; Check: Is64BitInstallMode and not IsTaskSelected('force32')
-Source: "X:\install\msvc100-64\FlightGear\bin\fgadmin.exe"; DestDir: "{app}\bin"; Flags: ignoreversion; Check: Is64BitInstallMode and not IsTaskSelected('force32')
-Source: "X:\install\msvc100-64\FlightGear\bin\terrasync.exe"; DestDir: "{app}\bin"; Flags: ignoreversion; Check: Is64BitInstallMode and not IsTaskSelected('force32')
-Source: "X:\install\msvc100-64\FlightGear\bin\js_demo.exe"; DestDir: "{app}\bin"; Flags: ignoreversion; Check: Is64BitInstallMode and not IsTaskSelected('force32')
-Source: "X:\install\msvc100-64\FlightGear\bin\fgjs.exe"; DestDir: "{app}\bin"; Flags: ignoreversion; Check: Is64BitInstallMode and not IsTaskSelected('force32')
-Source: "X:\install\msvc100-64\FlightGear\bin\GPSsmooth.exe"; DestDir: "{app}\bin"; Flags: ignoreversion; Check: Is64BitInstallMode and not IsTaskSelected('force32')
-Source: "X:\install\msvc100-64\FlightGear\bin\UGsmooth.exe"; DestDir: "{app}\bin"; Flags: ignoreversion; Check: Is64BitInstallMode and not IsTaskSelected('force32')
-Source: "X:\install\msvc100-64\FlightGear\bin\MIDGsmooth.exe"; DestDir: "{app}\bin"; Flags: ignoreversion; Check: Is64BitInstallMode and not IsTaskSelected('force32')
-Source: "X:\install\msvc100-64\FlightGear\bin\metar.exe"; DestDir: "{app}\bin"; Flags: ignoreversion; Check: Is64BitInstallMode and not IsTaskSelected('force32')
-Source: "X:\install\msvc100-64\FlightGear\bin\yasim.exe"; DestDir: "{app}\bin"; Flags: ignoreversion; Check: Is64BitInstallMode and not IsTaskSelected('force32')
-Source: "X:\install\msvc100-64\FlightGear\bin\fgcom.exe"; DestDir: "{app}\bin"; Flags: ignoreversion; Check: Is64BitInstallMode and not IsTaskSelected('force32')
-Source: "X:\install\msvc100-64\FGRun\bin\fgrun.exe"; DestDir: "{app}\bin"; Flags: ignoreversion; Check: Is64BitInstallMode and not IsTaskSelected('force32')
-Source: "X:\install\msvc100-64\FGRun\share\locale\*"; DestDir: "{app}\bin\locale"; Flags: ignoreversion recursesubdirs; Check: Is64BitInstallMode and not IsTaskSelected('force32')
-Source: "X:\3rdParty.x64\bin\*.dll"; DestDir: "{app}\bin"; Check: Is64BitInstallMode and not IsTaskSelected('force32')
-Source: "X:\3rdParty.x64\bin\vcredist_x64.exe"; DestDir: "{app}\bin"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode and not IsTaskSelected('force32')
-Source: "{#VCInstallDir}\redist\x64\Microsoft.VC100.CRT\*.dll"; DestDir: "{app}\bin"; Check: Is64BitInstallMode and not IsTaskSelected('force32')
+Source: "X:\install\msvc100-64\FlightGear\bin\fgfs.exe"; DestDir: "{app}\bin"; Flags: ignoreversion; Check: Is64BitInstallMode
+Source: "X:\install\msvc100-64\FlightGear\bin\fgfs.exe"; DestDir: "{app}\bin"; Flags: ignoreversion; Check: Is64BitInstallMode
+Source: "X:\install\msvc100-64\FlightGear\bin\fgadmin.exe"; DestDir: "{app}\bin"; Flags: ignoreversion; Check: Is64BitInstallMode
+Source: "X:\install\msvc100-64\FlightGear\bin\terrasync.exe"; DestDir: "{app}\bin"; Flags: ignoreversion; Check: Is64BitInstallMode
+Source: "X:\install\msvc100-64\FlightGear\bin\js_demo.exe"; DestDir: "{app}\bin"; Flags: ignoreversion; Check: Is64BitInstallMode
+Source: "X:\install\msvc100-64\FlightGear\bin\fgjs.exe"; DestDir: "{app}\bin"; Flags: ignoreversion; Check: Is64BitInstallMode
+Source: "X:\install\msvc100-64\FlightGear\bin\GPSsmooth.exe"; DestDir: "{app}\bin"; Flags: ignoreversion; Check: Is64BitInstallMode
+Source: "X:\install\msvc100-64\FlightGear\bin\UGsmooth.exe"; DestDir: "{app}\bin"; Flags: ignoreversion; Check: Is64BitInstallMode
+Source: "X:\install\msvc100-64\FlightGear\bin\MIDGsmooth.exe"; DestDir: "{app}\bin"; Flags: ignoreversion; Check: Is64BitInstallMode
+Source: "X:\install\msvc100-64\FlightGear\bin\metar.exe"; DestDir: "{app}\bin"; Flags: ignoreversion; Check: Is64BitInstallMode
+Source: "X:\install\msvc100-64\FlightGear\bin\yasim.exe"; DestDir: "{app}\bin"; Flags: ignoreversion; Check: Is64BitInstallMode
+Source: "X:\install\msvc100-64\FlightGear\bin\fgcom.exe"; DestDir: "{app}\bin"; Flags: ignoreversion; Check: Is64BitInstallMode
+Source: "X:\install\msvc100-64\FGRun\bin\fgrun.exe"; DestDir: "{app}\bin"; Flags: ignoreversion; Check: Is64BitInstallMode
+Source: "X:\install\msvc100-64\FGRun\share\locale\*"; DestDir: "{app}\bin\locale"; Flags: ignoreversion recursesubdirs; Check: Is64BitInstallMode
+Source: "X:\3rdParty.x64\bin\*.dll"; DestDir: "{app}\bin"; Check: Is64BitInstallMode
+Source: "X:\3rdParty.x64\bin\vcredist_x64.exe"; DestDir: "{app}\bin"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode
+Source: "{#VCInstallDir}\redist\x64\Microsoft.VC100.CRT\*.dll"; DestDir: "{app}\bin"; Check: Is64BitInstallMode
 
 ; 32/64 bits install
 ;NOTE: FGPanel has no 64 bits equivalent, so we are using the 32 bits binary for 32&64 bits OS
@@ -117,74 +116,74 @@ Source: "X:\data\*.*"; DestDir: "{app}\data"; Flags: ignoreversion recursesubdir
 Source: "X:\fgdata\*.*"; DestDir: "{app}\data"; Flags: ignoreversion recursesubdirs skipifsourcedoesntexist
 
 ; 32 bits install
-Source: "{#OSGInstallDir}\bin\osg{#OSGSoNumber}-osg.dll"; DestDir: "{app}\bin"; Check: not Is64BitInstallMode or IsTaskSelected('force32')
-Source: "{#OSGInstallDir}\bin\osg{#OSGSoNumber}-osgDB.dll"; DestDir: "{app}\bin"; Check: not Is64BitInstallMode or IsTaskSelected('force32')
-Source: "{#OSGInstallDir}\bin\osg{#OSGSoNumber}-osgGA.dll"; DestDir: "{app}\bin"; Check: not Is64BitInstallMode or IsTaskSelected('force32')
-Source: "{#OSGInstallDir}\bin\osg{#OSGSoNumber}-osgParticle.dll"; DestDir: "{app}\bin"; Check: not Is64BitInstallMode or IsTaskSelected('force32')
-Source: "{#OSGInstallDir}\bin\osg{#OSGSoNumber}-osgText.dll"; DestDir: "{app}\bin"; Check: not Is64BitInstallMode or IsTaskSelected('force32')
-Source: "{#OSGInstallDir}\bin\osg{#OSGSoNumber}-osgUtil.dll"; DestDir: "{app}\bin"; Check: not Is64BitInstallMode or IsTaskSelected('force32')
-Source: "{#OSGInstallDir}\bin\osg{#OSGSoNumber}-osgViewer.dll"; DestDir: "{app}\bin"; Check: not Is64BitInstallMode or IsTaskSelected('force32')
-Source: "{#OSGInstallDir}\bin\osg{#OSGSoNumber}-osgSim.dll"; DestDir: "{app}\bin"; Check: not Is64BitInstallMode or IsTaskSelected('force32')
-Source: "{#OSGInstallDir}\bin\osg{#OSGSoNumber}-osgFX.dll"; DestDir: "{app}\bin"; Check: not Is64BitInstallMode or IsTaskSelected('force32')
-Source: "{#OSGInstallDir}\bin\ot{#OTSoNumber}-OpenThreads.dll"; DestDir: "{app}\bin"; Check: not Is64BitInstallMode or IsTaskSelected('force32')
-Source: "{#OSGPluginsDir}\osgdb_ac.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Check: not Is64BitInstallMode or IsTaskSelected('force32')
-Source: "{#OSGPluginsDir}\osgdb_osg.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Check: not Is64BitInstallMode or IsTaskSelected('force32')
-Source: "{#OSGPluginsDir}\osgdb_osga.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Check: not Is64BitInstallMode or IsTaskSelected('force32')
-Source: "{#OSGPluginsDir}\osgdb_3ds.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Check: not Is64BitInstallMode or IsTaskSelected('force32')
-Source: "{#OSGPluginsDir}\osgdb_mdl.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Check: not Is64BitInstallMode or IsTaskSelected('force32')
-Source: "{#OSGPluginsDir}\osgdb_jpeg.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Check: not Is64BitInstallMode or IsTaskSelected('force32')
-Source: "{#OSGPluginsDir}\osgdb_rgb.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Check: not Is64BitInstallMode or IsTaskSelected('force32')
-Source: "{#OSGPluginsDir}\osgdb_png.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Check: not Is64BitInstallMode or IsTaskSelected('force32')
-Source: "{#OSGPluginsDir}\osgdb_dds.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Check: not Is64BitInstallMode or IsTaskSelected('force32')
-Source: "{#OSGPluginsDir}\osgdb_txf.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Check: not Is64BitInstallMode or IsTaskSelected('force32')
-Source: "{#OSGPluginsDir}\osgdb_freetype.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Check: not Is64BitInstallMode or IsTaskSelected('force32')
-Source: "{#OSGPluginsDir}\osgdb_serializers_osg.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Check: not Is64BitInstallMode or IsTaskSelected('force32')
-Source: "{#OSGPluginsDir}\osgdb_serializers_osganimation.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Check: not Is64BitInstallMode or IsTaskSelected('force32')
-Source: "{#OSGPluginsDir}\osgdb_serializers_osgfx.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Check: not Is64BitInstallMode or IsTaskSelected('force32')
-Source: "{#OSGPluginsDir}\osgdb_serializers_osgmanipulator.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Check: not Is64BitInstallMode or IsTaskSelected('force32')
-Source: "{#OSGPluginsDir}\osgdb_serializers_osgparticle.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Check: not Is64BitInstallMode or IsTaskSelected('force32')
-Source: "{#OSGPluginsDir}\osgdb_serializers_osgshadow.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Check: not Is64BitInstallMode or IsTaskSelected('force32')
-Source: "{#OSGPluginsDir}\osgdb_serializers_osgsim.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Check: not Is64BitInstallMode or IsTaskSelected('force32')
-Source: "{#OSGPluginsDir}\osgdb_serializers_osgterrain.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Check: not Is64BitInstallMode or IsTaskSelected('force32')
-Source: "{#OSGPluginsDir}\osgdb_serializers_osgtext.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Check: not Is64BitInstallMode or IsTaskSelected('force32')
-Source: "{#OSGPluginsDir}\osgdb_serializers_osgvolume.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Check: not Is64BitInstallMode or IsTaskSelected('force32')
-Source: "{#OSGPluginsDir}\osgdb_deprecated_osg.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Check: not Is64BitInstallMode or IsTaskSelected('force32')
-Source: "{#OSGPluginsDir}\osgdb_deprecated_osgparticle.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Check: not Is64BitInstallMode or IsTaskSelected('force32')
+Source: "{#OSGInstallDir}\bin\osg{#OSGSoNumber}-osg.dll"; DestDir: "{app}\bin"; Check: not Is64BitInstallMode
+Source: "{#OSGInstallDir}\bin\osg{#OSGSoNumber}-osgDB.dll"; DestDir: "{app}\bin"; Check: not Is64BitInstallMode
+Source: "{#OSGInstallDir}\bin\osg{#OSGSoNumber}-osgGA.dll"; DestDir: "{app}\bin"; Check: not Is64BitInstallMode
+Source: "{#OSGInstallDir}\bin\osg{#OSGSoNumber}-osgParticle.dll"; DestDir: "{app}\bin"; Check: not Is64BitInstallMode
+Source: "{#OSGInstallDir}\bin\osg{#OSGSoNumber}-osgText.dll"; DestDir: "{app}\bin"; Check: not Is64BitInstallMode
+Source: "{#OSGInstallDir}\bin\osg{#OSGSoNumber}-osgUtil.dll"; DestDir: "{app}\bin"; Check: not Is64BitInstallMode
+Source: "{#OSGInstallDir}\bin\osg{#OSGSoNumber}-osgViewer.dll"; DestDir: "{app}\bin"; Check: not Is64BitInstallMode
+Source: "{#OSGInstallDir}\bin\osg{#OSGSoNumber}-osgSim.dll"; DestDir: "{app}\bin"; Check: not Is64BitInstallMode
+Source: "{#OSGInstallDir}\bin\osg{#OSGSoNumber}-osgFX.dll"; DestDir: "{app}\bin"; Check: not Is64BitInstallMode
+Source: "{#OSGInstallDir}\bin\ot{#OTSoNumber}-OpenThreads.dll"; DestDir: "{app}\bin"; Check: not Is64BitInstallMode
+Source: "{#OSGPluginsDir}\osgdb_ac.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Check: not Is64BitInstallMode
+Source: "{#OSGPluginsDir}\osgdb_osg.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Check: not Is64BitInstallMode
+Source: "{#OSGPluginsDir}\osgdb_osga.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Check: not Is64BitInstallMode
+Source: "{#OSGPluginsDir}\osgdb_3ds.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Check: not Is64BitInstallMode
+Source: "{#OSGPluginsDir}\osgdb_mdl.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Check: not Is64BitInstallMode
+Source: "{#OSGPluginsDir}\osgdb_jpeg.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Check: not Is64BitInstallMode
+Source: "{#OSGPluginsDir}\osgdb_rgb.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Check: not Is64BitInstallMode
+Source: "{#OSGPluginsDir}\osgdb_png.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Check: not Is64BitInstallMode
+Source: "{#OSGPluginsDir}\osgdb_dds.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Check: not Is64BitInstallMode
+Source: "{#OSGPluginsDir}\osgdb_txf.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Check: not Is64BitInstallMode
+Source: "{#OSGPluginsDir}\osgdb_freetype.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Check: not Is64BitInstallMode
+Source: "{#OSGPluginsDir}\osgdb_serializers_osg.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Check: not Is64BitInstallMode
+Source: "{#OSGPluginsDir}\osgdb_serializers_osganimation.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Check: not Is64BitInstallMode
+Source: "{#OSGPluginsDir}\osgdb_serializers_osgfx.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Check: not Is64BitInstallMode
+Source: "{#OSGPluginsDir}\osgdb_serializers_osgmanipulator.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Check: not Is64BitInstallMode
+Source: "{#OSGPluginsDir}\osgdb_serializers_osgparticle.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Check: not Is64BitInstallMode
+Source: "{#OSGPluginsDir}\osgdb_serializers_osgshadow.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Check: not Is64BitInstallMode
+Source: "{#OSGPluginsDir}\osgdb_serializers_osgsim.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Check: not Is64BitInstallMode
+Source: "{#OSGPluginsDir}\osgdb_serializers_osgterrain.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Check: not Is64BitInstallMode
+Source: "{#OSGPluginsDir}\osgdb_serializers_osgtext.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Check: not Is64BitInstallMode
+Source: "{#OSGPluginsDir}\osgdb_serializers_osgvolume.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Check: not Is64BitInstallMode
+Source: "{#OSGPluginsDir}\osgdb_deprecated_osg.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Check: not Is64BitInstallMode
+Source: "{#OSGPluginsDir}\osgdb_deprecated_osgparticle.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Check: not Is64BitInstallMode
 
 ; 64 bits install
-Source: "{#OSG64InstallDir}\bin\osg{#OSGSoNumber}-osg.dll"; DestDir: "{app}\bin"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode and not IsTaskSelected('force32')
-Source: "{#OSG64InstallDir}\bin\osg{#OSGSoNumber}-osgDB.dll"; DestDir: "{app}\bin"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode and not IsTaskSelected('force32')
-Source: "{#OSG64InstallDir}\bin\osg{#OSGSoNumber}-osgGA.dll"; DestDir: "{app}\bin"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode and not IsTaskSelected('force32')
-Source: "{#OSG64InstallDir}\bin\osg{#OSGSoNumber}-osgParticle.dll"; DestDir: "{app}\bin"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode and not IsTaskSelected('force32')
-Source: "{#OSG64InstallDir}\bin\osg{#OSGSoNumber}-osgText.dll"; DestDir: "{app}\bin"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode and not IsTaskSelected('force32')
-Source: "{#OSG64InstallDir}\bin\osg{#OSGSoNumber}-osgUtil.dll"; DestDir: "{app}\bin"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode and not IsTaskSelected('force32')
-Source: "{#OSG64InstallDir}\bin\osg{#OSGSoNumber}-osgViewer.dll"; DestDir: "{app}\bin"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode and not IsTaskSelected('force32')
-Source: "{#OSG64InstallDir}\bin\osg{#OSGSoNumber}-osgSim.dll"; DestDir: "{app}\bin"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode and not IsTaskSelected('force32')
-Source: "{#OSG64InstallDir}\bin\osg{#OSGSoNumber}-osgFX.dll"; DestDir: "{app}\bin"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode and not IsTaskSelected('force32')
-Source: "{#OSG64InstallDir}\bin\ot{#OTSoNumber}-OpenThreads.dll"; DestDir: "{app}\bin"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode and not IsTaskSelected('force32')
-Source: "{#OSG64PluginsDir}\osgdb_ac.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode and not IsTaskSelected('force32')
-Source: "{#OSG64PluginsDir}\osgdb_osg.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode and not IsTaskSelected('force32')
-Source: "{#OSG64PluginsDir}\osgdb_osga.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode and not IsTaskSelected('force32')
-Source: "{#OSG64PluginsDir}\osgdb_3ds.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode and not IsTaskSelected('force32')
-Source: "{#OSG64PluginsDir}\osgdb_mdl.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode and not IsTaskSelected('force32')
-Source: "{#OSG64PluginsDir}\osgdb_jpeg.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode and not IsTaskSelected('force32')
-Source: "{#OSG64PluginsDir}\osgdb_rgb.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode and not IsTaskSelected('force32')
-Source: "{#OSG64PluginsDir}\osgdb_png.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode and not IsTaskSelected('force32')
-Source: "{#OSG64PluginsDir}\osgdb_dds.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode and not IsTaskSelected('force32')
-Source: "{#OSG64PluginsDir}\osgdb_txf.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode and not IsTaskSelected('force32')
-Source: "{#OSG64PluginsDir}\osgdb_freetype.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode and not IsTaskSelected('force32')
-Source: "{#OSG64PluginsDir}\osgdb_serializers_osg.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode and not IsTaskSelected('force32')
-Source: "{#OSG64PluginsDir}\osgdb_serializers_osganimation.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode and not IsTaskSelected('force32')
-Source: "{#OSG64PluginsDir}\osgdb_serializers_osgfx.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode and not IsTaskSelected('force32')
-Source: "{#OSG64PluginsDir}\osgdb_serializers_osgmanipulator.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode and not IsTaskSelected('force32')
-Source: "{#OSG64PluginsDir}\osgdb_serializers_osgparticle.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode and not IsTaskSelected('force32')
-Source: "{#OSG64PluginsDir}\osgdb_serializers_osgshadow.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode and not IsTaskSelected('force32')
-Source: "{#OSG64PluginsDir}\osgdb_serializers_osgsim.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode and not IsTaskSelected('force32')
-Source: "{#OSG64PluginsDir}\osgdb_serializers_osgterrain.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode and not IsTaskSelected('force32')
-Source: "{#OSG64PluginsDir}\osgdb_serializers_osgtext.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode and not IsTaskSelected('force32')
-Source: "{#OSG64PluginsDir}\osgdb_serializers_osgvolume.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode and not IsTaskSelected('force32')
-Source: "{#OSG64PluginsDir}\osgdb_deprecated_osg.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode and not IsTaskSelected('force32')
-Source: "{#OSG64PluginsDir}\osgdb_deprecated_osgparticle.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode and not IsTaskSelected('force32')
+Source: "{#OSG64InstallDir}\bin\osg{#OSGSoNumber}-osg.dll"; DestDir: "{app}\bin"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode
+Source: "{#OSG64InstallDir}\bin\osg{#OSGSoNumber}-osgDB.dll"; DestDir: "{app}\bin"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode
+Source: "{#OSG64InstallDir}\bin\osg{#OSGSoNumber}-osgGA.dll"; DestDir: "{app}\bin"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode
+Source: "{#OSG64InstallDir}\bin\osg{#OSGSoNumber}-osgParticle.dll"; DestDir: "{app}\bin"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode
+Source: "{#OSG64InstallDir}\bin\osg{#OSGSoNumber}-osgText.dll"; DestDir: "{app}\bin"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode
+Source: "{#OSG64InstallDir}\bin\osg{#OSGSoNumber}-osgUtil.dll"; DestDir: "{app}\bin"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode
+Source: "{#OSG64InstallDir}\bin\osg{#OSGSoNumber}-osgViewer.dll"; DestDir: "{app}\bin"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode
+Source: "{#OSG64InstallDir}\bin\osg{#OSGSoNumber}-osgSim.dll"; DestDir: "{app}\bin"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode
+Source: "{#OSG64InstallDir}\bin\osg{#OSGSoNumber}-osgFX.dll"; DestDir: "{app}\bin"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode
+Source: "{#OSG64InstallDir}\bin\ot{#OTSoNumber}-OpenThreads.dll"; DestDir: "{app}\bin"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode
+Source: "{#OSG64PluginsDir}\osgdb_ac.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode
+Source: "{#OSG64PluginsDir}\osgdb_osg.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode
+Source: "{#OSG64PluginsDir}\osgdb_osga.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode
+Source: "{#OSG64PluginsDir}\osgdb_3ds.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode
+Source: "{#OSG64PluginsDir}\osgdb_mdl.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode
+Source: "{#OSG64PluginsDir}\osgdb_jpeg.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode
+Source: "{#OSG64PluginsDir}\osgdb_rgb.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode
+Source: "{#OSG64PluginsDir}\osgdb_png.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode
+Source: "{#OSG64PluginsDir}\osgdb_dds.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode
+Source: "{#OSG64PluginsDir}\osgdb_txf.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode
+Source: "{#OSG64PluginsDir}\osgdb_freetype.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode
+Source: "{#OSG64PluginsDir}\osgdb_serializers_osg.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode
+Source: "{#OSG64PluginsDir}\osgdb_serializers_osganimation.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode
+Source: "{#OSG64PluginsDir}\osgdb_serializers_osgfx.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode
+Source: "{#OSG64PluginsDir}\osgdb_serializers_osgmanipulator.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode
+Source: "{#OSG64PluginsDir}\osgdb_serializers_osgparticle.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode
+Source: "{#OSG64PluginsDir}\osgdb_serializers_osgshadow.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode
+Source: "{#OSG64PluginsDir}\osgdb_serializers_osgsim.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode
+Source: "{#OSG64PluginsDir}\osgdb_serializers_osgterrain.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode
+Source: "{#OSG64PluginsDir}\osgdb_serializers_osgtext.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode
+Source: "{#OSG64PluginsDir}\osgdb_serializers_osgvolume.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode
+Source: "{#OSG64PluginsDir}\osgdb_deprecated_osg.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode
+Source: "{#OSG64PluginsDir}\osgdb_deprecated_osgparticle.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode
 
 [Dirs]
 ; Make the user installable scenery directory
@@ -208,7 +207,7 @@ Name: "{group}\Tools\UGsmooth"; Filename: "cmd"; Parameters: "/k ""{app}\bin\UGs
 Name: "{group}\Tools\MIDGsmooth"; Filename: "cmd"; Parameters: "/k ""{app}\bin\MIDGsmooth.exe"" -h"; WorkingDir: "{app}\bin"
 Name: "{group}\Tools\metar"; Filename: "cmd"; Parameters: "/k ""{app}\bin\metar.exe"" -h"; WorkingDir: "{app}\bin"
 Name: "{group}\Tools\yasim"; Filename: "cmd"; Parameters: "/k ""{app}\bin\yasim.exe"" -h"; WorkingDir: "{app}\bin"
-Name: "{group}\Tools\fgpanel"; Filename: "cmd"; Parameters: "/k ""{app}\bin\fgpanel.exe"" -h"; WorkingDir: "{app}\bin"; Check: not Is64BitInstallMode or IsTaskSelected('force32')
+Name: "{group}\Tools\fgpanel"; Filename: "cmd"; Parameters: "/k ""{app}\bin\fgpanel.exe"" -h"; WorkingDir: "{app}\bin"
 Name: "{group}\Tools\FGCom"; Filename: "{app}\bin\fgcom.exe"; WorkingDir: "{app}\bin"
 Name: "{group}\Tools\FGCom-testing"; Filename: "{app}\bin\fgcom.exe"; Parameters: "-f910"; WorkingDir: "{app}\bin"
 Name: "{group}\Tools\Explore Documentation Folder"; Filename: "{app}\data\Docs"
@@ -217,7 +216,7 @@ Name: "{group}\Tools\Explore Documentation Folder"; Filename: "{app}\data\Docs"
 filename: "cmd.exe"; WorkingDir: "{app}\bin"; Parameters: "/C del msvc*.dll"; Check: FileExists(ExpandConstant('{app}\bin\vcredist_x86.exe'))
 filename: "cmd.exe"; WorkingDir: "{app}\bin"; Parameters: "/C del msvc*.dll"; Check: FileExists(ExpandConstant('{app}\bin\vcredist_x64.exe'))
 filename: "{app}\bin\vcredist_x86.exe"; WorkingDir: "{app}\bin"; Parameters: "/passive /norestart"; Description: "Installing MS Visual C++ runtime components"; Check: FileExists(ExpandConstant('{app}\bin\vcredist_x86.exe'))
-filename: "{app}\bin\vcredist_x64.exe"; WorkingDir: "{app}\bin"; Parameters: "/passive /norestart"; Description: "Installing MS Visual C++ runtime components"; Check: Is64BitInstallMode and not IsTaskSelected('force32') and FileExists(ExpandConstant('{app}\bin\vcredist_x64.exe'))
+filename: "{app}\bin\vcredist_x64.exe"; WorkingDir: "{app}\bin"; Parameters: "/passive /norestart"; Description: "Installing MS Visual C++ runtime components"; Check: Is64BitInstallMode and FileExists(ExpandConstant('{app}\bin\vcredist_x64.exe'))
 filename: "{app}\bin\oalinst.exe"; WorkingDir: "{app}\bin"; Description: "Installing OpenAL"; Check: IsTaskSelected('insoal') and FileExists(ExpandConstant('{app}\bin\oalinst.exe'))
 ; Put installation directory into the fgrun.prefs
 filename: "{app}\bin\fgrun.exe"; WorkingDir: "{app}\bin"; Parameters: "--silent ""--fg-exe={app}\bin\fgfs.exe"" ""--fg-root={app}\data"" ""--fg-scenery={userdocs}\FlightGear\Custom Scenery;{app}\data\Scenery"" ""--fg-aircraft={userdocs}\FlightGear\Aircraft"" ""--terrasync-dir={userdocs}\FlightGear\TerraSync"" --version={#FGVersion}"
