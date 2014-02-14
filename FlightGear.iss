@@ -48,6 +48,7 @@ LicenseFile=X:\flightgear\COPYING
 Uninstallable=yes
 SetupIconFile=X:\flightgear\package\flightgear.ico
 VersionInfoVersion={#FGVersion}.0
+InfoBeforeFile=X:\flightgear\package\Win32-Inno\infobefore.txt
 WizardImageFile=X:\flightgear\package\Win32-Inno\setupimg.bmp
 WizardImageStretch=No
 WizardSmallImageFile=X:\flightgear\package\Win32-Inno\setupsmall.bmp
@@ -60,7 +61,7 @@ ArchitecturesAllowed=x86 x64
 ; NOTE: The following entry contains English phrases ("Create a desktop icon" and "Additional icons"). You are free to translate them into another language if required.
 Name: "desktopicon"; Description: "Create a &desktop icon"; GroupDescription: "Additional icons:"
 Name: "insoal"; Description: "Install OpenAL (the sound engine)"
-Name: "force32"; Description: "Force 32bit install on 64bit system"; Check: Is64BitInstallMode
+Name: "force32"; Description: "Force 32bit install on 64bit system (Not recommended)"; Check: Is64BitInstallMode; Flags: unchecked
 
 [Files]
 ; NOTE: run subst X: F:\ (or whatever path the expanded tree resides at)
