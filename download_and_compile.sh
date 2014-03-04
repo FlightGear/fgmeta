@@ -20,9 +20,13 @@
 # Setting up for download_and_compile.sh is documented 
 # on 
 
-VERSION="1.9-14" 
+VERSION="1.9-14a" 
 # See change log below
 # 
+# Changes in 1.9.14a
+# 
+# fixed distribution detection.
+#
 # Changes in 1.9.14
 # 1. Version bump for 2.99.9 now 3.0.0
 # 2. changed logging to log entire output of a sub-process 
@@ -644,7 +648,7 @@ set -$opts
 # Script Section: Determine Linux Distribution
 # ---------------------------------------------------------
 
-if [ -e /etc/lsb_release ]
+if [ -e /etc/lsb-release ]
 then
 	. /etc/lsb-release
 fi
