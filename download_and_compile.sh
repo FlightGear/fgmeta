@@ -17,14 +17,45 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-VERSION="1.9-13" 
-#compatibility with UBUNTU 13.10 - libhal no longer in ubuntu 13.10 
-#symbolic link error when using data directories in higher directories
-#fixed array index on FGDATA version picker
-#fixed fgdata directory reference when using parent or grandparent directories to store master copies.
-#fixed rebuild command
+# Setting up for download_and_compile.sh is documented 
+# on 
 
-#COMPILE GIT FGFS
+VERSION="1.9-14a" 
+# See change log below
+# 
+# Changes in 1.9.14a
+# 
+# fixed distribution detection.
+#
+# Changes in 1.9.14
+# 1. Version bump for 2.99.9 now 3.0.0
+# 2. changed logging to log entire output of a sub-process 
+#    rather than write individual lines of output to a logfile.
+# 3. logs are versioned.
+# 4. fix to support a change in fgdata version when fgdata is a symlink
+# 5. Automatic j option # of cores + 1
+# 6. fixed stable fgrun build 
+# 7. stable is now 2.12.0 for fgfs & simgear, 2.12.1 for fgdata
+# 8. fixed broken stable build for 2.12.0
+# 9. Added section on setup
+# 10. once built, unless specifically requested by parameter OSG or PLIB:
+#	Don't rebuild OSG or plib 
+#       Don't update OSG or plib sources
+# 12. self testing with ./download_and_compile.sh test.  
+#
+# Note: using the self test multiple times can cause problems.  Only so much bandwidth is allocated
+#       to you when downloading OSG.  Use it up and you will be shut off for a while.  As an alternative
+#       provide copies of the OSG sources in the same directory as download_and_compile.sh
+# 	the copy should be labeled with the version of OSG it contains. OpenSceneGraph-3.0.1 and OpenSceneGraph-3.2.0
+#       plib is handled the same way, but only one version of it exists so its just plib.
+#
+#	the symptom of overuse of svn.openscenegraph.org is:
+#	svn: E175002: OPTIONS of 'http://svn.openscenegraph.org/osg/OpenSceneGraph/tags/OpenSceneGraph-3.0.1': 
+#	could not connect to server (http://svn.openscenegraph.org)
+#
+# setup and minimal instructions: 
+# see http://wiki.flightgear.org/Scripted_Compilation_on_Linux_Debian/Ubuntu#Cut_to_the_Chase:_for_the_impatient
+#
 
 #######################################################
 # THANKS TO
@@ -35,6 +66,97 @@ VERSION="1.9-13"
 # Thanks to "F-JJTH" for bug fixes and suggestions
 # Thanks again to "F-JJTH" for OpenRTI and FGX 
 # Thanks to André, ( taureau89_9 ) for debian stable packages fixes
+
+# ---------------------------------------------------------
+# Script Section: Self Test
+# ---------------------------------------------------------
+
+function self_test_one(){
+	test_dir="$1$3"
+	test_options_and_parameters="$2"
+	test_sub_dir="$3"
+	mkdir -p ${test_dir}${test_sub_dir} 
+	if [[ "$test_sub_dir" != "" ]]
+	then
+		cp -f download_and_compile.sh ${test_dir}/../
+	fi
+
+	cd ${test_dir}
+	$test_start_dir/download_and_compile.sh $test_options_and_parameters
+
+	cd $test_start_dir
+	if [[ -e $test_dir/install/fgfs/bin/fgfs && -e $test_dir/install/fgrun/bin/fgrun ]]
+	then	
+		test_dir="$1"
+		touch ${test_dir}_ok
+		ls -lah  ${test_dir}/install/fgfs
+	else	
+		test_dir="$1"
+		touch ${test_dir}_failed
+	fi
+	echo '----------------------------------------------------------'
+	echo '----------------------------------------------------------'
+	echo '----------------------------------------------------------'
+	echo                Finished test build in ${test_dir}
+	echo '----------------------------------------------------------'
+	echo '----------------------------------------------------------'
+	echo '----------------------------------------------------------'
+
+}
+if [[ "$1" = "selftest" || "$1" = "test" ]]
+then
+	# this takes a LOT of disk space.
+	set -x
+	set -v
+	test_start_dir=$(pwd)
+	pwd
+	ls
+	if [[ "$2" = "reset" ]]
+	then
+		rm -rf b_stable 
+		rm -rf b_next
+		rm -rf b_master
+		rm -rf b_3.0.0
+		rm -rf b_2.12.1
+		rm -rf b_selftest
+	fi
+	if test -n "$(find . -maxdepth 1 -name 'b_*_ok' -print -quit)"
+	then	
+		rm b_*_ok
+	fi
+	if test -n "$(find . -maxdepth 1 -name 'b_*_failed' -print -quit)"
+	then	
+		rm b_*_failed
+	fi
+	mkdir -p fgsrc
+	mkdir -p othersrc
+
+	# fgdata_2.12.0 and fgdata_3.0.0 contain complete copies of fgdata
+	# so multiple versions can be built and then tested.
+	# the fgdata_ directories can exist in  ../, ../../ or ../../..
+	# if you already have an fgdata downloaded for 2.12.0, 2.12.1 or 3.0.0, 
+	# you can copy the entire fgdata folder to any empty fgdata_ folder in the
+	# same folder as download_and_compile.sh is being tested from The script will use these 
+        # where appropriate.  If you choose not to put an fgdata in the fgdata_${version} directories,
+        # fgdata will be downloaded and place there for future use. 
+	 
+	# mv $path_to_fgdata_2.12/fgdata -R fgdata_2.12.0/
+	# mv $path_to_fgdata_3.0.0/fgdata -R fgdata_3.0.0/
+
+	self_test_one b_stable   "-sxvp n"		              
+	self_test_one b_next     "-xvp n -G 3.2.0" 	            
+	self_test_one b_2.12.1   "-xvp n -B release/2.12.1 -G 3.2.0" 
+	self_test_one b_3.0.0    "-xvp n -B release/3.0.0 -G 3.2.0"  
+	self_test_one b_master   "-xvp n -B master -G 3.2.0"  	    
+	self_test_one b_selftest "-xvp n  -G 3.2.0" 	  		"/selftest/selftest"
+
+	# note the b_selftest is guaranteed to download everything but OSG and plib.
+
+	echo "Test Results:"
+
+	ls -l |grep ' b_*'
+ 	exit 0
+fi
 
 # ---------------------------------------------------------
 # Script Section: Script and Option Initialization
@@ -72,7 +194,7 @@ function git_check_branch_or_tag(){
 	fi
 }
 function SET_WINDOW_TITLE(){
-	echo -ne "\033]0;Build Flightgear:  -  ${CBD} - $1\007"
+	echo -ne "\033]0;Build Flightgear:  -  ${current_build_dir} - $1\007"
 }
 function check_build(){
 #
@@ -94,7 +216,7 @@ do
 	exe_fgrun=""
 	exe_fgcom=""
 	exe_fgcomgui=""
-	install_dir_fgfs=""
+	INSTALL_DIR_FGFS=""
 	install_dir_fgrun=""
 	install_dir_fgcom=""
 	install_dir_fgcomgui=""
@@ -102,7 +224,7 @@ do
 	no_exe_fgrun=""
 	no_exe_fgcom=""
 	no_exe_fgcomgui=""
-	no_install_dir_fgfs=""
+	no_INSTALL_DIR_FGFS=""
 	no_install_dir_fgrun=""
 	no_install_dir_fgcom=""
 	no_install_dir_fgcomgui=""
@@ -137,9 +259,9 @@ do
 
 	if [[ -e ${install_dir}/fgfs ]] 
 	then
-		install_dir_fgfs="fgfs"
+		INSTALL_DIR_FGFS="fgfs"
 	else
-		no_install_dir_fgfs="fgfs"
+		no_INSTALL_DIR_FGFS="fgfs"
 	fi
 
 	if [[ -e "${install_dir}/fgrun" ]] 
@@ -166,8 +288,8 @@ do
 	
 	found_exe="$exe_fgfs $exe_fgrun $exe_fgcom $exe_fgcomgui"
 	no_exe="$no_exe_fgfs $no_exe_fgrun $no_exe_fgcom $no_exe_fgcomgui"
-	found_install_dir="$install_dir_fgfs $install_dir_fgrun $install_dir_fgcom $install_dir_fgcomgui"
-	no_install_dir="$no_install_dir_fgfs $no_install_dir_fgrun $no_install_dir_fgcom $no_install_dir_fgcomgui"
+	found_install_dir="$INSTALL_DIR_FGFS $install_dir_fgrun $install_dir_fgcom $install_dir_fgcomgui"
+	no_install_dir="$no_INSTALL_DIR_FGFS $no_install_dir_fgrun $no_install_dir_fgcom $no_install_dir_fgcomgui"
 	found_exe=${found_exe=## }
 	found_install_dir=${found_install_dir=##}
 	no_exe=${no_exe##}
@@ -190,16 +312,43 @@ do
 	write_log ""
 done
 }
+set -x
+if [[ "$DOWNLOAD_AND_COMPILE_LOG" == "" ]]
+then
+	log_version=0
+	if test -n "$(find . -maxdepth 1 -name 'download_and_compile.log:*' -print -quit)"
+	then
+		for f in download_and_compile.log:*
+		do
+			log_version_found=$(( 10#${f##*:} ))
+			if [[ $log_version_found -gt $log_version ]]
+			then
+				log_version=$log_version_found
+			fi
+		done
+
+	fi
+	if [[ -e download_and_compile.log ]]
+	then
+		let log_version=$(( $log_version + 1))
+		if [[ $log_version -lt 10 ]]
+		then 
+			log_version='0'$log_version
+		fi
+		mv download_and_compile.log download_and_compile.log:$log_version
+	fi
+	export 	DOWNLOAD_AND_COMPILE_LOG=download_and_compile.log
+	bash $0 $* 2>&1 |tee $DOWNLOAD_AND_COMPILE_LOG
+    	exit
+fi
+
 rebuild_command="$0 $*"
-echo $0 $* >>download_and_compile.log
-echo "		started building in $(pwd)" >>download_and_compile.log
-echo "		        at $(date)" >>download_and_compile.log
 
-LOGFILE=compilation_log.txt
+echo $0 $* 
+echo "		started building in $(pwd)" 
+echo "		        at $(date)" 
+
 LOGSEP="***********************************"
-
-WHATTOBUILD=
-WHATTOBUILDALL=( PLIB OSG OPENRTI SIMGEAR FGFS DATA FGRUN FGCOM )
 UPDATE=
 STABLE=
 STOP_AFTER_ONE_MODULE=false 
@@ -211,14 +360,14 @@ COMPILE="y"
 RECONFIGURE="y"
 DOWNLOAD="y"
 
-JOPTION=""
+JOPTION="-j $(( $(nproc) + 1))"
 OOPTION=""
 DEBUG=""
 WITH_EVENT_INPUT=""
 WITH_OPENRTI=""
 FGSG_BRANCH="next"
 FGSG_REVISION="HEAD"
-OSG_VERSION="3.0.1"
+osg_version="3.0.1"
 # ---------------------------------------------------------
 # Script Section: Option Interpretation
 # ---------------------------------------------------------
@@ -230,7 +379,7 @@ do
      case $OPTION in
          s)
 	     STABLE="STABLE"
-             FGSG_BRANCH="2.10.0"
+             FGSG_BRANCH="2.12.1"
 	     FGSG_REVISION="HEAD"
              ;;
          B)
@@ -240,12 +389,12 @@ do
              FGSG_REVISION=$OPTARG
              ;;
          G)
-	     OSG_VERSION=${OPTARG^^} #3.0.1, 3.0.1d 3.1.9 3.1.9d, next nextd, etc
+	     osg_version=${OPTARG^^} #3.0.1, 3.0.1d 3.1.9 3.1.9d, 3.2.0 next nextd, etc
 	     OSG_DEBUG_OR_RELEASE='Release'
-	     if [[ ${OSG_VERSION%d} != ${OSG_VERSION} ]]
+	     if [[ ${osg_version%d} != ${osg_version} ]]
 	     then
 		    OSG_DEBUG_OR_RELEASE='Debug'
-		    OSG_VERSION= ${OSG_VERSION%d}
+		    osg_version= ${osg_version%d}
 	     fi
 	     ;;         
 	 u)
@@ -304,39 +453,7 @@ do
      esac
 done
 
-
-# ---------------------------------------------------------
-# Script Section: Build Argument Interpretation
-# ---------------------------------------------------------
-SET_WINDOW_TITLE "Option Interpretation"
-
-
-shift $(($OPTIND - 1))
-#printf "Remaining arguments are: %s\n" "$*"
-#printf "Num: %d\n" "$#"
-
-if [ ! "$#" = "0" ]
-then
-	for arg in $*
-	do
-		#echo  "$arg"
-		if [ "${arg^^}" == "UPDATE" ]
-		then
-			UPDATE="UPDATE"
-		else
-			WHATTOBUILD=( "${WHATTOBUILD[@]}" "${arg^^}" )
-		fi
-	done
-else
-	WHATTOBUILD=( "${WHATTOBUILDALL[@]}" )
-fi
-
-if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="ALL"' ]]
-then
-	WHATTOBUILD=( "${WHATTOBUILDALL[@]}" )
-fi
-
-printf "%s\n" "${WHATTOBUILD[@]}"
+opts=$-
 
 # ---------------------------------------------------------
 # Script Section: Set Source Archive Version Variables
@@ -344,21 +461,31 @@ printf "%s\n" "${WHATTOBUILD[@]}"
 
 # Last stable revision: currently FlightGear 2.10.0 with 3.0.1
 PLIB_STABLE_REVISION="2172"
-OSG_SVN="http://svn.openscenegraph.org/osg/OpenSceneGraph/tags/OpenSceneGraph-${OSG_VERSION}/"
+OSG_SVN="http://svn.openscenegraph.org/osg/OpenSceneGraph/tags/OpenSceneGraph-${osg_version}/"
 
 declare -A OPENRTI_MAP
 declare -A FGSG_MAP
-declare -A FGDATA_MAP
+declare -A FGRUN_MAP
+declare -A fgdata_map
 FGSG_MAP=( [next]="next HEAD"  \
 		[master]="master HEAD "  \
-		[2.12.1]="release/2.12.1 HEAD"  \
+		[3.0.0]="release/3.0.0 HEAD"  \
+		[2.12.1]="release/2.12.0 HEAD"  \
 		[2.12.0]="release/2.12.0 HEAD"  \
 		[2.10.0]="release/2.10.0 HEAD "  \
 		[2.8.0]="release/2.8.0 version/2.8.0-final" )
-FGDATA_MAP=([next]="master HEAD 2.99.9"  \
-		[master]="master HEAD 2.99.9"  \
-		[2.12.1]="release/2.12.0 HEAD 2.12.0"  \
-		[2.12.0]="release/2.12.0 HEAD 2.12.0"  \
+FGRUN_MAP=( [next]="next HEAD"  \
+		[master]="master HEAD "  \
+		[3.0.0]="release/3.0.0 HEAD "  \
+		[2.12.1]="release/2.12 HEAD"  \
+		[2.12.0]="release/2.12 HEAD"  \
+		[2.10.0]="release/2.12 HEAD "  \
+		[2.8.0]="release/2.12 HEAD" )
+fgdata_map=([next]="master HEAD 3.0.0"  \
+		[master]="master HEAD 3.0.0"  \
+		[3.0.0]="release/3.0.0 HEAD 3.0.0"  \
+		[2.12.1]="release/2.12.0 HEAD 2.12.1 "  \
+		[2.12.0]="release/2.12.0 HEAD 2.12.1"  \
 		[2.10.0]="release/2.10.0 HEAD 2.10.0"  \
 		[2.8.0]="release/2.8.0 HEAD 2.8.0" )
 
@@ -375,10 +502,14 @@ MAP_ITEM=( ${FGSG_MAP[${FG_SG_VERSION}]} )
 FGSG_BRANCH=${MAP_ITEM[0]}
 FGSG_REVISION=${MAP_ITEM[1]}
 
-MAP_ITEM=( ${FGDATA_MAP[${FG_SG_VERSION}]} )
-FGDATA_BRANCH=${MAP_ITEM[0]}
-FGDATA_REVISION=${MAP_ITEM[1]}
-FGDATA_VERSION=${MAP_ITEM[2]}
+MAP_ITEM=( ${FGRUN_MAP[${FG_SG_VERSION}]} )
+FGRUN_BRANCH=${MAP_ITEM[0]}
+FGRUN_REVISION=${MAP_ITEM[1]}
+
+MAP_ITEM=( ${fgdata_map[${FG_SG_VERSION}]} )
+fgdata_branch=${MAP_ITEM[0]}
+fgdata_revision=${MAP_ITEM[1]}
+fgdata_version=${MAP_ITEM[2]}
 
 MAP_ITEM=( ${OPENRTI_MAP[${FG_SG_VERSION}]} )
 OPENRTI_BRANCH=${MAP_ITEM[0]}
@@ -398,7 +529,7 @@ echo $(pwd)
 # ---------------------------------------------------------
 # Script Section: Display Script Help
 # ---------------------------------------------------------
-
+set +x
 if [ "$HELP" = "HELP" ]
 then
 	echo "$0 Version $VERSION"
@@ -492,24 +623,26 @@ fi
 # Script Section: Display Options Chosen
 # ---------------------------------------------------------
 
- 
-echo $0 $* > $LOGFILE
 
-echo "APT_GET_UPDATE=$APT_GET_UPDATE" |tee -a $LOGFILE
-echo "DOWNLOAD_PACKAGES=$DOWNLOAD_PACKAGES" |tee -a $LOGFILE
-echo "COMPILE=$COMPILE" |tee -a $LOGFILE
-echo "RECONFIGURE=$RECONFIGURE" |tee -a $LOGFILE
-echo "DOWNLOAD=$DOWNLOAD" |tee -a $LOGFILE
-echo "JOPTION=$JOPTION" |tee -a $LOGFILE
-echo "OOPTION=$OOPTION" |tee -a $LOGFILE
-echo "DEBUG=$DEBUG" |tee -a $LOGFILE
-echo "FGSG_VERSION=$FGSG_VERSION" |tee -a LOGFILE
-echo "FGSG_REVISION=$FGSG_REVISION" |tee -a LOGFILE
-echo "FGDATA_BRANCH=$FGDATA_BRANCH" |tee -a LOGFILE
-echo "FGDATA_REVISION=$FGDATA_REVISION" |tee -a LOGFILE
-echo "FGDATA_VERSION=$FGDATA_VERSION" |tee -a LOGFILE
 
-echo "$LOGSEP" |tee -a $LOGFILE
+echo $0 $* 
+
+echo "APT_GET_UPDATE=$APT_GET_UPDATE"
+echo "DOWNLOAD_PACKAGES=$DOWNLOAD_PACKAGES"
+echo "COMPILE=$COMPILE"
+echo "RECONFIGURE=$RECONFIGURE"
+echo "DOWNLOAD=$DOWNLOAD"
+echo "JOPTION=$JOPTION"
+echo "OOPTION=$OOPTION"
+echo "DEBUG=$DEBUG"
+echo "FGSG_VERSION=$FGSG_VERSION"
+echo "FGSG_REVISION=$FGSG_REVISION"
+echo "fgdata_branch=$fgdata_branch"
+echo "fgdata_revision=$fgdata_revision"
+echo "fgdata_version=$fgdata_version"
+
+echo "$LOGSEP"
+set -$opts
 
 # ---------------------------------------------------------
 # Script Section: Determine Linux Distribution
@@ -535,10 +668,10 @@ DEBIAN_PACKAGES_UNSTABLE="freeglut3-dev libjpeg8-dev libjpeg8 libfltk1.3-dev lib
 
 if [ "$DISTRIB_ID" = "Ubuntu" -o "$DISTRIB_ID" = "LinuxMint" ]
 then	
-	echo "$DISTRIB_ID $DISTRIB_RELEASE" >> $LOGFILE
+	echo "$DISTRIB_ID $DISTRIB_RELEASE"
 	DISTRO_PACKAGES="$DISTRO_PACKAGES $UBUNTU_PACKAGES"
 else
-	echo "DEBIAN I SUPPOUSE" >> $LOGFILE
+	echo "DEBIAN I SUPPOUSE"
 
 	DEBIAN_PACKAGES=$DEBIAN_PACKAGES_STABLE
 	if [ ! "$(apt-cache search libfltk1.3)" = "" ]
@@ -549,7 +682,7 @@ else
 
 	DISTRO_PACKAGES="$DISTRO_PACKAGES $DEBIAN_PACKAGES"
 fi
-echo "$LOGSEP" >> $LOGFILE
+echo "$LOGSEP"
 
 # ---------------------------------------------------------
 # Script Section: Install Prerequisite Development Packages
@@ -559,7 +692,7 @@ SET_WINDOW_TITLE "Install Prerequisite Development Packages"
 
 if [ "$DOWNLOAD_PACKAGES" = "y" ]
 then
-	echo -n "PACKAGE INSTALLATION ... " >> $LOGFILE
+	echo -n "PACKAGE INSTALLATION ... "
 
 	LIBOPENALPACKAGE=$(apt-cache search libopenal | grep "libopenal. " | sed s/\ .*//)
 	DISTRO_PACKAGES=$DISTRO_PACKAGES" "$LIBOPENALPACKAGE
@@ -589,7 +722,7 @@ then
 		su -c "apt-get install $DISTRO_PACKAGES"
 	fi
 
-	echo " OK" >> $LOGFILE
+	echo " OK"
 fi
 
 
@@ -604,20 +737,155 @@ COMPILE_BASE_DIR=.
 cd "$COMPILE_BASE_DIR"
 
 #get absolute path
-CBD=$(pwd)
+current_build_dir=$(pwd)
+current_build_dir=$(pwd)
+# ----------------------------------------------------------------------------------------
+# Special handling for plib and OpenSceneGraph
+#
+# These container, src, install and build directories support 
+# doing a single download, configure and build for osg versions and plib-1.8.5
+# This means that src, build and install directories for OSG can be separate from
+# the build and install directories for openrti, simgear, flightgear, fgrun and fgcom
+# this is optional and is conditioned on the existence of certain directories in the parent
+# of where you are building.  The scheme supports as many osg versions as you care to download.
+# it should also support debug versions of the osg libraries, but this has not been tried yet. 
+# care to build.
 
-LOGFILE=$CBD/$LOGFILE
+# handling plib and OSG in this way will save 
+# 	time
+#	network bandwidth 
+#	disk space
+#	
+# To trigger this option,  two things are required:
+# 1. create a folder othersrc in the directory containing download_and_compile.sh
+# 2. always build in a subdirectory of the one containing download_and_compile.sh
+# 
 
-echo "DIRECTORY= $CBD" >> $LOGFILE
-echo "$LOGSEP" >> $LOGFILE
+# Directory Scheme:
+# download_and_compile.sh
+# othersrc
+# 	plib-1.8.5
+#		plib
+#	osg${osg_version1}
+#	osg${osg_version2}
+# install
+#	plib
+#	osg${osg_version}
+# build
+#	plib
+#	osg${osg_version1}
+# next
+# master
+# stable
+# 2.12.0
+# 3.0.0
+# to build, cd into one of next, master, stable, 2.12.0 or 3.0.0 
+# and run ../download_and_compile.sh with appropriate parameters.
+
+# first the defaults
+plib_src_container=$current_build_dir
+osg_src_container=$current_build_dir
+install_dir_osg=
+
+# then override with the optional scheme for othersrc
+if [[ -e ../othersrc ]]
+then
+	mkdir -p ../othersrc/plib-1.8.5
+	mkdir -p ../build/plib
+	mkdir -p ../install/plib
+	plib_src_container=$(cd ../othersrc/plib-1.8.5; pwd;)
+	build_dir_plib=$(cd ../build/plib; pwd;)
+	install_dir_plib=$(cd ../install/plib; pwd;)
+
+	mkdir -p ../othersrc/OpensceneGraph-${osg_version}
+	mkdir -p ../build/osg-${osg_version}
+	mkdir -p ../install/osg-${osg_version}
+	osg_src_container=$(cd ../othersrc/OpensceneGraph-${osg_version}; pwd;)	
+	install_dir_osg=$(cd ../install/osg-${osg_version}; pwd;)
+	build_dir_osg=$(cd ../build/osg-${osg_version}; pwd;)
+fi
+if [[ "${install_dir_osg}" = "" ]]
+then
+	mkdir -p build/plib
+	mkdir -p install/plib
+	mkdir -p build/osg
+	mkdir -p install/osg
+	install_dir_osg=$(cd build/plib; pwd;)
+	install_dir_plib=$(cd install/plib; pwd;)
+	build_dir_osg=$(cd build/osg; pwd;)
+	build_dir_plib=$(cd install/osg; pwd;)
+fi
+# set it all up ahead of time:
+mkdir -p ${plib_src_container}
+mkdir -p ${osg_src_container}
+mkdir -p ${install_dir_osg}
+mkdir -p ${install_dir_plib}
+mkdir -p ${build_dir_osg}
+mkdir -p ${build_dir_plib}
+plib_src=$plib_src_container/plib
+osg_src=$osg_src_container/OpenSceneGraph
+
+# ---------------------------------------------------------
+# Script Section: Build Argument Interpretation
+# ---------------------------------------------------------
+#SET_WINDOW_TITLE "Option Interpretation"
+
+
+shift $(($OPTIND - 1))
+
+WHATTOBUILD=
+# supress build of plib and osg if the libraries are in place
+if [[ ! -e ${install_dir_plib}/lib/libplibsg.a ]]
+then
+	build_plib=PLIB
+fi
+if [[ ! -e ${install_dir_osg}/lib/libosgWidget.so.${osg_version} ]]
+then
+	build_osg=OSG
+fi
+
+WHATTOBUILDALL=( $build_plib $build_osg OPENRTI SIMGEAR FGFS DATA FGRUN FGCOM )
+
+#printf "Remaining arguments are: %s\n" "$*"
+#printf "Num: %d\n" "$#"
+
+if [ ! "$#" = "0" ]
+then
+	for arg in $*
+	do
+		#echo  "$arg"
+		if [ "${arg^^}" == "UPDATE" ]
+		then
+			UPDATE="UPDATE"
+		else
+			WHATTOBUILD=( "${WHATTOBUILD[@]}" "${arg^^}" )
+		fi
+	done
+else
+	WHATTOBUILD=( "${WHATTOBUILDALL[@]}" )
+fi
+
+if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="ALL"' ]]
+then
+	WHATTOBUILD=( "${WHATTOBUILDALL[@]}" )
+fi
+
+# 
+# 
+
+printf "%s\n" "${WHATTOBUILD[@]}"
+
+
+echo "DIRECTORY= $current_build_dir"
+echo "$LOGSEP"
 
 mkdir -p install
 
 SUB_INSTALL_DIR=install
-INSTALL_DIR=$CBD/$SUB_INSTALL_DIR
+INSTALL_DIR=$current_build_dir/$SUB_INSTALL_DIR
 
 
-cd "$CBD"
+cd "$current_build_dir"
 mkdir -p build
 
 # ---------------------------------------------------------
@@ -633,87 +901,65 @@ set -e
 #######################################################
 # PLIB
 #######################################################
-PLIB_INSTALL_DIR=plib
-INSTALL_DIR_PLIB=$INSTALL_DIR/$PLIB_INSTALL_DIR
-
-cd "$CBD"
-
+export INSTALL_DIR_PLIB=${install_dir_plib}
 if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="PLIB"' ]]
 then
 	if [ ! "$UPDATE" = "UPDATE" ]
 	then
-		echo "****************************************" | tee -a $LOGFILE
-		echo "**************** PLIB ******************" | tee -a $LOGFILE
-		echo "****************************************" | tee -a $LOGFILE
+		set +x
+		echo "****************************************"
+		echo "**************** PLIB ******************"
+		echo "****************************************"
 		SET_WINDOW_TITLE "Building PLIB"
 
-		echo "COMPILING PLIB" >> $LOGFILE
-		echo "INSTALL_DIR_PLIB=$INSTALL_DIR_PLIB" >> $LOGFILE
-
-
-		PLIB_STABLE_REVISION_=""
-		if [ "$STABLE" = "STABLE" ]
-		#if [ "STABLE" = "STABLE" ]
-		then
-			PLIB_STABLE_REVISION_=" -r $PLIB_STABLE_REVISION"
-		fi
+		echo "BUILDING PLIB"
+		echo "plib_src_container:$plib_src_container"
+		echo "plib_src:          $install_dir_plib"
+		echo "install_dir_plib:  $install_dir_plib"
+		set -$opts
 
 		if [ "$DOWNLOAD" = "y" ]
 		then
-			if [ -d "plib/.svn" ]
+			if [ -d "${plib_src_dir}/.svn" ]
 			then
-				echo -n "updating plib svn" >>$LOGFILE
-				cd plib
-				svn update $PLIB_STABLE_REVISION_
-				cd -
+				echo -n "updating plib svn"
+				cd ${plib_src}
+				svn update 
             		else
-				echo -n "DOWNLOADING FROM http://svn.code.sf.net/p/plib/code/trunk/ ..." >> $LOGFILE
-				svn $PLIB_STABLE_REVISION_ co http://svn.code.sf.net/p/plib/code/trunk/ plib  
-				echo " OK" >> $LOGFILE
+				echo -n "DOWNLOADING FROM http://svn.code.sf.net/p/plib/code/trunk/ ..."
+				cd ${plib_src_container}
+				svn  co http://svn.code.sf.net/p/plib/code/trunk/ plib  
+				echo " OK"
             		fi
 		fi 
-		cd plib
 
 		if [ "$RECONFIGURE" = "y" ]
 		then
+			cd ${plib_src}
 
-			cd "$CBD"
-			mkdir -p build/plib
-
-
-			cd plib
-
-			echo "AUTOGEN plib" >> $LOGFILE
-			./autogen.sh 2>&1 | tee  -a $LOGFILE
-			echo "CONFIGURING plib" >> $LOGFILE
-			cd "$CBD"/build/plib
-			../../plib/configure  --disable-pw --disable-sl --disable-psl --disable-ssg --disable-ssgaux  --prefix="$INSTALL_DIR_PLIB" --exec-prefix="$INSTALL_DIR_PLIB" 2>&1 | tee -a $LOGFILE
+			echo "AUTOGEN plib"
+			./autogen.sh
+			echo "CONFIGURING plib"
+			cd ${build_dir_plib}
+			
+			${plib_src}/configure  --disable-pw --disable-sl --disable-psl --disable-ssg --disable-ssgaux  --prefix="$INSTALL_DIR_PLIB" --exec-prefix="$INSTALL_DIR_PLIB"
+			echo "CONFIGURE/RECONFIGURE OSG DONE."
 		else
-			echo "NO RECONFIGURE FOR plib" >> $LOGFILE
+			echo "NO RECONFIGURE FOR plib"
 		fi
-
 		
 		if [ "$COMPILE" = "y" ]
 		then
 			
-			echo "MAKE plib" >> $LOGFILE
-			echo "make $JOPTION $OOPTION" >> $LOGFILE
+			echo "MAKE plib"
+			echo "make $JOPTION $OOPTION"
 			
-			cd "$CBD"/build/plib
-			make $JOPTION $OOPTION 2>&1 | tee -a $LOGFILE
-	
-			if [ ! -d $INSTALL_DIR_PLIB ]
-			then
-				mkdir -p "$INSTALL_DIR_PLIB"
-			fi
-	
-			
-			echo "INSTALL plib" >> $LOGFILE
-			echo "make install" >> $LOGFILE
-			make install 2>&1 | tee -a $LOGFILE
+			cd $build_dir_plib
+			make $JOPTION $OOPTION
+			echo "INSTALL plib"
+			echo "make install"
+			make install
 		fi
-
-		cd "$CBD"
 	fi
 	if [[ $STOP_AFTER_ONE_MODULE = true ]]; then exit; fi
 fi
@@ -722,69 +968,57 @@ fi
 # OpenSceneGraph
 #######################################################
 SET_WINDOW_TITLE "Building OpenSceneGraph"
-OSG_INSTALL_DIR=OpenSceneGraph
-INSTALL_DIR_OSG=$INSTALL_DIR/$OSG_INSTALL_DIR
-cd "$CBD"
+export INSTALL_DIR_OSG=${install_dir_osg}
 
 if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="OSG"' ]]
 then
-	echo "****************************************" | tee -a $LOGFILE
-	echo "**************** OSG *******************" | tee -a $LOGFILE
-	echo "****************************************" | tee -a $LOGFILE
+	set +x
+	echo "****************************************"
+	echo "**************** OSG *******************"
+	echo "****************************************"
+	echo "BUILDING PLIB"
+	echo "osg_src_container:$osg_src_container"
+	echo "osg_src:          $install_dir_osg"
+	echo "install_dir_osg:  $install_dir_osg"
+	set -$opts
 
 	if [ "$DOWNLOAD" = "y" ]
 	then
-		echo -n "SVN FROM $OSG_SVN ... " >> $LOGFILE
-		if [ -d "OpenSceneGraph/.svn" ]
+		
+		echo -n "SVN FROM $OSG_SVN ... "
+		if [ -d "${osg_src}/.svn" ]
 		then
 			echo -n "updating OpenSceneGraph svn"
-			cd OpenSceneGraph
+			cd ${osg_src}
 			svn update
-			cd -
             	else
 			echo -n "downloadING FROM $OSG_SVN ..."
+			cd $osg_src_container
 			svn co "$OSG_SVN" OpenSceneGraph
-			echo " OK"
             	fi
-		echo " OK" >> $LOGFILE		
-
 	fi
-	cd OpenSceneGraph
-
 	if [ ! "$UPDATE" = "UPDATE" ]
 	then
 		if [ "$RECONFIGURE" = "y" ]
 		then
-			cd "$CBD"
-			mkdir -p build/osg
-			cd "$CBD"/build/osg		
-			echo -n "RECONFIGURE OSG ... " >> $LOGFILE
-			rm -f CMakeCache.txt ../../OpenSceneGraph/CMakeCache.txt
-			cmake ../../OpenSceneGraph/
-			echo " OK" >> $LOGFILE
 
-
-
-			cmake ${VERBOSE_MAKEFILE} -D CMAKE_BUILD_TYPE="Release" -D CMAKE_CXX_FLAGS="-O3 -D__STDC_CONSTANT_MACROS" -D CMAKE_C_FLAGS="-O3" -D CMAKE_INSTALL_PREFIX:PATH="$INSTALL_DIR_OSG" ../../OpenSceneGraph/ 2>&1 | tee -a $LOGFILE
+			cd ${build_dir_osg}		
+			echo -n "RECONFIGURE OSG ... "
+			rm -f CMakeCache.txt ${osg_src}/CMakeCache.txt CMakeCache.txt
+			cmake ${osg_src}
+			cmake ${VERBOSE_MAKEFILE} -D CMAKE_BUILD_TYPE="Release" -D CMAKE_CXX_FLAGS="-O3 -D__STDC_CONSTANT_MACROS" -D CMAKE_C_FLAGS="-O3" -D CMAKE_INSTALL_PREFIX:PATH="$INSTALL_DIR_OSG" $osg_src
 			
-			echo "RECONFIGURE OSG DONE." >> $LOGFILE
-			
+			echo "RECONFIGURE OSG DONE."	
 		fi
 	fi
 
 	if [ "$COMPILE" = "y" ]
 	then
-		echo "COMPILING OSG" >> $LOGFILE
-		cd "$CBD"/build/osg
-		make $JOPTION $OOPTION 2>&1 | tee -a $LOGFILE
-	
-		if [ ! -d $INSTALL_DIR_OSG ]
-		then
-			mkdir -p "$INSTALL_DIR_OSG"
-		fi
-	
-		echo "INSTALLING OSG" >> $LOGFILE
-		make install 2>&1 | tee -a $LOGFILE
+		echo "COMPILING OSG"
+		cd ${build_dir_osg}
+		make $JOPTION $OOPTION
+		echo "INSTALLING OSG"
+		make install
 	fi
 	
 	#FIX FOR 64 BIT COMPILATION
@@ -797,8 +1031,6 @@ then
 			ln -s "$INSTALL_DIR_OSG/lib64" "$INSTALL_DIR_OSG/lib"
 		fi
 	fi
-
-	cd -
 	if [[ $STOP_AFTER_ONE_MODULE = true ]]; then exit; fi
 fi
 
@@ -808,7 +1040,7 @@ fi
 SET_WINDOW_TITLE "Building OPENRTI"
 OPENRTI_INSTALL_DIR=openrti
 INSTALL_DIR_OPENRTI=$INSTALL_DIR/$OPENRTI_INSTALL_DIR
-cd "$CBD"
+cd "$current_build_dir"
 
 if [ ! -d "openrti" ]
 then
@@ -817,16 +1049,16 @@ fi
 
 if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="OPENRTI"' ]]
 then
-	echo "****************************************" | tee -a $LOGFILE
-	echo "**************** OPENRTI ***************" | tee -a $LOGFILE
-	echo "****************************************" | tee -a $LOGFILE
+	echo "****************************************"
+	echo "**************** OPENRTI ***************"
+	echo "****************************************"
 
 
 	if [ "$DOWNLOAD" = "y" ]
 	then
 		cd openrti
 
-		echo -n "git FROM git://gitorious.org/openrti/openrti.git ... " >> $LOGFILE
+		echo -n "git FROM git://gitorious.org/openrti/openrti.git ... "
 
 		if [ -d "openrti" ]
 		then
@@ -859,7 +1091,7 @@ then
 
 		cd ..	
 
-		echo " OK" >> $LOGFILE
+		echo " OK"
 		cd ..
 	
 	fi
@@ -871,13 +1103,13 @@ then
 		if [ "$RECONFIGURE" = "y" ]
 		then
 
-			cd "$CBD"
+			cd "$current_build_dir"
 			mkdir -p build/openrti
-			cd "$CBD"/build/openrti
-			echo -n "RECONFIGURE OPENRTI ... " >> $LOGFILE
+			cd "$current_build_dir"/build/openrti
+			echo -n "RECONFIGURE OPENRTI ... "
 			rm -f ../../openrti/openrti/CMakeCache.txt
-			cmake ${VERBOSE_MAKEFILE} -D CMAKE_BUILD_TYPE="Release" -D CMAKE_CXX_FLAGS="-O3 -D__STDC_CONSTANT_MACROS" -D CMAKE_INSTALL_PREFIX:PATH="$INSTALL_DIR_OPENRTI" ../../openrti/openrti/ 2>&1 | tee -a $LOGFILE
-			echo " OK" >> $LOGFILE
+			cmake ${VERBOSE_MAKEFILE} -D CMAKE_BUILD_TYPE="Release" -D CMAKE_CXX_FLAGS="-O3 -D__STDC_CONSTANT_MACROS" -D CMAKE_INSTALL_PREFIX:PATH="$INSTALL_DIR_OPENRTI" ../../openrti/openrti/
+			echo " OK"
 
 
 
@@ -888,13 +1120,13 @@ then
 	then
 
 
-		cd "$CBD"/build/openrti
-		echo "MAKE OPENRTI" >> $LOGFILE
-		echo "make $JOPTION $OOPTION " >> $LOGFILE
-		make $JOPTION $OOPTION 2>&1 | tee -a $LOGFILE
+		cd "$current_build_dir"/build/openrti
+		echo "MAKE OPENRTI"
+		echo "make $JOPTION $OOPTION "
+		make $JOPTION $OOPTION
 
-		echo "INSTALL OPENRTI" >> $LOGFILE
-		make install 2>&1 | tee -a $LOGFILE
+		echo "INSTALL OPENRTI"
+		make install
 	fi
 	cd -
 	if [[ $STOP_AFTER_ONE_MODULE = true ]]; then exit; fi
@@ -906,7 +1138,7 @@ fi
 SET_WINDOW_TITLE "Building Simgear"
 SIMGEAR_INSTALL_DIR=simgear
 INSTALL_DIR_SIMGEAR=$INSTALL_DIR/$SIMGEAR_INSTALL_DIR
-cd "$CBD"
+cd "$current_build_dir"
 
 if [ ! -d "simgear" ]
 then
@@ -915,20 +1147,15 @@ fi
 
 if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="SIMGEAR"' ]]
 then
-	echo "****************************************" | tee -a $LOGFILE
-	echo "**************** SIMGEAR ***************" | tee -a $LOGFILE
-	echo "****************************************" | tee -a $LOGFILE
+	echo "****************************************"
+	echo "**************** SIMGEAR ***************"
+	echo "****************************************"
 
 
 	if [ "$DOWNLOAD" = "y" ]
 	then
 		cd simgear
-		#echo -n "CVS FROM cvs.simgear.org:/var/cvs/SimGear-0.3 ... " >> $LOGFILE
-		#cvs -z5 -d :pserver:cvsguest:guest@cvs.simgear.org:/var/cvs/SimGear-0.3 login
-		#cvs -z5 -d :pserver:cvsguest@cvs.simgear.org:/var/cvs/SimGear-0.3 co source
-
-
-		echo -n "git FROM git://gitorious.org/fg/simgear.git ... " >> $LOGFILE
+		echo -n "git FROM git://gitorious.org/fg/simgear.git ... "
 
 		if [ -d "simgear" ]
 		then
@@ -961,7 +1188,7 @@ then
 
 		cd ..	
 
-		echo " OK" >> $LOGFILE
+		echo " OK"
 		cd ..
 	
 	fi
@@ -974,14 +1201,14 @@ then
 		if [ "$RECONFIGURE" = "y" ]
 		then
 
-			cd "$CBD"
+			cd "$current_build_dir"
 			mkdir -p build/simgear
-			cd "$CBD"/build/simgear
-			echo -n "RECONFIGURE SIMGEAR ... " >> $LOGFILE
+			cd "$current_build_dir"/build/simgear
+			echo -n "RECONFIGURE SIMGEAR ... "
 			rm -f ../../simgear/simgear/CMakeCache.txt
 			rm -f CMakeCache.txt
-			cmake ${VERBOSE_MAKEFILE} -D CMAKE_BUILD_TYPE="Release" $WITH_OPENRTI -D CMAKE_CXX_FLAGS="-O3 -D__STDC_CONSTANT_MACROS" -D CMAKE_C_FLAGS="-O3" -D CMAKE_INSTALL_PREFIX:PATH="$INSTALL_DIR_SIMGEAR" -D "CMAKE_PREFIX_PATH=$INSTALL_DIR_OSG;$INSTALL_DIR_OPENRTI" ../../simgear/simgear/ 2>&1 | tee -a $LOGFILE
-			echo " OK" >> $LOGFILE
+			cmake ${VERBOSE_MAKEFILE} -D CMAKE_BUILD_TYPE="Release" $WITH_OPENRTI -D CMAKE_CXX_FLAGS="-O3 -D__STDC_CONSTANT_MACROS" -D CMAKE_C_FLAGS="-O3" -D CMAKE_INSTALL_PREFIX:PATH="$INSTALL_DIR_SIMGEAR" -D "CMAKE_PREFIX_PATH=$INSTALL_DIR_OSG;$INSTALL_DIR_OPENRTI" ../../simgear/simgear/
+			echo " OK"
 
 
 
@@ -992,13 +1219,13 @@ then
 	then
 
 
-		cd "$CBD"/build/simgear
-		echo "MAKE SIMGEAR" >> $LOGFILE
-		echo "make $JOPTION $OOPTION " >> $LOGFILE
-		make $JOPTION $OOPTION 2>&1 | tee -a $LOGFILE
+		cd "$current_build_dir"/build/simgear
+		echo "MAKE SIMGEAR"
+		echo "make $JOPTION $OOPTION "
+		make $JOPTION $OOPTION
 
-		echo "INSTALL SIMGEAR" >> $LOGFILE
-		make install 2>&1 | tee -a $LOGFILE
+		echo "INSTALL SIMGEAR"
+		make install
 	fi
 	cd -
 	if [[ $STOP_AFTER_ONE_MODULE = true ]]; then exit; fi
@@ -1010,7 +1237,7 @@ fi
 SET_WINDOW_TITLE "Building Flightgear"
 FGFS_INSTALL_DIR=fgfs
 INSTALL_DIR_FGFS=$INSTALL_DIR/$FGFS_INSTALL_DIR
-cd "$CBD"
+cd "$current_build_dir"
 
 if [ ! -d "fgfs" ]
 then
@@ -1021,9 +1248,9 @@ fi
 if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="FGFS"' || "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="DATA"' ]]
 then
 
-	echo "****************************************" | tee -a $LOGFILE
-	echo "**************** FGFS ******************" | tee -a $LOGFILE
-	echo "****************************************" | tee -a $LOGFILE
+	echo "****************************************"
+	echo "**************** FGFS ******************"
+	echo "****************************************"
 
 	cd fgfs
 
@@ -1031,11 +1258,8 @@ then
 	then
 		if [ "$DOWNLOAD" = "y" ]
 		then
-			#echo -n "CVS FROM cvs.flightgear.org:/var/cvs/FlightGear-0.9 ... " >> $LOGFILE
-			#cvs -z5 -d :pserver:cvsguest:guest@cvs.flightgear.org:/var/cvs/FlightGear-0.9 login
-			#cvs -z5 -d :pserver:cvsguest@cvs.flightgear.org:/var/cvs/FlightGear-0.9 co source
 
-			echo -n "GIT FROM git://gitorious.org/fg/flightgear.git ... " >> $LOGFILE
+			echo -n "GIT FROM git://gitorious.org/fg/flightgear.git ... "
 			
 
 			if [ -d "flightgear" ]
@@ -1070,7 +1294,7 @@ then
 
 			cd ..	
 
-			echo " OK" >> $LOGFILE
+			echo " OK"
 
 		fi
 		
@@ -1097,19 +1321,11 @@ fi
 		then
 			if [ "$RECONFIGURE" = "y" ]
 			then
-				#echo "AUTOGEN FGFS" >> $LOGFILE
-				#./autogen.sh 2>&1 | tee -a $LOGFILE
-				#echo "CONFIGURE FGFS" >> $LOGFILE
-			   	#echo ./configure "$DEBUG" $WITH_EVENT_INPUT --prefix=$INSTALL_DIR_FGFS --exec-prefix=$INSTALL_DIR_FGFS --with-osg="$INSTALL_DIR_OSG" --with-simgear="$INSTALL_DIR_SIMGEAR" --with-plib="$INSTALL_DIR_PLIB" 
-				#./configure "$DEBUG" $WITH_EVENT_INPUT --prefix=$INSTALL_DIR_FGFS --exec-prefix=$INSTALL_DIR_FGFS --with-osg="$INSTALL_DIR_OSG" --with-simgear="$INSTALL_DIR_SIMGEAR" --with-plib="$INSTALL_DIR_PLIB" 2>&1 | tee -a $LOGFILE
-
-
-	                        cd "$CBD"
+	                        cd "$current_build_dir"
        				mkdir -p build/fgfs
-	                        cd "$CBD"/build/fgfs
+	                        cd "$current_build_dir"/build/fgfs
 
-
-				echo -n "RECONFIGURE FGFS ... " >> $LOGFILE
+				echo -n "RECONFIGURE FGFS ... "
 				rm -f ../../fgfs/flightgear/CMakeCache.txt
 				rm -f CMakeCache.txt
 
@@ -1119,58 +1335,92 @@ fi
 				#cp -f  utils/fgadmin/src/CMakeLists_without_err.txt utils/fgadmin/src/CMakeLists.txt
 
 		
-				cmake ${VERBOSE_MAKEFILE} -D CMAKE_BUILD_TYPE="Release" $WITH_OPENRTI -D "WITH_FGPANEL=OFF" -D CMAKE_CXX_FLAGS="-O3 -D__STDC_CONSTANT_MACROS" -D CMAKE_C_FLAGS="-O3" -D CMAKE_INSTALL_PREFIX:PATH="$INSTALL_DIR_FGFS" -D "CMAKE_PREFIX_PATH=$INSTALL_DIR_OSG;$INSTALL_DIR_PLIB;$INSTALL_DIR_SIMGEAR;$INSTALL_DIR_OPENRTI" ../../fgfs/flightgear 2>&1 | tee -a $LOGFILE
+				cmake ${VERBOSE_MAKEFILE} -D CMAKE_BUILD_TYPE="Release" $WITH_OPENRTI -D "WITH_FGPANEL=OFF" -D CMAKE_CXX_FLAGS="-O3 -D__STDC_CONSTANT_MACROS" -D CMAKE_C_FLAGS="-O3" -D CMAKE_INSTALL_PREFIX:PATH="$INSTALL_DIR_FGFS" -D "CMAKE_PREFIX_PATH=$INSTALL_DIR_OSG;$INSTALL_DIR_PLIB;$INSTALL_DIR_SIMGEAR;$INSTALL_DIR_OPENRTI" ../../fgfs/flightgear
 
-				echo " OK" >> $LOGFILE
+				echo " OK"
 			fi
 		fi
 		
 		if [ "$COMPILE" = "y" ]
 		then
-                        cd "$CBD"
+                        cd "$current_build_dir"
                         mkdir -p build/fgfs
-                        cd "$CBD"/build/fgfs
+                        cd "$current_build_dir"/build/fgfs
 
-			echo "MAKE FGFS" >> $LOGFILE
-			echo "make $JOPTION $OOPTION" >> $LOGFILE
-			make $JOPTION $OOPTION 2>&1 | tee -a $LOGFILE
+			echo "MAKE FGFS"
+			echo "make $JOPTION $OOPTION"
+			make $JOPTION $OOPTION
 
-			echo "INSTALL FGFS" >> $LOGFILE
-			make install 2>&1 | tee -a $LOGFILE
+			echo "INSTALL FGFS"
+			make install
 		fi
-		cd ..
-	fi
-	cd ..
 
+	fi
+
+	
+#
+# Use a  scheme similar to the one for osg and plib for fgdata 
+#
+#fgdata-2.12.1
+# 	fgdata
+#fgdata-3.0.0
+#	fgdata
 	if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="DATA"' ]]
 	then
 		if [ ! "$UPDATE" = "UPDATE" ]
 		then
 			if [ "$DOWNLOAD" = "y" ]
 			then
+				cd $current_build_dir
+				fgdata_container=
+				echo "fgdata_version: ${fgdata_version}"
+				for f in ../../../fgdata[-_]${fgdata_version} \
+					 ../../fgdata[-_]${fgdata_version} \
+					 ../fgdata[-_]${fgdata_version} \
+					 ./fgdata[-_]${fgdata_version}
+				do
+				   if [[ -e $f ]]
+				      then
+
+					echo checking $f
+					fgdata_container=$(cd ${f}; pwd;)
+					fgdata_directory=$fgdata_container/fgdata
+					if [[ -L $INSTALL_DIR_FGFS/fgdata ]] 
+					then
+						rm $INSTALL_DIR_FGFS/fgdata
+					fi
+					if [[ -d $INSTALL_DIR_FGFS/fgdata  ]]
+					then
+						rm -rf $INSTALL_DIR_FGFS/fgdata 
+					fi
+					ln -s -T $fgdata_directory $INSTALL_DIR_FGFS/fgdata 
+					echo "$INSTALL_DIR_FGFS/fgdata is a symbolic link"
+					echo "It points to $(readlink -f $INSTALL_DIR_FGFS/fgdata)"		
+				   fi
+				done
+				if [[ "$fgdata_container" = "" ]]
+				then
+					fgdata_container=$(cd $INSTALL_DIR_FGFS; pwd;)
+					fgdata_directory=${f}/fgdata
+					if [[ -e $INSTALL_DIR_FGFS/fgdata ]]
+					then
+						echo "$fgdata_directory is a directory"
+						echo "fgdata has been downloaded"
+					fi
+				fi
+				if [[ -e $INSTALL_DIR_FGFS/fgdata ]]
+				then
+					echo "fgdata version $fgdata_version has been downloaded"
+				else
+					echo "fgdata version $fgdata_version will be downloaded."
+				fi
 				SET_WINDOW_TITLE " FGDATA"
-				if [[  -e ../fgdata_${FGDATA_VERSION} ]]
-				then
-					FGDATA_DIR=$(cd $(dirname ../fgdata_${FGDATA_VERSION}/fgdata); pwd)/$(basename ../fgdata_${FGDATA_VERSION}/fgdata)
-				fi
-				if [[  -e ../../fgdata_${FGDATA_VERSION} ]]
-				then
-					FGDATA_DIR=$(cd $(dirname ../../fgdata_${FGDATA_VERSION}/fgdata); pwd)/$(basename ../../fgdata_${FGDATA_VERSION}/fgdata)
-				fi
-				
-				if [[ ! -e $INSTALL_DIR_FGFS/fgdata && -e ${FGDATA_DIR} ]]
-				then
-					ln -s ${FGDATA_DIR} $INSTALL_DIR_FGFS/fgdata
-					ls -lah $INSTALL_DIR_FGFS/fgdata
-				fi
 				EXDIR=$(pwd)
 				cd $INSTALL_DIR_FGFS
-				echo -n "GIT DATA FROM $fgdata_git  ... " |tee -a $LOGFILE
+				echo  "GIT DATA FROM $fgdata_git  ... "
 
-				if [ -e "fgdata" ]
+				if [ ! -e "fgdata" ]
 				then
-					echo "fgdata exists already."
-				else
 					# no repository yet - need to clone a fresh one
 					git clone $fgdata_git fgdata
 				fi
@@ -1182,41 +1432,36 @@ fi
 				then
 					# switch to stable branch
 					# create local stable branch, ignore errors if it exists
-					if [[ "$(git_check_branch_or_tag $FGSG_BRANCH)" = "" ]]
+					if [[ "$(git_check_branch_or_tag $fgdata_branch)" = "" ]]
 					then
-						write_log_and_exec
-						  "git branch -f $FGSG_BRANCH origin/$FGSG_BRANCH" 
+						write_log_and_exec \
+						  "git branch -f $fgdata_branch origin/$fgdata_branch" 
 					fi
 					# switch to stable branch. No error is reported if we're already on the branch.
-					write_log_and_exec "git checkout -f $FGSG_BRANCH"
+					write_log_and_exec "git checkout -f $fgdata_branch"
  
 					# get indicated stable version
 					
-					write_log_and_exec  "git reset --hard $FGSG_BRANCH"
+					write_log_and_exec  "git reset --hard $fgdata_branch"
 				else
 					# switch to unstable branch
 					# create local unstable branch, ignore errors if it exists
 					$(git_check_branch_or_tag)
-					if [[ "$(git_check_branch_or_tag $FGDATA_BRANCH)" = "" ]]
+					if [[ "$(git_check_branch_or_tag $fgdata_branch)" = "" ]]
 					then
-						write_log_and_exec
-						  "git branch -f $FGDATA_BRANCH origin/$FGDATA_BRANCH" 
+						write_log_and_exec \
+						  "git branch -f $fgdata_branch origin/$fgdata_branch" 
 					fi
 					# switch to unstable branch. No error is reported if we're already on the branch.
-					write_log_and_exec  "git checkout -f $FGDATA_BRANCH"
+					write_log_and_exec  "git checkout -f $fgdata_branch"
 					# pull latest version from the unstable branch
 					write_log_and_exec  "git pull"
 				fi
-
-				cd ..
-
-				echo " OK" >> $LOGFILE
-				cd "$EXDIR"
 			fi
 		fi
 	fi
 
-	cd "$CBD"
+	cd "$current_build_dir"
 
 	# IF SEPARATED FOLDER FOR AIRCRAFTS
 	# --fg-aircraft=\$PWD/../aircrafts
@@ -1224,7 +1469,7 @@ fi
 #!/bin/sh
 cd \$(dirname \$0)
 cd $SUB_INSTALL_DIR/$FGFS_INSTALL_DIR/bin
-export LD_LIBRARY_PATH=../../$PLIB_INSTALL_DIR/lib:../../$OSG_INSTALL_DIR/lib:../../$SIMGEAR_INSTALL_DIR/lib:../../$OPENRTI_INSTALL_DIR/lib
+export LD_LIBRARY_PATH=$install_dir_plib/lib:$install_dir_osg/lib:../../$SIMGEAR_INSTALL_DIR/lib:../../$OPENRTI_INSTALL_DIR/lib
 ./fgfs --fg-root=\$PWD/../fgdata/ \$@
 ENDOFALL
 	chmod 755 run_fgfs.sh
@@ -1234,7 +1479,7 @@ ENDOFALL
 cd \$(dirname \$0)
 P1=\$PWD
 cd $SUB_INSTALL_DIR/$FGFS_INSTALL_DIR/bin
-export LD_LIBRARY_PATH=../../$PLIB_INSTALL_DIR/lib:../../$OSG_INSTALL_DIR/lib:../../$SIMGEAR_INSTALL_DIR/lib:../../$OPENRTI_INSTALL_DIR/lib
+export LD_LIBRARY_PATH=$install_dir_plib/lib:$install_dir_osg/lib:../../$SIMGEAR_INSTALL_DIR/lib:../../$OPENRTI_INSTALL_DIR/lib
 gdb  --directory="\$P1"/fgfs/source/src/ --args fgfs --fg-root=\$PWD/../fgdata/ \$@
 ENDOFALL2
 	chmod 755 run_fgfs_debug.sh
@@ -1243,7 +1488,7 @@ ENDOFALL2
 	echo "#!/bin/sh" > $SCRIPT
 	echo "cd \$(dirname \$0)" >> $SCRIPT
 	echo "cd $SUB_INSTALL_DIR/$FGFS_INSTALL_DIR/bin" >> $SCRIPT
-	echo "export LD_LIBRARY_PATH=../../$PLIB_INSTALL_DIR/lib:../../$OSG_INSTALL_DIR/lib:../../$SIMGEAR_INSTALL_DIR/lib" >> $SCRIPT
+	echo "export LD_LIBRARY_PATH=$install_dir_plib/lib:$install_dir_osg/lib:../../$SIMGEAR_INSTALL_DIR/lib" >> $SCRIPT
 	echo "./terrasync \$@" >> $SCRIPT
 	chmod 755 $SCRIPT
 
@@ -1256,12 +1501,12 @@ fi
 SET_WINDOW_TITLE "Building FGO"
 FGO_INSTALL_DIR=fgo
 INSTALL_DIR_FGO=$INSTALL_DIR/$FGO_INSTALL_DIR
-cd "$CBD"
+cd "$current_build_dir"
 if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="FGO"' ]]
 then
-	echo "****************************************" | tee -a $LOGFILE
-	echo "***************** FGO ******************" | tee -a $LOGFILE
-	echo "****************************************" | tee -a $LOGFILE
+	echo "****************************************"
+	echo "***************** FGO ******************"
+	echo "****************************************"
 
 	if [ "$DOWNLOAD" = "y" ]
 	then
@@ -1294,17 +1539,17 @@ fi
 SET_WINDOW_TITLE "Building FGX"
 FGX_INSTALL_DIR=fgx
 INSTALL_DIR_FGX=$INSTALL_DIR/$FGX_INSTALL_DIR
-cd "$CBD"
+cd "$current_build_dir"
 if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="FGX"' ]]
 then
-	echo "****************************************" | tee -a $LOGFILE
-	echo "***************** FGX ******************" | tee -a $LOGFILE
-	echo "****************************************" | tee -a $LOGFILE
+	echo "****************************************"
+	echo "***************** FGX ******************"
+	echo "****************************************"
 
 	if [ "$DOWNLOAD" = "y" ]
 	then
 
-		echo -n "git clone git://gitorious.org/fgx/fgx.git ... " >> $LOGFILE
+		echo -n "git clone git://gitorious.org/fgx/fgx.git ... "
 
 		if [ -d "fgx" ]
 		then
@@ -1313,7 +1558,7 @@ then
 			git clone git://gitorious.org/fgx/fgx.git fgx
 		fi
 
-		echo " OK" >> $LOGFILE
+		echo " OK"
 
 	fi
 
@@ -1349,27 +1594,27 @@ then
 		if [ "$RECONFIGURE" = "y" ]
 		then
 
-			echo -n "RECONFIGURE FGX ... " >> $LOGFILE
+			echo -n "RECONFIGURE FGX ... "
 
 			mkdir -p $INSTALL_DIR_FGX
 			cd $INSTALL_DIR_FGX
 
 			qmake ../../fgx/src
 
-			echo " OK" >> $LOGFILE
+			echo " OK"
 		fi
 	fi
 	
 	if [ "$COMPILE" = "y" ]
 	then
 		cd $INSTALL_DIR_FGX
-		echo "MAKE AND INSTALL FGX" >> $LOGFILE
-		echo "make $JOPTION $OOPTION " >> $LOGFILE
-		make $JOPTION $OOPTION | tee -a $LOGFILE
+		echo "MAKE AND INSTALL FGX"
+		echo "make $JOPTION $OOPTION "
+		make $JOPTION $OOPTION
 		cd ..
 	fi
 
-	cd "$CBD"
+	cd "$current_build_dir"
 
 	SCRIPT=run_fgx.sh
 	echo "#!/bin/sh" > $SCRIPT
@@ -1390,23 +1635,18 @@ fi
 SET_WINDOW_TITLE "Building FGRUN"
 FGRUN_INSTALL_DIR=fgrun
 INSTALL_DIR_FGRUN=$INSTALL_DIR/$FGRUN_INSTALL_DIR
-cd "$CBD"
+cd "$current_build_dir"
 
 if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="FGRUN"' ]]
 then
-	echo "****************************************" | tee -a $LOGFILE
-	echo "**************** FGRUN *****************" | tee -a $LOGFILE
-	echo "****************************************" | tee -a $LOGFILE
+	echo "****************************************"
+	echo "**************** FGRUN *****************"
+	echo "****************************************"
 
 
 		if [ "$DOWNLOAD" = "y" ]
 		then
-			#echo -n "CVS FROM cvs.flightgear.org:/var/cvs/FlightGear-0.9 ... " >> $LOGFILE
-			#cvs -z5 -d :pserver:cvsguest:guest@cvs.flightgear.org:/var/cvs/FlightGear-0.9 login
-			#cvs -z5 -d :pserver:cvsguest@cvs.flightgear.org:/var/cvs/FlightGear-0.9 co source
-
-			echo -n "GIT FROM git://gitorious.org/fg/fgrun.git ... " >> $LOGFILE
-			
+			echo -n "GIT FROM git://gitorious.org/fg/fgrun.git ... "
 
 			if [ -d "fgrun" ]
 			then
@@ -1457,7 +1697,7 @@ fi
 
 			cd ..	
 
-			echo " OK" >> $LOGFILE
+			echo " OK"
 
 		fi
 		
@@ -1468,39 +1708,39 @@ fi
 	then
 		if [ "$RECONFIGURE" = "y" ]
 		then
-                        cd "$CBD"
+                        cd "$current_build_dir"
                         mkdir -p build/fgrun
-                        cd "$CBD"/build/fgrun
+                        cd "$current_build_dir"/build/fgrun
 
-			echo -n "RECONFIGURE FGRUN ... " >> $LOGFILE
+			echo -n "RECONFIGURE FGRUN ... "
 			rm -f ../../fgrun/CMakeCache.txt
 			rm -f CMakeCache.txt
 			
-			cmake ${VERBOSE_MAKEFILE} -D CMAKE_BUILD_TYPE="Release" -D CMAKE_CXX_FLAGS="-O3 -D__STDC_CONSTANT_MACROS" -D CMAKE_C_FLAGS="-O3" -D CMAKE_INSTALL_PREFIX:PATH="$INSTALL_DIR_FGRUN" -D "CMAKE_PREFIX_PATH=$INSTALL_DIR_OSG;$INSTALL_DIR_PLIB;$INSTALL_DIR_SIMGEAR" ../../fgrun/ 2>&1 | tee -a $LOGFILE
+			cmake ${VERBOSE_MAKEFILE} -D CMAKE_BUILD_TYPE="Release" -D CMAKE_CXX_FLAGS="-O3 -D__STDC_CONSTANT_MACROS" -D CMAKE_C_FLAGS="-O3" -D CMAKE_INSTALL_PREFIX:PATH="$INSTALL_DIR_FGRUN" -D "CMAKE_PREFIX_PATH=$INSTALL_DIR_OSG;$INSTALL_DIR_PLIB;$INSTALL_DIR_SIMGEAR" ../../fgrun/
 
-			echo " OK" >> $LOGFILE
+			echo " OK"
 		fi
 	fi
 	
 	if [ "$COMPILE" = "y" ]
 	then
-		cd "$CBD"/build/fgrun
+		cd "$current_build_dir"/build/fgrun
 
-		echo "MAKE FGRUN" >> $LOGFILE
-		echo "make $JOPTION $OOPTION" >> $LOGFILE
-		make $JOPTION $OOPTION 2>1 | tee -a $LOGFILE
+		echo "MAKE FGRUN"
+		echo "make $JOPTION $OOPTION"
+		make $JOPTION $OOPTION 2>1
 
-		echo "INSTALL FGRUN" >> $LOGFILE
-		make install 2>&1 | tee -a $LOGFILE
+		echo "INSTALL FGRUN"
+		make install
 	fi
 
-	cd "$CBD"
+	cd "$current_build_dir"
 
 	SCRIPT=run_fgrun.sh
 	echo "#!/bin/sh" > $SCRIPT
 	echo "cd \$(dirname \$0)" >> $SCRIPT
 	echo "cd $SUB_INSTALL_DIR/$FGRUN_INSTALL_DIR/bin" >> $SCRIPT
-	echo "export LD_LIBRARY_PATH=../../$PLIB_INSTALL_DIR/lib:../../$OSG_INSTALL_DIR/lib:../../$SIMGEAR_INSTALL_DIR/lib" >> $SCRIPT
+	echo "export LD_LIBRARY_PATH=$install_dir_plib/lib:$install_dir_osg/lib:../../$SIMGEAR_INSTALL_DIR/lib" >> $SCRIPT
 	#echo "export FG_AIRCRAFTS=\$PWD/../../$FGFS_INSTALL_DIR/aircrafts" >> $SCRIPT
 	echo "./fgrun --fg-exe=\$PWD/../../$FGFS_INSTALL_DIR/bin/fgfs --fg-root=\$PWD/../../$FGFS_INSTALL_DIR/fgdata   \$@" >> $SCRIPT
 	chmod 755 $SCRIPT
@@ -1515,19 +1755,19 @@ fi
 SET_WINDOW_TITLE "Building FGCOM"
 FGCOM_INSTALL_DIR=fgcom
 INSTALL_DIR_FGCOM=$INSTALL_DIR/$FGCOM_INSTALL_DIR
-cd "$CBD"
+cd "$current_build_dir"
 
 if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="FGCOM"' ]]
 then
-	echo "****************************************" | tee -a $LOGFILE
-	echo "**************** FGCOM *****************" | tee -a $LOGFILE
-	echo "****************************************" | tee -a $LOGFILE
+	echo "****************************************"
+	echo "**************** FGCOM *****************"
+	echo "****************************************"
 
 
 	#svn checkout svn://svn.dfn.de:/fgcom/trunk fgcom
 	if [ "$DOWNLOAD" = "y" ]
 	then
-		echo -n "git://gitorious.org/fg/fgcom.git ... " >> $LOGFILE
+		echo -n "git://gitorious.org/fg/fgcom.git ... "
 
 		if [ -d "fgcom" ]
 		then 
@@ -1546,8 +1786,7 @@ then
                 # pull latest version from the unstable branch
                 git pull
 		
-		
-		echo " OK" >> $LOGFILE
+		echo " OK"
 		cd ..
 			
 #patch for new netdb.h version.
@@ -1555,47 +1794,46 @@ then
 		mv fgcom/iaxclient/lib/libiax2/src/iax_ok.c fgcom/iaxclient/lib/libiax2/src/iax.c
 	fi
 	
-	cd "$CBD"
+	cd "$current_build_dir"
 	if [ -d "fgcom" ]
 	then
 		if [ "$RECONFIGURE" = "y" ]
 		then
-		cd "$CBD"/fgcom
+		cd "$current_build_dir"/fgcom
 
-			cd "$CBD"
+			cd "$current_build_dir"
 			mkdir -p build/fgcom
 
-			cd "$CBD"/build/fgcom
-			echo -n "RECONFIGURE FGCOM ... " >> $LOGFILE
+			cd "$current_build_dir"/build/fgcom
+			echo -n "RECONFIGURE FGCOM ... "
 			rm -f CMakeCache.txt
 			# add -lpthread for UNIX
-			cmake ${VERBOSE_MAKEFILE} -DCMAKE_SKIP_INSTALL_RPATH:BOOL=TRUE  -DCMAKE_SKIP_RPATH:BOOL=TRUE -DFIND_PTHREAD_LIB:BOOL=TRUE -D CMAKE_BUILD_TYPE="Release" -D "CMAKE_PREFIX_PATH=$INSTALL_DIR_PLIB"  -D "CMAKE_INSTALL_PREFIX:PATH=$INSTALL_DIR_FGCOM" "$CBD"/fgcom   2>&1  | tee -a $LOGFILE
+			cmake ${VERBOSE_MAKEFILE} -DCMAKE_SKIP_INSTALL_RPATH:BOOL=TRUE  -DCMAKE_SKIP_RPATH:BOOL=TRUE -DFIND_PTHREAD_LIB:BOOL=TRUE -D CMAKE_BUILD_TYPE="Release" -D "CMAKE_PREFIX_PATH=$INSTALL_DIR_PLIB"  -D "CMAKE_INSTALL_PREFIX:PATH=$INSTALL_DIR_FGCOM" "$current_build_dir"/fgcom   2>&1 
 
-			echo " OK" >> $LOGFILE
+			echo " OK"
 
-			cd "$CBD"/fgcom/src/
-
+			cd "$current_build_dir"/fgcom/src/
 		fi
 
-		cd "$CBD"/build/fgcom
+		cd "$current_build_dir"/build/fgcom
 
 		mkdir -p "$INSTALL_DIR_FGCOM"/bin
 
 		if [ "$COMPILE" = "y" ]
 		then
-			echo "MAKE FGCOM" >> $LOGFILE
-			echo "cmake --build . --config Release" >> $LOGFILE
-			cmake --build . --config Release 2>&1 | tee -a $LOGFILE
+			echo "MAKE FGCOM"
+			echo "cmake --build . --config Release"
+			cmake --build . --config Release
 		
-			echo "INSTALL FGCOM" >> $LOGFILE
-			cmake ${VERBOSE_MAKEFILE} -DBUILD_TYPE=Release -P cmake_install.cmake 2>&1 | tee -a $LOGFILE
+			echo "INSTALL FGCOM"
+			cmake ${VERBOSE_MAKEFILE} -DBUILD_TYPE=Release -P cmake_install.cmake
 		fi
-		cd "$CBD"
+		cd "$current_build_dir"
 
 		echo "#!/bin/sh" > run_fgcom.sh
 		echo "cd \$(dirname \$0)" >> run_fgcom.sh
 		echo "cd $SUB_INSTALL_DIR/$FGCOM_INSTALL_DIR/bin" >> run_fgcom.sh
-		echo "export LD_LIBRARY_PATH=../../$PLIB_INSTALL_DIR/lib:../../$OSG_INSTALL_DIR/lib:../../$SIMGEAR_INSTALL_DIR/lib" >> run_fgcom.sh
+		echo "export LD_LIBRARY_PATH=$install_dir_plib/lib:$install_dir_osg/lib:../../$SIMGEAR_INSTALL_DIR/lib" >> run_fgcom.sh
 		echo "./fgcom -Sfgcom.flightgear.org.uk  \$@" >> run_fgcom.sh
 		chmod 755 run_fgcom.sh
 	fi
@@ -1608,13 +1846,13 @@ fi
 SET_WINDOW_TITLE "Building FGCOMGUI"
 FGCOMGUI_INSTALL_DIR=fgcomgui
 INSTALL_DIR_FGCOMGUI=$INSTALL_DIR/$FGCOMGUI_INSTALL_DIR
-cd "$CBD"
+cd "$current_build_dir"
 
 if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="FGCOMGUI"' ]]
 then
-	echo "****************************************" | tee -a $LOGFILE
-	echo "*************** FGCOMGUI ***************" | tee -a $LOGFILE
-	echo "****************************************" | tee -a $LOGFILE
+	echo "****************************************"
+	echo "*************** FGCOMGUI ***************"
+	echo "****************************************"
 
 
 	#svn checkout svn://svn.dfn.de:/fgcom/trunk fgcom
@@ -1626,9 +1864,9 @@ then
 			FGCOMGUI_STABLE_REVISION_=" -r $FGCOMGUI_STABLE_REVISION"
 		fi
 
-		echo -n "SVN FROM https://fgcomgui.googlecode.com/svn/trunk ... " >> $LOGFILE
+		echo -n "SVN FROM https://fgcomgui.googlecode.com/svn/trunk ... "
 		svn $FGCOMGUI_STABLE_REVISION_ co https://fgcomgui.googlecode.com/svn/trunk fgcomgui 
-		echo " OK" >> $LOGFILE
+		echo " OK"
 		
 	fi
 	
@@ -1640,18 +1878,18 @@ then
 
 		if [ "$COMPILE" = "y" ]
 		then
-			echo "SCONS FGCOMGUI" >> $LOGFILE
-			echo "scons prefix=\"$INSTALL_DIR_FGCOMGUI\" $JOPTION" >> $LOGFILE
-			scons prefix="$INSTALL_DIR_FGCOMGUI" $JOPTION 2>&1 | tee -a $LOGFILE
-			echo "INSTALL FGCOM" >> $LOGFILE
-			scons install 2>&1 | tee -a $LOGFILE
+			echo "SCONS FGCOMGUI"
+			echo "scons prefix=\"$INSTALL_DIR_FGCOMGUI\" $JOPTION"
+			scons prefix="$INSTALL_DIR_FGCOMGUI" $JOPTION
+			echo "INSTALL FGCOM"
+			scons install
 		fi
-		cd "$CBD"
+		cd "$current_build_dir"
 
 		echo "#!/bin/sh" > run_fgcomgui.sh
 		echo "cd \$(dirname \$0)" >> run_fgcomgui.sh
 		echo "cd $SUB_INSTALL_DIR/$FGCOMGUI_INSTALL_DIR/bin" >> run_fgcomgui.sh
-		echo "export LD_LIBRARY_PATH=../../$PLIB_INSTALL_DIR/lib:../../$OSG_INSTALL_DIR/lib:../../$SIMGEAR_INSTALL_DIR/lib" >> run_fgcomgui.sh
+		echo "export LD_LIBRARY_PATH=$install_dir_plib/lib:$install_dir_osg/lib:../../$SIMGEAR_INSTALL_DIR/lib" >> run_fgcomgui.sh
 		echo "export PATH=../../fgcom/bin/:$PATH" >> run_fgcomgui.sh
 		echo "./fgcomgui \$@" >> run_fgcomgui.sh
 		chmod 755 run_fgcomgui.sh
@@ -1665,7 +1903,7 @@ fi
 SET_WINDOW_TITLE "Building OPENRADAR"
 OR_INSTALL_DIR=openradar
 INSTALL_DIR_OR=$INSTALL_DIR/$OR_INSTALL_DIR
-cd "$CBD"
+cd "$current_build_dir"
 
 if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="OPENRADAR"' ]]
 then
@@ -1696,25 +1934,25 @@ fi
 SET_WINDOW_TITLE "Building ATLAS"
 ATLAS_INSTALL_DIR=atlas
 INSTALL_DIR_ATLAS=$INSTALL_DIR/$ATLAS_INSTALL_DIR
-cd "$CBD"
+cd "$current_build_dir"
 
 if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="ATLAS"' ]]
 then
-	echo "****************************************" | tee -a $LOGFILE
-	echo "**************** ATLAS *****************" | tee -a $LOGFILE
-	echo "****************************************" | tee -a $LOGFILE
+	echo "****************************************"
+	echo "**************** ATLAS *****************"
+	echo "****************************************"
 
 	if [ "$DOWNLOAD" = "y" ]
 	then
-		echo -n "CSV FROM atlas.cvs.sourceforge.net:/cvsroot/atlas ... " >> $LOGFILE
+		echo -n "CSV FROM atlas.cvs.sourceforge.net:/cvsroot/atlas ... "
 		cvs -z3 -d:pserver:anonymous@atlas.cvs.sourceforge.net:/cvsroot/atlas co Atlas
-		echo " OK" >> $LOGFILE
+		echo " OK"
 
 		echo "fixing old function name \".get_gbs_center2(\" in Subbucket.cxx"
 		cd Atlas/src
 		cp Subbucket.cxx Subbucket.cxx.original
 		cat Subbucket.cxx.original | sed s/\.get_gbs_center2\(/\.get_gbs_center\(/g > Subbucket.cxx
-		cd "$CBD"
+		cd "$current_build_dir"
 	fi
 	
 	if [ -d "Atlas" ]
@@ -1726,44 +1964,44 @@ then
 			if [ "$RECONFIGURE" = "y" ]
 			then
 
-				cd "$CBD"
+				cd "$current_build_dir"
 		                mkdir -p build/atlas
 
 				cd Atlas
-				echo "AUTOGEN ATLAS" >> $LOGFILE
-				./autogen.sh 2>&1 | tee -a $LOGFILE
-				echo "CONFIGURE ATLAS" >> $LOGFILE
-				cd "$CBD"/build/atlas
-				../../Atlas/configure --prefix=$INSTALL_DIR_ATLAS --exec-prefix=$INSTALL_DIR_ATLAS  --with-plib=$INSTALL_DIR_PLIB --with-simgear="$INSTALL_DIR_SIMGEAR" --with-fgbase="$INSTALL_DIR_FGFS/fgdata" CXXFLAGS="$CXXFLAGS -I$CBD/OpenSceneGraph/include" 2>&1 | tee -a $LOGFILE
+				echo "AUTOGEN ATLAS"
+				./autogen.sh
+				echo "CONFIGURE ATLAS"
+				cd "$current_build_dir"/build/atlas
+				../../Atlas/configure --prefix=$INSTALL_DIR_ATLAS --exec-prefix=$INSTALL_DIR_ATLAS  --with-plib=$INSTALL_DIR_PLIB --with-simgear="$INSTALL_DIR_SIMGEAR" --with-fgbase="$INSTALL_DIR_FGFS/fgdata" CXXFLAGS="$CXXFLAGS -I$current_build_dir/OpenSceneGraph/include"
 				make clean
 			fi
 		fi
 		if [ "$COMPILE" = "y" ]
 		then
-			echo "MAKE ATLAS" >> $LOGFILE
-			echo "make $JOPTION $OOPTION" >> $LOGFILE
+			echo "MAKE ATLAS"
+			echo "make $JOPTION $OOPTION"
 		
-			cd "$CBD"/build/atlas
-			make $JOPTION $OOPTION 2>&1 | tee -a $LOGFILE
+			cd "$current_build_dir"/build/atlas
+			make $JOPTION $OOPTION
 
-			echo "INSTALL ATLAS" >> $LOGFILE
-			make install 2>&1 | tee -a $LOGFILE
+			echo "INSTALL ATLAS"
+			make install
 		fi
-		cd "$CBD"
+		cd "$current_build_dir"
 
 		echo "#!/bin/sh" > run_atlas.sh
 		echo "cd \$(dirname \$0)" >> run_atlas.sh
 		echo "cd $SUB_INSTALL_DIR/$ATLAS_INSTALL_DIR/bin" >> run_atlas.sh
-		echo "export LD_LIBRARY_PATH=../../$PLIB_INSTALL_DIR/lib:../../$OSG_INSTALL_DIR/lib:../../$SIMGEAR_INSTALL_DIR/lib" >> run_atlas.sh
+		echo "export LD_LIBRARY_PATH=$install_dir_plib/lib:$install_dir_osg/lib:../../$SIMGEAR_INSTALL_DIR/lib" >> run_atlas.sh
 		echo "./Atlas --fg-root=\$PWD/../../$FGFS_INSTALL_DIR/fgdata \$@" >> run_atlas.sh
 		chmod 755 run_atlas.sh
 	fi
 fi
 SET_WINDOW_TITLE "Finished Building"
-echo "		finished at $(date)" >>download_and_compile.log
-echo "" >>download_and_compile.log
+echo "		finished at $(date)" >>download_and_compile_summary.log
+echo "" >>download_and_compile_summary.log
 
-check_build "$CBD"
+check_build "$current_build_dir"
 
 echo "To start fgfs, run the run_fgfs.sh file"
 echo "To start terrasync, run the run_terrasync.sh file"
