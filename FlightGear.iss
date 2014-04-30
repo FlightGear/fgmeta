@@ -80,12 +80,12 @@ Source: "X:\install\msvc100\FlightGear\bin\yasim.exe"; DestDir: "{app}\bin"; Fla
 Source: "X:\install\msvc100\FlightGear\bin\fgcom.exe"; DestDir: "{app}\bin"; Flags: ignoreversion; Check: not Is64BitInstallMode
 Source: "X:\install\msvc100\FGRun\bin\fgrun.exe"; DestDir: "{app}\bin"; Flags: ignoreversion ; Check: not Is64BitInstallMode
 Source: "X:\install\msvc100\FGRun\share\locale\*"; DestDir: "{app}\bin\locale"; Flags: ignoreversion recursesubdirs; Check: not Is64BitInstallMode
-Source: "X:\3rdParty\bin\*.dll"; DestDir: "{app}\bin"; Check: not Is64BitInstallMode
+Source: "X:\3rdParty\bin\zlib.dll"; DestDir: "{app}\bin"; Check: not Is64BitInstallMode
+Source: "X:\3rdParty\bin\OpenAL32.dll"; DestDir: "{app}\bin"; Check: not Is64BitInstallMode
 Source: "{#VCInstallDir}\redist\x86\Microsoft.VC100.CRT\*.dll"; DestDir:  "{app}\bin"; Check: not Is64BitInstallMode
 Source: "X:\3rdParty\bin\vcredist_x86.exe"; DestDir: "{app}\bin"; Flags: skipifsourcedoesntexist; Check: not Is64BitInstallMode
 
 ; 64 bits install
-Source: "X:\install\msvc100-64\FlightGear\bin\fgfs.exe"; DestDir: "{app}\bin"; Flags: ignoreversion; Check: Is64BitInstallMode
 Source: "X:\install\msvc100-64\FlightGear\bin\fgfs.exe"; DestDir: "{app}\bin"; Flags: ignoreversion; Check: Is64BitInstallMode
 Source: "X:\install\msvc100-64\FlightGear\bin\fgadmin.exe"; DestDir: "{app}\bin"; Flags: ignoreversion; Check: Is64BitInstallMode
 Source: "X:\install\msvc100-64\FlightGear\bin\terrasync.exe"; DestDir: "{app}\bin"; Flags: ignoreversion; Check: Is64BitInstallMode
@@ -99,7 +99,8 @@ Source: "X:\install\msvc100-64\FlightGear\bin\yasim.exe"; DestDir: "{app}\bin"; 
 Source: "X:\install\msvc100-64\FlightGear\bin\fgcom.exe"; DestDir: "{app}\bin"; Flags: ignoreversion; Check: Is64BitInstallMode
 Source: "X:\install\msvc100-64\FGRun\bin\fgrun.exe"; DestDir: "{app}\bin"; Flags: ignoreversion; Check: Is64BitInstallMode
 Source: "X:\install\msvc100-64\FGRun\share\locale\*"; DestDir: "{app}\bin\locale"; Flags: ignoreversion recursesubdirs; Check: Is64BitInstallMode
-Source: "X:\3rdParty.x64\bin\*.dll"; DestDir: "{app}\bin"; Check: Is64BitInstallMode
+Source: "X:\3rdParty.x64\bin\zlib.dll"; DestDir: "{app}\bin"; Check: Is64BitInstallMode
+Source: "X:\3rdParty.x64\bin\OpenAL32.dll"; DestDir: "{app}\bin"; Check: Is64BitInstallMode
 Source: "X:\3rdParty.x64\bin\vcredist_x64.exe"; DestDir: "{app}\bin"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode
 Source: "{#VCInstallDir}\redist\x64\Microsoft.VC100.CRT\*.dll"; DestDir: "{app}\bin"; Check: Is64BitInstallMode
 
@@ -136,6 +137,9 @@ Source: "{#OSGPluginsDir}\osgdb_rgb.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVe
 Source: "{#OSGPluginsDir}\osgdb_png.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Check: not Is64BitInstallMode
 Source: "{#OSGPluginsDir}\osgdb_dds.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Check: not Is64BitInstallMode
 Source: "{#OSGPluginsDir}\osgdb_txf.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Check: not Is64BitInstallMode
+Source: "{#OSGPluginsDir}\osgdb_tiff.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Check: not Is64BitInstallMode
+Source: "{#OSGPluginsDir}\osgdb_ogr.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Check: not Is64BitInstallMode
+Source: "{#OSGPluginsDir}\osgdb_gdal.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Check: not Is64BitInstallMode
 Source: "{#OSGPluginsDir}\osgdb_freetype.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Check: not Is64BitInstallMode
 Source: "{#OSGPluginsDir}\osgdb_serializers_osg.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Check: not Is64BitInstallMode
 Source: "{#OSGPluginsDir}\osgdb_serializers_osganimation.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Check: not Is64BitInstallMode
@@ -171,6 +175,9 @@ Source: "{#OSG64PluginsDir}\osgdb_rgb.dll"; DestDir: "{app}\bin\osgPlugins-{#OSG
 Source: "{#OSG64PluginsDir}\osgdb_png.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode
 Source: "{#OSG64PluginsDir}\osgdb_dds.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode
 Source: "{#OSG64PluginsDir}\osgdb_txf.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode
+Source: "{#OSG64PluginsDir}\osgdb_tiff.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode
+Source: "{#OSG64PluginsDir}\osgdb_ogr.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode
+Source: "{#OSG64PluginsDir}\osgdb_gdal.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode
 Source: "{#OSG64PluginsDir}\osgdb_freetype.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode
 Source: "{#OSG64PluginsDir}\osgdb_serializers_osg.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode
 Source: "{#OSG64PluginsDir}\osgdb_serializers_osganimation.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode
