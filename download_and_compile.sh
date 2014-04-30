@@ -243,7 +243,7 @@ do
 		no_exe_fgrun="fgrun"
 	fi
 
-	if [[ -e "${install_dir}/fgcom/bin/fgcom" ]] 
+	if [[ -e "${install_dir}/fgfs/bin/fgcom" ]] 
 	then
 		exe_fgcom="fgcom"
 	else
@@ -271,7 +271,7 @@ do
 		no_install_dir_fgrun="fgrun"
 	fi
 
-	if [[ -e "${install_dir}/fgcom" ]] 
+	if [[ -e "${install_dir}/fgfs" ]] 
 	then
 		install_dir_fgcom="fgcom"
 	else
@@ -367,7 +367,7 @@ WITH_EVENT_INPUT=""
 WITH_OPENRTI=""
 FGSG_BRANCH="next"
 FGSG_REVISION="HEAD"
-osg_version="3.0.1"
+osg_version="3.2.0"
 # ---------------------------------------------------------
 # Script Section: Option Interpretation
 # ---------------------------------------------------------
@@ -516,8 +516,7 @@ OPENRTI_BRANCH=${MAP_ITEM[0]}
 OPENRTI_REVISION=${MAP_ITEM[1]}
 
 
-# FGCOM
-FGCOM_BRANCH="master"
+# FGCOMGUI
 FGCOMGUI_STABLE_REVISION="46"
 
 #OpenRadar
@@ -534,7 +533,7 @@ if [ "$HELP" = "HELP" ]
 then
 	echo "$0 Version $VERSION"
 	echo "Usage:"
-	echo "./$0 [-u] [-h] [-s] [-e] [-i] [-g] [-a y|n] [-c y|n] [-p y|n] [-d y|n] [-r y|n] [ALL|PLIB|OSG|OPENRTI|SIMGEAR|FGFS|FGO|FGX|FGRUN|FGCOM|FGCOMGUI|ATLAS] [UPDATE]"
+	echo "./$0 [-u] [-h] [-s] [-e] [-i] [-g] [-a y|n] [-c y|n] [-p y|n] [-d y|n] [-r y|n] [ALL|PLIB|OSG|OPENRTI|SIMGEAR|FGFS|FGO|FGX|FGRUN|FGCOMGUI|ATLAS] [UPDATE]"
 	echo "* without options it recompiles: PLIB,OSG,OPENRTI,SIMGEAR,FGFS,FGRUN"
 	echo "* Using ALL compiles everything"
 	echo "* Adding UPDATE it does not rebuild all (faster but to use only after one successfull first compile)"
@@ -844,7 +843,7 @@ then
 	build_osg=OSG
 fi
 
-WHATTOBUILDALL=( $build_plib $build_osg OPENRTI SIMGEAR FGFS DATA FGRUN FGCOM )
+WHATTOBUILDALL=( $build_plib $build_osg OPENRTI SIMGEAR FGFS DATA FGRUN )
 
 #printf "Remaining arguments are: %s\n" "$*"
 #printf "Num: %d\n" "$#"
@@ -1492,6 +1491,14 @@ ENDOFALL2
 	echo "./terrasync \$@" >> $SCRIPT
 	chmod 755 $SCRIPT
 
+	SCRIPT=run_fgcom.sh
+	echo "#!/bin/sh" > $SCRIPT
+	echo "cd \$(dirname \$0)" >> $SCRIPT
+	echo "cd $SUB_INSTALL_DIR/$FGFS_INSTALL_DIR/bin" >> $SCRIPT
+	echo "export LD_LIBRARY_PATH=$install_dir_plib/lib:$install_dir_osg/lib:../../$SIMGEAR_INSTALL_DIR/lib" >> $SCRIPT
+	echo "./fgcom \$@" >> $SCRIPT
+	chmod 755 $SCRIPT
+
 	if [[ $STOP_AFTER_ONE_MODULE = true ]]; then exit; fi
 fi
 
@@ -1578,7 +1585,7 @@ then
 	cat x_default.ini | sed s/\\/usr\\/bin\\/fgfs/INSTALL_DIR_FGXMY_SLASH_HERE..MY_SLASH_HEREfgfsMY_SLASH_HEREbinMY_SLASH_HEREfgfs/g > tmp1
 	cat tmp1 | sed s/\\/usr\\/share\\/flightgear/INSTALL_DIR_FGXMY_SLASH_HERE..MY_SLASH_HEREfgfsMY_SLASH_HEREfgdata/g > tmp2
 	cat tmp2 | sed s/\\/usr\\/bin\\/terrasync/INSTALL_DIR_FGXMY_SLASH_HERE..MY_SLASH_HEREfgfsMY_SLASH_HEREbinMY_SLASH_HEREterrasync/g > tmp3
-	cat tmp3 | sed s/\\/usr\\/bin\\/fgcom/INSTALL_DIR_FGXMY_SLASH_HERE..MY_SLASH_HEREfgcomMY_SLASH_HEREbinMY_SLASH_HEREfgcom/g > tmp4
+	cat tmp3 | sed s/\\/usr\\/bin\\/fgcom/INSTALL_DIR_FGXMY_SLASH_HERE..MY_SLASH_HEREfgfsMY_SLASH_HEREbinMY_SLASH_HEREfgcom/g > tmp4
 	cat tmp4 | sed s/\\/usr\\/bin\\/js_demo/INSTALL_DIR_FGXMY_SLASH_HERE..MY_SLASH_HEREfgfsMY_SLASH_HEREbinMY_SLASH_HEREjs_demo/g > tmp5
 
 	INSTALL_DIR_FGX_NO_SLASHS=$(echo "$INSTALL_DIR_FGX" | sed -e 's/\//MY_SLASH_HERE/g')
@@ -1746,97 +1753,6 @@ fi
 	chmod 755 $SCRIPT
 
 
-	if [[ $STOP_AFTER_ONE_MODULE = true ]]; then exit; fi
-fi
-
-#######################################################
-# FGCOM
-#######################################################
-SET_WINDOW_TITLE "Building FGCOM"
-FGCOM_INSTALL_DIR=fgcom
-INSTALL_DIR_FGCOM=$INSTALL_DIR/$FGCOM_INSTALL_DIR
-cd "$current_build_dir"
-
-if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="FGCOM"' ]]
-then
-	echo "****************************************"
-	echo "**************** FGCOM *****************"
-	echo "****************************************"
-
-
-	#svn checkout svn://svn.dfn.de:/fgcom/trunk fgcom
-	if [ "$DOWNLOAD" = "y" ]
-	then
-		echo -n "git://gitorious.org/fg/fgcom.git ... "
-
-		if [ -d "fgcom" ]
-		then 
-			echo "fgcom exists already."
-		else   
-	                git clone git://gitorious.org/fg/fgcom.git
-		fi
-
-		cd fgcom
-		git fetch origin
-			
-                # create local unstable branch, ignore errors if it exists
-                git branch -f $FGCOM_UNSTABLE_GIT_BRANCH origin/$FGCOM_UNSTABLE_GIT_BRANCH 2> /dev/null || true
-                 # switch to unstable branch. No error is reported if we're already on the branch.
-                git checkout -f $FGCOM_UNSTABLE_GIT_BRANCH
-                # pull latest version from the unstable branch
-                git pull
-		
-		echo " OK"
-		cd ..
-			
-#patch for new netdb.h version.
-		cat fgcom/iaxclient/lib/libiax2/src/iax.c | sed s/hp-\>h_addr,/hp-\>h_addr_list[0],/g > fgcom/iaxclient/lib/libiax2/src/iax_ok.c
-		mv fgcom/iaxclient/lib/libiax2/src/iax_ok.c fgcom/iaxclient/lib/libiax2/src/iax.c
-	fi
-	
-	cd "$current_build_dir"
-	if [ -d "fgcom" ]
-	then
-		if [ "$RECONFIGURE" = "y" ]
-		then
-		cd "$current_build_dir"/fgcom
-
-			cd "$current_build_dir"
-			mkdir -p build/fgcom
-
-			cd "$current_build_dir"/build/fgcom
-			echo -n "RECONFIGURE FGCOM ... "
-			rm -f CMakeCache.txt
-			# add -lpthread for UNIX
-			cmake ${VERBOSE_MAKEFILE} -DCMAKE_SKIP_INSTALL_RPATH:BOOL=TRUE  -DCMAKE_SKIP_RPATH:BOOL=TRUE -DFIND_PTHREAD_LIB:BOOL=TRUE -D CMAKE_BUILD_TYPE="Release" -D "CMAKE_PREFIX_PATH=$INSTALL_DIR_PLIB"  -D "CMAKE_INSTALL_PREFIX:PATH=$INSTALL_DIR_FGCOM" "$current_build_dir"/fgcom   2>&1 
-
-			echo " OK"
-
-			cd "$current_build_dir"/fgcom/src/
-		fi
-
-		cd "$current_build_dir"/build/fgcom
-
-		mkdir -p "$INSTALL_DIR_FGCOM"/bin
-
-		if [ "$COMPILE" = "y" ]
-		then
-			echo "MAKE FGCOM"
-			echo "cmake --build . --config Release"
-			cmake --build . --config Release
-		
-			echo "INSTALL FGCOM"
-			cmake ${VERBOSE_MAKEFILE} -DBUILD_TYPE=Release -P cmake_install.cmake
-		fi
-		cd "$current_build_dir"
-
-		echo "#!/bin/sh" > run_fgcom.sh
-		echo "cd \$(dirname \$0)" >> run_fgcom.sh
-		echo "cd $SUB_INSTALL_DIR/$FGCOM_INSTALL_DIR/bin" >> run_fgcom.sh
-		echo "export LD_LIBRARY_PATH=$install_dir_plib/lib:$install_dir_osg/lib:../../$SIMGEAR_INSTALL_DIR/lib" >> run_fgcom.sh
-		echo "./fgcom -Sfgcom.flightgear.org.uk  \$@" >> run_fgcom.sh
-		chmod 755 run_fgcom.sh
-	fi
 	if [[ $STOP_AFTER_ONE_MODULE = true ]]; then exit; fi
 fi
 
