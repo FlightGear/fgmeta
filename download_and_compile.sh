@@ -1298,7 +1298,7 @@ then
 		fi
 		
 		cd flightgear
-		if [[ $(grep -L 'list(APPEND FLTK_LIBRARIES ${CMAKE_DL_LIBS})' CMakeLists.txt) != "" ]]
+		if [[ "$STABLE" = "STABLE" && $(grep -L 'list(APPEND FLTK_LIBRARIES ${CMAKE_DL_LIBS})' CMakeLists.txt) != "" ]]
 		then
 		patch  CMakeLists.txt <<\EOF
 --- fgfs/flightgear/CMakeLists.txt_old	2013-08-04 08:59:00.614104454 -0400
