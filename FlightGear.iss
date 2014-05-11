@@ -226,7 +226,7 @@ filename: "{app}\bin\vcredist_x86.exe"; WorkingDir: "{app}\bin"; Parameters: "/p
 filename: "{app}\bin\vcredist_x64.exe"; WorkingDir: "{app}\bin"; Parameters: "/passive /norestart"; Description: "Installing MS Visual C++ runtime components"; Check: Is64BitInstallMode and FileExists(ExpandConstant('{app}\bin\vcredist_x64.exe'))
 filename: "{app}\bin\oalinst.exe"; WorkingDir: "{app}\bin"; Description: "Installing OpenAL"; Check: IsTaskSelected('insoal') and FileExists(ExpandConstant('{app}\bin\oalinst.exe'))
 ; Put installation directory into the fgrun.prefs
-filename: "{app}\bin\fgrun.exe"; WorkingDir: "{app}\bin"; Parameters: "--silent ""--fg-exe={app}\bin\fgfs.exe"" ""--fg-root={app}\data"" ""--fg-scenery={userdocs}\FlightGear\Custom Scenery;{app}\data\Scenery"" ""--fg-aircraft={userdocs}\FlightGear\Aircraft"" ""--terrasync-dir={userdocs}\FlightGear\TerraSync"" --version={#FGVersion}"
+filename: "{app}\bin\fgrun.exe"; WorkingDir: "{app}\bin"; Parameters: "--silent ""--fg-exe={app}\bin\fgfs.exe"" ""--fg-root={app}\data"" ""--fg-scenery={userdocs}\FlightGear\Custom Scenery;{app}\data\Scenery;{userdocs}\FlightGear\TerraSync"" ""--fg-aircraft={userdocs}\FlightGear\Aircraft"" ""--terrasync-dir={userdocs}\FlightGear\TerraSync"" --version={#FGVersion}"
 ; Put installation and source directories into the fgadmin.prefs
 filename: "{app}\bin\fgadmin.exe"; WorkingDir: "{app}\bin"; Parameters: "--silent ""--install-source={src}\..\Scenery"" ""--scenery-dest={userdocs}\FlightGear\Custom Scenery"""
 
