@@ -88,6 +88,7 @@ elseif(MSVC)
         -DTIFF_LIBRARY:FILEPATH=${CMAKE_BINARY_DIR}/${RDPARTY_DIR}/lib/libtiff.lib
         -DCURL_LIBRARY:FILEPATH=${CMAKE_BINARY_DIR}/${RDPARTY_DIR}/lib/libcurl_imp.lib
         -DFREETYPE_LIBRARY:FILEPATH=${CMAKE_BINARY_DIR}/${RDPARTY_DIR}/lib/freetype.lib
+        -DFREETYPE_INCLUDE_DIR:PATH=${CMAKE_BINARY_DIR}/${RDPARTY_DIR}/include;${CMAKE_BINARY_DIR}/${RDPARTY_DIR}/include/freetype
     )
 
     # for compatability with MSVC directory layout
