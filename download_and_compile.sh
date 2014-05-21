@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-VERSION="2.24"
+VERSION="2.25"
 
 #######################################################
 # THANKS TO
@@ -312,7 +312,7 @@ if [ -d "$CBD"/fgfs/flightgear ]; then
 	mv fgfs/flightgear tmp && rm -rf fgfs && mv tmp flightgear
 	mv simgear/simgear tmp && rm -rf simgear && mv tmp simgear
 	mkdir -p install/flightgear && mv install/fgfs/fgdata install/flightgear/fgdata
-	exit 0
+	echo "Done"
 fi
 
 #######################################################
