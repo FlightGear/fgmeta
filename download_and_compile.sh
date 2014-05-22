@@ -91,8 +91,8 @@ function _gitUpdate(){
 	fi
 	branch=$1
 	set +e
-	git status | grep -q "nothing to commit, working directory clean"; result=$?
-	if [ $result != 1 ]; then
+	git diff --exit-code 2>&1 > /dev/null
+	if [ $? != 1 ]; then
 		set -e
 		git checkout -f $branch
 		git pull -r
