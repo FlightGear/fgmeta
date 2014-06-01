@@ -1,7 +1,10 @@
 #!/usr/bin/python
 
 import os, sys, re
+import urllib2
+import hashlib # for MD5
 
+import catalogFilenames
 import sgprops
 
 fgRoot = sys.argv[1]
@@ -32,7 +35,7 @@ urls = [
 thumbs = [
     "http://www.flightgear.org/thumbs/v3.0/{acft}.jpg"
 ]
-
+    
 for d in os.listdir(aircraftDir):
     acftDirPath = os.path.join(aircraftDir, d)
     if not os.path.isdir(acftDirPath):
@@ -81,20 +84,26 @@ for d in os.listdir(aircraftDir):
         if sim.hasChild('tags'):
             for c in sim.getChild('tags').getChildren('tag'):
                 pkgNode.addChild('tag').value = c.value
-        
-        pkgNode.addChild("md5").value = 'ffffffffff'
-        
+                
         # create download and thumbnail URLs
-        date = '0000000'
-        s = "{url}Aircraft-3.0/{acft}_{date}.zip"
+        s = "{url}Aircraft-3.0/"
+        if d not in catalogFilenames.aircraft:
+            print "filename not found for:",d
+            raise RuntimeError("filename not found for:" + d)
+        s += catalogFilenames.aircraft[d]
+        
         for u in urls:
-            pkgNode.addChild("url").value = s.format(url=u,acft=d, date=date)
+            pkgNode.addChild("url").value = s.format(url=u,filename=f)
         
         for t in thumbs:
             pkgNode.addChild("thumbnail").value = t.format(acft=d)
         
+        # download and compute MD5 sum
+        dl = urllib2.urlopen(s.format(url=urls[0],filename=f))
+        digest = hashlib.md5(dl.read()).hexdigest()
+        pkgNode.addChild("md5").value = digest
+        
     except:
         print "Failure processing:", setFilePath
-        
 
 catalogProps.write("catalog.xml")        
