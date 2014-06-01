@@ -21,12 +21,12 @@ de = catalogProps.addChild('de')
 fr = catalogProps.addChild('fr')
 
 urls = [
-        "http://flightgear.wo0t.de/Aircraft-3.0/{acft}_20140116.zip",
-        "http://ftp.icm.edu.pl/packages/flightgear/Aircraft-3.0/{acft}_20140216.zip",
-        "http://mirrors.ibiblio.org/pub/mirrors/flightgear/ftp/Aircraft-3.0/{acft}_20140216.zip",
-        "http://ftp.igh.cnrs.fr/pub/flightgear/ftp/Aircraft-3.0/{acft}_20140116.zip",
-        "http://ftp.linux.kiev.ua/pub/fgfs/Aircraft-3.0/{acft}_20140116.zip",
-        "http://fgfs.physra.net/ftp/Aircraft-3.0/{acft}_20130225.zip"
+        "http://flightgear.wo0t.de/",
+        "http://ftp.icm.edu.pl/packages/flightgear/",
+        "http://mirrors.ibiblio.org/pub/mirrors/flightgear/ftp/",
+        "http://ftp.igh.cnrs.fr/pub/flightgear/ftp/",
+        "http://ftp.linux.kiev.ua/pub/fgfs/",
+        "http://fgfs.physra.net/ftp/"
 ]
 
 thumbs = [
@@ -56,6 +56,8 @@ for d in os.listdir(aircraftDir):
         sim = props.getNode("sim")
      
         pkgNode = catalogProps.addChild('package')
+        
+        # basic / mandatory values
         pkgNode.addChild('id').value = d
         pkgNode.addChild('name').value = sim.getValue('description')
         
@@ -63,14 +65,30 @@ for d in os.listdir(aircraftDir):
         if longDesc is not None:
             pkgNode.addChild('description').value = longDesc
             
+        # copy all the standard values
+        for p in ['status', 'author', 'license']:
+            v = sim.getValue(p)
+            if v is not None:
+                pkgNode.addChild(p).value = v
+            
+        # ratings
+        if sim.hasChild('rating'):
+            pkgRatings = pkgNode.addChild('rating')
+            for r in ['FDM', 'systems', 'cockpit', 'model']:
+                pkgRatings.addChild(r).value = sim.getValue('rating/' + r, 0)
+            
         # copy tags
         if sim.hasChild('tags'):
             for c in sim.getChild('tags').getChildren('tag'):
                 pkgNode.addChild('tag').value = c.value
         
+        pkgNode.addChild("md5").value = 'ffffffffff'
+        
         # create download and thumbnail URLs
+        date = '0000000'
+        s = "{url}Aircraft-3.0/{acft}_{date}.zip"
         for u in urls:
-            pkgNode.addChild("url").value = u.format(acft=d)
+            pkgNode.addChild("url").value = s.format(url=u,acft=d, date=date)
         
         for t in thumbs:
             pkgNode.addChild("thumbnail").value = t.format(acft=d)

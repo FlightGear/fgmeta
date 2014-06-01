@@ -100,7 +100,7 @@ class Node(object):
         root = self._createXMLElement('PropertyList')
         
         t = ET.ElementTree(root)
-        t.write(path, 'UTF-8')
+        t.write(path, 'utf-8')
         
     def _createXMLElement(self, nm = None):
         if nm is None:
@@ -109,15 +109,24 @@ class Node(object):
         n = ET.Element(nm)
         
         # value and type specification 
-        if self._value is not None:
-            n.text = str(self._value)
-            if isinstance(self._value, int):
-                n.set('type', 'int')
-            elif isinstance(self._value, float):
-                n.set('type', 'double')
-            elif isinstance(self._value, bool):
-                n.set('type', "bool")
-        
+        try:
+            if self._value is not None:
+                if isinstance(self._value, basestring):
+                    # don't call str() on strings, breaks the
+                    # encoding
+                    n.text = self._value
+                else:
+                    # use str() to turn non-string types into text
+                    n.text = str(self._value)
+                    if isinstance(self._value, int):
+                        n.set('type', 'int')
+                    elif isinstance(self._value, float):
+                        n.set('type', 'double')
+                    elif isinstance(self._value, bool):
+                        n.set('type', "bool")
+        except UnicodeEncodeError:
+            print "Encoding error with", self._value, type(self._value)
+            
         # index in parent
         if (self.index != 0):
             n.set('n', self.index)
