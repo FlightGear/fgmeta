@@ -1,171 +1,82 @@
 #!/usr/bin/python
 
-import os
-import sys
-import fnmatch
-import tarfile
-import hashlib
-import shutil
+import os, sys, re
 
-import xml.etree.cElementTree as ET
+import sgprops
 
-rootPath = sys.argv[1]
-outputDir = sys.argv[2]
+fgRoot = sys.argv[1]
+aircraftDir = os.path.join(fgRoot, 'Aircraft')
 
-existingCatalogPath = os.path.join(outputDir, 'catalog.xml')
-existingCatalog = None
-print 'existing ctalog path:' + existingCatalogPath
-if os.path.exists(existingCatalogPath):
-    existingCatalog = ET.parse(existingCatalogPath)
+catalogProps = sgprops.Node()
+catalogProps.addChild('version').value = '3.1.0'
+catalogProps.addChild('id').value = 'org.flightgear.default'
+catalogProps.addChild('license').value = 'GPL'
+catalogProps.addChild('url').value = "http://fgfs.goneabitbursar.com/pkg/3.1.0/default-catalog.xml"
 
-for file in os.listdir(outputDir):
-    if fnmatch.fnmatch(file, '*.tar.gz'):
-        os.remove(os.path.join(outputDir, file));
+catalogProps.addChild('description').value = "Aircraft developed and maintained by the FlightGear project"
 
+de = catalogProps.addChild('de')
+# de.addChild('description').value = "<German translation of catalog description>"
 
-thumbsDir = os.path.join(outputDir, 'thumbs')
-shutil.rmtree(thumbsDir)
-os.makedirs(thumbsDir)
+fr = catalogProps.addChild('fr')
 
-def setProperty(node, id, value):
-    s = node.find(id) # check for existing
-    if s is None: 
-        s = ET.SubElement(node, id)
-    s.text = value
+urls = [
+        "http://flightgear.wo0t.de/Aircraft-3.0/{acft}_20140116.zip",
+        "http://ftp.icm.edu.pl/packages/flightgear/Aircraft-3.0/{acft}_20140216.zip",
+        "http://mirrors.ibiblio.org/pub/mirrors/flightgear/ftp/Aircraft-3.0/{acft}_20140216.zip",
+        "http://ftp.igh.cnrs.fr/pub/flightgear/ftp/Aircraft-3.0/{acft}_20140116.zip",
+        "http://ftp.linux.kiev.ua/pub/fgfs/Aircraft-3.0/{acft}_20140116.zip",
+        "http://fgfs.physra.net/ftp/Aircraft-3.0/{acft}_20130225.zip"
+]
 
-def clearChildren(node, tag):
-    for c in node.findall(tag):
-        node.remove(c)
+thumbs = [
+    "http://www.flightgear.org/thumbs/v3.0/{acft}.jpg"
+]
 
-def parse_setXml(path):
-    tree = ET.parse(path)
-    
-    desc = tree.find('sim/description')
-    ratings = tree.find('sim/rating')
-    if (ratings is not None):
-        for rating in list(ratings):
-            if rating.tag == 'status':
-                continue
-                
-            rvalue = int(rating.text)
-            if rvalue < 2:
-                return None
-    else:
-        return None
-    
-    d = {}
-    
-    d['desc'] = desc
-    d['ratings'] = ratings;
-    d['status'] = tree.find('sim/status')
-    d['authors'] = tree.findall('sim/author')
-
-    return d
-    
-def process_aircraft(acft, path):
-    print '===' + acft + '==='
-    setFiles = []
-    thumbs = []
-    
-    for file in os.listdir(path):
-        if fnmatch.fnmatch(file, '*-set.xml'):
-            setFiles.append(file);
+for d in os.listdir(aircraftDir):
+    acftDirPath = os.path.join(aircraftDir, d)
+    if not os.path.isdir(acftDirPath):
+        continue
         
-        if fnmatch.fnmatch(file, 'thumbnail*'):
-            thumbs.append(file)
-    
-    aircraft = []
-    for s in setFiles:
-        d = parse_setXml(os.path.join(path, s))
-        if d is None:
-            continue
-        
-        d['set'] = s[0:-8]
-        aircraft.append(d)
-    
-    thumbnailNames = []
-    # copy thumbnails
-    for t in thumbs:
-        outThumb = os.path.join(thumbsDir, acft + "-" + t)
-        thumbnailNames.append(acft + "-" + t)
-        shutil.copyfile(os.path.join(path, t), outThumb)
+    setFilePath = None
+
+    # find the first set file 
+    # FIXME - way to designate the primary file
+    for f in os.listdir(acftDirPath):
+        if f.endswith("-set.xml"):
+            setFilePath = os.path.join(acftDirPath, f)
+            break
             
-    if len(aircraft) == 0:
-        print "no aircraft profiles for " + acft
-        return
-            
-    # tarball creation
-    outTar = os.path.join(outputDir, acft + ".tar.gz")
-    tar = tarfile.open(outTar, "w:gz")
-    tar.add(path, acft)
-    tar.close()
-
-    digest = hashlib.md5(open(outTar, 'r').read()).hexdigest()
-    revision = 1
+    if setFilePath is None:
+        print "No -set.xml file found in",acftDirPath,"will be skipped"
+        continue
     
-    # revision check
-    if acft in existingPackages:
-        previousMd5 = existingPackages[acft].find('md5').text
-        previousRevsion = int(existingPackages[acft].find('revision').text)
-        if digest != previousMd5:
-            print acft + ": MD5 has changed"
-            revision = previousRevsion + 1
-        else:
-            print acft + ": MD5 is unchanged"
-    else:    
-        existingPackages[acft] = ET.Element('package')
-        setProperty(existingPackages[acft], 'id', acft)
-    
-    setProperty(existingPackages[acft], 'revision', str(revision))
-    setProperty(existingPackages[acft], 'md5', digest)
-    setProperty(existingPackages[acft], 'description', aircraft[0]['desc'])
+    try:
+        props = sgprops.readProps(setFilePath, dataDirPath = fgRoot)
+        sim = props.getNode("sim")
+     
+        pkgNode = catalogProps.addChild('package')
+        pkgNode.addChild('id').value = d
+        pkgNode.addChild('name').value = sim.getValue('description')
         
-    clearChildren(existingPackages[acft], 'thumbnail')
-    for t in thumbnailNames:
-        tn = ET.SubElement(existingPackages[acft], 'thumbnail')
-        tn.text = 'thumbs/' + t
-    
-    clearChildren(existingPackages[acft], 'rating')
-    existingPackages[acft].append(aircraft[0]['ratings'])
-    
-    print "wrote tarfile, digest is " + digest
-    
-root = ET.Element('PropertyList')
-catalogTree = ET.ElementTree(root)
-
-existingPackages = dict()
-
-if (existingCatalog is not None):
-    print 'have existing catalog data'
-    
-    root.append(existingCatalog.find('license'))
-    root.append(existingCatalog.find('url'))
-    root.append(existingCatalog.find('description'))
-    root.append(existingCatalog.find('id'))
-    
-    # existing data (for revision incrementing)
-    for n in existingCatalog.findall('package'):
-        idNode = n.find('id')
-        if idNode is None:
-            print 'Missing <id> tag on package'
-            continue
+        longDesc = sim.getValue('long-description')
+        if longDesc is not None:
+            pkgNode.addChild('description').value = longDesc
             
-        existingPackages[idNode.text] = n;
+        # copy tags
+        if sim.hasChild('tags'):
+            for c in sim.getChild('tags').getChildren('tag'):
+                pkgNode.addChild('tag').value = c.value
         
-#licenseElement = ET.SubElement(root, 'license')
-#licenseElement.text = 'gpl'
+        # create download and thumbnail URLs
+        for u in urls:
+            pkgNode.addChild("url").value = u.format(acft=d)
+        
+        for t in thumbs:
+            pkgNode.addChild("thumbnail").value = t.format(acft=d)
+        
+    except:
+        print "Failure processing:", setFilePath
+        
 
-#urlElement = ET.SubElement(root, 'url')
-#urlElement.text = 'http://catalog.xml'
-
-for acft in os.listdir(rootPath):
-    path = os.path.join(rootPath, acft);
-    if (os.path.isdir(path)):
-        process_aircraft(acft, path)
-
-
-for ep in existingPackages:
-    root.append(existingPackages[ep])
-
-catalogTree.write(os.path.join(outputDir, 'catalog.xml'), 'UTF-8')
-
+catalogProps.write("catalog.xml")        
