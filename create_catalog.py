@@ -1,10 +1,11 @@
 #!/usr/bin/python
 
 import os, sys, re
-import urllib2
+import urllib
 import hashlib # for MD5
 
 import catalogFilenames
+import catalogTags
 import sgprops
 
 fgRoot = sys.argv[1]
@@ -35,6 +36,18 @@ urls = [
 thumbs = [
     "http://www.flightgear.org/thumbs/v3.0/{acft}.jpg"
 ]
+    
+standardTagSet = frozenset(catalogTags.tags)
+def isNonstandardTag(t):
+    return t not in standardTagSet
+    
+# create the download cache dir if require
+
+cacheDir = '.catalog_cache'
+if not os.path.isdir(cacheDir):
+    print "Creating catalog cache dir"
+    os.mkdir(cacheDir)
+    
     
 for d in os.listdir(aircraftDir):
     acftDirPath = os.path.join(aircraftDir, d)
@@ -83,7 +96,10 @@ for d in os.listdir(aircraftDir):
         # copy tags
         if sim.hasChild('tags'):
             for c in sim.getChild('tags').getChildren('tag'):
-                pkgNode.addChild('tag').value = c.value
+                if isNonstandardTag(c.value):
+                    print "Skipping non-standard tag:", c.value
+                else:
+                    pkgNode.addChild('tag').value = c.value
                 
         # create download and thumbnail URLs
         s = "{url}Aircraft-3.0/"
@@ -93,17 +109,26 @@ for d in os.listdir(aircraftDir):
         s += catalogFilenames.aircraft[d]
         
         for u in urls:
-            pkgNode.addChild("url").value = s.format(url=u,filename=f)
+            pkgNode.addChild("url").value = s.format(url=u)
         
         for t in thumbs:
             pkgNode.addChild("thumbnail").value = t.format(acft=d)
         
-        # download and compute MD5 sum
-        dl = urllib2.urlopen(s.format(url=urls[0],filename=f))
-        digest = hashlib.md5(dl.read()).hexdigest()
-        pkgNode.addChild("md5").value = digest
+        cachedZip = os.path.join(cacheDir, catalogFilenames.aircraft[d])
+        if not os.path.exists(cachedZip):
+            # download the zip
+            url = s.format(url=urls[0])
+            print "Downloading ", url
+            urllib.urlretrieve(url, cachedZip)
+        #else:
+        #    print "Using cached zip for", d
+            
+        zipFile = open(cachedZip, 'r')
         
+        digest = hashlib.md5(zipFile.read()).hexdigest()
+        pkgNode.addChild("md5").value = digest
+        pkgNode.addChild("file-size-bytes").value = os.path.getsize(cachedZip)
     except:
         print "Failure processing:", setFilePath
-
+        
 catalogProps.write("catalog.xml")        
