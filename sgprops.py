@@ -159,11 +159,12 @@ class PropsHandler(handler.ContentHandler):
         if (name == 'PropertyList'):
             return
             
-        index = 0
         if 'n' in attrs.keys():
             index = int(attrs['n'])
+            self._current = self._current.getChild(name, index, create=True)
+        else:
+            self._current = self._current.addChild(name)
             
-        self._current = self._current.getChild(name, index, create=True)
             
         if 'include' in attrs.keys():
             self.handleInclude(attrs['include'])

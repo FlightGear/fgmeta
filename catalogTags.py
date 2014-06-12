@@ -1,12 +1,12 @@
 aircraftTypeTags = [
     "ga", "fighter", "helicopter", "glider", "spaceship", "bomber", "groundvehicle", 
-    "tanker", "cargo", "passenger", "bizjet", "trainer", "airship", "balloon"
+    "tanker", "cargo", "transport", "bizjet", "trainer", "airship", "balloon"
 ]
 
 manufacturerTags = [
     "boeing", "cessna", "diamond", "douglas", "bell", "piper", 
     "airbus", "vickers", "lockheed", "fokker",
-    "embrarer", "bombardier", "pilatus"
+    "embrarer", "bombardier", "pilatus", "robin"
 ]
 
 eraTags = [
@@ -62,7 +62,9 @@ propulsionTags = [
     "supercharged",
     "turboprop",
     "jet", "afterburner", "rocket",
-    "electric"
+    "electric",
+    "twin-engine",
+    "single-engine"
 ]
 
 simFeatureTags = [
