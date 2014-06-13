@@ -7,6 +7,7 @@ import re
 from collections import defaultdict
 import subprocess
 import math
+import tarfile
 
 def rfilelist(path,exclude_dirs=[]):
     """Dict of files/sizes in path, including those in any subdirectories (as relative paths)"""
@@ -22,17 +23,26 @@ def rfilelist(path,exclude_dirs=[]):
             else:
                 files[os.path.join(cdir,file)]=os.path.getsize(os.path.join(path,cdir,file))
     return files
-def textures_used(path,exclude_dirs=[],pattern=r'<(?:texture|object-mask|tree-texture).*?>(\S+?)</(texture|object-mask|tree-texture)'):
-    """Textures used by a file in paths; default pattern matches a <texture> (possibly with number), <tree-texture> or <object-mask> element (for materials files)"""
+def files_used(pattern,path,exclude_dirs=[],filelist=None,filetypes=None,relative_path=False):
+    """Files used by an element matching pattern, in a file in path or filelist"""
     textures=[]
-    matfiles=rfilelist(path,exclude_dirs).keys()
+    if filelist is None:
+        filelist=rfilelist(path,exclude_dirs).keys()
+    if filetypes is not None:
+        filelist=[f for f in filelist if os.path.splitext(f)[1] in filetypes]
     texfind=re.compile(pattern)
-    for file in matfiles:
-        f=open(os.path.join(path,file),'r')
+    for file in filelist:
+        try:
+            f=open(os.path.join(path,file),'r',errors='replace')
+        except FileNotFoundError:
+            continue
         for line in f:
             tex=texfind.search(line)
             if tex:
-                textures.append(tex.group(1))
+                if relative_path:
+                    textures.append(os.path.normpath(os.path.join(os.path.dirname(file),tex.group(1).replace('\\','/'))))
+                else:
+                    textures.append(os.path.normpath(tex.group(1).replace('\\','/')))
     return textures
 def find_unused_textures(basedir,output_lists=True,grep_check=False,output_rsync_rules=False,output_comparison_strips=False,output_removal_commands=False):
     """Checks if any textures are unused (wasting space), and if any textures are only available as .dds (not recommended in the source repository, as it is a lossy-compressed format)
@@ -41,14 +51,14 @@ Set basedir to your fg-root, and enable the kind(s) of output you want:
 output_lists prints lists of unused textures, and of dds-only textures
 grep_check checks for possible use outside the normal directories; requires Unix shell
 output_rsync_rules prints rsync rules for excluding unused textures from the release flightgear-data.  Warning: if you use this, re-run this script regularly, in case they start being used
-output_comparison_strips creates thumbnail strips, unused_duplicate.png/unused_dds.png/high_low.png, for visually checking whether same-name textures are the same (remove the unused one entirely) or different (move it to Unused); requires ImageMagick/graphicsmagick
+output_comparison_strips creates thumbnail strips, unused_duplicate.png/unused_dds.png/high_low.png, for visually checking whether same-name textures are the same (remove the unused one entirely) or different (move it to Unused); requires imagemagick or graphicsmagick
 output_removal_commands creates another script, delete_unused_textures.sh, which will remove unused textures when run in a Unix shell"""
 
     false_positives=set(['buildings-lightmap.png','buildings.png','Credits','Globe/00README.txt', 'Globe/01READMEocean_depth_1png.txt', 'Globe/world.topo.bathy.200407.3x4096x2048.png','Trees/convert.pl'])#these either aren't textures, or are used where we don't check
-    used_textures=set(textures_used(os.path.join(basedir,'Materials')))|false_positives
-    used_textures_noregions=set(textures_used(os.path.join(basedir,'Materials'),exclude_dirs=['regions']))|false_positives
-    used_effectslow=set(textures_used(os.path.join(basedir,'Effects'),pattern=r'image.*?>[\\/]?Textures[\\/](\S+?)</.*?image'))|set(textures_used(os.path.join(basedir,'Materials'),pattern=r'<building-(?:texture|lightmap).*?>Textures[\\/](\S+?)</building-(?:texture|lightmap)'))#Effects (<image>), and Materials <building-texture>/<building-lightmap>, explicitly includes the Textures/ or Textures.high/
-    used_effectshigh=set(textures_used(os.path.join(basedir,'Effects'),pattern=r'image.*?>[\\/]?Textures.high[\\/](\S+?)</.*?image'))|set(textures_used(os.path.join(basedir,'Materials'),pattern=r'<building-(?:texture|lightmap).*?>Textures.high[\\/](\S+?)</building-(?:texture|lightmap)'))
+    used_textures=set(files_used(path=os.path.join(basedir,'Materials'),pattern=r'<(?:texture|object-mask|tree-texture).*?>(\S+?)</(texture|object-mask|tree-texture)'))|false_positives
+    used_textures_noregions=set(files_used(path=os.path.join(basedir,'Materials'),exclude_dirs=['regions'],pattern=r'<(?:texture|object-mask|tree-texture).*?>(\S+?)</(texture|object-mask|tree-texture)'))|false_positives#this pattern matches a <texture> (possibly with number), <tree-texture> or <object-mask> element
+    used_effectslow=set(files_used(path=os.path.join(basedir,'Effects'),pattern=r'image.*?>[\\/]?Textures[\\/](\S+?)</.*?image'))|set(files_used(path=os.path.join(basedir,'Materials'),pattern=r'<building-(?:texture|lightmap).*?>Textures[\\/](\S+?)</building-(?:texture|lightmap)'))#Effects (<image>), and Materials <building-texture>/<building-lightmap>, explicitly includes the Textures/ or Textures.high/
+    used_effectshigh=set(files_used(path=os.path.join(basedir,'Effects'),pattern=r'image.*?>[\\/]?Textures.high[\\/](\S+?)</.*?image'))|set(files_used(path=os.path.join(basedir,'Materials'),pattern=r'<building-(?:texture|lightmap).*?>Textures.high[\\/](\S+?)</building-(?:texture|lightmap)'))
     high_tsizes=rfilelist(os.path.join(basedir,'Textures.high'))
     high_textures=set(high_tsizes.keys())
     low_tsizes=rfilelist(os.path.join(basedir,'Textures'),exclude_dirs=['Sky','Unused'])#sky textures are used where we don't check
@@ -169,6 +179,40 @@ output_removal_commands creates another script, delete_unused_textures.sh, which
         r_script.write(move_command(basedir,[f for f in (unused_other-high_textures)|low_unneeded_nondup|unused_dds_matchhigh if (f[-4:]==".dds" and f[:5]!="Signs" and f[:6]!="Runway")],high=False,comment=True))
         r_script.close()
 
+def find_locally_unused_models(basedir):
+    """Find models not used in the base scenery (these do need to be in Terrasync as they may well be used in other locations, but don't need to be in the base flightgear-data package)
+    Known bug: doesn't search everywhere: check /Nasal,.eff <image>,<inherits-from>,/(AI/)Aircraft not referenced in AI scenarios, unusual tags in Aircraft/Generic/Human/Models/walker.xml,HLA/av-aircraft.xml,/Environment,MP/aircraft_types.xml"""
+    models_allfiles={os.path.join('Models',f):s for f,s in rfilelist(os.path.join(basedir,'Models')).items()}
+    t_size=lambda flist: sum(models_allfiles[f] for f in flist if f in models_allfiles)
+    used_models=set(files_used(path=os.path.join(basedir,'Scenery'),filetypes=".stg",pattern=r'OBJECT_SHARED (\S+?) '))|set(files_used(path=os.path.join(basedir,'AI'),exclude_dirs=["Aircraft","Traffic"],pattern=r'<model>[\\/]?(\S+?)</model>'))|set(f for f in files_used(path=os.path.join(basedir,'Materials'),filetypes=".xml",pattern=r'<path>[\\/]?(\S+?)</path>') if f[-4:]==".xml")
+    n=0
+    while n!=len(used_models):
+        n=len(used_models)
+        used_models=used_models|set(f for f in files_used(path=basedir,filelist=used_models,filetypes=".xml",pattern=r'<path>[\\/]?(\S+?)</path>') if f[-4:]==".xml")
+    used_textures=set(files_used(path=basedir,filelist=used_models,filetypes=".ac",pattern=r'texture "(\S+?)"',relative_path=True))|set(files_used(path=basedir,filelist=used_models,filetypes=".xml",pattern=r'<texture>[\\/]?(\S+?)</texture>',relative_path=True))
+    extra_used_models=set()
+    for f1 in used_models:
+        if f1[-4:]!=".xml":
+            continue
+        for f2 in files_used(path=basedir,filelist=[f1],pattern=r'<path>[\\/]?(\S+?)</path>',relative_path=True):
+            if f2[-3:]!=".ac":
+                continue
+            extra_used_models=extra_used_models|set([f2])
+            p2=[f for f in files_used(path=basedir,filelist=[f1],pattern=r'<texture-path>[\\/]?(\S+?)</texture-path>',relative_path=True)]
+            if len(p2)==0:
+                p2=[os.path.dirname(f1)]
+            if len(p2)!=1:
+                print("non-unique/not found:",f1,f2,p2)
+                continue
+            try:
+                used_textures=used_textures|set(os.path.normpath(os.path.join(p2[0],f)) for f in files_used(path=basedir,filelist=[f2],filetypes=".ac",pattern=r'texture "(\S+?)"'))
+            except (IOError,OSError):
+                print("not found",f1,f2,p2)
+    used_models=used_models|extra_used_models
+    unused=set(models_allfiles.keys())-(used_models|used_textures)
+    missing=set(f for f in (used_models|used_textures) if ((f.startswith('Models') and f not in models_allfiles.keys()) or not os.path.isfile(os.path.join(basedir,f))))
+    print("used\n",sorted(used_models),"\nsize=",t_size(used_models),"\n\n",sorted(used_textures),"\nsize=",t_size(used_textures),"\n\nunused\n",sorted(unused),"\nsize=",t_size(unused),"\n\nmissing\n",sorted(missing),"\nsize=",t_size(missing))
+
 def size_by_type(path,exclude_dirs=[]):
     """Dict of total file size by file extension"""
     files=rfilelist(path,exclude_dirs)
@@ -188,18 +232,35 @@ def size_by_size(path,exclude_dirs=[],exts=[".png",".dds",".rgb"]):
         if (not exts) or (file_ext in exts):
             size_totals[2**math.frexp(size)[1]]=size_totals[2**math.frexp(size)[1]]+size
     return size_totals
-def fgdata_size(path,dirs_to_list=["AI/Aircraft","AI/Traffic","Models","Scenery","Textures","Textures.high"],exclude_dirs=[".git","Aircraft"]):
+def fgdata_size(path,dirs_to_list=["AI/Aircraft","AI/Traffic","Aircraft","Models","Scenery","Textures","Textures.high"],exclude_dirs=None,compressed_size=False,num_types=3):
+    if dirs_to_list is None:
+        dirs_to_list=[d for d in os.listdir(path) if os.path.isdir(os.path.join(path,d))]
+    if exclude_dirs is None:
+        if os.path.exists(os.path.join(path,".git")):
+            exclude_dirs=[".git","Aircraft"]
+        else:
+            exclude_dirs=[]
+    total_compressed_size=0
     exclude_list=[[]]*len(dirs_to_list)+[dirs_to_list+exclude_dirs]+[exclude_dirs]
     names_list=dirs_to_list+["other","all"]
     for n,dir1 in enumerate(dirs_to_list+["",""]):
         size_totals=size_by_type(os.path.join(path,dir1),exclude_list[n])
-        print(names_list[n],sorted(size_totals.items(),key=lambda x:-x[1]),"total",sum(size_totals.values()))
+        print(names_list[n],sorted(size_totals.items(),key=lambda x:-x[1])[:num_types],"total",sum(size_totals.values()))
+        if compressed_size:
+            if names_list[n]=="all":
+                print("compressed size",total_compressed_size)
+                continue
+            targz=tarfile.open("fgdata_sizetest_temp.tar.gz",mode="w:gz")
+            for file in rfilelist(os.path.join(path,dir1),exclude_list[n]):
+                targz.add(os.path.join(path,dir1,file))
+            targz.close()
+            print("compressed size",os.path.getsize("fgdata_sizetest_temp.tar.gz"))
+            total_compressed_size=total_compressed_size+os.path.getsize("fgdata_sizetest_temp.tar.gz")
 
 def create_reduced_fgdata(input_path,output_path,exclude_ai=False):
     """Create a smaller, reduced-quality flightgear-data package
-Requires imagemagick (not Ubuntu graphicsmagick, it can't write .dds)"""
-    raise ValueError("The package this generates currently crashes FlightGear; not sure why yet")
-    texture_filetypes=[".png",".rgb",".dds"]
+Requires Unix shell, imagemagick or graphicsmagick (for convert) and libnvtt-bin (for nvcompress)"""
+    texture_filetypes={".png":"PNG",".dds":"DDS"}#,".rgb":"SGI" loses cloud transparency
     downsample_min_filesize=30000
     dirs_to_downsample=("Textures.high/Terrain","Textures.high/Trees","Textures.high/Terrain.winter","AI/Aircraft","Models")
     exclude_dirs=[".git"]
@@ -224,7 +285,15 @@ Requires imagemagick (not Ubuntu graphicsmagick, it can't write .dds)"""
                     dirs.append(os.path.join(cdir,file))
             else:
                 if (cdir.startswith(dirs_to_downsample)) and (os.path.splitext(file)[1] in texture_filetypes) and (os.path.getsize(os.path.join(input_path,cdir,file))>downsample_min_filesize):
-                    subprocess.call(["convert",os.path.join(input_path,cdir,file),"-sample","50%",os.path.join(output_path,cdir,file)])
+                    image_type=texture_filetypes[os.path.splitext(file)[1]]
+                    if image_type=="DDS":# in Ubuntu, neither imagemagick nor graphicsmagick can write .dds
+                        #doesn't work subprocess.call(["nvzoom","-s","0.5","-f","box",os.path.join(input_path,cdir,file),os.path.join(output_path,cdir,file)])
+                        if subprocess.call(["convert",image_type+":"+os.path.join(input_path,cdir,file),"-sample","50%","temp_reduced_size.png"]):#fails on normal maps, so just copy them
+                            subprocess.call(["cp",os.path.join(input_path,cdir,file),os.path.join(output_path,cdir,file)])
+                        else:
+                            subprocess.call(["nvcompress","-bc3","temp_reduced_size.png",os.path.join(output_path,cdir,file)])
+                    else:
+                        subprocess.call(["convert",image_type+":"+os.path.join(input_path,cdir,file),"-sample","50%",image_type+":"+os.path.join(output_path,cdir,file)])#we use sample rather than an averaging filter to not break mask/rotation/... maps
                 else:
                     subprocess.call(["cp",os.path.join(input_path,cdir,file),os.path.join(output_path,cdir,file)])
     
