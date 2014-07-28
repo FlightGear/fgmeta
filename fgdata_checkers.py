@@ -299,7 +299,7 @@ Texture downsampling: textures in dirs_to_downsample and larger than downsample_
 Example: dirs_to_downsample=("Textures.high/Terrain","Textures.high/Trees","Textures.high/Terrain.winter","AI/Aircraft","Models"),downsample_min_filesize=30000
 
 To put each section in its own directory use {0} in output_path, e.g.
-python3 -c "import fgdata_checkers; fgdata_checkers.create_reduced_fgdata(input_path='~/fs_dev/git/fgdata',output_path='~/fs_dev/flightgear/data_split/debian/flightgear-data-{0}/usr/share/games/flightgear',include_aircraft=['UIUC','b1900d','CitationX','ZLT-NT','dhc2','Cub','sopwithCamel','f-14b','ASK13','bo105','Dragonfly','SenecaII','A6M2'])"
+python3 -c "import fgdata_checkers; fgdata_checkers.create_reduced_fgdata(input_path='/home/palmer/fs_dev/git/fgdata',output_path='/home/palmer/fs_dev/flightgear/data_split/debian/flightgear-data-{0}/usr/share/games/flightgear',include_aircraft=['UIUC','b1900d','CitationX','ZLT-NT','dhc2','Cub','sopwithCamel','f-14b','ASK13','bo105','Dragonfly','SenecaII','A6M2'])"
 This creates separate preferences-regions.xml and preferences-noregions.xml files for with and without regional textures; you need to handle symlinking preferences.xml to the correct one
 """
     texture_filetypes={".png":"PNG",".dds":"DDS"}#,".rgb":"SGI" loses cloud transparency
@@ -340,6 +340,10 @@ This creates separate preferences-regions.xml and preferences-noregions.xml file
                     subprocess.call(["mkdir","-p",path_join(output_path.format(fclass),cdir)])
                 if (cdir.startswith(dirs_to_downsample)) and (os.path.splitext(file)[1] in texture_filetypes) and (os.path.getsize(path_join(input_path,cdir,file))>downsample_min_filesize):
                     image_type=texture_filetypes[os.path.splitext(file)[1]]
+                    if "{0}" in output_path and fclass=="base-textures":#downsampled in base-textures, full resolution in extra-textures
+                        if not os.path.exists(path_join(output_path.format("extra-textures"),cdir)):
+                            subprocess.call(["mkdir","-p",path_join(output_path.format("extra-textures"),cdir)])
+                        subprocess.call(["cp",path_join(input_path,cdir,file),path_join(output_path.format("extra-textures"),cdir,file)])
                     if image_type=="DDS":# in Ubuntu, neither imagemagick nor graphicsmagick can write .dds
                         #doesn't work subprocess.call(["nvzoom","-s","0.5","-f","box",path_join(input_path,cdir,file),path_join(output_path.format(fclass),cdir,file)])
                         if subprocess.call(["convert",image_type+":"+path_join(input_path,cdir,file),"-sample","50%","temp_reduced_size.png"]):#fails on normal maps, so just copy them
@@ -351,7 +355,7 @@ This creates separate preferences-regions.xml and preferences-noregions.xml file
                 else:#not to be downsampled
                     subprocess.call(["cp",path_join(input_path,cdir,file),path_join(output_path.format(fclass),cdir,file)])
     if "{0}" in output_path:
-        subprocess.call(["mv",path_join(output_path.format("base"),"preferences.xml"),path_join(output_path.format("base"),"preferences-regions.xml")
+        subprocess.call(["mv",path_join(output_path.format("base"),"preferences.xml"),path_join(output_path.format("base"),"preferences-regions.xml")])
     if "extra-textures" in exclude_parts or "{0}" in output_path:
         prefs_in=open(path_join(input_path,"preferences.xml"),'r')
         prefs_out=open(path_join(output_path.format("base"),"preferences-noregions.xml" if "{0}" in output_path else "preferences.xml"),'w')
