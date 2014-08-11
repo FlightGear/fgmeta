@@ -14,7 +14,7 @@ cmake ..\simgear -G "Visual Studio 10" -DMSVC_3RDPARTY_ROOT=%WORKSPACE% -DCMAKE_
 cmake --build . --config Release --target INSTALL
 
 cd ..\build-fg
-cmake ..\flightgear -G "Visual Studio 10" -DMSVC_3RDPARTY_ROOT=%WORKSPACE% -DCMAKE_INSTALL_PREFIX:PATH=%WORKSPACE%/install/msvc100/FlightGear -DFLTK_FLUID_EXECUTABLE=%WORKSPACE%/3rdParty/bin/fluid.exe -DBOOST_ROOT=%WORKSPACE%/Boost
+cmake ..\flightgear -G "Visual Studio 10" -DMSVC_3RDPARTY_ROOT=%WORKSPACE% -DCMAKE_INSTALL_PREFIX:PATH=%WORKSPACE%/install/msvc100/FlightGear -DPNG_LIBRARY=%WORKSPACE%/3rdParty/lib/libpng16.lib -DFLTK_FLUID_EXECUTABLE=%WORKSPACE%/3rdParty/bin/fluid.exe -DBOOST_ROOT=%WORKSPACE%/Boost
 cmake --build . --config Release --target INSTALL
 
 cd ..\build-fgrun
