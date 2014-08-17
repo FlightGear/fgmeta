@@ -55,20 +55,3 @@ make install
 make package_source
 cp flightgear-*.tar.bz2 ../output/.
 
-#####################################################################################
-
-echo "Assembling base package"
-cd $WORKSPACE
-
-echo "Syncing base packages files from sphere.telascience.org"
-
-# a: archive mode
-# z: compress
-# delete: 'delete extraneous files from dest dirs'; avoid bug 1344
-# filter: use the rules in our rules file
-rsync -az --delete \
- --filter 'merge base-package.rules' \
- -e ssh jturner@sphere.telascience.org:/home/jturner/fgdata .
-
-tar cjf output/FlightGear-$VERSION-data.tar.bz2 fgdata/
-
