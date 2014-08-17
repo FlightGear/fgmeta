@@ -65,10 +65,6 @@ gcc -o FlightGear main.m \
 popd
 
 ################################################################################
-echo "Syncing base packages files from sphere.telascience.org"
-rsync -avz --filter 'merge base-package.rules' \
- -e ssh jturner@sphere.telascience.org:/home/jturner/fgdata .
-
 # run the unlock script now - we need to do this right before code-signing,
 # or the keychain may automatically re-lock after some period of time
 unlock-keychain.sh
