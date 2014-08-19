@@ -115,8 +115,6 @@ Source: "{#VCInstallDir}\redist\x64\Microsoft.VC100.CRT\*.dll"; DestDir: "{app}\
 ; 32/64 bits install
 ;NOTE: FGPanel has no 64 bits equivalent, so we are using the 32 bits binary for 32&64 bits OS
 Source: "X:\install\msvc100\FlightGear\bin\fgpanel.exe"; DestDir: "{app}\bin"; Flags: ignoreversion
-Source: "X:\install\msvc100\FlightGear\share\flightgear\positions.txt"; DestDir: "{app}\share\flightgear"
-Source: "X:\install\msvc100\FlightGear\share\flightgear\special_frequencies.txt"; DestDir: "{app}\share\flightgear"
 Source: "X:\3rdParty\bin\oalinst.exe"; DestDir: "{app}\bin"; Flags: ignoreversion skipifsourcedoesntexist
 
 ; NOTE: tar.gz file uses name 'fgdata', to avoid renaming it, look for both names.
@@ -224,7 +222,7 @@ Name: "{group}\Tools\metar"; Filename: "cmd"; Parameters: "/k ""{app}\bin\metar.
 Name: "{group}\Tools\yasim"; Filename: "cmd"; Parameters: "/k ""{app}\bin\yasim.exe"" -h"; WorkingDir: "{app}\bin"
 Name: "{group}\Tools\fgpanel"; Filename: "cmd"; Parameters: "/k ""{app}\bin\fgpanel.exe"" -h"; WorkingDir: "{app}\bin"
 Name: "{group}\Tools\FGCom"; Filename: "{app}\bin\fgcom.exe"; WorkingDir: "{app}\bin"
-Name: "{group}\Tools\FGCom-testing"; Filename: "{app}\bin\fgcom.exe"; Parameters: "-f910"; WorkingDir: "{app}\bin"
+Name: "{group}\Tools\FGCom-testing"; Filename: "{app}\bin\fgcom.exe"; Parameters: "--frequency=910"; WorkingDir: "{app}\bin"
 Name: "{group}\Tools\Explore Documentation Folder"; Filename: "{app}\data\Docs"
 
 [Run]
