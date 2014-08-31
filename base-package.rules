@@ -26,9 +26,6 @@
 
 - /fgdata/Aircraft/*
 
-- /fgdata/Textures.high/*.new
-- /fgdata/Textures.high/*.orig
-- /fgdata/Textures.high/*.save
 - /fgdata/Textures/Unused
 - /fgdata/Textures/*.orig
 - /fgdata/Docs/source
