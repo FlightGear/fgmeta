@@ -11,12 +11,19 @@ import subprocess
 import math
 import tarfile
 import gzip
+import shutil
+try:
+    devnull=subprocess.DEVNULL#hide annoying nvcompress messages
+except (AttributeError,NameError):#pre-3.3 Python
+    devnull=None
 def path_join(*args):
     """Unlike plain os.path.join, this doesn't add a trailing / if the last component is empty"""
     return os.path.normpath(os.path.join(*args))
 def rfilelist(path,exclude_dirs=[]):
     """Dict of files/sizes in path, including those in any subdirectories (as relative paths)"""
     files=defaultdict(int)
+    if not os.path.exists(path):
+        return files
     dirs=[""]
     while dirs:
         cdir=dirs.pop()
@@ -171,11 +178,11 @@ output_removal_commands creates another script, delete_unused_textures.sh, which
         unused_f=[os.path.basename(f) for f in unused]
         all_f=[os.path.basename(f) for f in (high_textures|low_textures)]
         print("\n\nPossible use outside main search:")#used to set false_positives
-        subprocess.call(["grep","-r","-E","--exclude-dir=Aircraft","--exclude-dir=.git","-e","("+")|(".join(unused)+")","/home/palmer/fs_dev/git/fgdata","/home/palmer/fs_dev/git/flightgear","/home/palmer/fs_dev/git/simgear"])#everywhere using full names
-        subprocess.call(["grep","-r","-E","--exclude-dir=Aircraft","--exclude-dir=Textures.high","--exclude-dir=Models","--exclude-dir=Materials","--exclude-dir=Effects","--exclude-dir=.git","-e","("+")|(".join(all_f)+")","/home/palmer/fs_dev/git/fgdata","/home/palmer/fs_dev/git/flightgear","/home/palmer/fs_dev/git/simgear"])#restricted (to avoid false positives from Terrain.winter vs Terrain) using filenames
-        subprocess.call(["grep","-r","-E","--exclude-dir=Aircraft","--exclude-dir=Textures.high","--exclude-dir=Models","--exclude-dir=Materials","--exclude-dir=Effects","--exclude-dir=.git","-e",'[."\']dds',"/home/palmer/fs_dev/git/fgdata","/home/palmer/fs_dev/git/flightgear","/home/palmer/fs_dev/git/simgear"])#check for programmatic .png -> .dds swap; none found
+        subprocess.call(["grep","-r","-E","--exclude-dir=Aircraft","--exclude-dir=.git","-e","("+")|(".join(unused)+")","/home/rnpalmer/fs_dev/git/fgdata","/home/rnpalmer/fs_dev/git/flightgear","/home/rnpalmer/fs_dev/git/simgear"])#everywhere using full names
+        subprocess.call(["grep","-r","-E","--exclude-dir=Aircraft","--exclude-dir=Textures.high","--exclude-dir=Models","--exclude-dir=Materials","--exclude-dir=Effects","--exclude-dir=.git","-e","("+")|(".join(all_f)+")","/home/rnpalmer/fs_dev/git/fgdata","/home/rnpalmer/fs_dev/git/flightgear","/home/rnpalmer/fs_dev/git/simgear"])#restricted (to avoid false positives from Terrain.winter vs Terrain) using filenames
+        subprocess.call(["grep","-r","-E","--exclude-dir=Aircraft","--exclude-dir=Textures.high","--exclude-dir=Models","--exclude-dir=Materials","--exclude-dir=Effects","--exclude-dir=.git","-e",'[."\']dds',"/home/rnpalmer/fs_dev/git/fgdata","/home/rnpalmer/fs_dev/git/flightgear","/home/rnpalmer/fs_dev/git/simgear"])#check for programmatic .png -> .dds swap; none found
         print("\n\nUse of sourceless textures:")
-        subprocess.call(["grep","-r","-E","--exclude-dir=Aircraft","--exclude-dir=.git","-e","("+")|(".join(sourceless)+")","/home/palmer/fs_dev/git/fgdata","/home/palmer/fs_dev/git/flightgear","/home/palmer/fs_dev/git/simgear"])
+        subprocess.call(["grep","-r","-E","--exclude-dir=Aircraft","--exclude-dir=.git","-e","("+")|(".join(sourceless)+")","/home/rnpalmer/fs_dev/git/fgdata","/home/rnpalmer/fs_dev/git/flightgear","/home/rnpalmer/fs_dev/git/simgear"])
     if output_rsync_rules:
         print("\n\nFull flightgear-data:\n")
         rsync_rules(basedir,unused)
@@ -284,10 +291,10 @@ def fgdata_size(path,dirs_to_list=["AI/Aircraft","AI/Traffic","Aircraft","Models
             print("compressed size",os.path.getsize("fgdata_sizetest_temp.tar.gz"))
             total_compressed_size=total_compressed_size+os.path.getsize("fgdata_sizetest_temp.tar.gz")
 
-def create_reduced_fgdata(input_path,output_path,split_textures=True,exclude_parts=[],include_aircraft=['UIUC','777','777-200','b1900d','CitationX','ZLT-NT','dhc2','Cub','sopwithCamel','f-14b','ASK13','bo105','Dragonfly','SenecaII','A6M2'],dirs_to_downsample=(),downsample_min_filesize=30000):
+def create_reduced_fgdata(input_path,output_path,split_textures=True,exclude_parts=[],include_aircraft=['UIUC','777','777-200','b1900d','CitationX','ZLT-NT','dhc2','Cub','sopwithCamel','f-14b','ASK13','bo105','Dragonfly','SenecaII','A6M2'],dirs_to_downsample=(),dirs_to_compress=(),compressed_format=".dds",downsample_min_filesize=30000):
     """Create a smaller, reduced-quality flightgear-data package
-Can downsample textures 50% and/or omit sections
-Requires Unix shell; downsampling requires imagemagick or graphicsmagick (for convert) and libnvtt-bin (for nvcompress)
+Can downsample textures 50%, change texture format, and/or omit sections (region-specific textures, aircraft, AI traffic)
+Downsampling and format change require imagemagick or graphicsmagick (for convert) and libnvtt-bin (for nvcompress)
 
 Optional parts, use exclude_parts to omit:
 ai: no background traffic, but tankers etc do still work
@@ -296,13 +303,31 @@ extra-textures (requires split_textures=True): no region-specific textures
 The c172p and ufo are always included; other aircraft are added by include_aircraft
 
 Texture downsampling: textures in dirs_to_downsample and larger than downsample_min_filesize downsampled 50%
-Example: dirs_to_downsample=("Textures.high/Terrain","Textures.high/Trees","Textures.high/Terrain.winter","AI/Aircraft","Models"),downsample_min_filesize=30000
+Texture format conversion: textures in dirs_to_compress and larger than downsample_min_filesize converted to compressed_format
+Suggested dirs_to_downsample:
+3.2: ('Textures.high/Terrain','Textures.high/Trees','Textures.high/Terrain.winter','AI/Aircraft','Models')
+3.3: ('Textures/Terrain','Textures/Trees','Textures/Terrain.winter','AI/Aircraft','Models')
+To do "everything" (a few are always skipped due to potential breakage), use dirs_to_compress=('',)
 
-To put each section in its own directory use {0} in output_path, e.g.
-python3 -c "import fgdata_checkers; fgdata_checkers.create_reduced_fgdata(input_path='/home/palmer/fs_dev/git/fgdata',output_path='/home/palmer/fs_dev/flightgear/data_split/debian/flightgear-data-{0}/usr/share/games/flightgear',include_aircraft=['UIUC','b1900d','CitationX','ZLT-NT','dhc2','Cub','sopwithCamel','f-14b','ASK13','bo105','Dragonfly','SenecaII','A6M2'])"
+To put each section in its own directory (e.g. for building a Debian-style flightgear-data-* set of packages) use {0} in output_path, e.g.
+python3 -c "import fgdata_checkers; fgdata_checkers.create_reduced_fgdata(input_path='/home/rnpalmer/fs_dev/git/fgdata',output_path='/home/rnpalmer/fs_dev/flightgear/data_split/debian/flightgear-data-{0}/usr/share/games/flightgear',include_aircraft=['UIUC','b1900d','CitationX','ZLT-NT','dhc2','Cub','sopwithCamel','f-14b','ASK13','bo105','Dragonfly','SenecaII','A6M2'])"
 This creates separate preferences-regions.xml and preferences-noregions.xml files for with and without regional textures; you need to handle symlinking preferences.xml to the correct one
 """
-    texture_filetypes={".png":"PNG",".dds":"DDS"}#,".rgb":"SGI" loses cloud transparency
+    texture_filetypes={".png":"PNG",".dds":"DDS",".jpg":"JPEG"}#,".rgb":"SGI" loses cloud transparency
+    textureuser_types={".eff",".xml",".ac",".nas"}
+    binary_types={".png",".dds",".rgb",".RGB",".jpg",".wav",".WAV",".btg.gz",".zip",".tar.gz"}#don't search these for texture name replacement
+    """Textures named directly in flightgear/simgear code:
+gui/images/shadow.png,gui/cursor-spin-cw.png (probably safest to treat this as gui/*, they're all small)
+Textures/Globe/world.topo.bathy.200407.3x4096x2048.png
+Textures/buildings.png,Textures/buildings-lightmap.png
+Textures/Sky/*
+Textures/Splash*.png
+unknown.rgb (probably Textures/ or Textures/Terrain/, neither exists)
+Aircraft/Instruments/Textures/nd-symbols.png (doesn't actually exist),Aircraft/Instruments/Textures/compass-ribbon.rgb,Aircraft/Instruments/Textures/od_wxradar.rgb,Aircraft/Instruments/Textures/od_wxradar.rgb,Aircraft/Instruments/Textures/wxecho.rgb,Aircraft/Instruments/Textures/od_groundradar.rgb (doesn't actually exist)
+also, Aircraft/{Instruments,Instruments-3d,Generic} may be used by downloaded aircraft, and Docs images are used in .html
+Nasal (Canvas map) probably wouldn't break anything, but guessing it's a bad idea visually"""
+    no_compress_pattern=re.compile(r'mask|light|relief|nmap|nm\.|normal|^Splash[0-9].png$|^buildings.png$|^buildings-lightmap.png$|^world.topo.bathy.200407.3x4096x2048.png$')#edge blurring from lossy compression may break masks, and this script doesn't know how to create DDS normal maps
+    no_compress_dirs=("gui","Docs","webgui","Nasal","Textures/Sky","Aircraft/Instruments","Aircraft/Instruments-3d","Aircraft/Generic")
     exclude_dirs=[".git","Textures/Unused"]
     exclude_unnamed_subdirs=["Aircraft"]#these are a separate mechanism from subtree_class/exclude_parts mostly to save time (subtree_class still fully scans excluded directories because the class may change again further down the tree, e.g. AI/Aircraft ai -> performancedb.xml base; these don't)
     subtree_class={"Aircraft/c172p":"base","Aircraft/Generic":"base","Aircraft/Instruments":"base","Aircraft/Instruments-3d":"base","Aircraft/ufo":"base","Textures":"textures","Textures.high":"textures","AI/Aircraft":"ai","AI/Traffic":"ai","AI/Aircraft/performancedb.xml":"base","Scenery":"scenery","Models":"models"}
@@ -314,11 +339,36 @@ This creates separate preferences-regions.xml and preferences-noregions.xml file
         base_texture_files=[]
         for t in find_unused_textures(input_path,return_used_noregions=True):
             base_texture_files.extend([path_join("Textures",t),path_join("Textures.high",t)])
-    #if os.path.exists(path_join(input_path,".git")):
-        #print(input_path,"appears to be a git clone; this will work, but the result will be larger than starting from a standard flightgear-data package.\nTo create this use (adjusting paths as necessary) rsync -av --filter=\"merge /home/palmer/fs_dev/git/fgmeta/base-package.rules\" ~/fs_dev/git/fgdata ~/fs_dev/flightgear/data_full")
+    #no longer a significant problem with exclude_dirs: if os.path.exists(path_join(input_path,".git")):
+        #print(input_path,"appears to be a git clone; this will work, but the result will be larger than starting from a standard flightgear-data package.\nTo create this use (adjusting paths as necessary) rsync -av --filter=\"merge /home/rnpalmer/fs_dev/git/fgmeta/base-package.rules\" ~/fs_dev/git/fgdata ~/fs_dev/flightgear/data_full")
     if os.path.exists(output_path.format("base")) and os.listdir(output_path.format("base")):
         print("output path",output_path,"non-empty, aborting to avoid data loss\nIf you did want to lose its previous contents, run:\nrm -r",output_path,"\nthen re-run this script")
         return
+    if compressed_format==".jpg":
+        print("Warning: selected compression format does not support transparency")
+    compress_names=set()
+    if dirs_to_compress:#need this preliminary pass to get names to change in .xml,etc
+        no_compress_names=set()
+        dirs={"":"base"}
+        while dirs:
+            cdir,cclass=dirs.popitem()
+            cdirfiles=os.listdir(path_join(input_path,cdir))
+            for file in cdirfiles:
+                fclass=subtree_class.get(path_join(cdir,file),cclass)
+                if os.path.isdir(path_join(input_path,cdir,file)):
+                    if (path_join(cdir,file) not in exclude_dirs) and (cdir not in exclude_unnamed_subdirs or path_join(cdir,file) in subtree_class):
+                        dirs[path_join(cdir,file)]=fclass
+                else:#file
+                    compress_this=cdir.startswith(dirs_to_compress) and (os.path.splitext(file)[1] in texture_filetypes) and (os.path.getsize(path_join(input_path,cdir,file))>downsample_min_filesize) and not no_compress_pattern.search(file) and not cdir.startswith(no_compress_dirs) and (file not in no_compress_names) and (not os.path.exists(path_join(input_path,cdir,os.path.splitext(file)[0]+compressed_format)))
+                    if compress_this:
+                        compress_names.add(file)
+                    else:
+                        no_compress_names.add(file)
+                        compress_names.discard(file)#if there are two with the same name in different directories, compress both or neither, to simplify name replacement
+    compress_names_find=re.compile(('(?<=["\'>/\\\\ \\n])('+'|'.join(re.escape(f) for f in compress_names)+')($|(?=["\'< \\n]))').encode('utf-8'))
+    compress_names_replace=lambda mf: os.path.splitext(mf.group(0))[0]+(compressed_format.encode('utf-8'))
+    compress_names_find0=re.compile(('|'.join(re.escape(f) for f in compress_names)).encode('utf-8'))
+    #print(compress_names,"\n\n",no_compress_names,"\n\n",'(?<=["\'>/\\\\ \\n])('+'|'.join(re.escape(f) for f in compress_names)+')($|(?=["\'< \\n]))',"\n\n",'|'.join(re.escape(f) for f in compress_names),"\n\n")
     dirs={"":"base"}
     while dirs:
         cdir,cclass=dirs.popitem()
@@ -337,23 +387,69 @@ This creates separate preferences-regions.xml and preferences-noregions.xml file
                 if fclass in exclude_parts:
                     continue
                 if not os.path.exists(path_join(output_path.format(fclass),cdir)):
-                    subprocess.call(["mkdir","-p",path_join(output_path.format(fclass),cdir)])
-                if (cdir.startswith(dirs_to_downsample)) and (os.path.splitext(file)[1] in texture_filetypes) and (os.path.getsize(path_join(input_path,cdir,file))>downsample_min_filesize):
+                    os.mkdirs(path_join(output_path.format(fclass),cdir))
+                downsample_this=(cdir.startswith(dirs_to_downsample)) and (os.path.splitext(file)[1] in texture_filetypes) and (os.path.getsize(path_join(input_path,cdir,file))>downsample_min_filesize)
+                compress_this=(file in compress_names)
+                if downsample_this or compress_this:
                     image_type=texture_filetypes[os.path.splitext(file)[1]]
+                    output_image_type=compressed_format if compress_this else os.path.splitext(file)[1]
+                    output_file=os.path.splitext(file)[0]+output_image_type
+                    output_image_type=texture_filetypes[output_image_type]
                     if "{0}" in output_path and fclass=="base-textures":#downsampled in base-textures, full resolution in extra-textures
                         if not os.path.exists(path_join(output_path.format("extra-textures"),cdir)):
-                            subprocess.call(["mkdir","-p",path_join(output_path.format("extra-textures"),cdir)])
-                        subprocess.call(["cp",path_join(input_path,cdir,file),path_join(output_path.format("extra-textures"),cdir,file)])
-                    if image_type=="DDS":# in Ubuntu, neither imagemagick nor graphicsmagick can write .dds
+                            os.mkdirs(path_join(output_path.format("extra-textures"),cdir))
+                        shutil.copy(path_join(input_path,cdir,file),path_join(output_path.format("extra-textures"),cdir,file))
+                    if output_image_type=="DDS":# in Ubuntu, neither imagemagick nor graphicsmagick can write .dds
                         #doesn't work subprocess.call(["nvzoom","-s","0.5","-f","box",path_join(input_path,cdir,file),path_join(output_path.format(fclass),cdir,file)])
-                        if subprocess.call(["convert",image_type+":"+path_join(input_path,cdir,file),"-sample","50%","temp_reduced_size.png"]):#fails on normal maps, so just copy them
-                            subprocess.call(["cp",path_join(input_path,cdir,file),path_join(output_path.format(fclass),cdir,file)])
+                        if subprocess.call(["convert",image_type+":"+path_join(input_path,cdir,file)]+(["-flip"] if ((image_type=="DDS")!=(output_image_type=="DDS")) else [])+(["-sample","50%"] if downsample_this else [])+["temp_reduced_size.png"]):#fails on DDS normal maps, so just copy them
+                            retcode=None
+                            shutil.copy(path_join(input_path,cdir,file),path_join(output_path.format(fclass),cdir,file))
+                            if compress_this:
+                                print("Error:")
+                            print(path_join(cdir,file)," probably normal map")
                         else:
-                            subprocess.call(["nvcompress","-bc3","temp_reduced_size.png",path_join(output_path.format(fclass),cdir,file)])
+                            retcode=subprocess.call(["nvcompress","-bc3","temp_reduced_size.png",path_join(output_path.format(fclass),cdir,output_file)],stdout=devnull)
                     else:
-                        subprocess.call(["convert",image_type+":"+path_join(input_path,cdir,file),"-sample","50%",image_type+":"+path_join(output_path.format(fclass),cdir,file)])#we use sample rather than an averaging filter to not break mask/rotation/... maps
-                else:#not to be downsampled
-                    subprocess.call(["cp",path_join(input_path,cdir,file),path_join(output_path.format(fclass),cdir,file)])
+                        retcode=subprocess.call(["convert",image_type+":"+path_join(input_path,cdir,file)]+(["-sample","50%"] if downsample_this else [])+[output_image_type+":"+path_join(output_path.format(fclass),cdir,output_file)])#we use sample rather than an averaging filter to not break mask/rotation/... maps
+                else:#not to be downsampled/compressed
+                    if os.path.splitext(file)[1] in binary_types:#just copy
+                        retcode=None
+                        shutil.copy(path_join(input_path,cdir,file),path_join(output_path.format(fclass),cdir,file))
+                    else:#texture name replacement
+                        retcode=None
+                        file_in=open(path_join(input_path,cdir,file),'rb')
+                        file_out=open(path_join(output_path.format(fclass),cdir,file),'wb')
+                        file_str=file_in.read(None)
+                        file_in.close()
+                        (file_strout,num_matches)=compress_names_find.subn(compress_names_replace,file_str)
+                        file_out.write(file_strout)
+                        file_out.close()
+                        #if ((os.path.splitext(file)[1] not in textureuser_types) and num_matches>0):
+                            #print("Warning: ",num_matches," unexpected use(s) in ",path_join(cdir,file))
+                        #if compress_names_find0.search(file_strout):
+                            #print("Warning: unreplaced match(es) in ",path_join(cdir,file),compress_names_find0.search(file_strout).group(0))
+                            """Warning: unreplaced match(es) in... correct rejections of match within a filename:
+                            Aircraft/Instruments-3d/AN-APS-13.ac b'panel.png'
+                            Aircraft/Instruments-3d/magneto-switch/mag_switch.ac b'black.png'
+                            Nasal/canvas/map/Images/chart_symbols.svg b'wash.png'
+                            Models/Airport/blast-deflector49m.ac b'generic.png'
+                            Models/Airport/blast-deflector63m.ac b'generic.png'
+                            Models/Industrial/oilrig09.ac b'yellow.png'
+                            Models/Industrial/oilrig10.ac b'yellow.png'
+                            Models/Industrial/oilrig09.ac.before-color-change b'yellow.png'
+                            Models/Industrial/oilrig10.ac.before-color-change b'yellow.png'
+                            Models/Maritime/Civilian/Tanker.ac b'black.png'
+                            Models/Transport/flatcar.xml b'evergreen.png'
+                            Models/Commercial/tower-grey-black.ac b'black.png'
+                            Materials/base/materials-base.xml b'yellow.png'
+                            
+                            Warning: unexpected use(s) in...
+                            Docs/README.local_weather.html (the only one that looke like an actual problem; hence, Docs is now skipped)
+                            Nasal/canvas/map/Images/chart_symbols.svg (probably inkscape:export-filename, which are creator-specific absolute paths anyway, but now skipped)
+                            oilrig09.ac.before-color-change,oilrig10.ac.before-color-chang,stbd_coaming_panel.ac.bak (presumably backup files)
+                            """
+                if retcode:
+                    print("Error ",retcode," on ",path_join(cdir,file))
     if "{0}" in output_path:
         subprocess.call(["mv",path_join(output_path.format("base"),"preferences.xml"),path_join(output_path.format("base"),"preferences-regions.xml")])
     if "extra-textures" in exclude_parts or "{0}" in output_path:
