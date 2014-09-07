@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<!--
+  The <regex> field is evaluated by preg_match
+  http://php.net/manual/en/function.preg-match.php
+-->
+<PropertyList>
+  <webhook>
+    <regex>/^Merge branch/</regex>
+    <description>Detect merge branch when rebase has been ommited</description>
+  </webhook>
+  <webhook>
+    <regex>/^test$/</regex>
+    <description>Detect for dummy message</description>
+  </webhook>
+  <webhook>
+    <regex>/blabla/</regex>
+    <description>Detect for bad commit description</description>
+  </webhook>
+</PropertyList>
