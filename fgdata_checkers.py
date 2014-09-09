@@ -8,17 +8,20 @@ import os.path
 import re
 from collections import defaultdict
 import subprocess
+import multiprocessing
 import math
 import tarfile
+import tempfile
 import gzip
 import shutil
+import time
 try:
     devnull=subprocess.DEVNULL#hide annoying nvcompress messages
 except (AttributeError,NameError):#pre-3.3 Python
     devnull=None
 def path_join(*args):
-    """Unlike plain os.path.join, this doesn't add a trailing / if the last component is empty"""
-    return os.path.normpath(os.path.join(*args))
+    """Unlike plain os.path.join, this always uses forward slashes, and doesn't add a trailing / if the last component is empty"""
+    return os.path.normpath(os.path.join(*args)).replace('\\','/')
 def rfilelist(path,exclude_dirs=[]):
     """Dict of files/sizes in path, including those in any subdirectories (as relative paths)"""
     files=defaultdict(int)
@@ -72,16 +75,16 @@ def files_used(pattern,path,exclude_dirs=[],filelist=None,filetypes=None,relativ
             tex=texfind.search(line)
             if tex:
                 if relative_path:
-                    textures.append(os.path.normpath(path_join(os.path.dirname(file),tex.group(1).replace('\\','/'))))
+                    textures.append(os.path.normpath(path_join(os.path.dirname(file),tex.group(1).replace('\\','/'))).replace('\\','/'))
                 else:
-                    textures.append(os.path.normpath(tex.group(1).replace('\\','/')))
+                    textures.append(os.path.normpath(tex.group(1).replace('\\','/')).replace('\\','/'))
     return textures
 def find_unused_textures(basedir,output_lists=True,grep_check=False,output_rsync_rules=False,output_comparison_strips=False, output_removal_commands=False,return_used_noregions=False):
     """Checks if any textures are unused (wasting space), and if any textures are only available as .dds (not recommended in the source repository, as it is a lossy-compressed format)
 
 Set basedir to your fg-root, and enable the kind(s) of output you want:
 output_lists prints lists of unused textures, and of dds-only textures
-grep_check checks for possible use outside the normal directories; requires Unix shell
+grep_check checks for possible use outside the normal directories; requires Unix shell and assumes side-by-side fgdata,flightgear,simgear
 output_rsync_rules prints rsync rules for excluding unused textures from the release flightgear-data.  Warning: if you use this, re-run this script regularly, in case they start being used
 output_comparison_strips creates thumbnail strips, unused_duplicate.png/unused_dds.png/high_low.png, for visually checking whether same-name textures are the same (remove the unused one entirely) or different (move it to Unused); requires imagemagick or graphicsmagick
 output_removal_commands creates another script, delete_unused_textures.sh, which will remove unused textures when run in a Unix shell"""
@@ -124,6 +127,9 @@ output_removal_commands creates another script, delete_unused_textures.sh, which
     low_unneeded_nondup=low_unneeded&set(known_highlow_mismatch)
     def image_check_strip(basedir,index_fname,ilist1,ilist2=None,size=128):
         """Generate two rows of thumbnails, for easy visual comparison (between the two lists given, or if a single list is given, between low and high resolution)"""
+        if not ilist1:
+            print(index_fname," empty, skipping")
+            return
         if ilist2 is None:
             ipairs=[[path_join(basedir,'Textures',f),path_join(basedir,'Textures.high',f)] for f in ilist1]
         else:
@@ -169,6 +175,12 @@ output_removal_commands creates another script, delete_unused_textures.sh, which
     if output_comparison_strips:
         image_check_strip(basedir,"unused_duplicate.png",unused_duplicate,["Terrain"+f[14:] for f in unused_duplicate])
         image_check_strip(basedir,"unused_dds.png",unused_dds,[f[:-4]+".png" for f in unused_dds])
+        dds_skip=set(['Runway/rwy-normalmap.dds','Water/perlin-noise-nm.dds','Water/water_sine_nmap.dds','Water/waves-ver10-nm.dds'])
+        used_dds_withpng=set(f for f in (high_textures|low_textures) if (f[-4:]==".dds" and f[:-4]+".png" in (high_textures|low_textures)))-unused_dds-dds_skip
+        print(".dds omitted from comparison strip (normal maps etc): ",dds_skip)
+        #used_dds_withpng different: p{a,c}_taxiway.dds and possibly more runway markings (darker),sand{4,5,6}.dds(less high-freq noise),water.dds(more high-freq noise),grass_rwy.dds (has stripes),cropwood.dds,irrcrop.dds,shrub.dds,herbtundra.dds,cropgrass.dds(unrelated)
+        #water-reflection.{png,dds} really are plain white (so do match), not an alpha map
+        image_check_strip(basedir,"used_dds.png",used_dds_withpng,[f[:-4]+".png" for f in used_dds_withpng])
         image_check_strip(basedir,"high_low.png",high_textures&low_textures)
         #image_check_strip(basedir,"high_low2.png",[f for f in high_textures&low_textures if (f[0:14]=="Terrain.winter" or "_taxiway." in f or "lava" in f or "sand" in f)],size=512)#closer look at the doubtful cases
     if output_lists:
@@ -178,11 +190,11 @@ output_removal_commands creates another script, delete_unused_textures.sh, which
         unused_f=[os.path.basename(f) for f in unused]
         all_f=[os.path.basename(f) for f in (high_textures|low_textures)]
         print("\n\nPossible use outside main search:")#used to set false_positives
-        subprocess.call(["grep","-r","-E","--exclude-dir=Aircraft","--exclude-dir=.git","-e","("+")|(".join(unused)+")","/home/rnpalmer/fs_dev/git/fgdata","/home/rnpalmer/fs_dev/git/flightgear","/home/rnpalmer/fs_dev/git/simgear"])#everywhere using full names
-        subprocess.call(["grep","-r","-E","--exclude-dir=Aircraft","--exclude-dir=Textures.high","--exclude-dir=Models","--exclude-dir=Materials","--exclude-dir=Effects","--exclude-dir=.git","-e","("+")|(".join(all_f)+")","/home/rnpalmer/fs_dev/git/fgdata","/home/rnpalmer/fs_dev/git/flightgear","/home/rnpalmer/fs_dev/git/simgear"])#restricted (to avoid false positives from Terrain.winter vs Terrain) using filenames
-        subprocess.call(["grep","-r","-E","--exclude-dir=Aircraft","--exclude-dir=Textures.high","--exclude-dir=Models","--exclude-dir=Materials","--exclude-dir=Effects","--exclude-dir=.git","-e",'[."\']dds',"/home/rnpalmer/fs_dev/git/fgdata","/home/rnpalmer/fs_dev/git/flightgear","/home/rnpalmer/fs_dev/git/simgear"])#check for programmatic .png -> .dds swap; none found
+        subprocess.call(["grep","-r","-E","--exclude-dir=Aircraft","--exclude-dir=.git","-e","("+")|(".join(unused)+")",basedir,path_join(basedir,"../flightgear"),path_join(basedir,"../simgear")])#everywhere using full names
+        subprocess.call(["grep","-r","-E","--exclude-dir=Aircraft","--exclude-dir=Textures.high","--exclude-dir=Models","--exclude-dir=Materials","--exclude-dir=Effects","--exclude-dir=.git","-e","("+")|(".join(all_f)+")",basedir,path_join(basedir,"../flightgear"),path_join(basedir,"../simgear")])#restricted (to avoid false positives from Terrain.winter vs Terrain) using filenames
+        subprocess.call(["grep","-r","-E","--exclude-dir=Aircraft","--exclude-dir=Textures.high","--exclude-dir=Models","--exclude-dir=Materials","--exclude-dir=Effects","--exclude-dir=.git","-e",'[."\']dds',basedir,path_join(basedir,"../flightgear"),path_join(basedir,"../simgear")])#check for programmatic .png -> .dds swap; none found
         print("\n\nUse of sourceless textures:")
-        subprocess.call(["grep","-r","-E","--exclude-dir=Aircraft","--exclude-dir=.git","-e","("+")|(".join(sourceless)+")","/home/rnpalmer/fs_dev/git/fgdata","/home/rnpalmer/fs_dev/git/flightgear","/home/rnpalmer/fs_dev/git/simgear"])
+        subprocess.call(["grep","-r","-E","--exclude-dir=Aircraft","--exclude-dir=.git","-e","("+")|(".join(sourceless)+")",basedir,path_join(basedir,"../flightgear"),path_join(basedir,"../simgear")])
     if output_rsync_rules:
         print("\n\nFull flightgear-data:\n")
         rsync_rules(basedir,unused)
@@ -247,51 +259,168 @@ def find_locally_unused_models(basedir):
     missing=set(f for f in (used_models|used_textures) if ((f.startswith('Models') and f not in models_allfiles.keys()) or not os.path.isfile(path_join(basedir,f))))
     print("used\n",sorted(used_models),"\nsize=",t_size(used_models),"\n\n",sorted(used_textures),"\nsize=",t_size(used_textures),"\n\nunused\n",sorted(unused),"\nsize=",t_size(unused),"\n\nmissing\n",sorted(missing),"\nsize=",t_size(missing))
 
-def size_by_type(path,exclude_dirs=[]):
-    """Dict of total file size by file extension"""
+class FilesetSizes:
+    def __init__(self):
+        self.count=0
+        self.ncsize=0
+        self.csize=0
+    @property
+    def size(self):
+        if self.csize>0:
+            return self.csize
+        else:
+            return self.ncsize
+    def __str__(self):
+        if self.csize>0:
+            return "{0:10,} {1:15,} {2:15,}".format(self.count,self.ncsize,self.csize)
+        else:
+            return "{0:10,} {1:15,}".format(self.count,self.ncsize)
+    def __add__(self,other):
+        result=FilesetSizes()
+        result.count=self.count+other.count
+        result.ncsize=self.ncsize+other.ncsize
+        result.csize=self.csize+other.csize
+        return result
+def size_by_category(path,exclude_dirs,keyfn,compressed_size=False):
+    """Total size of files, in each category returned from keyfn"""
     files=rfilelist(path,exclude_dirs)
-    size_totals=defaultdict(int)
-    for filename,size in files.items():
-        file_ext=os.path.splitext(filename)[1]
-        if file_ext==".gz":
-            file_ext=os.path.splitext(os.path.splitext(filename)[0])[1]+file_ext
-        size_totals[file_ext]=size_totals[file_ext]+size
-    return size_totals
-def size_by_size(path,exclude_dirs=[],exts=[".png",".dds",".rgb"]):
-    """Dict of total file size by individual file size range, of given extensions (empty list for all files)"""
-    files=rfilelist(path,exclude_dirs)
-    size_totals=defaultdict(int)
-    for filename,size in files.items():
-        file_ext=os.path.splitext(filename)[1]
-        if (not exts) or (file_ext in exts):
-            size_totals[2**math.frexp(size)[1]]=size_totals[2**math.frexp(size)[1]]+size
-    return size_totals
-def fgdata_size(path,dirs_to_list=["AI/Aircraft","AI/Traffic","Aircraft","Models","Scenery","Textures","Textures.high"],exclude_dirs=None,compressed_size=False,num_types=3):
-    if dirs_to_list is None:
-        dirs_to_list=[d for d in os.listdir(path) if os.path.isdir(path_join(path,d))]
+    result=defaultdict(FilesetSizes)
+    gzdir=tempfile.TemporaryDirectory()
+    gzpath=gzdir.name
+    gzcount=0
+    for file,size in files.items():
+        cat=keyfn(file,size)
+        if cat is None:
+            continue
+        result[cat].count=result[cat].count+1
+        result[cat].ncsize=result[cat].ncsize+size
+        if compressed_size:
+            try:
+                result[cat].targz.add(path_join(path,file))
+            except AttributeError:
+                result[cat].targzname=path_join(gzpath,str(gzcount)+".tar.gz")
+                result[cat].targz=tarfile.open(result[cat].targzname,mode="w:gz")
+                gzcount=gzcount+1
+                result[cat].targz.add(path_join(path,file))
+    if compressed_size:
+        for cat in result:
+            result[cat].targz.close()
+            result[cat].csize=os.path.getsize(result[cat].targzname)
+    return result
+def fgdata_size(path,by_size=False,exclude_dirs=None,compressed_size=False,min_size=1e6,include_aircraft=['UIUC','777','777-200','b1900d','CitationX','ZLT-NT','dhc2','Cub','sopwithCamel','f-14b','ASK13','bo105','Dragonfly','SenecaII','A6M2'],sections={"Aircraft/c172p":"Aircraft-base","Aircraft/Generic":"Aircraft-base","Aircraft/Instruments":"Aircraft-base","Aircraft/Instruments-3d":"Aircraft-base","Aircraft/ufo":"Aircraft-base","Aircraft/777":"Aircraft-777","Aircraft/777-200":"Aircraft-777","Aircraft":"Aircraft-other","Textures":"Textures","Textures.high":"Textures","AI/Aircraft":"AI-aircraft","AI":"AI-other","Scenery":"scenery","Models":"models"}):
+    if any('\\' in s for s in sections):
+        raise ValueError("sections always uses forward slashes")
+    if "" not in sections:
+        sections[""]="Other"
     if exclude_dirs is None:
         if os.path.exists(path_join(path,".git")):
-            exclude_dirs=[".git","Aircraft"]
+            exclude_dirs=[".git","Textures/Unused"]+[path_join("Aircraft",d) for d in os.listdir(path_join(path,"Aircraft")) if d not in ["c172p","ufo","Generic","Instruments","Instruments-3d"]+include_aircraft]
         else:
             exclude_dirs=[]
-    total_compressed_size=0
-    exclude_list=[[]]*len(dirs_to_list)+[dirs_to_list+exclude_dirs]+[exclude_dirs]
-    names_list=dirs_to_list+["other","all"]
-    for n,dir1 in enumerate(dirs_to_list+["",""]):
-        size_totals=size_by_type(path_join(path,dir1),exclude_list[n])
-        print(names_list[n],sorted(size_totals.items(),key=lambda x:-x[1])[:num_types],"total",sum(size_totals.values()))
-        if compressed_size:
-            if names_list[n]=="all":
-                print("compressed size",total_compressed_size)
-                continue
-            targz=tarfile.open("fgdata_sizetest_temp.tar.gz",mode="w:gz")
-            for file in rfilelist(path_join(path,dir1),exclude_list[n]):
-                targz.add(path_join(path,dir1,file))
-            targz.close()
-            print("compressed size",os.path.getsize("fgdata_sizetest_temp.tar.gz"))
-            total_compressed_size=total_compressed_size+os.path.getsize("fgdata_sizetest_temp.tar.gz")
+    if by_size:
+        keyfn=lambda file,size: ("texture",math.frexp(size)[1]) if os.path.splitext(file)[1] in [".png",".dds",".rgb",".jpg"] else ("nontexture",math.frexp(size)[1])
+    else:
+        def keyfn(file,size):
+            file_ext=os.path.splitext(file)[1]
+            if file_ext==".gz":
+                file_ext=os.path.splitext(os.path.splitext(file)[0])[1]+file_ext
+            file0=file.replace('\\','/')
+            section=sections[max((s for s in sections if file0.startswith(s)),key=len)]
+            return (section,file_ext)
+    result=size_by_category(path,exclude_dirs,keyfn,compressed_size)
+    #print(result)
+    totals1=defaultdict(FilesetSizes)
+    totals2=defaultdict(FilesetSizes)
+    other=defaultdict(FilesetSizes)
+    for cat in result:
+        totals1[cat[0]]=totals1[cat[0]]+result[cat]
+        totals2[cat[1]]=totals2[cat[1]]+result[cat]
+        if (not by_size) and (result[cat].size<min_size):
+            other[cat[0]]=other[cat[0]]+result[cat]
+    print("{0:>10} {1:>15} {2:>15}".format("Count","Size","Compr.size"))
+    for cat0,r0 in sorted(totals1.items(),key=lambda p:-p[1].size):
+        print(cat0)
+        for cat,r in sorted([(c[1],r) for (c,r) in result.items() if (c[0]==cat0 and (by_size or r.size>min_size))],key=(lambda p:p[0]) if by_size else (lambda p:-p[1].size)):
+            print(r,cat)
+        if not by_size:
+            print(other[cat0],"other")
+        print(totals1[cat0],"all")
+    print("All")
+    for cat,r in sorted([(c,r) for (c,r) in totals2.items() if (by_size or r.size>min_size)],key=(lambda p:p[0]) if by_size else (lambda p:-p[1].size)):
+        print(r,cat)
+    if not by_size:
+        print(sum((r for r in totals2.values() if r.size<min_size),FilesetSizes()),"other")
+    print(sum(totals1.values(),FilesetSizes()),"all")
+def create_reduced_file(input_path,output_path,temp_path,cdir,file,downsample_this,compress_this,compress_names_find, compressed_format,texture_filetypes,binary_types,fclass):
+    """Process a single file in create_reduced_fgdata.  (Separate function to allow parallel processing)"""
+    retcode=0
+    if downsample_this or compress_this:
+        image_type=texture_filetypes[os.path.splitext(file)[1]]
+        output_image_type=compressed_format if compress_this else os.path.splitext(file)[1]
+        output_file=os.path.splitext(file)[0]+output_image_type
+        output_image_type=texture_filetypes[output_image_type]
+        if "{0}" in output_path and fclass=="base-textures":#downsampled in base-textures, full resolution in extra-textures
+            shutil.copy(path_join(input_path,cdir,file),path_join(output_path.format("extra-textures"),cdir,file))
+        if output_image_type=="DDS":# in Ubuntu, neither imagemagick nor graphicsmagick can write .dds
+            #doesn't work (for dds -> smaller dds): subprocess.call(["nvzoom","-s","0.5","-f","box",path_join(input_path,cdir,file),path_join(output_path.format(fclass),cdir,file)])
+            if subprocess.call(["convert",image_type+":"+path_join(input_path,cdir,file)]+(["-flip"] if ((image_type=="DDS")!=(output_image_type=="DDS")) else [])+(["-sample","50%"] if downsample_this else [])+[path_join(temp_path,cdir,os.path.splitext(file)[0]+".png")]):#fails on some DDS formats, so just copy them
+                shutil.copy(path_join(input_path,cdir,file),path_join(output_path.format(fclass),cdir,file))
+                print(path_join(cdir,file),"unsupported type, probably normal map")
+                if compress_this:
+                    raise TypeError#copy will have the wrong name
+            else:
+                try:
+                    image_properties=subprocess.check_output(["identify","-verbose",path_join(temp_path,cdir,os.path.splitext(file)[0]+".png")])
+                except subprocess.CalledProcessError as err:
+                    print("identify error on",path_join(cdir,file),"after ",["convert",image_type+":"+path_join(input_path,cdir,file)]+(["-flip"] if ((image_type=="DDS")!=(output_image_type=="DDS")) else [])+(["-sample","50%"] if downsample_this else [])+[path_join(temp_path,cdir,os.path.splitext(file)[0]+".png")],["identify","-verbose",path_join(temp_path,cdir,os.path.splitext(file)[0]+".png")],err)
+                    raise
+                has_alpha=b"Alpha" in image_properties
+                needs_alpha=has_alpha
+                if has_alpha and re.search(rb"Alpha:\s*min: 255 \(1\)",image_properties):
+                    print(path_join(cdir,file),"has always-255 alpha")
+                    needs_alpha=False
+                retcode=subprocess.call(["nvcompress","-bc3" if needs_alpha else "-bc1",path_join(temp_path,cdir,os.path.splitext(file)[0]+".png"),path_join(output_path.format(fclass),cdir,output_file)],stdout=devnull)
+        else:
+            retcode=subprocess.call(["convert",image_type+":"+path_join(input_path,cdir,file)]+(["-sample","50%"] if downsample_this else [])+[output_image_type+":"+path_join(output_path.format(fclass),cdir,output_file)])#we use sample rather than an averaging filter to not break mask/rotation/... maps
+    else:#not to be downsampled/compressed
+        if os.path.splitext(file)[1] in binary_types:#just copy
+            shutil.copy(path_join(input_path,cdir,file),path_join(output_path.format(fclass),cdir,file))
+        else:#texture name replacement
+            file_in=open(path_join(input_path,cdir,file),'rb')
+            file_out=open(path_join(output_path.format(fclass),cdir,file),'wb')
+            file_str=file_in.read(None)
+            file_in.close()
+            (file_strout,num_matches)=compress_names_find.subn(lambda mf: os.path.splitext(mf.group(0))[0]+(compressed_format.encode('utf-8')),file_str)
+            file_out.write(file_strout)
+            file_out.close()
+            #if ((os.path.splitext(file)[1] not in textureuser_types) and num_matches>0):
+                #print("Warning: ",num_matches," unexpected use(s) in ",path_join(cdir,file))
+            #if compress_names_find0.search(file_strout):
+                #print("Warning: unreplaced match(es) in ",path_join(cdir,file),compress_names_find0.search(file_strout).group(0))
+            """Warning: unreplaced match(es) in... correct rejections of match within a filename:
+                Aircraft/Instruments-3d/AN-APS-13.ac b'panel.png'
+                Aircraft/Instruments-3d/magneto-switch/mag_switch.ac b'black.png'
+                Nasal/canvas/map/Images/chart_symbols.svg b'wash.png'
+                Models/Airport/blast-deflector49m.ac b'generic.png'
+                Models/Airport/blast-deflector63m.ac b'generic.png'
+                Models/Industrial/oilrig09.ac b'yellow.png'
+                Models/Industrial/oilrig10.ac b'yellow.png'
+                Models/Industrial/oilrig09.ac.before-color-change b'yellow.png'
+                Models/Industrial/oilrig10.ac.before-color-change b'yellow.png'
+                Models/Maritime/Civilian/Tanker.ac b'black.png'
+                Models/Transport/flatcar.xml b'evergreen.png'
+                Models/Commercial/tower-grey-black.ac b'black.png'
+                Materials/base/materials-base.xml b'yellow.png'
+                
+                Warning: unexpected use(s) in...
+                Docs/README.local_weather.html (the only one that looke like an actual problem; hence, Docs is now skipped)
+                Nasal/canvas/map/Images/chart_symbols.svg (probably inkscape:export-filename, which are creator-specific absolute paths anyway, but now skipped)
+                oilrig09.ac.before-color-change,oilrig10.ac.before-color-change,stbd_coaming_panel.ac.bak (presumably backup files)
+                """
+    if retcode:
+        print("Error ",retcode," in ",path_join(cdir,file))
 
-def create_reduced_fgdata(input_path,output_path,split_textures=True,exclude_parts=[],include_aircraft=['UIUC','777','777-200','b1900d','CitationX','ZLT-NT','dhc2','Cub','sopwithCamel','f-14b','ASK13','bo105','Dragonfly','SenecaII','A6M2'],dirs_to_downsample=(),dirs_to_compress=(),compressed_format=".dds",downsample_min_filesize=30000):
+def create_reduced_fgdata(input_path,output_path,reject_positional_args=None,split_textures=False,exclude_parts=[],include_aircraft=['UIUC','777','777-200','b1900d','CitationX','ZLT-NT','dhc2','Cub','sopwithCamel','f-14b','ASK13','bo105','Dragonfly','SenecaII','A6M2'],dirs_to_downsample=(),dirs_to_compress=(),compressed_format=".dds",downsample_min_filesize=1e5,compress_min_filesize=3e4,use_ready_compressed=True):
     """Create a smaller, reduced-quality flightgear-data package
 Can downsample textures 50%, change texture format, and/or omit sections (region-specific textures, aircraft, AI traffic)
 Downsampling and format change require imagemagick or graphicsmagick (for convert) and libnvtt-bin (for nvcompress)
@@ -303,7 +432,8 @@ extra-textures (requires split_textures=True): no region-specific textures
 The c172p and ufo are always included; other aircraft are added by include_aircraft
 
 Texture downsampling: textures in dirs_to_downsample and larger than downsample_min_filesize downsampled 50%
-Texture format conversion: textures in dirs_to_compress and larger than downsample_min_filesize converted to compressed_format
+Texture format conversion: textures in dirs_to_compress and larger than compress_min_filesize converted to compressed_format
+use_ready_compressed determines what happens if a same-basename file in compressed_format already exists: True uses the already-compressed one, False uses the uncompressed one, None keeps both
 Suggested dirs_to_downsample:
 3.2: ('Textures.high/Terrain','Textures.high/Trees','Textures.high/Terrain.winter','AI/Aircraft','Models')
 3.3: ('Textures/Terrain','Textures/Trees','Textures/Terrain.winter','AI/Aircraft','Models')
@@ -313,7 +443,14 @@ To put each section in its own directory (e.g. for building a Debian-style fligh
 python3 -c "import fgdata_checkers; fgdata_checkers.create_reduced_fgdata(input_path='/home/rnpalmer/fs_dev/git/fgdata',output_path='/home/rnpalmer/fs_dev/flightgear/data_split/debian/flightgear-data-{0}/usr/share/games/flightgear',include_aircraft=['UIUC','b1900d','CitationX','ZLT-NT','dhc2','Cub','sopwithCamel','f-14b','ASK13','bo105','Dragonfly','SenecaII','A6M2'])"
 This creates separate preferences-regions.xml and preferences-noregions.xml files for with and without regional textures; you need to handle symlinking preferences.xml to the correct one
 """
+    start_time=time.time()
+    if reject_positional_args is not None:
+        raise TypeError("Keyword arguments only please: this is not a stable API")
+    if use_ready_compressed not in (True,False,None):
+        raise TypeError("invalid use_ready_compressed setting")
     texture_filetypes={".png":"PNG",".dds":"DDS",".jpg":"JPEG"}#,".rgb":"SGI" loses cloud transparency
+    if compressed_format not in texture_filetypes:
+        raise ValueError("Invalid compressed_format (include the .)")
     textureuser_types={".eff",".xml",".ac",".nas"}
     binary_types={".png",".dds",".rgb",".RGB",".jpg",".wav",".WAV",".btg.gz",".zip",".tar.gz"}#don't search these for texture name replacement
     """Textures named directly in flightgear/simgear code:
@@ -326,7 +463,7 @@ unknown.rgb (probably Textures/ or Textures/Terrain/, neither exists)
 Aircraft/Instruments/Textures/nd-symbols.png (doesn't actually exist),Aircraft/Instruments/Textures/compass-ribbon.rgb,Aircraft/Instruments/Textures/od_wxradar.rgb,Aircraft/Instruments/Textures/od_wxradar.rgb,Aircraft/Instruments/Textures/wxecho.rgb,Aircraft/Instruments/Textures/od_groundradar.rgb (doesn't actually exist)
 also, Aircraft/{Instruments,Instruments-3d,Generic} may be used by downloaded aircraft, and Docs images are used in .html
 Nasal (Canvas map) probably wouldn't break anything, but guessing it's a bad idea visually"""
-    no_compress_pattern=re.compile(r'mask|light|relief|nmap|nm\.|normal|^Splash[0-9].png$|^buildings.png$|^buildings-lightmap.png$|^world.topo.bathy.200407.3x4096x2048.png$')#edge blurring from lossy compression may break masks, and this script doesn't know how to create DDS normal maps
+    no_compress_pattern=re.compile(r'mask|light|relief|nmap|nm\.|normal|dudv|^Splash[0-9].png$|^buildings.png$|^buildings-lightmap.png$|^world.topo.bathy.200407.3x4096x2048.png$')#edge blurring from lossy compression may break masks, and this script doesn't know how to create DDS normal maps
     no_compress_dirs=("gui","Docs","webgui","Nasal","Textures/Sky","Aircraft/Instruments","Aircraft/Instruments-3d","Aircraft/Generic")
     exclude_dirs=[".git","Textures/Unused"]
     exclude_unnamed_subdirs=["Aircraft"]#these are a separate mechanism from subtree_class/exclude_parts mostly to save time (subtree_class still fully scans excluded directories because the class may change again further down the tree, e.g. AI/Aircraft ai -> performancedb.xml base; these don't)
@@ -359,17 +496,21 @@ Nasal (Canvas map) probably wouldn't break anything, but guessing it's a bad ide
                     if (path_join(cdir,file) not in exclude_dirs) and (cdir not in exclude_unnamed_subdirs or path_join(cdir,file) in subtree_class):
                         dirs[path_join(cdir,file)]=fclass
                 else:#file
-                    compress_this=cdir.startswith(dirs_to_compress) and (os.path.splitext(file)[1] in texture_filetypes) and (os.path.getsize(path_join(input_path,cdir,file))>downsample_min_filesize) and not no_compress_pattern.search(file) and not cdir.startswith(no_compress_dirs) and (file not in no_compress_names) and (not os.path.exists(path_join(input_path,cdir,os.path.splitext(file)[0]+compressed_format)))
+                    compress_this=cdir.startswith(dirs_to_compress) and (os.path.splitext(file)[1] in texture_filetypes) and (os.path.splitext(file)[1]!=compressed_format) and (os.path.getsize(path_join(input_path,cdir,file))>compress_min_filesize) and not no_compress_pattern.search(file) and not cdir.startswith(no_compress_dirs) and (file not in no_compress_names) and ((use_ready_compressed is not None) or not os.path.exists(path_join(input_path,cdir,os.path.splitext(file)[0]+compressed_format)))
                     if compress_this:
                         compress_names.add(file)
                     else:
                         no_compress_names.add(file)
                         compress_names.discard(file)#if there are two with the same name in different directories, compress both or neither, to simplify name replacement
     compress_names_find=re.compile(('(?<=["\'>/\\\\ \\n])('+'|'.join(re.escape(f) for f in compress_names)+')($|(?=["\'< \\n]))').encode('utf-8'))
-    compress_names_replace=lambda mf: os.path.splitext(mf.group(0))[0]+(compressed_format.encode('utf-8'))
     compress_names_find0=re.compile(('|'.join(re.escape(f) for f in compress_names)).encode('utf-8'))
     #print(compress_names,"\n\n",no_compress_names,"\n\n",'(?<=["\'>/\\\\ \\n])('+'|'.join(re.escape(f) for f in compress_names)+')($|(?=["\'< \\n]))',"\n\n",'|'.join(re.escape(f) for f in compress_names),"\n\n")
+    print("Starting conversion...",len(compress_names),"files to change format, runtime so far=",int(time.time()-start_time),"sec")
     dirs={"":"base"}
+    subprocess_pool=multiprocessing.Pool(processes=8)
+    subprocess_list=[]
+    temp_dir=tempfile.TemporaryDirectory()
+    temp_path=temp_dir.name
     while dirs:
         cdir,cclass=dirs.popitem()
         cdirfiles=os.listdir(path_join(input_path,cdir))
@@ -387,71 +528,29 @@ Nasal (Canvas map) probably wouldn't break anything, but guessing it's a bad ide
                 if fclass in exclude_parts:
                     continue
                 if not os.path.exists(path_join(output_path.format(fclass),cdir)):
-                    os.mkdirs(path_join(output_path.format(fclass),cdir))
+                    os.makedirs(path_join(output_path.format(fclass),cdir))#errors out if the directory does exist, so calling it in the per-file subprocess would be a race condition
+                if "{0}" in output_path and fclass=="base-textures" and not os.path.exists(path_join(output_path.format("extra-textures"),cdir)):#downsampled in base-textures, full resolution in extra-textures
+                    os.makedirs(path_join(output_path.format("extra-textures"),cdir))
+                if not os.path.exists(path_join(temp_path,cdir)):
+                    os.makedirs(path_join(temp_path,cdir))
                 downsample_this=(cdir.startswith(dirs_to_downsample)) and (os.path.splitext(file)[1] in texture_filetypes) and (os.path.getsize(path_join(input_path,cdir,file))>downsample_min_filesize)
                 compress_this=(file in compress_names)
-                if downsample_this or compress_this:
-                    image_type=texture_filetypes[os.path.splitext(file)[1]]
-                    output_image_type=compressed_format if compress_this else os.path.splitext(file)[1]
-                    output_file=os.path.splitext(file)[0]+output_image_type
-                    output_image_type=texture_filetypes[output_image_type]
-                    if "{0}" in output_path and fclass=="base-textures":#downsampled in base-textures, full resolution in extra-textures
-                        if not os.path.exists(path_join(output_path.format("extra-textures"),cdir)):
-                            os.mkdirs(path_join(output_path.format("extra-textures"),cdir))
-                        shutil.copy(path_join(input_path,cdir,file),path_join(output_path.format("extra-textures"),cdir,file))
-                    if output_image_type=="DDS":# in Ubuntu, neither imagemagick nor graphicsmagick can write .dds
-                        #doesn't work subprocess.call(["nvzoom","-s","0.5","-f","box",path_join(input_path,cdir,file),path_join(output_path.format(fclass),cdir,file)])
-                        if subprocess.call(["convert",image_type+":"+path_join(input_path,cdir,file)]+(["-flip"] if ((image_type=="DDS")!=(output_image_type=="DDS")) else [])+(["-sample","50%"] if downsample_this else [])+["temp_reduced_size.png"]):#fails on DDS normal maps, so just copy them
-                            retcode=None
-                            shutil.copy(path_join(input_path,cdir,file),path_join(output_path.format(fclass),cdir,file))
-                            if compress_this:
-                                print("Error:")
-                            print(path_join(cdir,file)," probably normal map")
-                        else:
-                            retcode=subprocess.call(["nvcompress","-bc3","temp_reduced_size.png",path_join(output_path.format(fclass),cdir,output_file)],stdout=devnull)
-                    else:
-                        retcode=subprocess.call(["convert",image_type+":"+path_join(input_path,cdir,file)]+(["-sample","50%"] if downsample_this else [])+[output_image_type+":"+path_join(output_path.format(fclass),cdir,output_file)])#we use sample rather than an averaging filter to not break mask/rotation/... maps
-                else:#not to be downsampled/compressed
-                    if os.path.splitext(file)[1] in binary_types:#just copy
-                        retcode=None
-                        shutil.copy(path_join(input_path,cdir,file),path_join(output_path.format(fclass),cdir,file))
-                    else:#texture name replacement
-                        retcode=None
-                        file_in=open(path_join(input_path,cdir,file),'rb')
-                        file_out=open(path_join(output_path.format(fclass),cdir,file),'wb')
-                        file_str=file_in.read(None)
-                        file_in.close()
-                        (file_strout,num_matches)=compress_names_find.subn(compress_names_replace,file_str)
-                        file_out.write(file_strout)
-                        file_out.close()
-                        #if ((os.path.splitext(file)[1] not in textureuser_types) and num_matches>0):
-                            #print("Warning: ",num_matches," unexpected use(s) in ",path_join(cdir,file))
-                        #if compress_names_find0.search(file_strout):
-                            #print("Warning: unreplaced match(es) in ",path_join(cdir,file),compress_names_find0.search(file_strout).group(0))
-                            """Warning: unreplaced match(es) in... correct rejections of match within a filename:
-                            Aircraft/Instruments-3d/AN-APS-13.ac b'panel.png'
-                            Aircraft/Instruments-3d/magneto-switch/mag_switch.ac b'black.png'
-                            Nasal/canvas/map/Images/chart_symbols.svg b'wash.png'
-                            Models/Airport/blast-deflector49m.ac b'generic.png'
-                            Models/Airport/blast-deflector63m.ac b'generic.png'
-                            Models/Industrial/oilrig09.ac b'yellow.png'
-                            Models/Industrial/oilrig10.ac b'yellow.png'
-                            Models/Industrial/oilrig09.ac.before-color-change b'yellow.png'
-                            Models/Industrial/oilrig10.ac.before-color-change b'yellow.png'
-                            Models/Maritime/Civilian/Tanker.ac b'black.png'
-                            Models/Transport/flatcar.xml b'evergreen.png'
-                            Models/Commercial/tower-grey-black.ac b'black.png'
-                            Materials/base/materials-base.xml b'yellow.png'
-                            
-                            Warning: unexpected use(s) in...
-                            Docs/README.local_weather.html (the only one that looke like an actual problem; hence, Docs is now skipped)
-                            Nasal/canvas/map/Images/chart_symbols.svg (probably inkscape:export-filename, which are creator-specific absolute paths anyway, but now skipped)
-                            oilrig09.ac.before-color-change,oilrig10.ac.before-color-chang,stbd_coaming_panel.ac.bak (presumably backup files)
-                            """
-                if retcode:
-                    print("Error ",retcode," on ",path_join(cdir,file))
+                if compress_this and use_ready_compressed==True and os.path.exists(path_join(input_path,cdir,os.path.splitext(file)[0]+compressed_format)):
+                    continue
+                if (not compress_this) and use_ready_compressed==False and os.path.splitext(file)[1]==compressed_format and any((os.path.exists(path_join(input_path,cdir,os.path.splitext(file)[0]+f)) and os.path.splitext(file)[0]+f in compress_names) for f in texture_filetypes if f!=os.path.splitext(file)[1]):
+                    continue
+                subprocess_list.append(subprocess_pool.apply_async(create_reduced_file,args=(input_path,output_path,temp_path,cdir,file,downsample_this,compress_this,compress_names_find, compressed_format,texture_filetypes,binary_types,fclass)))
+    print(len(subprocess_list),"file tasks started...runtime so far=",int(time.time()-start_time),"sec\n(Not a linear progress indicator: they are different lengths.)")
+    last_report=time.time()-100#print first report immediately
+    for s0 in subprocess_list:
+        if time.time()>last_report+60:
+            print("Waiting for",len([s for s in subprocess_list if not s.ready()]),"file tasks...runtime so far=",int(time.time()-start_time),"sec")
+            last_report=time.time()
+        s0.get()
+    subprocess_pool.close()
+    subprocess_pool.join()
     if "{0}" in output_path:
-        subprocess.call(["mv",path_join(output_path.format("base"),"preferences.xml"),path_join(output_path.format("base"),"preferences-regions.xml")])
+        os.rename(path_join(output_path.format("base"),"preferences.xml"),path_join(output_path.format("base"),"preferences-regions.xml"))
     if "extra-textures" in exclude_parts or "{0}" in output_path:
         prefs_in=open(path_join(input_path,"preferences.xml"),'r')
         prefs_out=open(path_join(output_path.format("base"),"preferences-noregions.xml" if "{0}" in output_path else "preferences.xml"),'w')
@@ -460,6 +559,7 @@ Nasal (Canvas map) probably wouldn't break anything, but guessing it's a bad ide
         prefs_str=prefs_str.replace("Materials/regions/materials.xml","Materials/default/materials.xml")#turn off regional textures
         prefs_out.write(prefs_str)
         prefs_out.close()
+    print("Total runtime=",int(time.time()-start_time),"sec")
 def check_text_encoding(path,filelist=None,binary_types=(".png",".dds",".rgb",".RGB",".jpg",".wav",".WAV",".btg.gz",".xcf.gz",".xcf",".XCF","Thumbs.db",".blend",".bmp",".gif", ".3ds",".3DS",".pdf",".ttf",".txf",".htsvoice",".odt",".ods",".xls",".mp3",".zip",".tar.gz"),exclude_dirs=[".git","Timezone"]):
     """filelist is intended for quick testing: see fgdata_nonascii_filelist.py"""
     def err_context(err):
