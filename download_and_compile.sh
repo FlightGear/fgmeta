@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-VERSION="2.26"
+VERSION="2.27"
 
 #######################################################
 # THANKS TO
@@ -476,9 +476,6 @@ if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="SIMGEAR"' ]]; then
 	else
 		_gitUpdate $FGSG_UNSTABLE_GIT_BRANCH
 	fi
-
-	# Remove DDS warning message
-	sed -i s/SG_ALERT,\ \"Image/SG_WARN,\ \"Image/g simgear/scene/model/ModelRegistry.cxx
 	
 	if [ ! "$UPDATE" = "UPDATE" ]; then
 		if [ "$RECONFIGURE" = "y" ]; then
