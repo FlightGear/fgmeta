@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-VERSION="2.27"
+VERSION="2.28"
 
 #######################################################
 # THANKS TO
@@ -524,7 +524,7 @@ if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="FGFS"' || "$(declare -p WHAT
        				mkdir -p build/flightgear
 	                        cd "$CBD"/build/flightgear
 				rm -f CMakeCache.txt
-				cmake 	-D CMAKE_BUILD_TYPE="Debug" \
+				cmake 	-D CMAKE_BUILD_TYPE="Release" \
 					-D ENABLE_RTI=OFF \
 					-D ENABLE_FLITE=ON \
 					-D CMAKE_INSTALL_PREFIX:PATH="$INSTALL_DIR_FGFS" \
