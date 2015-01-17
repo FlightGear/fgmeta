@@ -132,8 +132,8 @@ function _make(){
 OSG_STABLE_GIT_BRANCH="OpenSceneGraph-3.2"
 PLIB_STABLE_GIT_BRANCH="master"
 # common stable branch for flightgear, simgear and fgdata
-FGSG_STABLE_GIT_BRANCH="release/3.2.0"
-OPENRTI_STABLE_GIT_BRANCH="release-0.5"
+FGSG_STABLE_GIT_BRANCH="release/3.4.0"
+OPENRTI_STABLE_GIT_BRANCH="release-0.6"
 # unstable branch: next for sg/fg, master for fgdata
 FGSG_UNSTABLE_GIT_BRANCH="next"
 FGDATA_UNSTABLE_GIT_BRANCH="master"
