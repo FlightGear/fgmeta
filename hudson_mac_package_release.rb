@@ -24,13 +24,13 @@ puts "osgVersion=#{osgVersion}, so-number=#{$osgSoVersion}"
 
 def fix_install_names(object)
   #puts "fixing install names for #{object}"
-  
+
   $osgLibs.each do |l|
     oldName = "lib#{l}.#{$osgSoVersion}.dylib"
     newName = "@executable_path/../Frameworks/#{oldName}"
     `install_name_tool -change #{oldName} #{newName} #{object}`
   end
-  
+
   oldName = "libOpenThreads.#{$openThreadsSoVersion}.dylib"
   newName= "@executable_path/../Frameworks/#{oldName}"
   `install_name_tool -change #{oldName} #{newName} #{object}`
@@ -47,6 +47,17 @@ end
 
 puts "Erasing previous image dir"
 `rm -rf #{dmgDir}`
+
+bundle=dmgDir + "/FlightGear.app"
+
+# run macdeployt before we rename the bundle, otherwise it
+# can't find the bundle executable
+puts "Running macdeployqt on the bundle to copy Qt libraries"
+`macdeployqt #{$prefixDir}/fgfs.app`
+
+puts "Moving & renaming app bundle"
+`mkdir -p #{dmgDir}`
+`mv #{$prefixDir}/fgfs.app #{bundle}`
 
 bundle=dmgDir + "/FlightGear.app"
 contents=bundle + "/Contents"
@@ -70,14 +81,16 @@ puts "Creating directory structure"
 `mkdir -p #{resourcesDir}`
 `mkdir -p #{osgPluginsDir}`
 
-puts "Copying binaries"
-`cp #{$prefixDir}/fgfs.app/Contents/MacOS/fgfs #{macosDir}/fgfs`
-bins = ['fgjs', 'fgcom', 'fgviewer']
+# fix install names on the primary executable
+fix_install_names("#{macosDir}/fgfs")
+
+puts "Copying auxilliary binaries"
+bins = ['fgjs', 'fgcom']
 bins.each do |b|
   if !File.exist?("#{$prefixDir}/bin/#{b}")
     next
   end
-  
+
   outPath = "#{macosDir}/#{b}"
   `cp #{$prefixDir}/bin/#{b} #{outPath}`
   fix_install_names(outPath)
@@ -98,14 +111,6 @@ $osgPlugins.each do |p|
   pluginFile = "osgdb_#{p}.so"
   `cp #{$prefixDir}/lib/osgPlugins-#{osgVersion}/#{pluginFile} #{osgPluginsDir}`
   fix_install_names("#{osgPluginsDir}/#{pluginFile}")
-end
-
-# Macflightgear launcher
-puts "Copying Macflightgear launcher files"
-
-Dir.chdir "maclauncher/FlightGearOSX" do
-  `cp FlightGear #{macosDir}`
-  `rsync -a *.rb *.lproj *.sh *.tiff *.html #{resourcesDir}`
 end
 
 if File.exist?("#{$prefixDir}/bin/fgcom-data")
