@@ -43,6 +43,7 @@ AppPublisherURL=http://www.flightgear.org
 AppSupportURL=http://www.flightgear.org
 AppUpdatesURL=http://www.flightgear.org
 DefaultDirName={pf}\FlightGear {#FGVersion}
+UsePreviousAppDir=no
 DefaultGroupName=FlightGear {#FGVersion}
 LicenseFile=X:\flightgear\COPYING
 Uninstallable=yes
