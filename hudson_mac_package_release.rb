@@ -40,11 +40,6 @@ $prefixDir=Dir.pwd + "/dist"
 dmgDir=Dir.pwd + "/image"
 srcDir=Dir.pwd + "/flightgear"
 
-def code_sign(path)
-  puts "Signing #{path}"
-  `codesign -s "#{$codeSignIdentity}" #{path}`
-end
-
 puts "Erasing previous image dir"
 `rm -rf #{dmgDir}`
 
@@ -64,7 +59,7 @@ contents=bundle + "/Contents"
 macosDir=contents + "/MacOS"
 $frameworksDir=contents +"/Frameworks"
 resourcesDir=contents+"/Resources"
-osgPluginsDir=contents+"/PlugIns/osgPlugins-#{osgVersion}"
+osgPluginsDir=contents+"/PlugIns/osgPlugins"
 
 # for writing copyright year to Info.plist
 t = Time.new
@@ -108,8 +103,8 @@ libFile = "libOpenThreads.#{$openThreadsSoVersion}.dylib"
 `cp #{$prefixDir}/lib/#{libFile} #{$frameworksDir}`
 
 $osgPlugins.each do |p|
-  pluginFile = "osgdb_#{p}.so"
-  `cp #{$prefixDir}/lib/osgPlugins-#{osgVersion}/#{pluginFile} #{osgPluginsDir}`
+  pluginFile = "osgdb_#{p}.dylib"
+  `cp #{$prefixDir}/lib/osgPlugins/#{pluginFile} #{osgPluginsDir}`
   fix_install_names("#{osgPluginsDir}/#{pluginFile}")
 end
 
@@ -136,14 +131,9 @@ File.open("#{contents}/Info.plist", 'w') { |f|
 puts "Copying base package files into the image"
 `rsync -a fgdata/ #{resourcesDir}/data`
 
-# code sign all executables in MacOS dir. Do this last since reource
-# changes will invalidate the signature!
-Dir.foreach(macosDir) do |b|
-    if b == '.' or b == '..' then
-        next
-    end
-  code_sign("#{macosDir}/#{b}")
-end
+# code sign the entire bundle once complete - v2 code-signing
+puts "Signing #{bundle}"
+`codesign --deep -s "#{$codeSignIdentity}" #{bundle}`
 
 puts "Creating DMG"
 
