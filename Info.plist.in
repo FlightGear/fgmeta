@@ -13,7 +13,7 @@
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleExecutable</key>
-	<string>FlightGear</string>
+	<string>fgfs</string>
 	<key>CFBundleIdentifier</key>
 	<string>org.flightgear.FlightGear</string>
 	<key>CFBundleVersion</key>
@@ -21,13 +21,20 @@
 	<key>CFBundleShortVersionString</key>
 	<string><%= fgVersion %></string>
 	<key>LSMinimumSystemVersion</key>
-	<string>10.6.0</string>
+	<string>10.7.0</string>
 	<key>NSMainNibFile</key>
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
     <key>NSHumanReadableCopyright</key>
     <string>©1996-<%= fgCurrentYear%>, The FlightGear Project</string>
+
+    <!-- when launched via LaunchServices, run the launcher GUI -->
+    <key>LSEnvironment</key>
+    <dict>
+        <key>FG_LAUNCHER</key>
+        <string>1</string>
+    </dict>
 </dict>
 </plist>
 
