@@ -68,7 +68,7 @@ fgCurrentYear = t.year
 fgVersion = File.read("#{srcDir}/version").strip
 volName="\"FlightGear #{fgVersion}\""
 
-dmgPath = Dir.pwd + "/output/FlightGear-#{fgVersion}.dmg"
+dmgPath = Dir.pwd + "/output/FlightGear-#{fgVersion}-nightly.dmg"
 
 puts "Creating directory structure"
 `mkdir -p #{macosDir}`

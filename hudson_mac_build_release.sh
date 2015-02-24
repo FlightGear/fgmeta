@@ -33,7 +33,7 @@ popd
 ################################################################################
 echo "Starting on FlightGear"
 pushd fgBuild
-cmake -DCMAKE_INSTALL_PREFIX:PATH=$WORKSPACE/dist -G Xcode ../flightgear
+cmake -DFG_NIGHTLY=1 -DCMAKE_INSTALL_PREFIX:PATH=$WORKSPACE/dist -G Xcode ../flightgear
 
 xcodebuild -configuration RelWithDebInfo -target install  build
 
