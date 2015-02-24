@@ -22,19 +22,15 @@ puts "Code signing identity is #{$codeSignIdentity}"
 
 puts "osgVersion=#{osgVersion}, so-number=#{$osgSoVersion}"
 
-$svnLibs = ['svn_client', 'svn_wc', 'svn_delta', 'svn_diff', 'svn_ra', 
-  'svn_ra_local', 'svn_repos', 'svn_fs', 'svn_fs_fs', 'svn_fs_util',
-  'svn_ra_svn', 'svn_subr', 'svn_ra_neon']
-
 def fix_install_names(object)
   #puts "fixing install names for #{object}"
-  
+
   $osgLibs.each do |l|
     oldName = "lib#{l}.#{$osgSoVersion}.dylib"
     newName = "@executable_path/../Frameworks/#{oldName}"
     `install_name_tool -change #{oldName} #{newName} #{object}`
   end
-  
+
   oldName = "libOpenThreads.#{$openThreadsSoVersion}.dylib"
   newName= "@executable_path/../Frameworks/#{oldName}"
   `install_name_tool -change #{oldName} #{newName} #{object}`
@@ -44,25 +40,6 @@ $prefixDir=Dir.pwd + "/dist"
 dmgDir=Dir.pwd + "/image"
 srcDir=Dir.pwd + "/flightgear"
 
-def fix_svn_install_names(object)
-  $svnLibs.each do |l|
-    fileName = "lib#{l}-1.0.dylib"
-    newName = "@executable_path/../Frameworks/#{fileName}"
-    `install_name_tool -change #{fileName} #{newName} #{object}`
-  end
-end
-
-def copy_svn_libs()
-  puts "Copying Subversion client libraries"
-  $svnLibs.each do |l|
-    libFile = "lib#{l}-1.0.dylib"
-    path = "#{$frameworksDir}/#{libFile}"
-    `cp #{$prefixDir}/lib/#{libFile} #{$frameworksDir}`
-    fix_svn_install_names(path)
-   # `install_name_tool -id #{libFile}  #{path}`    
-  end
-end
-
 def code_sign(path)
   puts "Signing #{path}"
   `codesign -s "#{$codeSignIdentity}" #{path}`
@@ -71,6 +48,17 @@ end
 
 puts "Erasing previous image dir"
 `rm -rf #{dmgDir}`
+
+bundle=dmgDir + "/FlightGear.app"
+
+# run macdeployt before we rename the bundle, otherwise it
+# can't find the bundle executable
+puts "Running macdeployqt on the bundle to copy Qt libraries"
+`macdeployqt #{$prefixDir}/fgfs.app`
+
+puts "Moving & renaming app bundle"
+`mkdir -p #{dmgDir}`
+`mv #{$prefixDir}/fgfs.app #{bundle}`
 
 bundle=dmgDir + "/FlightGear.app"
 contents=bundle + "/Contents"
@@ -94,18 +82,19 @@ puts "Creating directory structure"
 `mkdir -p #{resourcesDir}`
 `mkdir -p #{osgPluginsDir}`
 
-puts "Copying binaries"
-`cp #{$prefixDir}/fgfs.app/Contents/MacOS/fgfs #{macosDir}/fgfs`
-bins = ['fgjs', 'fgcom', 'fgviewer']
+# fix install names on the primary executable
+fix_install_names("#{macosDir}/fgfs")
+
+puts "Copying auxilliary binaries"
+bins = ['fgjs', 'fgcom']
 bins.each do |b|
   if !File.exist?("#{$prefixDir}/bin/#{b}")
     next
   end
-  
+
   outPath = "#{macosDir}/#{b}"
   `cp #{$prefixDir}/bin/#{b} #{outPath}`
   fix_install_names(outPath)
-  fix_svn_install_names(outPath)
 end
 
 puts "copying libraries"
@@ -123,16 +112,6 @@ $osgPlugins.each do |p|
   pluginFile = "osgdb_#{p}.so"
   `cp #{$prefixDir}/lib/osgPlugins-#{osgVersion}/#{pluginFile} #{osgPluginsDir}`
   fix_install_names("#{osgPluginsDir}/#{pluginFile}")
-end
-
-copy_svn_libs()
-
-# Macflightgear launcher
-puts "Copying Macflightgear launcher files"
-
-Dir.chdir "maclauncher/FlightGearOSX" do
-  `cp FlightGear #{macosDir}`
-  `rsync -a *.rb *.lproj *.sh *.tiff *.html #{resourcesDir}`
 end
 
 if File.exist?("#{$prefixDir}/bin/fgcom-data")
