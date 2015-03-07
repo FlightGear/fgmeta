@@ -76,10 +76,8 @@ fi
 
 if [ "$STABLE" = "STABLE" ]; then
   FGVERSION=$FGVERSION
-  FGDATAVERSION=$FGVERSION
 else
   FGVERSION="next"
-  FGDATAVERSION="master"
 fi
 
 
@@ -389,8 +387,8 @@ if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="FGFS"' || "$(declare -p WHAT
     echo "**************** DATA ******************" | tee -a $LOGFILE
     echo "****************************************" | tee -a $LOGFILE
 
-    _gitDownload https://gitorious.org/fg/fgdata.git
-    _gitUpdate $FGDATAVERSION
+    _gitDownload git://git.code.sf.net/p/flightgear/fgdata
+    _gitUpdate $FGVERSION
   fi
   cd "$CBD"
 
