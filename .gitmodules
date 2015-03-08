@@ -10,7 +10,7 @@
 	path = fgrun
 	url = git://gitorious.org/fg/fgrun.git
 	branch = next
-[submodule "maclauncher"]
-	path = maclauncher
-	url = git://gitorious.org/fg/maclauncher.git
-	branch = master
+[submodule "fgdata"]
+	path = fgdata
+	url = git://git.code.sf.net/p/flightgear/fgdata
+	branch = next

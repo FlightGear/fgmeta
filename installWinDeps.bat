@@ -1,6 +1,7 @@
 REM ExternalProject can't cleanly extract a zip into an existing directory
 REM Instead we extract to a subdir, and then move the directories we want
 REM using this bat file.
+REM This script is used by the SuperBuild CMakeLists.txt
 
 echo %CD%
 IF EXIST winDeps/3rdParty (

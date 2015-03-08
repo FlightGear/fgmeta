@@ -12,7 +12,6 @@ sgBuild
 image
 build
 macflightgear
-fgdata
 src
 tmp
 Makefile
