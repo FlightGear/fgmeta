@@ -1,14 +1,14 @@
 [submodule "simgear"]
 	path = simgear
-	url = git://gitorious.org/fg/simgear.git
+	url = https://gitorious.org/fg/simgear.git
 	branch = next
 [submodule "flightgear"]
 	path = flightgear
-	url = git://gitorious.org/fg/flightgear.git
+	url = https://gitorious.org/fg/flightgear.git
 	branch = next
 [submodule "fgrun"]
 	path = fgrun
-	url = git://gitorious.org/fg/fgrun.git
+	url = https://gitorious.org/fg/fgrun.git
 	branch = next
 [submodule "fgdata"]
 	path = fgdata
