@@ -69,6 +69,7 @@ fgVersion = File.read("#{srcDir}/version").strip
 volName="\"FlightGear #{fgVersion}\""
 
 dmgPath = Dir.pwd + "/output/FlightGear-#{fgVersion}-nightly.dmg"
+dmgFullPath = Dir.pwd + "/output/FlightGear-#{fgVersion}-nightly-full.dmg"
 
 puts "Creating directory structure"
 `mkdir -p #{macosDir}`
@@ -128,8 +129,7 @@ File.open("#{contents}/Info.plist", 'w') { |f|
 `mv fgdata/Docs/FGShortRef.pdf "#{dmgDir}/Quick Reference.pdf"`
 `mv fgdata/Docs/getstart.pdf "#{dmgDir}/Getting Started.pdf"`
 
-puts "Copying base package files into the image"
-`rsync -a fgdata/ #{resourcesDir}/data`
+# create the 'lite' DMG without the base files
 
 # code sign the entire bundle once complete - v2 code-signing
 puts "Signing #{bundle}"
@@ -141,3 +141,16 @@ createArgs = "-format UDBZ -imagekey bzip2-level=9 -quiet -volname #{volName}"
 
 `rm #{dmgPath}`
 `hdiutil create -srcfolder #{dmgDir} #{createArgs} #{dmgPath}`
+
+
+puts "Creatign full image with data"
+
+puts "Copying base package files into the image"
+`rsync -a fgdata/ #{resourcesDir}/data`
+
+# re-sign the entire bundle
+puts "Re-signing full #{bundle}"
+`codesign --force --deep -s "#{$codeSignIdentity}" #{bundle}`
+
+`rm #{dmgFullPath}`
+`hdiutil create -srcfolder #{dmgDir} #{createArgs} #{dmgFullPath}`
