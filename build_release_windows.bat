@@ -96,7 +96,7 @@ REM 3) FlightGear nightly: without fgdata, output filename would be "FlightGear-
 REM for case 1)
 SET "FG_DETAILS="
 
-IF "IS_NIGHTLY_BUILD"=="TRUE" (
+IF "%IS_NIGHTLY_BUILD%"=="TRUE" (
   REM only for case 2)
   SET "FG_DETAILS=-nightly-full"
 )
@@ -114,7 +114,7 @@ iscc FlightGear.iss
 
 
 REM only for case 3)
-IF "IS_NIGHTLY_BUILD"=="TRUE" (
+IF "%IS_NIGHTLY_BUILD%"=="TRUE" (
   SET "DETAILS=-nightly"
 
   ECHO #define FGVersion "%FLIGHTGEAR_VERSION%" > InstallConfig.iss
