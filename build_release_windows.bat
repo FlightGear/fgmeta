@@ -17,7 +17,7 @@ cd ..\build-fg32
 cmake ..\flightgear -G "Visual Studio 10" ^
                     -DMSVC_3RDPARTY_ROOT=%WORKSPACE% ^
                     -DCMAKE_INSTALL_PREFIX:PATH=%WORKSPACE%/install/msvc100/FlightGear ^
-                    -DQt5_DIR=%QTSDK32% ^
+                    -DCMAKE_PREFIX_PATH=%QTSDK32% ^
                     -DPNG_LIBRARY=%WORKSPACE%/3rdParty/lib/libpng16.lib ^
                     -DFLTK_FLUID_EXECUTABLE=%WORKSPACE%/3rdParty/bin/fluid.exe ^
                     -DBOOST_ROOT=%WORKSPACE%/Boost
@@ -50,7 +50,7 @@ cd ..\build-fg64
 cmake ..\flightgear -G "Visual Studio 10 Win64" ^
                     -DMSVC_3RDPARTY_ROOT=%WORKSPACE% ^
                     -DCMAKE_INSTALL_PREFIX:PATH=%WORKSPACE%/install/msvc100-64/FlightGear ^
-                    -DQt5_DIR=%QTSDK64% ^
+                    -DCMAKE_PREFIX_PATH=%QTSDK64% ^
                     -DFLTK_FLUID_EXECUTABLE=%WORKSPACE%/3rdParty/bin/fluid.exe ^
                     -DBOOST_ROOT=%WORKSPACE%/Boost ^
                     -DWITH_FGPANEL=OFF ^
