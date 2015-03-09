@@ -37,7 +37,7 @@
 AppId=FlightGear
 AppName=FlightGear
 AppPublisher=The FlightGear Team
-OutputBaseFilename=fgsetup-{#FGVersion}
+OutputBaseFilename=FlightGear-{#FGVersion}{#FGDetails}
 AppVerName=FlightGear v{#FGVersion}
 AppPublisherURL=http://www.flightgear.org
 AppSupportURL=http://www.flightgear.org
@@ -118,10 +118,10 @@ Source: "{#VCInstallDir}\redist\x64\Microsoft.VC100.CRT\*.dll"; DestDir: "{app}\
 Source: "X:\install\msvc100\FlightGear\bin\fgpanel.exe"; DestDir: "{app}\bin"; Flags: ignoreversion
 Source: "X:\3rdParty\bin\oalinst.exe"; DestDir: "{app}\bin"; Flags: ignoreversion skipifsourcedoesntexist
 
-; NOTE: tar.gz file uses name 'fgdata', to avoid renaming it, look for both names.
-; assuming no setup has both names and hence we don't package twice :)
-Source: "X:\data\*.*"; DestDir: "{app}\data"; Flags: ignoreversion recursesubdirs skipifsourcedoesntexist
-Source: "X:\fgdata\*.*"; DestDir: "{app}\data"; Flags: ignoreversion recursesubdirs skipifsourcedoesntexist
+; Include the base package
+#if IncludeData == "TRUE"
+Source: "X:\fgdata\*.*"; DestDir: "{app}\fgdata"; Flags: ignoreversion recursesubdirs skipifsourcedoesntexist
+#endif
 
 ; 32 bits install
 Source: "{#OSGInstallDir}\bin\osg{#OSGSoNumber}-osg.dll"; DestDir: "{app}\bin"; Check: not Is64BitInstallMode
@@ -208,14 +208,15 @@ Name: "{userdocs}\FlightGear\Custom Scenery"; Permissions: everyone-modify; Chec
 [Icons]
 Name: "{userdesktop}\FlightGear {#FGVersion}"; Filename: "{app}\bin\fgrun.exe"; WorkingDir: "{app}"; Tasks: desktopicon;
 Name: "{group}\FlightGear Launcher"; Filename: "{app}\bin\fgrun.exe"; WorkingDir: "{app}";
-Name: "{group}\FlightGear Manual"; Filename: "{app}\data\Docs\getstart.pdf"
-Name: "{group}\FlightGear Documentation"; Filename: "{app}\data\Docs\index.html"
+Name: "{group}\FlightGear Launcher (new)"; Filename: "{app}\bin\fgfs.exe --launcher"; WorkingDir: "{app}";
+Name: "{group}\FlightGear Manual"; Filename: "{app}\fgdata\Docs\getstart.pdf"
+Name: "{group}\FlightGear Documentation"; Filename: "{app}\fgdata\Docs\index.html"
 Name: "{group}\Flightgear Wiki"; Filename: "http://wiki.flightgear.org"
 Name: "{group}\Tools\Install & Uninstall Scenery"; Filename: "{app}\bin\fgadmin.exe"; WorkingDir: "{app}"
 Name: "{group}\Tools\TerraSync"; Filename: "{app}\bin\terrasync.exe"; Parameters: "-S -p 5505 -d ""{userdocs}\FlightGear\TerraSync"""; WorkingDir: "{app}"
 Name: "{group}\Tools\Uninstall FlightGear"; Filename: "{uninstallexe}"
 Name: "{group}\Tools\js_demo"; Filename: "{app}\bin\js_demo.exe"
-Name: "{group}\Tools\fgjs"; Filename: "cmd"; Parameters: "/k fgjs.exe ""--fg-root={app}\data"""; WorkingDir: "{app}\bin"
+Name: "{group}\Tools\fgjs"; Filename: "cmd"; Parameters: "/k fgjs.exe ""--fg-root={app}\fgdata"""; WorkingDir: "{app}\bin"
 Name: "{group}\Tools\GPSsmooth"; Filename: "cmd"; Parameters: "/k ""{app}\bin\GPSsmooth.exe"" -h"; WorkingDir: "{app}\bin"
 Name: "{group}\Tools\UGsmooth"; Filename: "cmd"; Parameters: "/k ""{app}\bin\UGsmooth.exe"" -h"; WorkingDir: "{app}\bin"
 Name: "{group}\Tools\MIDGsmooth"; Filename: "cmd"; Parameters: "/k ""{app}\bin\MIDGsmooth.exe"" -h"; WorkingDir: "{app}\bin"
@@ -224,7 +225,7 @@ Name: "{group}\Tools\yasim"; Filename: "cmd"; Parameters: "/k ""{app}\bin\yasim.
 Name: "{group}\Tools\fgpanel"; Filename: "cmd"; Parameters: "/k ""{app}\bin\fgpanel.exe"" -h"; WorkingDir: "{app}\bin"
 Name: "{group}\Tools\FGCom"; Filename: "{app}\bin\fgcom.exe"; WorkingDir: "{app}\bin"
 Name: "{group}\Tools\FGCom-testing"; Filename: "{app}\bin\fgcom.exe"; Parameters: "--frequency=910"; WorkingDir: "{app}\bin"
-Name: "{group}\Tools\Explore Documentation Folder"; Filename: "{app}\data\Docs"
+Name: "{group}\Tools\Explore Documentation Folder"; Filename: "{app}\fgdata\Docs"
 
 [Run]
 filename: "cmd.exe"; WorkingDir: "{app}\bin"; Parameters: "/C del msvc*.dll"; Check: FileExists(ExpandConstant('{app}\bin\vcredist_x86.exe'))
@@ -233,7 +234,7 @@ filename: "{app}\bin\vcredist_x86.exe"; WorkingDir: "{app}\bin"; Parameters: "/p
 filename: "{app}\bin\vcredist_x64.exe"; WorkingDir: "{app}\bin"; Parameters: "/passive /norestart"; Description: "Installing MS Visual C++ runtime components"; Check: Is64BitInstallMode and FileExists(ExpandConstant('{app}\bin\vcredist_x64.exe'))
 filename: "{app}\bin\oalinst.exe"; WorkingDir: "{app}\bin"; Description: "Installing OpenAL"; Check: IsTaskSelected('insoal') and FileExists(ExpandConstant('{app}\bin\oalinst.exe'))
 ; Put installation directory into the fgrun.prefs
-filename: "{app}\bin\fgrun.exe"; WorkingDir: "{app}\bin"; Parameters: "--silent ""--fg-exe={app}\bin\fgfs.exe"" ""--fg-root={app}\data"" ""--fg-scenery={userdocs}\FlightGear\Custom Scenery;{app}\data\Scenery;{userdocs}\FlightGear\TerraSync"" ""--fg-aircraft={userdocs}\FlightGear\Aircraft"" ""--terrasync-dir={userdocs}\FlightGear\TerraSync"" --version={#FGVersion}"
+filename: "{app}\bin\fgrun.exe"; WorkingDir: "{app}\bin"; Parameters: "--silent ""--fg-exe={app}\bin\fgfs.exe"" ""--fg-root={app}\fgdata"" ""--fg-scenery={userdocs}\FlightGear\Custom Scenery;{app}\fgdata\Scenery;{userdocs}\FlightGear\TerraSync"" ""--fg-aircraft={userdocs}\FlightGear\Aircraft"" ""--terrasync-dir={userdocs}\FlightGear\TerraSync"" --version={#FGVersion}"
 ; Put installation and source directories into the fgadmin.prefs
 filename: "{app}\bin\fgadmin.exe"; WorkingDir: "{app}\bin"; Parameters: "--silent ""--install-source={src}\..\Scenery"" ""--scenery-dest={userdocs}\FlightGear\Custom Scenery"""
 

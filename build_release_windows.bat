@@ -1,11 +1,6 @@
-
+@ECHO off
 
 IF NOT DEFINED WORKSPACE SET WORKSPACE=%~dp0
-
-REM SET /P SIMGEAR_VERSION=<%WORKSPACE%\simgear\version
-REM ECHO #define SIMGEAR_VERSION "%SIMGEAR_VERSION%" > %WORKSPACE%\simgear\simgear\version.h
-
-
 
 REM 32bits
 md build-sg32
@@ -60,11 +55,44 @@ SET /P OSG_VERSION=<%TEMP%\osg-version.txt
 SET /P OSG_SO_NUMBER=<%TEMP%\osg-so-number.txt
 SET /P OT_SO_NUMBER=<%TEMP%\openthreads-so-number.txt
 
+
+REM we have to handle a set of case:
+REM 1) FlightGear release: with fgdata, output filename would be "FlightGear-x.x.x.exe"
+REM 2) FlightGear nightly: with fgdata, output filename would be "FlightGear-x.x.x-nightly-full.exe"
+REM 3) FlightGear nightly: without fgdata, output filename would be "FlightGear-x.x.x-nightly.exe"
+
+
+REM for case 1)
+SET "FG_DETAILS="
+
+IF "IS_NIGHTLY_BUILD"=="TRUE" (
+  REM only for case 2)
+  SET "FG_DETAILS=-nightly-full"
+)
+
 ECHO #define FGVersion "%FLIGHTGEAR_VERSION%" > InstallConfig.iss
+ECHO #define FGDetails "%FG_DETAILS%" >> InstallConfig.iss
+ECHO #define IncludeData "TRUE" >> InstallConfig.iss
 ECHO #define OSGVersion "%OSG_VERSION%" >> InstallConfig.iss
 ECHO #define OSGSoNumber "%OSG_SO_NUMBER%" >> InstallConfig.iss
 ECHO #define OTSoNumber "%OT_SO_NUMBER%" >> InstallConfig.iss
 
-REM run Inno-setup!
+REM run Inno-setup for case 1) and 2)
 REM use iscc instead of compil32 for better error reporting
 iscc FlightGear.iss
+
+
+REM only for case 3)
+IF "IS_NIGHTLY_BUILD"=="TRUE" (
+  SET "DETAILS=-nightly"
+
+  ECHO #define FGVersion "%FLIGHTGEAR_VERSION%" > InstallConfig.iss
+  ECHO #define FGDetails "%FG_DETAILS%" >> InstallConfig.iss
+  ECHO #define IncludeData "FALSE" >> InstallConfig.iss
+  ECHO #define OSGVersion "%OSG_VERSION%" >> InstallConfig.iss
+  ECHO #define OSGSoNumber "%OSG_SO_NUMBER%" >> InstallConfig.iss
+  ECHO #define OTSoNumber "%OT_SO_NUMBER%" >> InstallConfig.iss
+
+  iscc FlightGear.iss
+)
+
