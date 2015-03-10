@@ -115,7 +115,7 @@ iscc FlightGear.iss
 
 REM only for case 3)
 IF "%IS_NIGHTLY_BUILD%"=="TRUE" (
-  SET "DETAILS=-nightly"
+  SET "FG_DETAILS=-nightly"
 
   ECHO #define FGVersion "%FLIGHTGEAR_VERSION%" > InstallConfig.iss
   ECHO #define FGDetails "%FG_DETAILS%" >> InstallConfig.iss
