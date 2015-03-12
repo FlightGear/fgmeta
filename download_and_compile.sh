@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-VERSION="2.32"
+VERSION="2.33"
 FGVERSION="release/3.4.0"
 
 #######################################################
