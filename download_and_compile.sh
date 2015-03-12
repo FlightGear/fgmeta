@@ -267,7 +267,7 @@ if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="PLIB"' ]]; then
 
   mkdir -p "plib"
   cd "$CBD"/plib
-  _gitDownload https://gitorious.org/libplib/libplib.git
+  _gitDownload git://git.code.sf.net/p/libplib/code
   _gitUpdate master
 
   if [ "$RECONFIGURE" = "y" ]; then
@@ -329,7 +329,7 @@ if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="SIMGEAR"' ]]; then
 
   mkdir -p "simgear"
   cd "$CBD"/simgear
-  _gitDownload https://gitorious.org/fg/simgear.git
+  _gitDownload git://git.code.sf.net/p/flightgear/simgear
   _gitUpdate $FGVERSION
 	
   if [ "$RECONFIGURE" = "y" ]; then
@@ -361,7 +361,7 @@ if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="FGFS"' || "$(declare -p WHAT
   cd "$CBD"/flightgear
 
   if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="FGFS"' ]]; then
-    _gitDownload https://gitorious.org/fg/flightgear.git
+    _gitDownload git://git.code.sf.net/p/flightgear/flightgear
     _gitUpdate $FGVERSION
 
     if [ "$RECONFIGURE" = "y" ]; then
@@ -429,7 +429,7 @@ if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="FGRUN"' ]]; then
 
   mkdir -p "fgrun"
   cd "$CBD"/fgrun
-  _gitDownload https://gitorious.org/fg/fgrun.git
+  _gitDownload git://git.code.sf.net/p/flightgear/fgrun
   _gitUpdate $FGVERSION
 
   if [ "$RECONFIGURE" = "y" ]; then
@@ -610,7 +610,7 @@ if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="TERRAGEAR"' ]]; then
 
   mkdir -p "terragear"
   cd "$CBD"/terragear
-  _gitDownload https://gitorious.org/fg/terragear.git
+  _gitDownload git://git.code.sf.net/p/flightgear/terragear
   _gitUpdate scenery/ws2.0
 
   if [ "$RECONFIGURE" = "y" ]; then
