@@ -1,4 +1,3 @@
-@ECHO off
 
 IF NOT DEFINED WORKSPACE SET WORKSPACE=%~dp0
 
@@ -96,10 +95,14 @@ REM 3) FlightGear nightly: without fgdata, output filename would be "FlightGear-
 REM for case 1)
 SET "FG_DETAILS="
 
+ECHO "%IS_NIGHTLY_BUILD%"
+
 IF "%IS_NIGHTLY_BUILD%"=="TRUE" (
   REM only for case 2)
   SET "FG_DETAILS=-nightly-full"
 )
+
+ECHO "%FG_DETAILS%"
 
 ECHO #define FGVersion "%FLIGHTGEAR_VERSION%" > InstallConfig.iss
 ECHO #define FGDetails "%FG_DETAILS%" >> InstallConfig.iss
@@ -116,6 +119,7 @@ iscc FlightGear.iss
 REM only for case 3)
 IF "%IS_NIGHTLY_BUILD%"=="TRUE" (
   SET "FG_DETAILS=-nightly"
+  ECHO "%FG_DETAILS%"
 
   ECHO #define FGVersion "%FLIGHTGEAR_VERSION%" > InstallConfig.iss
   ECHO #define FGDetails "%FG_DETAILS%" >> InstallConfig.iss
