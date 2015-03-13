@@ -91,47 +91,50 @@ REM 1) FlightGear release: with fgdata, output filename would be "FlightGear-x.x
 REM 2) FlightGear nightly: with fgdata, output filename would be "FlightGear-x.x.x-nightly-full.exe"
 REM 3) FlightGear nightly: without fgdata, output filename would be "FlightGear-x.x.x-nightly.exe"
 
+IF "%IS_NIGHTLY_BUILD%" EQU 1 (
+  REM Case 2)
+  CALL :writeBaseConfig
+  CALL :writeNightlyFullConfig
+  iscc FlightGear.iss
 
-REM for case 1)
-SET "FG_DETAILS="
+  REM Case 3)
+  CALL :writeBaseConfig
+  CALL :writeNightlyDietConfig
+  iscc FlightGear.iss
 
-ECHO "%IS_NIGHTLY_BUILD%"
+  GOTO End
+)ELSE(
+  REM Case 1)
+  CALL :writeBaseConfig
+  CALL :writeReleaseConfig
+  iscc FlightGear.iss
 
-IF "%IS_NIGHTLY_BUILD%"=="TRUE" (
-  REM only for case 2)
-  SET "FG_DETAILS=-nightly-full"
+  GOTO End
 )
 
-ECHO "%FG_DETAILS%"
-
+:writeBaseConfig
 ECHO #define FGVersion "%FLIGHTGEAR_VERSION%" > InstallConfig.iss
-ECHO #define FGDetails "%FG_DETAILS%" >> InstallConfig.iss
+ECHO #define OSGVersion "%OSG_VERSION%" >> InstallConfig.iss
+ECHO #define OSGSoNumber "%OSG_SO_NUMBER%" >> InstallConfig.iss
+ECHO #define OTSoNumber "%OT_SO_NUMBER%" >> InstallConfig.iss
+GOTO End
+
+:writeReleaseConfig
+CALL :writeBaseConfig
+ECHO #define FGDetails "" >> InstallConfig.iss
 ECHO #define IncludeData "TRUE" >> InstallConfig.iss
-ECHO #define OSGVersion "%OSG_VERSION%" >> InstallConfig.iss
-ECHO #define OSGSoNumber "%OSG_SO_NUMBER%" >> InstallConfig.iss
-ECHO #define OTSoNumber "%OT_SO_NUMBER%" >> InstallConfig.iss
+GOTO End
 
-REM run Inno-setup for case 1) and 2)
-REM use iscc instead of compil32 for better error reporting
-iscc FlightGear.iss
+:writeNightlyFullConfig
+CALL :writeBaseConfig
+ECHO #define FGDetails "-nightly-full" >> InstallConfig.iss
+ECHO #define IncludeData "TRUE" >> InstallConfig.iss
+GOTO End
 
-
-REM only for case 3)
-IF "%IS_NIGHTLY_BUILD%"!="TRUE" (
-  GOTO end
-)
-
-SET "FG_DETAILS=-nightly"
-ECHO "%FG_DETAILS%"
-
-ECHO #define FGVersion "%FLIGHTGEAR_VERSION%" > InstallConfig.iss
-ECHO #define FGDetails "%FG_DETAILS%" >> InstallConfig.iss
+:writeNightlyDietConfig
+CALL :writeBaseConfig
+ECHO #define FGDetails "-nightly" >> InstallConfig.iss
 ECHO #define IncludeData "FALSE" >> InstallConfig.iss
-ECHO #define OSGVersion "%OSG_VERSION%" >> InstallConfig.iss
-ECHO #define OSGSoNumber "%OSG_SO_NUMBER%" >> InstallConfig.iss
-ECHO #define OTSoNumber "%OT_SO_NUMBER%" >> InstallConfig.iss
+GOTO End
 
-iscc FlightGear.iss
-
-:end
-
+:End
