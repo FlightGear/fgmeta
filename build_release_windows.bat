@@ -85,26 +85,20 @@ SET /P OSG_VERSION=<%TEMP%\osg-version.txt
 SET /P OSG_SO_NUMBER=<%TEMP%\osg-so-number.txt
 SET /P OT_SO_NUMBER=<%TEMP%\openthreads-so-number.txt
 
-
-REM we have to handle a set of case:
-REM 1) FlightGear release: with fgdata, output filename would be "FlightGear-x.x.x.exe"
-REM 2) FlightGear nightly: with fgdata, output filename would be "FlightGear-x.x.x-nightly-full.exe"
-REM 3) FlightGear nightly: without fgdata, output filename would be "FlightGear-x.x.x-nightly.exe"
-
-IF "%IS_NIGHTLY_BUILD%" EQU 1 (
-  REM Case 2)
+IF %IS_NIGHTLY_BUILD% EQU 1 (
+  REM FlightGear nightly: with fgdata, output filename would be "FlightGear-x.x.x-nightly-full.exe"
   CALL :writeBaseConfig
   CALL :writeNightlyFullConfig
   iscc FlightGear.iss
 
-  REM Case 3)
+  REM FlightGear nightly: without fgdata, output filename would be "FlightGear-x.x.x-nightly.exe"
   CALL :writeBaseConfig
   CALL :writeNightlyDietConfig
   iscc FlightGear.iss
 
   GOTO End
 ) ELSE (
-  REM Case 1)
+  REM FlightGear release: with fgdata, output filename would be "FlightGear-x.x.x.exe"
   CALL :writeBaseConfig
   CALL :writeReleaseConfig
   iscc FlightGear.iss
