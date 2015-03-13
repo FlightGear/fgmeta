@@ -117,17 +117,21 @@ iscc FlightGear.iss
 
 
 REM only for case 3)
-IF "%IS_NIGHTLY_BUILD%"=="TRUE" (
-  SET "FG_DETAILS=-nightly"
-  ECHO "%FG_DETAILS%"
-
-  ECHO #define FGVersion "%FLIGHTGEAR_VERSION%" > InstallConfig.iss
-  ECHO #define FGDetails "%FG_DETAILS%" >> InstallConfig.iss
-  ECHO #define IncludeData "FALSE" >> InstallConfig.iss
-  ECHO #define OSGVersion "%OSG_VERSION%" >> InstallConfig.iss
-  ECHO #define OSGSoNumber "%OSG_SO_NUMBER%" >> InstallConfig.iss
-  ECHO #define OTSoNumber "%OT_SO_NUMBER%" >> InstallConfig.iss
-
-  iscc FlightGear.iss
+IF "%IS_NIGHTLY_BUILD%"!="TRUE" (
+  GOTO end
 )
+
+SET "FG_DETAILS=-nightly"
+ECHO "%FG_DETAILS%"
+
+ECHO #define FGVersion "%FLIGHTGEAR_VERSION%" > InstallConfig.iss
+ECHO #define FGDetails "%FG_DETAILS%" >> InstallConfig.iss
+ECHO #define IncludeData "FALSE" >> InstallConfig.iss
+ECHO #define OSGVersion "%OSG_VERSION%" >> InstallConfig.iss
+ECHO #define OSGSoNumber "%OSG_SO_NUMBER%" >> InstallConfig.iss
+ECHO #define OTSoNumber "%OT_SO_NUMBER%" >> InstallConfig.iss
+
+iscc FlightGear.iss
+
+:end
 
