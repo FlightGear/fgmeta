@@ -95,16 +95,13 @@ IF %IS_NIGHTLY_BUILD% EQU 1 (
   CALL :writeBaseConfig
   CALL :writeNightlyDietConfig
   iscc FlightGear.iss
-
-  GOTO End
 ) ELSE (
   REM FlightGear release: with fgdata, output filename would be "FlightGear-x.x.x.exe"
   CALL :writeBaseConfig
   CALL :writeReleaseConfig
   iscc FlightGear.iss
-
-  GOTO End
 )
+GOTO End
 
 :writeBaseConfig
 ECHO #define FGVersion "%FLIGHTGEAR_VERSION%" > InstallConfig.iss
