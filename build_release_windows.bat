@@ -103,7 +103,7 @@ IF "%IS_NIGHTLY_BUILD%" EQU 1 (
   iscc FlightGear.iss
 
   GOTO End
-)ELSE(
+) ELSE (
   REM Case 1)
   CALL :writeBaseConfig
   CALL :writeReleaseConfig
