@@ -9,13 +9,12 @@ VERSION=`cat flightgear/version`
 
 #####################################################################################
 # remove old and create fresh build directories
-rm -rf sgBuild
-rm -rf fgBuild
+cd $WORKSPACE
 mkdir -p sgBuild
 mkdir -p fgBuild
 mkdir -p output
 rm -rf output/*
-rm -rf $WORKSPACE/dist/include/simgear $WORKSPACE/dist/libSim* $WORKSPACE/dist/libsg*.a
+rm -rf dist/*
 
 #####################################################################################
 echo "Starting on SimGear"
