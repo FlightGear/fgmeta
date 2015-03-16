@@ -68,6 +68,10 @@ cmake --build . --config Release --target INSTALL
 
 cd ..
 
+REM Qt5 deployment
+%QT5SDK32%\bin\windeployqt --release --list target %WORKSPACE%/install/msvc100/FlightGear/bin/fgfs.exe
+%QT5SDK64%\bin\windeployqt --release --list target %WORKSPACE%/install/msvc100-64/FlightGear/bin/fgfs.exe
+
 REM build setup
 ECHO Packaging root is %WORKSPACE%
 
