@@ -190,7 +190,7 @@ Name: "{userdocs}\FlightGear\Custom Scenery"; Permissions: everyone-modify; Chec
 [Icons]
 Name: "{userdesktop}\FlightGear {#FGVersion}"; Filename: "{app}\bin\fgrun.exe"; WorkingDir: "{app}"; Tasks: desktopicon;
 Name: "{group}\FlightGear Launcher"; Filename: "{app}\bin\fgrun.exe"; WorkingDir: "{app}";
-Name: "{group}\FlightGear Launcher (new)"; Filename: "{app}\bin\fgfs.exe --launcher"; WorkingDir: "{app}";
+Name: "{group}\FlightGear Launcher (new)"; Filename: "{app}\bin\fgfs.exe"; Parameters: "--launcher"; WorkingDir: "{app}";
 Name: "{group}\FlightGear Manual"; Filename: "{app}\fgdata\Docs\getstart.pdf"
 Name: "{group}\FlightGear Documentation"; Filename: "{app}\fgdata\Docs\index.html"
 Name: "{group}\Flightgear Wiki"; Filename: "http://wiki.flightgear.org"
