@@ -68,17 +68,7 @@ Name: "insoal"; Description: "Install OpenAL (the sound engine)"
 ; NOTE: run subst X: F:\ (or whatever path the expanded tree resides at)
 ;Source: "X:\*.txt"; DestDir: "{app}"; Flags: ignoreversion
 ; 32 bits install
-Source: "X:\install\msvc100\FlightGear\bin\fgfs.exe"; DestDir: "{app}\bin"; Flags: ignoreversion; Check: not Is64BitInstallMode
-Source: "X:\install\msvc100\FlightGear\bin\fgadmin.exe"; DestDir: "{app}\bin"; Flags: ignoreversion; Check: not Is64BitInstallMode
-Source: "X:\install\msvc100\FlightGear\bin\terrasync.exe"; DestDir: "{app}\bin"; Flags: ignoreversion; Check: not Is64BitInstallMode
-Source: "X:\install\msvc100\FlightGear\bin\js_demo.exe"; DestDir: "{app}\bin"; Flags: ignoreversion; Check: not Is64BitInstallMode
-Source: "X:\install\msvc100\FlightGear\bin\fgjs.exe"; DestDir: "{app}\bin"; Flags: ignoreversion; Check: not Is64BitInstallMode
-Source: "X:\install\msvc100\FlightGear\bin\GPSsmooth.exe"; DestDir: "{app}\bin"; Flags: ignoreversion; Check: not Is64BitInstallMode
-Source: "X:\install\msvc100\FlightGear\bin\UGsmooth.exe"; DestDir: "{app}\bin"; Flags: ignoreversion; Check: not Is64BitInstallMode
-Source: "X:\install\msvc100\FlightGear\bin\MIDGsmooth.exe"; DestDir: "{app}\bin"; Flags: ignoreversion; Check: not Is64BitInstallMode
-Source: "X:\install\msvc100\FlightGear\bin\metar.exe"; DestDir: "{app}\bin"; Flags: ignoreversion; Check: not Is64BitInstallMode
-Source: "X:\install\msvc100\FlightGear\bin\yasim.exe"; DestDir: "{app}\bin"; Flags: ignoreversion; Check: not Is64BitInstallMode
-Source: "X:\install\msvc100\FlightGear\bin\fgcom.exe"; DestDir: "{app}\bin"; Flags: ignoreversion; Check: not Is64BitInstallMode
+Source: "X:\install\msvc100\FlightGear\bin\*"; DestDir: "{app}\bin"; Flags: ignoreversion; Check: not Is64BitInstallMode
 Source: "X:\install\msvc100\FGRun\bin\fgrun.exe"; DestDir: "{app}\bin"; Flags: ignoreversion ; Check: not Is64BitInstallMode
 Source: "X:\install\msvc100\FGRun\share\locale\*"; DestDir: "{app}\bin\locale"; Flags: ignoreversion recursesubdirs; Check: not Is64BitInstallMode
 Source: "X:\3rdParty\bin\zlib.dll"; DestDir: "{app}\bin"; Check: not Is64BitInstallMode
@@ -91,17 +81,7 @@ Source: "{#VCInstallDir}\redist\x86\Microsoft.VC100.CRT\*.dll"; DestDir:  "{app}
 Source: "X:\3rdParty\bin\vcredist_x86.exe"; DestDir: "{app}\bin"; Flags: skipifsourcedoesntexist; Check: not Is64BitInstallMode
 
 ; 64 bits install
-Source: "X:\install\msvc100-64\FlightGear\bin\fgfs.exe"; DestDir: "{app}\bin"; Flags: ignoreversion; Check: Is64BitInstallMode
-Source: "X:\install\msvc100-64\FlightGear\bin\fgadmin.exe"; DestDir: "{app}\bin"; Flags: ignoreversion; Check: Is64BitInstallMode
-Source: "X:\install\msvc100-64\FlightGear\bin\terrasync.exe"; DestDir: "{app}\bin"; Flags: ignoreversion; Check: Is64BitInstallMode
-Source: "X:\install\msvc100-64\FlightGear\bin\js_demo.exe"; DestDir: "{app}\bin"; Flags: ignoreversion; Check: Is64BitInstallMode
-Source: "X:\install\msvc100-64\FlightGear\bin\fgjs.exe"; DestDir: "{app}\bin"; Flags: ignoreversion; Check: Is64BitInstallMode
-Source: "X:\install\msvc100-64\FlightGear\bin\GPSsmooth.exe"; DestDir: "{app}\bin"; Flags: ignoreversion; Check: Is64BitInstallMode
-Source: "X:\install\msvc100-64\FlightGear\bin\UGsmooth.exe"; DestDir: "{app}\bin"; Flags: ignoreversion; Check: Is64BitInstallMode
-Source: "X:\install\msvc100-64\FlightGear\bin\MIDGsmooth.exe"; DestDir: "{app}\bin"; Flags: ignoreversion; Check: Is64BitInstallMode
-Source: "X:\install\msvc100-64\FlightGear\bin\metar.exe"; DestDir: "{app}\bin"; Flags: ignoreversion; Check: Is64BitInstallMode
-Source: "X:\install\msvc100-64\FlightGear\bin\yasim.exe"; DestDir: "{app}\bin"; Flags: ignoreversion; Check: Is64BitInstallMode
-Source: "X:\install\msvc100-64\FlightGear\bin\fgcom.exe"; DestDir: "{app}\bin"; Flags: ignoreversion; Check: Is64BitInstallMode
+Source: "X:\install\msvc100-64\FlightGear\bin\*"; DestDir: "{app}\bin"; Flags: ignoreversion; Check: Is64BitInstallMode
 Source: "X:\install\msvc100-64\FGRun\bin\fgrun.exe"; DestDir: "{app}\bin"; Flags: ignoreversion; Check: Is64BitInstallMode
 Source: "X:\install\msvc100-64\FGRun\share\locale\*"; DestDir: "{app}\bin\locale"; Flags: ignoreversion recursesubdirs; Check: Is64BitInstallMode
 Source: "X:\3rdParty.x64\bin\zlib.dll"; DestDir: "{app}\bin"; Check: Is64BitInstallMode
