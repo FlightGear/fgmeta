@@ -14,3 +14,7 @@
 	path = fgdata
 	url = git://git.code.sf.net/p/flightgear/fgdata
 	branch = next
+[submodule "windows-3rd-party"]
+	path = windows-3rd-party
+	url = git://git.code.sf.net/p/flightgear/windows-3rd-party
+	branch = master
