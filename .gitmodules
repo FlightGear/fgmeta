@@ -14,3 +14,7 @@
 	path = maclauncher
 	url = git://gitorious.org/fg/maclauncher.git
 	branch = master
+[submodule "fgdata"]
+	path = fgdata
+	url = git://git.code.sf.net/p/flightgear/fgdata
+	branch = release/3.4.0
