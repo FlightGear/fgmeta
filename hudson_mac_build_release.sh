@@ -44,11 +44,6 @@ fi
 
 popd
 
-################################################################################
-echo "Syncing base packages files from sphere.telascience.org"
-rsync -avz --filter 'merge base-package.rules' \
--e ssh jturner@sphere.telascience.org:/home/jturner/fgdata .
-
 chmod +x $WORKSPACE/dist/bin/osgversion
 
 ################################################################################

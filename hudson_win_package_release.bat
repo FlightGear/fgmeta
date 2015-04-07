@@ -29,10 +29,9 @@ ECHO #define OSGVersion "%OSG_VERSION%" >> InstallConfig.iss
 ECHO #define OSGSoNumber "%OSG_SO_NUMBER%" >> InstallConfig.iss
 ECHO #define OTSoNumber "%OT_SO_NUMBER%" >> InstallConfig.iss
 
-set DATA_FILE=FlightGear-%FLIGHTGEAR_VERSION%-data
-
+REM set DATA_FILE=FlightGear-%FLIGHTGEAR_VERSION%-data
 REM extract the data files
-7z e -aoa %DATA_FILE%.tar.bz2 && 7z x -aoa %DATA_FILE%.tar
+REM 7z e -aoa %DATA_FILE%.tar.bz2 && 7z x -aoa %DATA_FILE%.tar
 
 REM run Inno-setup!
 REM use iscc instead of compil32 for better error reporting

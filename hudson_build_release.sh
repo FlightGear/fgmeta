@@ -60,20 +60,25 @@ cp flightgear-*.tar.bz2 ../output/.
 echo "Assembling base package"
 cd $WORKSPACE
 
-rm -rf fgdata-tarball
+rm -rf base_package
 
 # a: archive mode
 # z: compress
 # delete: 'delete extraneous files from dest dirs'; avoid bug 1344
 # filter: use the rules in our rules file
 
-rsync -avz --delete \
- --filter 'merge aircraft-package.rules' \
- -e ssh jturner@sphere.telascience.org:/home/jturner/fgdata_340 fgdata-tarball
-
-
-rsync -az --delete \
+echo "Copying FGData files"
+rsync -a --delete \
  --filter 'merge base-package.rules' \
-  fgdata fgdata-tarball
+  fgdata base_package
 
-tar cjf output/FlightGear-$VERSION-data.tar.bz2 fgdata-tarball/
+echo "Syncing aircraft"
+rsync -az --filter 'merge aircraft.rules' \
+ -e ssh jturner@sphere.telascience.org:/home/jturner/fgdata/Aircraft aircraft-data
+
+echo "Copying aircraft"
+rsync -a aircraft-data/Aircraft base_package/fgdata
+
+pushd base_package
+tar cjf $WORKSPACE/output/FlightGear-$VERSION-data.tar.bz2 fgdata/
+popd
