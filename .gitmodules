@@ -1,19 +1,15 @@
 [submodule "simgear"]
 	path = simgear
-	url = git://gitorious.org/fg/simgear.git
-	branch = next
+	url = git://git.code.sf.net/p/flightgear/simgear
+	branch = release/3.4.0
 [submodule "flightgear"]
 	path = flightgear
-	url = git://gitorious.org/fg/flightgear.git
-	branch = next
+	url = git://git.code.sf.net/p/flightgear/flightgear
+	branch = release/3.4.0
 [submodule "fgrun"]
 	path = fgrun
-	url = git://gitorious.org/fg/fgrun.git
-	branch = next
-[submodule "maclauncher"]
-	path = maclauncher
-	url = git://gitorious.org/fg/maclauncher.git
-	branch = master
+	url = git://git.code.sf.net/p/flightgear/fgrun
+	branch = release/3.4.0
 [submodule "fgdata"]
 	path = fgdata
 	url = git://git.code.sf.net/p/flightgear/fgdata
