@@ -73,8 +73,7 @@ rsync -a --delete \
   fgdata base_package
 
 echo "Syncing aircraft"
-rsync -az --filter 'merge aircraft.rules' \
- -e ssh jturner@sphere.telascience.org:/home/jturner/fgdata/Aircraft aircraft-data
+rsync -a --filter 'merge aircraft.rules' /home/jenkins/fgdata_340/Aircraft aircraft-data
 
 echo "Copying aircraft"
 rsync -a aircraft-data/Aircraft base_package/fgdata
