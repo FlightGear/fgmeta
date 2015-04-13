@@ -351,6 +351,7 @@ if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="SIMGEAR"' ]]; then
     cmake -DCMAKE_BUILD_TYPE="Release" \
           -DCMAKE_INSTALL_PREFIX:PATH="$INSTALL_DIR_SIMGEAR" \
           -DCMAKE_PREFIX_PATH="$INSTALL_DIR_OSG;$INSTALL_DIR_OPENRTI" \
+	  $SG_CMAKEARGS \
           ../../simgear 2>&1 | tee -a $LOGFILE
   fi
 	
@@ -384,6 +385,7 @@ if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="FGFS"' || "$(declare -p WHAT
             -DENABLE_FLITE=ON \
             -DCMAKE_INSTALL_PREFIX:PATH="$INSTALL_DIR_FGFS" \
             -DCMAKE_PREFIX_PATH="$INSTALL_DIR_SIMGEAR;$INSTALL_DIR_OPENRTI;$INSTALL_DIR_PLIB" \
+            $FG_CMAKEARGS \
             ../../flightgear 2>&1 | tee -a $LOGFILE
     fi
 
