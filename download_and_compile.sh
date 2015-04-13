@@ -43,6 +43,8 @@ DOWNLOAD="y"
 JOPTION=""
 OOPTION=""
 DEBUG=""
+SG_CMAKEARGS=""
+FG_CMAKEARGE=""
 
 while getopts "shc:p:a:d:r:j:O:i" OPTION; do
   case $OPTION in
@@ -55,6 +57,7 @@ while getopts "shc:p:a:d:r:j:O:i" OPTION; do
     r) RECONFIGURE=$OPTARG ;;
     j) JOPTION=" -j"$OPTARG" " ;;
     O) OOPTION=" -O"$OPTARG" " ;;
+    i) OPENRTI="OPENRTI" ;;
     ?) HELP="HELP" ;;
   esac
 done
@@ -78,6 +81,13 @@ if [ "$STABLE" = "STABLE" ]; then
   FGVERSION=$FGVERSION
 else
   FGVERSION="next"
+fi
+
+
+if [ "$OPENRTI" = "OPENRTI" ]; then
+  SG_CMAKEARGS="$SG_CMAKEARGS-DENABLE_RTI=ON;"
+  FG_CMAKEARGS="$FG_CMAKEARGS-DENABLE_RTI=ON;"
+  WHATTOBUILD=( "${WHATTOBUILD[@]}" OPENRTI )
 fi
 
 
@@ -145,6 +155,7 @@ if [ "$HELP" = "HELP" ]; then
   echo "Switches:"
   echo "* -h  show this help"
   echo "* -e  compile FlightGear with --with-eventinput option (experimental)"
+  echo "* -i  compile SimGear and FlightGear with -D ENABLE_RTI=ON option (experimental)"
   echo "* -g  compile with debug info for gcc"
   echo "* -a y|n  y=do an apt-get update n=skip apt-get update                          default=y"
   echo "* -p y|n  y=download packages n=skip download packages                          default=y"
@@ -295,7 +306,7 @@ if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="OPENRTI"' ]]; then
 
   mkdir -p "openrti"
   cd "$CBD"/openrti
-  _gitDownload https://gitorious.org/openrti/openrti.git
+  _gitDownload git://git.code.sf.net/p/openrti/OpenRTI
 
   if [ "$STABLE" = "STABLE" ]; then
     _gitUpdate release-0.7
