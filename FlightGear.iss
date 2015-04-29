@@ -124,7 +124,7 @@ Source: "X:\data\*.*"; DestDir: "{app}\data"; Flags: ignoreversion recursesubdir
 Source: "X:\fgdata\*.*"; DestDir: "{app}\data"; Flags: ignoreversion recursesubdirs skipifsourcedoesntexist
 
 ; work-around for 3.4.1: look for additional aircraft data
-Source: "X:\aircraft-data\*.*"; DestDir: "{app}\data"; Flags: ignoreversion recursesubdirs skipifsourcedoesntexist
+Source: "X:\extended-data\*.*"; DestDir: "{app}\data"; Flags: ignoreversion recursesubdirs skipifsourcedoesntexist
 
 ; 32 bits install
 Source: "{#OSGInstallDir}\bin\osg{#OSGSoNumber}-osg.dll"; DestDir: "{app}\bin"; Check: not Is64BitInstallMode

@@ -131,8 +131,8 @@ File.open("#{contents}/Info.plist", 'w') { |f|
 puts "Copying base package files into the image"
 `rsync -a --filter 'merge base-package.rules' fgdata/ #{resourcesDir}/data`
 
-# work-around for 3.4.1: copy aircraft files too
-`rsync -a aircraft-data/Aircraft #{resourcesDir}/data`
+# work-around for 3.4.1: copy aircraft/scenery files too
+`rsync -a aircraft-data/ #{resourcesDir}/data`
 
 # code sign the entire bundle once complete - v2 code-signing
 puts "Signing #{bundle}"
