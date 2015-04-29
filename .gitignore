@@ -22,4 +22,5 @@ osgbuild
 CMakeCache.txt
 aircraft-data
 base_package
+extended-data
 

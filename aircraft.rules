@@ -1,3 +1,4 @@
++ /Aircraft
 + /Aircraft/777
 + /Aircraft/777-200
 + /Aircraft/b1900d
@@ -13,3 +14,8 @@
 + /Aircraft/SenecaII
 + /Aircraft/A6M2
 - /Aircraft/*
++ /Models
++ /Scenery
++ /AI
+- /*
+

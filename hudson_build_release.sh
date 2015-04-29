@@ -72,12 +72,13 @@ rsync -a --delete \
  --filter 'merge base-package.rules' \
   fgdata base_package
 
-echo "Syncing aircraft"
-rsync -a --filter 'merge aircraft.rules' /home/jenkins/fgdata_340/Aircraft aircraft-data
+echo "Syncing extended data"
+rsync -a --filter 'merge aircraft.rules' /home/jenkins/fgdata_340/ extended-data
 
-echo "Copying aircraft"
-rsync -a aircraft-data/Aircraft base_package/fgdata
+echo "Copying extended data"
+rsync -a extended-data/ base_package/fgdata
 
+echo "Creating tar archive"
 pushd base_package
 tar cjf $WORKSPACE/output/FlightGear-$VERSION-data.tar.bz2 fgdata/
 popd
