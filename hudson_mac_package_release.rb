@@ -132,6 +132,8 @@ File.open("#{contents}/Info.plist", 'w') { |f|
 
 createArgs = "-format UDBZ -imagekey bzip2-level=9 -quiet -volname #{volName}"
 
+# work-around for 3.6: copy aircraft files too
+`rsync -a extended-data/ #{resourcesDir}/data`
 
 if !$isRelease
   # create the 'lite' DMG without the base files
