@@ -32,7 +32,7 @@ FGVERSION="release/3.4.0"
 
 LOGFILE=compilation_log.txt
 WHATTOBUILD=
-#AVAILABLE VALUES: PLIB OPENRTI SIMGEAR FGFS DATA FGRUN FGO FGX OPENRADAR ATCPIE TERRAGEAR TERRAGEARGUI
+#AVAILABLE VALUES: PLIB OPENRTI OSG SIMGEAR FGFS DATA FGRUN FGO FGX OPENRADAR ATCPIE TERRAGEAR TERRAGEARGUI
 WHATTOBUILDALL=(SIMGEAR FGFS DATA)
 STABLE=
 APT_GET_UPDATE="y"
@@ -328,6 +328,41 @@ if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="OPENRTI"' ]]; then
 fi
 
 #######################################################
+# OpenSceneGraph
+#######################################################
+OSG_INSTALL_DIR=openscenegraph
+INSTALL_DIR_OSG=$INSTALL_DIR/$OSG_INSTALL_DIR
+cd "$CBD"
+mkdir -p "openscenegraph"
+if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="OSG"' ]]; then
+echo "****************************************" | tee -a $LOGFILE
+echo "**************** OSG *******************" | tee -a $LOGFILE
+echo "****************************************" | tee -a $LOGFILE
+cd "$CBD"/openscenegraph
+_gitDownload http://github.com/openscenegraph/osg.git
+_gitUpdate OpenSceneGraph-3.2
+
+if [ "$RECONFIGURE" = "y" ]; then
+cd "$CBD"
+mkdir -p build/openscenegraph
+cd "$CBD"/build/openscenegraph
+rm -f CMakeCache.txt
+cmake -DCMAKE_BUILD_TYPE="Release" \
+-DCMAKE_INSTALL_PREFIX:PATH="$INSTALL_DIR_OSG" ../../openscenegraph/ 2>&1 | tee -a $LOGFILE
+fi
+
+_make openscenegraph
+#FIX FOR 64 BIT COMPILATION
+if [ -d "$INSTALL_DIR_OSG/lib64" ]; then
+if [ -L "$INSTALL_DIR_OSG/lib" ]; then
+echo "link already done"
+else
+ln -s "$INSTALL_DIR_OSG/lib64" "$INSTALL_DIR_OSG/lib"
+fi
+fi
+fi
+
+#######################################################
 # SIMGEAR
 #######################################################
 SIMGEAR_INSTALL_DIR=simgear
@@ -384,7 +419,7 @@ if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="FGFS"' || "$(declare -p WHAT
       cmake -DCMAKE_BUILD_TYPE="Release" \
             -DENABLE_FLITE=ON \
             -DCMAKE_INSTALL_PREFIX:PATH="$INSTALL_DIR_FGFS" \
-            -DCMAKE_PREFIX_PATH="$INSTALL_DIR_SIMGEAR;$INSTALL_DIR_OPENRTI;$INSTALL_DIR_PLIB" \
+            -DCMAKE_PREFIX_PATH="$INSTALL_DIR_SIMGEAR;$INSTALL_DIR_OSG;$INSTALL_DIR_OPENRTI;$INSTALL_DIR_PLIB" \
             $FG_CMAKEARGS \
             ../../flightgear 2>&1 | tee -a $LOGFILE
     fi
@@ -409,7 +444,7 @@ if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="FGFS"' || "$(declare -p WHAT
   echo "#!/bin/sh" > $SCRIPT
   echo "cd \$(dirname \$0)" >> $SCRIPT
   echo "cd $SUB_INSTALL_DIR/$FGFS_INSTALL_DIR/bin" >> $SCRIPT
-  echo "export LD_LIBRARY_PATH=../../$SIMGEAR_INSTALL_DIR/lib:../../$OPENRTI_INSTALL_DIR/lib:../../$PLIB_INSTALL_DIR/lib" >> $SCRIPT
+  echo "export LD_LIBRARY_PATH=../../$SIMGEAR_INSTALL_DIR/lib:../../$OSG_INSTALL_DIR/lib:../../$OPENRTI_INSTALL_DIR/lib:../../$PLIB_INSTALL_DIR/lib" >> $SCRIPT
   echo "./fgfs --fg-root=\$PWD/../fgdata/ \$@" >> $SCRIPT
   chmod 755 $SCRIPT
 
@@ -417,7 +452,7 @@ if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="FGFS"' || "$(declare -p WHAT
   echo "#!/bin/sh" > $SCRIPT
   echo "cd \$(dirname \$0)" >> $SCRIPT
   echo "cd $SUB_INSTALL_DIR/$FGFS_INSTALL_DIR/bin" >> $SCRIPT
-  echo "export LD_LIBRARY_PATH=../../$SIMGEAR_INSTALL_DIR/lib:../../$OPENRTI_INSTALL_DIR/lib:../../$PLIB_INSTALL_DIR/lib" >> $SCRIPT
+  echo "export LD_LIBRARY_PATH=../../$SIMGEAR_INSTALL_DIR/lib:../../$OSG_INSTALL_DIR/lib:../../$OPENRTI_INSTALL_DIR/lib:../../$PLIB_INSTALL_DIR/lib" >> $SCRIPT
   echo "gdb  --directory="\$P1"/fgfs/source/src/ --args fgfs --fg-root=\$PWD/../fgdata/ \$@" >> $SCRIPT
   chmod 755 $SCRIPT
 
