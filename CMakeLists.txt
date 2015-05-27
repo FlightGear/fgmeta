@@ -104,7 +104,7 @@ endif()
 if (FALSE)
     ExternalProject_Add(OpenRTI
         PREFIX ${CMAKE_BINARY_DIR}
-        DOWNLOAD_COMMAND GIT_REPOSITORY git://gitorious.org/openrti/openrti.git
+        DOWNLOAD_COMMAND GIT_REPOSITORY git://git.code.sf.net/p/openrti/OpenRTI
         BINARY_DIR rtibuild 
         CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${RTI_INSTALL_PREFIX}
     )

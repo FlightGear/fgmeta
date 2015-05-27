@@ -548,7 +548,7 @@ if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="FGX"' ]]; then
 
   mkdir -p "fgx"
   cd "$CBD"/fgx
-  _gitDownload https://gitorious.org/fgx/fgx.git
+  _gitDownload https://github.com/fgx/fgx.git
   _gitUpdate master
 
   cd "$CBD"/fgx/src/
@@ -605,7 +605,7 @@ if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="ATCPIE"' ]]; then
 
   mkdir -p "$INSTALL_DIR_ATCPIE"
   cd $INSTALL_DIR_ATCPIE
-  _gitDownload https://gitorious.org/atc-pie/atc-pie.git
+  _gitDownload git://git.code.sf.net/p/atc-pie/code
   _gitUpdate master
 
   cd "$CBD"
@@ -709,7 +709,7 @@ if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="TERRAGEARGUI"' ]]; then
 
   mkdir -p "terrageargui"
   cd "$CBD"/terrageargui
-  _gitDownload https://gitorious.org/fgscenery/terrageargui.git
+  _gitDownload git://git.code.sf.net/p/flightgear/fgscenery/terrageargui
   _gitUpdate master
 	
 
