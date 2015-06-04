@@ -1,0 +1,52 @@
+<?xml version="1.0"?>
+<!--
+Template catalog - copy and modify for your site as required
+-->
+<PropertyList>
+    
+    <!--
+    catalogProps.addChild('version').value = '3.1.0'
+    catalogProps.addChild('id').value = 'org.flightgear.default'
+    catalogProps.addChild('license').value = 'GPL'
+    catalogProps.addChild('url').value = "http://fgfs.goneabitbursar.com/pkg/3.1.0/default-catalog.xml"
+
+    catalogProps.addChild('description').value = "Aircraft developed and maintained by the FlightGear project"
+
+    de = catalogProps.addChild('de')
+    # de.addChild('description').value = "<German translation of catalog description>"
+
+    fr = catalogProps.addChild('fr')
+    -->
+        
+        <version>3.4.*</version>
+        <version>3.5.*</version>
+        <version>3.6.*</version>
+        
+        <id>org.myorganisation.hangar</id>
+        <license>GPL</license>
+        <url>http://some.stable.url.com/foo/bar/catalog.xml</url>
+        
+        <description>A collection of interesting aircraft with some features
+        </description>
+        
+        <de>
+            <description>Au Deutsch</description>
+        </de>
+        
+        <fr>
+            <description>Francais</description>
+        </fr>
+        
+        <mirror>http://some.url/</mirror>
+        <!--  <mirror>another mirror</mirror> -->
+        
+        
+        <thumbnails>http://some.url/images</thumbnails>
+        
+        <git-repository>git://some.git.repo/</git-repository>
+        
+        <repository-prefix>Aircraft</repository-prefix>
+        
+</PropertyList>
+
+    

@@ -56,17 +56,24 @@ class Node(object):
             raise IndexError("no such child:" + str(n) + " index=" + str(i))
             
     def addChild(self, n):
-        i = 0
-        
-        # find first free index
+        # adding an existing instance
+        if isinstance(n, Node):
+            n._parent = self
+            n._index = self.firstUnusedIndex(n.name)
+            self._children.append(n)
+            return n
+            
+        i = self.firstUnusedIndex(n)        
+        # create it via getChild
+        return self.getChild(n, i, create=True)
+            
+    def firstUnusedIndex(self, n):
         usedIndices = frozenset(c.index for c in self.getChildren(n))
         while i < 1000:
             if i not in usedIndices:
-                 break
+                 return i
             i += 1
-        
-        # create it via getChild
-        return self.getChild(n, i, create=True)
+        raise RuntimeException("too many children with name:" + n)
             
     def hasChild(self, nm):
         for c in self._children:
@@ -222,3 +229,11 @@ def readProps(path, root = None, dataDirPath = None):
     parser.setContentHandler(h)
     parser.parse(path)
     return h.root
+    
+def copy(src, dest):
+    dest.value = src.value
+    
+    # recurse over children
+    for c in src.children:
+        dc = dest.getChild(c.name, i = c.index, create = True)
+        copy(c, dc)
