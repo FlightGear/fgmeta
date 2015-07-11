@@ -179,10 +179,10 @@ class PackageData:
         self._node.getChild("scm-revision", create = True).value = self.scmRevision
 
         for m in mirrorUrls:
-            self._node.addChild("url", m + "/" + self.id + ".zip")
+            self._node.addChild("url").value = m + "/" + self.id + ".zip"
 
         for t in self._thumbnails:
-            self._node.addChild("thumbnail", thumbnailUrl + "/" + self.id + "_" + t)
+            self._node.addChild("thumbnail").value = thumbnailUrl + "/" + self.id + "_" + t
 
         for pr in self._variants:
             for vr in self._variants[pr]:
@@ -274,6 +274,8 @@ print "Output path is:" + outPath
 thumbnailPath = os.path.join(outPath, config.getValue('thumbnail-dir', "thumbnails"))
 thumbnailUrl = config.getValue('thumbnail-url')
 
+print "Thumbnail url is:", thumbnailUrl
+
 mirrorUrls = []
 
 # contains existing catalog
@@ -306,6 +308,7 @@ else:
 catalogNode = sgprops.Node("catalog")
 sgprops.copy(config.getChild("template"), catalogNode)
 
+mirrorUrls = (m.value for m in config.getChildren("mirror"))
 
 packagesToGenerate = []
 for p in packages.values():
