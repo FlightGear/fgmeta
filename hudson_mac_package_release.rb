@@ -19,22 +19,7 @@ $openThreadsSoVersion=runOsgVersion('openthreads-soversion-number')
 
 $codeSignIdentity = ENV['FG_CODESIGN_IDENTITY']
 puts "Code signing identity is #{$codeSignIdentity}"
-
 puts "osgVersion=#{osgVersion}, so-number=#{$osgSoVersion}"
-
-def fix_install_names(object)
-  #puts "fixing install names for #{object}"
-
-  $osgLibs.each do |l|
-    oldName = "lib#{l}.#{$osgSoVersion}.dylib"
-    newName = "@executable_path/../Frameworks/#{oldName}"
-    `install_name_tool -change #{oldName} #{newName} #{object}`
-  end
-
-  oldName = "libOpenThreads.#{$openThreadsSoVersion}.dylib"
-  newName= "@executable_path/../Frameworks/#{oldName}"
-  `install_name_tool -change #{oldName} #{newName} #{object}`
-end
 
 $prefixDir=Dir.pwd + "/dist"
 dmgDir=Dir.pwd + "/image"
@@ -77,8 +62,6 @@ puts "Creating directory structure"
 `mkdir -p #{resourcesDir}`
 `mkdir -p #{osgPluginsDir}`
 
-# fix install names on the primary executable
-fix_install_names("#{macosDir}/fgfs")
 
 puts "Copying auxilliary binaries"
 bins = ['fgjs', 'fgcom']
@@ -89,14 +72,12 @@ bins.each do |b|
 
   outPath = "#{macosDir}/#{b}"
   `cp #{$prefixDir}/bin/#{b} #{outPath}`
-  fix_install_names(outPath)
 end
 
 puts "copying libraries"
 $osgLibs.each do |l|
   libFile = "lib#{l}.#{$osgSoVersion}.dylib"
   `cp #{$prefixDir}/lib/#{libFile} #{$frameworksDir}`
-  fix_install_names("#{$frameworksDir}/#{libFile}")
 end
 
 # and not forgetting OpenThreads
@@ -106,7 +87,6 @@ libFile = "libOpenThreads.#{$openThreadsSoVersion}.dylib"
 $osgPlugins.each do |p|
   pluginFile = "osgdb_#{p}.dylib"
   `cp #{$prefixDir}/lib/osgPlugins/#{pluginFile} #{osgPluginsDir}`
-  fix_install_names("#{osgPluginsDir}/#{pluginFile}")
 end
 
 if File.exist?("#{$prefixDir}/bin/fgcom-data")
