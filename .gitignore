@@ -19,3 +19,4 @@ CMakeFiles
 archivebuild
 osgbuild
 CMakeCache.txt
+*.pyc
