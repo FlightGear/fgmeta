@@ -106,11 +106,7 @@ class Node(object):
 
     def write(self, path):
         root = self._createXMLElement('PropertyList')
-
         t = ET.ElementTree(root)
-
-        ET.dump(root)
-
         t.write(path, 'utf-8', xml_declaration = True)
 
     def _createXMLElement(self, nm = None):
@@ -205,15 +201,32 @@ class PropsHandler(handler.ContentHandler):
             self._current.value = self._content
             if self._currentTy == "int":
                 self._current.value = int(self._content)
-            if self._currentTy is "bool":
-                self._current.value = bool(self._content)
-            if self._currentTy is "double":
+            if self._currentTy == "bool":
+                self._current.value = self.parsePropsBool(self._content)
+            if self._currentTy == "double":
                 self._current.value = float(self._content)
         except:
             print "Parse error for value:", self._content, "at line:", self._locator.getLineNumber(), "of:", self._path
 
         self._current = self._current.parent
         self._content = None
+
+    def parsePropsBool(self, content):
+        if content == "True" or content == "true":
+            return True
+
+        if content == "False" or content == "false":
+            return False
+
+        try:
+            icontent = int(content)
+            if icontent is not None:
+                if icontent == 0:
+                    return False
+                else:
+                    return True;
+        except:
+            return False
 
     def characters(self, content):
         if self._content is None:
