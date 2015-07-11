@@ -4,7 +4,7 @@ import subprocess
 import os
 import sgprops
 
-import GITCatalogRepository
+import git_catalog_repository
 
 class GitDiscreteSCM:
     def __init__(self, node):

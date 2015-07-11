@@ -7,7 +7,7 @@ class GITCatalogRepository:
     def __init__(self, path, usesSubmodules = False, singleAircraft = False):
         self._path = path
         
-        if !os.path.exists(os.path.join(path, ".git")):
+        if not os.path.exists(os.path.join(path, ".git")):
             raise RuntimeError("not a Git directory:" + path)
         
         self._usesSubmodules = usesSubmodules
