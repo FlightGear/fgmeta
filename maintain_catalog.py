@@ -14,9 +14,11 @@ import git_discrete_repository
 # TODO
 # uploading / rsyncing
 
+thumbnailNames = ["thumbnail.png", "thumbnail.jpg"]
+
 class VariantData:
-    def __init__(self, primary, path, node):
-        self._primary = primary
+    def __init__(self, path, node):
+        #self._primary = primary
         self._path = path
         self._name = node.getValue("sim/description")
 
@@ -63,6 +65,10 @@ class PackageData:
         return self._path
 
     @property
+    def variants(self):
+        return self._variants
+
+    @property
     def scmRevision(self):
         currentRev = scmRepo.scmRevisionForPath(self._path)
         if (currentRev is None):
@@ -87,14 +93,14 @@ class PackageData:
                 continue
 
             p = os.path.join(self._path, f)
-            node = readProps(p)
+            node = sgprops.readProps(p)
             simNode = node.getChild("sim")
-            if (simNode.getValue("exclude")):
+            if (simNode.getValue("exclude", False)):
                 continue
 
             primary = simNode.getValue("variant-of", None)
             if primary:
-                if not primary in variants:
+                if not primary in self.variants:
                     self._variants[primary] = []
                 self._variants[primary].append(VariantData(self, node))
                 continue
@@ -105,10 +111,11 @@ class PackageData:
             else:
                 foundPrimary = True;
 
-            parsePrimarySetNode(simNode)
+            self.parsePrimarySetNode(simNode)
 
-            if os.path.exists(os.path.join(self._path, "thumbnail.png")):
-                self._thumbnails.append("thumbnail.png")
+            for n in thumbnailNames:
+                if os.path.exists(os.path.join(self._path, n)):
+                    self._thumbnails.append(n)
 
         if not foundPrimary:
             raise RuntimeError("No primary -set.xml found at:" + self._path)
@@ -118,7 +125,6 @@ class PackageData:
     def parsePrimarySetNode(self, sim):
 
         # basic / mandatory values
-        self._node.addChild('id').value = d
         self._node.addChild('name').value = sim.getValue('description')
 
         longDesc = sim.getValue('long-description')
@@ -145,7 +151,7 @@ class PackageData:
                 else:
                     self._node.addChild('tag').value = c.value
 
-        self._thumbnails = (t.value for t in self.getChildren("thumbnail"))
+        self._thumbnails.append(t.value for t in sim.getChildren("thumbnail"))
 
     def validate(self):
         for t in self._thumbnails:
@@ -312,6 +318,8 @@ mirrorUrls = (m.value for m in config.getChildren("mirror"))
 
 packagesToGenerate = []
 for p in packages.values():
+    p.scanSetXmlFiles()
+
     if (p.isSourceModified(scmRepo)):
         packagesToGenerate.append(p)
     else:
