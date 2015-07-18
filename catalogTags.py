@@ -1,12 +1,13 @@
 aircraftTypeTags = [
-    "ga", "fighter", "helicopter", "glider", "spaceship", "bomber", "groundvehicle", 
+    "ga", "fighter", "helicopter", "glider", "spaceship", "bomber", "groundvehicle",
     "tanker", "cargo", "transport", "bizjet", "trainer", "airship", "balloon"
 ]
 
 manufacturerTags = [
-    "boeing", "cessna", "diamond", "douglas", "bell", "piper", 
+    "boeing", "cessna", "diamond", "douglas", "bell", "piper",
     "airbus", "vickers", "lockheed", "fokker",
-    "embrarer", "bombardier", "pilatus", "robin"
+    "embrarer", "bombardier", "pilatus", "robin",
+    "eurocopter"
 ]
 
 eraTags = [
@@ -21,6 +22,8 @@ eraTags = [
     "1960s",
     "1970s",
     "1980s",
+    "1990s",
+    "2000s",
     "gulfwar1",
     "gulfwar2"
 ]
@@ -69,7 +72,8 @@ propulsionTags = [
 
 simFeatureTags = [
     "tow",
-    "dual-controls"
+    "dual-controls",
+    "rembrandt"
 ]
 
 tags = aircraftTypeTags + manufacturerTags + eraTags + simFeatureTags + propulsionTags + featureTags

@@ -3,7 +3,7 @@
 import os, sys, re, glob
 import hashlib # for MD5
 import subprocess
-
+import shutil # for copy2
 import catalogTags
 import sgprops
 
@@ -11,10 +11,12 @@ import svn_catalog_repository
 import git_catalog_repository
 import git_discrete_repository
 
-# TODO
-# uploading / rsyncing
+standardTagSet = frozenset(catalogTags.tags)
+def isNonstandardTag(t):
+    return t not in standardTagSet
 
 thumbnailNames = ["thumbnail.png", "thumbnail.jpg"]
+includePaths = []
 
 class VariantData:
     def __init__(self, path, node):
@@ -28,8 +30,8 @@ class VariantData:
 
     @property
     def catalogNode(self):
-        n = Node("variant")
-        n.addChild("id").value = path
+        n = sgprops.Node("variant")
+        n.addChild("id").value = self._path
         n.addChild("name").value = self._name
 
 class PackageData:
@@ -85,15 +87,19 @@ class PackageData:
 
         return True
 
-    def scanSetXmlFiles(self):
+    def scanSetXmlFiles(self, includes):
         foundPrimary = False
+        foundMultiple = False
 
         for f in os.listdir(self._path):
             if not f.endswith("-set.xml"):
                 continue
 
             p = os.path.join(self._path, f)
-            node = sgprops.readProps(p)
+            node = sgprops.readProps(p, includePaths = includes)
+            if not node.hasChild("sim"):
+                continue
+
             simNode = node.getChild("sim")
             if (simNode.getValue("exclude", False)):
                 continue
@@ -106,7 +112,9 @@ class PackageData:
                 continue
 
             if foundPrimary:
-                print "Multiple primary -set.xml files at:" + self._path
+                if not foundMultiple:
+                    print "Multiple primary -set.xml files at:" + self._path
+                    foundMultiple = True
                 continue
             else:
                 foundPrimary = True;
@@ -147,11 +155,12 @@ class PackageData:
         if sim.hasChild('tags'):
             for c in sim.getChild('tags').getChildren('tag'):
                 if isNonstandardTag(c.value):
-                    print "Skipping non-standard tag:", c.value
+                    print "Skipping non-standard tag:", c.value, self.path
                 else:
                     self._node.addChild('tag').value = c.value
 
-        self._thumbnails.append(t.value for t in sim.getChildren("thumbnail"))
+        for t in sim.getChildren("thumbnail"):
+            self._thumbnails.append(t.value)
 
     def validate(self):
         for t in self._thumbnails:
@@ -199,7 +208,7 @@ class PackageData:
     def extractThumbnails(self, thumbnailDir):
         for t in self._thumbnails:
             fullName = self.id + "_" + t
-            os.file.copy(os.path.join(self._path, t),
+            shutil.copy2(os.path.join(self._path, t),
                          os.path.join(thumbnailDir, fullName)
                          )
             # TODO : verify image format, size and so on
@@ -209,6 +218,11 @@ def scanPackages(globPath):
     print "Scanning", globPath
     print os.getcwd()
     for d in glob.glob(globPath):
+        # check dir contains at least one -set.xml file
+        if len(glob.glob(os.path.join(d, "*-set.xml"))) == 0:
+            print "no -set.xml in", d
+            continue
+
         result.append(PackageData(d))
 
     return result
@@ -278,9 +292,18 @@ if not os.path.exists(outPath):
 print "Output path is:" + outPath
 
 thumbnailPath = os.path.join(outPath, config.getValue('thumbnail-dir', "thumbnails"))
+if not os.path.exists(thumbnailPath):
+    os.mkdir(thumbnailPath)
+
 thumbnailUrl = config.getValue('thumbnail-url')
 
 print "Thumbnail url is:", thumbnailUrl
+
+for i in config.getChildren("include-dir"):
+    if not os.path.exists(i.value):
+        print "Skipping missing include path:", i.value
+        continue
+    includePaths.append(i.value)
 
 mirrorUrls = []
 
@@ -318,7 +341,7 @@ mirrorUrls = (m.value for m in config.getChildren("mirror"))
 
 packagesToGenerate = []
 for p in packages.values():
-    p.scanSetXmlFiles()
+    p.scanSetXmlFiles(includePaths)
 
     if (p.isSourceModified(scmRepo)):
         packagesToGenerate.append(p)

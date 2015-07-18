@@ -146,11 +146,11 @@ class Node(object):
 
 
 class PropsHandler(handler.ContentHandler):
-    def __init__(self, root = None, path = None, dataDirPath = None):
+    def __init__(self, root = None, path = None, includePaths = []):
         self._root = root
         self._path = path
         self._basePath = os.path.dirname(path)
-        self._dataDirPath = dataDirPath
+        self._includes = includePaths
         self._locator = None
 
         if root is None:
@@ -167,7 +167,13 @@ class PropsHandler(handler.ContentHandler):
             return
 
         if 'n' in attrs.keys():
-            index = int(attrs['n'])
+            try:
+                index = int(attrs['n'])
+            except:
+                print "Invalid index at line:", self._locator.getLineNumber(), "of", self._path
+                self._current = self._current.addChild(name)
+                return
+
             self._current = self._current.getChild(name, index, create=True)
         else:
             self._current = self._current.addChild(name)
@@ -186,11 +192,17 @@ class PropsHandler(handler.ContentHandler):
 
         p = os.path.join(self._basePath, includePath)
         if not os.path.exists(p):
-            p = os.path.join(self._dataDirPath, includePath)
-            if not os.path.exists(p):
+            found = False
+            for i in self._includes:
+                p = os.path.join(i, includePath)
+                if os.path.exists(p):
+                    found = True
+                    break
+
+            if not found:
                 raise RuntimeError("include file not found", includePath, "at line", self._locator.getLineNumber())
 
-        readProps(p, self._current, self._dataDirPath)
+        readProps(p, self._current, self._includes)
 
     def endElement(self, name):
         if (name == 'PropertyList'):
@@ -200,16 +212,23 @@ class PropsHandler(handler.ContentHandler):
             # convert and store value
             self._current.value = self._content
             if self._currentTy == "int":
-                self._current.value = int(self._content)
+                self._current.value = int(self._content) if self._content is not None else 0
             if self._currentTy == "bool":
                 self._current.value = self.parsePropsBool(self._content)
             if self._currentTy == "double":
-                self._current.value = float(self._content)
+                if self._content is None:
+                    self._current.value = 0.0
+                else:
+                    if self._content.endswith('f'):
+                        self._content = self._content[:-1]
+                    self._current.value = float(self._content)
         except:
             print "Parse error for value:", self._content, "at line:", self._locator.getLineNumber(), "of:", self._path
 
         self._current = self._current.parent
         self._content = None
+        self._currentTy = None
+
 
     def parsePropsBool(self, content):
         if content == "True" or content == "true":
@@ -240,11 +259,10 @@ class PropsHandler(handler.ContentHandler):
     def root(self):
         return self._root
 
-
-def readProps(path, root = None, dataDirPath = None):
+def readProps(path, root = None, includePaths = []):
     parser = make_parser()
     locator = expatreader.ExpatLocator( parser )
-    h = PropsHandler(root, path, dataDirPath)
+    h = PropsHandler(root, path, includePaths)
     h.setDocumentLocator(locator)
     parser.setContentHandler(h)
     parser.parse(path)
