@@ -6,10 +6,18 @@ import subprocess
 import shutil # for copy2
 import catalogTags
 import sgprops
+#from multiprocessing import Pool
+import argparse
+import urllib2
 
 import svn_catalog_repository
 import git_catalog_repository
 import git_discrete_repository
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--clean", help="Regenerate every package", type=bool)
+parser.add_argument("dir", help="Catalog directory")
+args = parser.parse_args()
 
 standardTagSet = frozenset(catalogTags.tags)
 def isNonstandardTag(t):
@@ -244,7 +252,6 @@ def initScmRepository(node):
         raise RuntimeError("Unspported SCM type:" + scmType)
 
 def processUpload(node, outputPath):
-    print "Enabled value is:", node.getValue("enabled")
     if not node.getValue("enabled", True):
         print "Upload disabled"
         return
@@ -254,23 +261,25 @@ def processUpload(node, outputPath):
         subprocess.call(["rsync", node.getValue("args", "-az"), ".",
             node.getValue("remote")],
         cwd = outputPath)
+    elif (uploadType == "rsync-ssh"):
+        subprocess.call(["rsync", node.getValue("args", "-azve"),
+            "ssh", ".",
+            node.getValue("remote")],
+            cwd = outputPath)
     elif (uploadType == "scp"):
-        subprocess.call(["scp", node.getValue("args", "-r"), outputPath,
-            node.getValue("remote")])
+        subprocess.call(["scp", node.getValue("args", "-r"), ".",
+            node.getValue("remote")],
+            cwd = outputPath)
     else:
         raise RuntimeError("Unsupported upload type:" + uploadType)
 
 # dictionary
 packages = {}
 
-if len(sys.argv) < 2:
-    raise RuntimeError("no root dir specified")
-
-rootDir = sys.argv[1]
+rootDir = args.dir
 if not os.path.isabs(rootDir):
     rootDir = os.path.abspath(rootDir)
 os.chdir(rootDir)
-print "Root path is:", rootDir
 
 configPath = 'catalog.config.xml'
 if not os.path.exists(configPath):
@@ -286,18 +295,18 @@ if outPath is None:
 elif not os.path.isabs(outPath):
     outPath = os.path.join(rootDir, "output")
 
+if args.clean:
+    print "Cleaning output"
+    shutil.rmtree(outPath)
+
 if not os.path.exists(outPath):
     os.mkdir(outPath)
-
-print "Output path is:" + outPath
 
 thumbnailPath = os.path.join(outPath, config.getValue('thumbnail-dir', "thumbnails"))
 if not os.path.exists(thumbnailPath):
     os.mkdir(thumbnailPath)
 
 thumbnailUrl = config.getValue('thumbnail-url')
-
-print "Thumbnail url is:", thumbnailUrl
 
 for i in config.getChildren("include-dir"):
     if not os.path.exists(i.value):
@@ -316,6 +325,19 @@ scmRepo = initScmRepository(config.getChild('scm'))
 for g in config.getChildren("aircraft-dir"):
     for p in scanPackages(g.value):
         packages[p.id] = p
+
+if not os.path.exists(existingCatalogPath):
+    try:
+    # can happen on new or from clean, try to pull current
+    # catalog from the upload location
+        response = urllib2.urlopen(config.getValue("template/url"), timeout = 5)
+        content = response.read()
+        f = open(existingCatalogPath, 'w' )
+        f.write( content )
+        f.close()
+    except urllib2.URLError as e:
+        print "Downloading current catalog failed", e
+
 
 if os.path.exists(existingCatalogPath):
     try:
@@ -348,9 +370,18 @@ for p in packages.values():
     else:
         p.useExistingCatalogData()
 
+
+# def f(x):
+#     x.generateZip(outPath)
+#     x.extractThumbnails(thumbnailPath)
+#     return True
+#
+# p = Pool(8)
+# print(p.map(f,packagesToGenerate))
+
 for p in packagesToGenerate:
-    p.generateZip(outPath)
-    p.extractThumbnails(thumbnailPath)
+   p.generateZip(outPath)
+   p.extractThumbnails(thumbnailPath)
 
 print "Creating catalog"
 for p in packages.values():
