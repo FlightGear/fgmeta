@@ -25,8 +25,12 @@ args = parser.parse_args()
 
 includePaths = []
 
-def scanPackages(globPath):
+def scanPackages(scmRepo):
     result = []
+    globPath = scmRepo.aircraftPath
+    if globPath is None:
+        return result
+
     print "Scanning", globPath
     print os.getcwd()
     for d in glob.glob(globPath):
@@ -35,19 +39,16 @@ def scanPackages(globPath):
             print "no -set.xml in", d
             continue
 
-        result.append(pkg.PackageData(d))
+        result.append(pkg.PackageData(d, scmRepo))
 
     return result
 
 def initScmRepository(node):
     scmType = node.getValue("type")
     if (scmType == "svn"):
-        svnPath = node.getValue("path")
-        return svn_catalog_repository.SVNCatalogRepository(svnPath)
+        return svn_catalog_repository.SVNCatalogRepository(node)
     elif (scmType == "git"):
-        gitPath = node.getValue("path")
-        usesSubmodules = node.getValue("uses-submodules", False)
-        return git_catalog_repository.GitCatalogRepository(gitPath, usesSubmodules)
+        return git_catalog_repository.GITCatalogRepository(node)
     elif (scmType == "git-discrete"):
         return git_discrete_repository.GitDiscreteSCM(node)
     elif (scmType == None):
@@ -66,6 +67,7 @@ def processUpload(node, outputPath):
             node.getValue("remote")],
         cwd = outputPath)
     elif (uploadType == "rsync-ssh"):
+        print "Doing rsync upload to:", node.getValue("remote")
         subprocess.call(["rsync", node.getValue("args", "-azve"),
             "ssh", ".",
             node.getValue("remote")],
@@ -121,14 +123,15 @@ for i in config.getChildren("include-dir"):
 # contains existing catalog
 existingCatalogPath = os.path.join(outPath, 'catalog.xml')
 
-scmProps = config.getChild('scm')
-scmRepo = initScmRepository(scmProps)
-if args.update or (not args.noupdate and scmProps.getValue("update")):
-    scmRepo.update()
+for scm in config.getChildren("scm"):
+    scmRepo = initScmRepository(scm)
+    if args.update or (not args.noupdate and scm.getValue("update")):
+        scmRepo.update()
+    # presumably include repos in parse path
+    # TODO: make this configurable
+    includePaths.append(scmRepo.path)
 
-# scan the directories in the aircraft paths
-for g in config.getChildren("aircraft-dir"):
-    for p in scanPackages(g.value):
+    for p in scanPackages(scmRepo):
         packages[p.id] = p
 
 if not os.path.exists(existingCatalogPath):
@@ -170,7 +173,7 @@ packagesToGenerate = []
 for p in packages.values():
     p.scanSetXmlFiles(includePaths)
 
-    if (p.isSourceModified(scmRepo)):
+    if p.isSourceModified:
         packagesToGenerate.append(p)
     else:
         p.useExistingCatalogData()
@@ -190,10 +193,9 @@ for p in packagesToGenerate:
 
 print "Creating catalog"
 for p in packages.values():
-    catalogNode.addChild(p.packageNode(scmRepo, mirrorUrls, thumbnailUrls[0]))
+    catalogNode.addChild(p.packageNode(mirrorUrls, thumbnailUrls[0]))
 
 catalogNode.write(os.path.join(outPath, "catalog.xml"))
 
-print "Uploading"
 for up in config.getChildren("upload"):
     processUpload(up, outPath)

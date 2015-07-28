@@ -1,9 +1,10 @@
 
-import subprocess, os
+import subprocess, os, sgprops
 import xml.etree.cElementTree as ET
 
 class SVNCatalogRepository:
-    def __init__(self, path):
+    def __init__(self, node):
+        path = node.getValue("path")
         if not os.path.exists(path):
             raise RuntimeError("No directory at:" + path)
 
@@ -13,6 +14,18 @@ class SVNCatalogRepository:
 
         if (root.find(".//repository/root") == None):
             raise RuntimeError("Not an SVN repository:" + path)
+
+        self._aircraftPath = None
+        if node.hasChild("scan-suffix"):
+            self._aircraftPath = os.path.join(path, node.getValue("scan-suffix"))
+
+    @property
+    def path(self):
+        return self._path
+
+    @property
+    def aircraftPath(self):
+        return self._aircraftPath
 
     def hasPathChanged(self, path, oldRevision):
         return self.scmRevisionForPath(path) != oldRevision

@@ -27,8 +27,9 @@ class VariantData:
         n.addChild("name").value = self._name
 
 class PackageData:
-    def __init__(self, path):
+    def __init__(self, path, scmRepo):
         self._path = path
+        self._scm = scmRepo
         self._previousSCMRevision = None
         self._previousRevision = 0
         self._thumbnails = []
@@ -62,18 +63,20 @@ class PackageData:
     def variants(self):
         return self._variants
 
-    def scmRevision(self, repo):
-        currentRev = repo.scmRevisionForPath(self._path)
+    @property
+    def scmRevision(self):
+        currentRev = self._scm.scmRevisionForPath(self._path)
         if (currentRev is None):
             raise RuntimeError("Unable to query SCM revision of files")
 
         return currentRev
 
-    def isSourceModified(self, scmRepo):
+    @property
+    def isSourceModified(self):
         if (self._previousSCMRevision == None):
             return True
 
-        if (self._previousSCMRevision == self.scmRevision(scmRepo)):
+        if (self._previousSCMRevision == self.scmRevision):
             return False
 
         return True
@@ -178,11 +181,11 @@ class PackageData:
     def useExistingCatalogData(self):
         self._md5 = self._previousMD5
 
-    def packageNode(self, repo, mirrorUrls, thumbnailUrl):
+    def packageNode(self, mirrorUrls, thumbnailUrl):
         self._node.getChild("md5", create = True).value = self._md5
         self._node.getChild("file-size-bytes", create = True).value = self._fileSize
         self._node.getChild("revision", create = True).value = int(self._revision)
-        self._node.getChild("scm-revision", create = True).value = self.scmRevision(repo)
+        self._node.getChild("scm-revision", create = True).value = self.scmRevision
 
         for m in mirrorUrls:
             self._node.addChild("url").value = m + "/" + self.id + ".zip"
