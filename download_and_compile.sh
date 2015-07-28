@@ -18,7 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 VERSION="2.33"
-FGVERSION="release/3.4.0"
+FGVERSION="release/3.6.0"
 
 #######################################################
 # THANKS TO
