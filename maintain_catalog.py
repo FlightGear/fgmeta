@@ -16,6 +16,8 @@ parser.add_argument("--clean", help="Regenerate every package",
      action="store_true")
 parser.add_argument("--update", help="Update/pull SCM source",
      action="store_true")
+parser.add_argument("--no-update", help="Disable updating from SCM source",
+     action="store_true")
 parser.add_argument("dir", help="Catalog directory")
 args = parser.parse_args()
 
@@ -120,7 +122,7 @@ mirrorUrls = []
 existingCatalogPath = os.path.join(outPath, 'catalog.xml')
 
 scmRepo = initScmRepository(config.getChild('scm'))
-if args.update:
+if args.update or (not args.no-update and scmRepo.getValue("update")):
     scmRepo.update()
 
 # scan the directories in the aircraft paths
