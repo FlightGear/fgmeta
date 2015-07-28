@@ -24,4 +24,5 @@ class SVNCatalogRepository:
         return commit.get('revision', 0)
 
     def update(self):
-        subprocess.call(["svn", "update"])
+        print "SVN update of", self._path
+        subprocess.call(["svn", "update", self._path])

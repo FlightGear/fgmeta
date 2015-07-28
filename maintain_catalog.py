@@ -12,7 +12,10 @@ import git_catalog_repository
 import git_discrete_repository
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--clean", help="Regenerate every package", type=bool)
+parser.add_argument("--clean", help="Regenerate every package",
+     action="store_true")
+parser.add_argument("--update", help="Update/pull SCM source",
+     action="store_true")
 parser.add_argument("dir", help="Catalog directory")
 args = parser.parse_args()
 
@@ -117,6 +120,8 @@ mirrorUrls = []
 existingCatalogPath = os.path.join(outPath, 'catalog.xml')
 
 scmRepo = initScmRepository(config.getChild('scm'))
+if args.update:
+    scmRepo.update()
 
 # scan the directories in the aircraft paths
 for g in config.getChildren("aircraft-dir"):
@@ -187,5 +192,5 @@ for p in packages.values():
 catalogNode.write(os.path.join(outPath, "catalog.xml"))
 
 print "Uploading"
-if config.hasChild("upload"):
-    processUpload(config.getChild("upload"), outPath)
+for up in config.getChildren("upload"):
+    processUpload(up, outPath)
