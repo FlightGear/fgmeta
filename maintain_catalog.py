@@ -16,7 +16,9 @@ parser.add_argument("--clean", help="Regenerate every package",
      action="store_true")
 parser.add_argument("--update", help="Update/pull SCM source",
      action="store_true")
-parser.add_argument("--no-update", help="Disable updating from SCM source",
+parser.add_argument("--no-update",
+     dest = "noupdate",
+     help="Disable updating from SCM source",
      action="store_true")
 parser.add_argument("dir", help="Catalog directory")
 args = parser.parse_args()
@@ -108,7 +110,7 @@ thumbnailPath = os.path.join(outPath, config.getValue('thumbnail-dir', "thumbnai
 if not os.path.exists(thumbnailPath):
     os.mkdir(thumbnailPath)
 
-thumbnailUrl = config.getValue('thumbnail-url')
+thumbnailUrls = list(t.value for t in config.getChildren("thumbnail-url"))
 
 for i in config.getChildren("include-dir"):
     if not os.path.exists(i.value):
@@ -116,13 +118,12 @@ for i in config.getChildren("include-dir"):
         continue
     includePaths.append(i.value)
 
-mirrorUrls = []
-
 # contains existing catalog
 existingCatalogPath = os.path.join(outPath, 'catalog.xml')
 
-scmRepo = initScmRepository(config.getChild('scm'))
-if args.update or (not args.no-update and scmRepo.getValue("update")):
+scmProps = config.getChild('scm')
+scmRepo = initScmRepository(scmProps)
+if args.update or (not args.noupdate and scmProps.getValue("update")):
     scmRepo.update()
 
 # scan the directories in the aircraft paths
@@ -163,7 +164,7 @@ else:
 catalogNode = sgprops.Node("catalog")
 sgprops.copy(config.getChild("template"), catalogNode)
 
-mirrorUrls = (m.value for m in config.getChildren("mirror"))
+mirrorUrls = list(m.value for m in config.getChildren("mirror"))
 
 packagesToGenerate = []
 for p in packages.values():
@@ -189,7 +190,7 @@ for p in packagesToGenerate:
 
 print "Creating catalog"
 for p in packages.values():
-    catalogNode.addChild(p.packageNode(scmRepo, mirrorUrls, thumbnailUrl))
+    catalogNode.addChild(p.packageNode(scmRepo, mirrorUrls, thumbnailUrls[0]))
 
 catalogNode.write(os.path.join(outPath, "catalog.xml"))
 
