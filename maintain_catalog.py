@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import os, sys, re, glob
+import os, sys, re, glob, shutil
 import subprocess
 import sgprops
 import argparse
@@ -79,6 +79,28 @@ def processUpload(node, outputPath):
     else:
         raise RuntimeError("Unsupported upload type:" + uploadType)
 
+def parseExistingCatalog():
+    global existingCatalogPath
+    global previousCatalog
+
+    # contains existing catalog
+    existingCatalogPath = os.path.join(outPath, 'catalog.xml')
+
+    if not os.path.exists(existingCatalogPath):
+        url = config.getValue("template/url")
+        print "Attempting downloading from", url
+        try:
+        # can happen on new or from clean, try to pull current
+        # catalog from the upload location
+            response = urllib2.urlopen(url, timeout = 5)
+            content = response.read()
+            f = open(existingCatalogPath, 'w' )
+            f.write( content )
+            f.close()
+            print "...worked"
+        except urllib2.URLError as e:
+            print "Downloading current catalog failed", e, "from", url
+
 # dictionary
 packages = {}
 
@@ -120,8 +142,7 @@ for i in config.getChildren("include-dir"):
         continue
     includePaths.append(i.value)
 
-# contains existing catalog
-existingCatalogPath = os.path.join(outPath, 'catalog.xml')
+parseExistingCatalog()
 
 for scm in config.getChildren("scm"):
     scmRepo = initScmRepository(scm)
@@ -133,19 +154,6 @@ for scm in config.getChildren("scm"):
 
     for p in scanPackages(scmRepo):
         packages[p.id] = p
-
-if not os.path.exists(existingCatalogPath):
-    try:
-    # can happen on new or from clean, try to pull current
-    # catalog from the upload location
-        response = urllib2.urlopen(config.getValue("template/url"), timeout = 5)
-        content = response.read()
-        f = open(existingCatalogPath, 'w' )
-        f.write( content )
-        f.close()
-    except urllib2.URLError as e:
-        print "Downloading current catalog failed", e
-
 
 if os.path.exists(existingCatalogPath):
     try:
