@@ -170,9 +170,16 @@ class PackageData:
         os.chdir(os.path.dirname(self.path))
 
         print "Creating zip", zipFilePath
-        # TODO: exclude certain files
         # anything we can do to make this faster?
-        subprocess.call(['zip', '--quiet', '-r', zipFilePath, self.id])
+
+        zipArgs = ['zip', '--quiet', '-r']
+        excludePath = os.path.join(self.path, 'package-exclude.lst')
+        if (os.path.exists(excludePath)):
+            print self.id, "has zip exclude list"
+            zipArgs += ["-x@" + excludePath]
+
+        zipArgs += [zipFilePath, self.id]
+        subprocess.call(zipArgs)
 
         zipFile = open(zipFilePath, 'r')
         self._md5 = hashlib.md5(zipFile.read()).hexdigest()
