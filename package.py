@@ -161,7 +161,7 @@ class PackageData:
             if not os.path.exists(os.path.join(self._path, t)):
                 raise RuntimeError("missing thumbnail:" + t);
 
-    def generateZip(self, outDir):
+    def generateZip(self, outDir, globalExcludePath):
         self._revision = self._previousRevision + 1
 
         zipName = self.id + ".zip"
@@ -173,6 +173,9 @@ class PackageData:
         # anything we can do to make this faster?
 
         zipArgs = ['zip', '--quiet', '-r']
+        if os.path.exists(globalExcludePath):
+            zipArgs += [ "-x@" + globalExcludePath]
+
         excludePath = os.path.join(self.path, 'package-exclude.lst')
         if (os.path.exists(excludePath)):
             print self.id, "has zip exclude list"

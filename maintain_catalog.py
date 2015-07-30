@@ -186,6 +186,7 @@ for p in packages.values():
     else:
         p.useExistingCatalogData()
 
+excludeFilePath = os.path.join(rootDir, "zip-excludes.lst")
 
 # def f(x):
 #     x.generateZip(outPath)
@@ -196,7 +197,7 @@ for p in packages.values():
 # print(p.map(f,packagesToGenerate))
 
 for p in packagesToGenerate:
-   p.generateZip(outPath)
+   p.generateZip(outPath, excludeFilePath)
    p.extractThumbnails(thumbnailPath)
 
 print "Creating catalog"
