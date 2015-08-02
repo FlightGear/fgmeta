@@ -45,6 +45,7 @@ AppUpdatesURL=http://www.flightgear.org
 DefaultDirName={pf}\FlightGear {#FGVersion}
 UsePreviousAppDir=no
 DefaultGroupName=FlightGear {#FGVersion}
+UsePreviousGroup=no
 LicenseFile=X:\flightgear\COPYING
 Uninstallable=yes
 SetupIconFile=X:\flightgear\package\flightgear.ico
