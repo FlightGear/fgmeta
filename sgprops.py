@@ -11,7 +11,7 @@ class Node(object):
         self._parent = parent
         self._name = name
         self._value = None
-        self._index = 0
+        self._index = index
         self._children = []
 
     @property
