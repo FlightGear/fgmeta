@@ -79,5 +79,5 @@ rsync -a extended-data/ base_package/fgdata
 
 echo "Creating tar archive"
 pushd base_package
-tar cjf output/FlightGear-$VERSION-data.tar.bz2 fgdata/
+tar cjf $WORKSPACE/output/FlightGear-$VERSION-data.tar.bz2 fgdata/
 popd
