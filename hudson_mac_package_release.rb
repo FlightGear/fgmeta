@@ -130,16 +130,16 @@ File.open("#{contents}/Info.plist", 'w') { |f|
 `cp fgdata/Docs/FGShortRef.pdf "#{dmgDir}/Quick Reference.pdf"`
 `cp fgdata/Docs/getstart.pdf "#{dmgDir}/Getting Started.pdf"`
 
-# create the 'lite' DMG without the base files
+createArgs = "-format UDBZ -imagekey bzip2-level=9 -quiet -volname #{volName}"
 
-# code sign the entire bundle once complete - v2 code-signing
-puts "Signing #{bundle}"
-`codesign --deep -s "#{$codeSignIdentity}" #{bundle}`
 
 if !$isRelease
-  puts "Creating DMG"
+  # create the 'lite' DMG without the base files
 
-  createArgs = "-format UDBZ -imagekey bzip2-level=9 -quiet -volname #{volName}"
+  # code sign the entire bundle once complete - v2 code-signing
+  puts "Signing #{bundle}"
+  `codesign --deep -s "#{$codeSignIdentity}" #{bundle}`
+  puts "Creating DMG"
 
   `rm #{dmgPath}`
   `hdiutil create -srcfolder #{dmgDir} #{createArgs} #{dmgPath}`
