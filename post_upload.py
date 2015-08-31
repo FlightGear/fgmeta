@@ -9,7 +9,7 @@ if sys.argv[1] == 'windows':
 if sys.argv[1] == 'linux':
     suffix = '.tar.bz2'
 
-isRelease = False
+isReleaseCandidate = False
 if len(sys.argv) > 2 and sys.argv[2] == 'release':
     isReleaseCandidate = True
 
