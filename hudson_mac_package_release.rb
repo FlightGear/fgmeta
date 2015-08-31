@@ -7,6 +7,19 @@ include FileUtils
 $osgLibs = ['osgFX', 'osgParticle', 'osg', 'osgGA', 'osgText', 'osgUtil', 'osgSim', 'osgViewer', 'osgDB']
 $osgPlugins = ['ac', 'osg', 'freetype', 'imageio', 'rgb', 'txf', 'mdl', '3ds']
 
+# from http://drawingablank.me/blog/ruby-boolean-typecasting.html
+class String
+  def to_bool
+    return true if self == true || self =~ (/^(true|t|yes|y|1)$/i)
+    return false if self == false || self.blank? || self =~ (/^(false|f|no|n|0)$/i)
+    raise ArgumentError.new("invalid value for Boolean: \"#{self}\"")
+  end
+end
+
+class NilClass
+  def to_bool; false; end
+end
+
 def runOsgVersion(option)
   env = "export DYLD_LIBRARY_PATH=#{Dir.pwd}/dist/lib"
   bin = Dir.pwd + "/dist/bin/osgversion"
@@ -20,6 +33,9 @@ $openThreadsSoVersion=runOsgVersion('openthreads-soversion-number')
 $codeSignIdentity = ENV['FG_CODESIGN_IDENTITY']
 puts "Code signing identity is #{$codeSignIdentity}"
 puts "osgVersion=#{osgVersion}, so-number=#{$osgSoVersion}"
+
+$isRelease = ENV['FG_IS_RELEASE'].to_bool
+puts "Is-release? : ##{$isRelease}"
 
 $prefixDir=Dir.pwd + "/dist"
 dmgDir=Dir.pwd + "/image"
@@ -53,8 +69,13 @@ fgCurrentYear = t.year
 fgVersion = File.read("#{srcDir}/version").strip
 volName="\"FlightGear #{fgVersion}\""
 
-dmgPath = Dir.pwd + "/output/FlightGear-#{fgVersion}-nightly.dmg"
-dmgFullPath = Dir.pwd + "/output/FlightGear-#{fgVersion}-nightly-full.dmg"
+if $isRelease
+  dmgPath = "" # no 'lite' build for release candidates
+  dmgFullPath = Dir.pwd + "/output/FlightGear-#{fgVersion}.dmg"
+else
+  dmgPath = Dir.pwd + "/output/FlightGear-#{fgVersion}-nightly.dmg"
+  dmgFullPath = Dir.pwd + "/output/FlightGear-#{fgVersion}-nightly-full.dmg"
+end
 
 puts "Creating directory structure"
 `mkdir -p #{macosDir}`
@@ -106,8 +127,8 @@ File.open("#{contents}/Info.plist", 'w') { |f|
 `cp #{srcDir}/COPYING #{dmgDir}`
 
 # move documentation to a public place
-`mv fgdata/Docs/FGShortRef.pdf "#{dmgDir}/Quick Reference.pdf"`
-`mv fgdata/Docs/getstart.pdf "#{dmgDir}/Getting Started.pdf"`
+`cp fgdata/Docs/FGShortRef.pdf "#{dmgDir}/Quick Reference.pdf"`
+`cp fgdata/Docs/getstart.pdf "#{dmgDir}/Getting Started.pdf"`
 
 # create the 'lite' DMG without the base files
 
@@ -115,15 +136,16 @@ File.open("#{contents}/Info.plist", 'w') { |f|
 puts "Signing #{bundle}"
 `codesign --deep -s "#{$codeSignIdentity}" #{bundle}`
 
-puts "Creating DMG"
+if !$isRelease
+  puts "Creating DMG"
 
-createArgs = "-format UDBZ -imagekey bzip2-level=9 -quiet -volname #{volName}"
+  createArgs = "-format UDBZ -imagekey bzip2-level=9 -quiet -volname #{volName}"
 
-`rm #{dmgPath}`
-`hdiutil create -srcfolder #{dmgDir} #{createArgs} #{dmgPath}`
+  `rm #{dmgPath}`
+  `hdiutil create -srcfolder #{dmgDir} #{createArgs} #{dmgPath}`
+end
 
-
-puts "Creatign full image with data"
+puts "Creating full image with data"
 
 puts "Copying base package files into the image"
 `rsync -a fgdata/ #{resourcesDir}/data`
