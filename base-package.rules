@@ -1,0 +1,9 @@
+- .git
+- *.xcf
+- *.tex
+
+- /fgdata/Textures/Unused
+- /fgdata/Textures/*.orig
+- /fgdata/Docs/source
+- /fgdata/Models/Airspace
+- /fgdata/Models/MNUAV

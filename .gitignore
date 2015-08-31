@@ -20,3 +20,5 @@ archivebuild
 osgbuild
 CMakeCache.txt
 *.pyc
+base_package
+extended-data

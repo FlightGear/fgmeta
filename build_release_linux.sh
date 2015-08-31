@@ -59,5 +59,25 @@ cp flightgear-*.tar.bz2 ../output/.
 echo "Assembling base package"
 cd $WORKSPACE
 
-tar cjf output/FlightGear-$VERSION-data.tar.bz2 fgdata/
+rm -rf base_package
 
+# a: archive mode
+# z: compress
+# delete: 'delete extraneous files from dest dirs'; avoid bug 1344
+# filter: use the rules in our rules file
+
+echo "Copying FGData files"
+rsync -a --delete \
+ --filter 'merge base-package.rules' \
+  fgdata base_package
+
+echo "Syncing aircraft data"
+rsync -a --delete --filter 'merge aircraft.rules' /home/jenkins/fgaddon-3.6.0/ extended-data
+
+echo "Copying aircraft data"
+rsync -a extended-data/ base_package/fgdata
+
+echo "Creating tar archive"
+pushd base_package
+tar cjf output/FlightGear-$VERSION-data.tar.bz2 fgdata/
+popd
