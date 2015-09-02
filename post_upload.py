@@ -89,7 +89,9 @@ for file in incomingFiles:
         m = re.match(r'(\w+)-\d+\.\d+\.\d+-([\w-]+)' + suffix, file)
         latestName = m.group(1) + '-latest-' + m.group(2) + suffix
 
+        print "Creating symlink from " + file + " to " + latestName
         if os.path.exists(latestName):
+            print "\tremoving existing target"
             os.remove(latestName)
         os.symlink(file, latestName)
 
