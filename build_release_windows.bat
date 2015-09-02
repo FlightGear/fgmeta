@@ -81,6 +81,10 @@ subst X: %WORKSPACE%.
 REM ensure output dir is clean since we upload the entirety of it
 rmdir /S /Q output
 
+REM archiving PDB files
+copy %WORKSPACE%\build-fg32\src\Main\RelWithDebInfo\fgfs.pdb %WORKSPACE%\Output\fgfs-x86-%BUILD_NUMBER%.pdb
+copy %WORKSPACE%\build-fg64\src\Main\RelWithDebInfo\fgfs.pdb %WORKSPACE%\Output\fgfs-x64-%BUILD_NUMBER%.pdb
+
 REM indirect way to get command output into an environment variable
 set PATH=%WORKSPACE%\install\msvc100\OpenSceneGraph\bin;%PATH%
 osgversion --so-number > %TEMP%\osg-so-number.txt
