@@ -78,6 +78,9 @@ ECHO Packaging root is %WORKSPACE%
 subst X: /D
 subst X: %WORKSPACE%.
 
+REM ensure output dir is clean since we upload the entirety of it
+rmdir /S output
+
 REM indirect way to get command output into an environment variable
 set PATH=%WORKSPACE%\install\msvc100\OpenSceneGraph\bin;%PATH%
 osgversion --so-number > %TEMP%\osg-so-number.txt
