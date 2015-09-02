@@ -103,7 +103,7 @@ Source: "X:\3rdParty\bin\oalinst.exe"; DestDir: "{app}\bin"; Flags: ignoreversio
 
 ; Include the base package
 #if IncludeData == "TRUE"
-Source: "X:\fgdata\*.*"; DestDir: "{app}\fgdata"; Flags: ignoreversion recursesubdirs skipifsourcedoesntexist
+Source: "X:\fgdata\*.*"; DestDir: "{app}\data"; Flags: ignoreversion recursesubdirs skipifsourcedoesntexist
 #endif
 
 ; 32 bits install
