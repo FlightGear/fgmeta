@@ -1,6 +1,7 @@
 - .git
 - *.xcf
 - *.tex
+- .svn
 
 - /fgdata/Textures/Unused
 - /fgdata/Textures/*.orig
