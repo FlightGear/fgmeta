@@ -79,7 +79,7 @@ subst X: /D
 subst X: %WORKSPACE%.
 
 REM ensure output dir is clean since we upload the entirety of it
-rmdir /S output
+rmdir /S /Q output
 
 REM indirect way to get command output into an environment variable
 set PATH=%WORKSPACE%\install\msvc100\OpenSceneGraph\bin;%PATH%
