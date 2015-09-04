@@ -1,5 +1,9 @@
 #!/usr/bin/python
 
+# this file runs on the download server (download.flightgear.org)
+# from the Jenkins upload-via-ssh jobs. It ensures that only complete
+# uploads are visible (and mirrored to SF).
+
 import os, sys, re, fnmatch
 from subprocess import call
 
@@ -19,6 +23,7 @@ print "Wildcard pattern is:" + allSuffix
 pattern = r'\w+-(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)([\w-]*)' + suffix
 sourceForgeUserHost = "jmturner@frs.sourceforge.net"
 sftpCommandFile = "sftp-commands"
+symbolDir = "/home/jenkins/symbols"
 
 if isReleaseCandidate:
     publicRoot = "/var/www/html/builds/rc"
@@ -113,3 +118,11 @@ if len(oldFiles) > 0:
 for file in newFiles:
     print "Uploading " + file + " to SourceForge"
     call(["scp", file, sourceForgeUserHost + ":" + sourceForgePath + file])
+
+if sys.argv[1] == 'windows':
+    print "Archiving PDB files"
+    for file in os.listdir(incomingDir):
+        if fnmatch.fnmatch(file, "*.pdb"):
+            srcFile = os.path.join(incomingDir, file)
+            outFile = os.path.join(symbolDir, file)
+            os.rename(srcFile, outFile)
