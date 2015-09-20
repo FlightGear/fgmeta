@@ -175,6 +175,10 @@ else:
 catalogNode = sgprops.Node("catalog")
 sgprops.copy(config.getChild("template"), catalogNode)
 
+# version 3 catalog
+catalogNode.getChild("catalog-version", create = True).value = 3
+
+
 mirrorUrls = list(m.value for m in config.getChildren("mirror"))
 
 packagesToGenerate = []

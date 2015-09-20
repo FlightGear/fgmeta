@@ -23,7 +23,7 @@ class VariantData:
     @property
     def catalogNode(self):
         n = sgprops.Node("variant")
-        n.addChild("id").value = self._path
+        n.addChild("id").value = self._path[:-8] # "remove -set.xml" (8 chars)
         n.addChild("name").value = self._name
 
 class PackageData:
@@ -37,9 +37,8 @@ class PackageData:
         self._revision = 0
         self._md5 = None
         self._fileSize = 0
-
+        self._primarySetXmlPath = None
         self._node = sgprops.Node("package")
-        self._node.addChild("id").value = self.id
 
     def setPreviousData(self, node):
         self._previousRevision = node.getValue("revision")
@@ -49,7 +48,7 @@ class PackageData:
 
     @property
     def id(self):
-        return os.path.basename(self._path)
+        return self._primarySetXmlPath
 
     @property
     def thumbnails(self):
@@ -102,7 +101,7 @@ class PackageData:
             if primary:
                 if not primary in self.variants:
                     self._variants[primary] = []
-                self._variants[primary].append(VariantData(self, node))
+                self._variants[primary].append(VariantData(f, node))
                 continue
 
             if foundPrimary:
@@ -112,6 +111,7 @@ class PackageData:
                 continue
             else:
                 foundPrimary = True;
+                self._primarySetXmlPath = f[:-8] # trim -set.xml
 
             self.parsePrimarySetNode(simNode)
 
@@ -164,7 +164,7 @@ class PackageData:
     def generateZip(self, outDir, globalExcludePath):
         self._revision = self._previousRevision + 1
 
-        zipName = self.id + ".zip"
+        zipName = os.path.basename(self.path) + ".zip"
         zipFilePath = os.path.join(outDir, zipName)
 
         os.chdir(os.path.dirname(self.path))
@@ -192,6 +192,7 @@ class PackageData:
         self._md5 = self._previousMD5
 
     def packageNode(self, mirrorUrls, thumbnailUrl):
+        self._node.addChild("id").value = self.id
         self._node.getChild("md5", create = True).value = self._md5
         self._node.getChild("file-size-bytes", create = True).value = self._fileSize
         self._node.getChild("revision", create = True).value = int(self._revision)
@@ -201,6 +202,7 @@ class PackageData:
             self._node.addChild("url").value = m + "/" + self.id + ".zip"
 
         for t in self._thumbnails:
+            self._node.addChild("thumbnail-path").value = t
             self._node.addChild("thumbnail").value = thumbnailUrl + "/" + self.id + "_" + t
 
         for pr in self._variants:
