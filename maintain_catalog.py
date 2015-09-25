@@ -16,6 +16,8 @@ parser.add_argument("--clean", help="Regenerate every package",
      action="store_true")
 parser.add_argument("--update", help="Update/pull SCM source",
      action="store_true")
+parser.add_argument("--force-dirty", dest="forcedirty",
+     help="Mark every package as dirty", action="store_true")
 parser.add_argument("--no-update",
      dest = "noupdate",
      help="Disable updating from SCM source",
@@ -184,13 +186,11 @@ sgprops.copy(config.getChild("template"), catalogNode)
 
 # version 3 catalog
 catalogNode.getChild("catalog-version", create = True).value = 3
-
-
 mirrorUrls = list(m.value for m in config.getChildren("mirror"))
 
 packagesToGenerate = []
 for p in packages.values():
-    if p.isSourceModified:
+    if p.isSourceModified or args.forcedirty:
         packagesToGenerate.append(p)
     else:
         p.useExistingCatalogData()
