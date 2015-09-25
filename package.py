@@ -181,7 +181,7 @@ class PackageData:
             print self.id, "has zip exclude list"
             zipArgs += ["-x@" + excludePath]
 
-        zipArgs += [zipFilePath, self.id]
+        zipArgs += [zipFilePath, self.path]
         subprocess.call(zipArgs)
 
         zipFile = open(zipFilePath, 'r')

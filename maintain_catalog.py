@@ -24,6 +24,7 @@ parser.add_argument("dir", help="Catalog directory")
 args = parser.parse_args()
 
 includePaths = []
+packages = {}
 
 def scanPackages(scmRepo):
     result = []
@@ -55,6 +56,20 @@ def initScmRepository(node):
         raise RuntimeError("No scm/type defined in catalog configuration")
     else:
         raise RuntimeError("Unspported SCM type:" + scmType)
+
+def initRepositories():
+    repositories = []
+
+    for scm in config.getChildren("scm"):
+        scmRepo = initScmRepository(scm)
+        if args.update or (not args.noupdate and scm.getValue("update")):
+            scmRepo.update()
+        # presumably include repos in parse path
+        # TODO: make this configurable
+        includePaths.append(scmRepo.path)
+        repositories.append(scmRepo)
+
+    return repositories
 
 def processUpload(node, outputPath):
     if not node.getValue("enabled", True):
@@ -101,9 +116,6 @@ def parseExistingCatalog():
         except urllib2.URLError as e:
             print "Downloading current catalog failed", e, "from", url
 
-# dictionary
-packages = {}
-
 rootDir = args.dir
 if not os.path.isabs(rootDir):
     rootDir = os.path.abspath(rootDir)
@@ -143,16 +155,11 @@ for i in config.getChildren("include-dir"):
     includePaths.append(i.value)
 
 parseExistingCatalog()
+repositories = initRepositories()
 
-for scm in config.getChildren("scm"):
-    scmRepo = initScmRepository(scm)
-    if args.update or (not args.noupdate and scm.getValue("update")):
-        scmRepo.update()
-    # presumably include repos in parse path
-    # TODO: make this configurable
-    includePaths.append(scmRepo.path)
-
-    for p in scanPackages(scmRepo):
+for scm in repositories:
+    for p in scanPackages(scm):
+        p.scanSetXmlFiles(includePaths)
         packages[p.id] = p
 
 if os.path.exists(existingCatalogPath):
@@ -183,8 +190,6 @@ mirrorUrls = list(m.value for m in config.getChildren("mirror"))
 
 packagesToGenerate = []
 for p in packages.values():
-    p.scanSetXmlFiles(includePaths)
-
     if p.isSourceModified:
         packagesToGenerate.append(p)
     else:
