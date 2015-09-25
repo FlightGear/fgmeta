@@ -64,7 +64,7 @@ class PackageData:
 
     @property
     def scmRevision(self):
-        currentRev = self._scm.scmRevisionForPath(self._path)
+        currentRev = self._scm.scmRevisionForPath(self.path)
         if (currentRev is None):
             raise RuntimeError("Unable to query SCM revision of files")
 
@@ -84,11 +84,11 @@ class PackageData:
         foundPrimary = False
         foundMultiple = False
 
-        for f in os.listdir(self._path):
+        for f in os.listdir(self.path):
             if not f.endswith("-set.xml"):
                 continue
 
-            p = os.path.join(self._path, f)
+            p = os.path.join(self.path, f)
             node = sgprops.readProps(p, includePaths = includes)
             if not node.hasChild("sim"):
                 continue
@@ -106,7 +106,7 @@ class PackageData:
 
             if foundPrimary:
                 if not foundMultiple:
-                    print "Multiple primary -set.xml files at:" + self._path
+                    print "Multiple primary -set.xml files at:" + self.path
                     foundMultiple = True
                 continue
             else:
@@ -116,11 +116,11 @@ class PackageData:
             self.parsePrimarySetNode(simNode)
 
             for n in thumbnailNames:
-                if os.path.exists(os.path.join(self._path, n)):
+                if os.path.exists(os.path.join(self.path, n)):
                     self._thumbnails.append(n)
 
         if not foundPrimary:
-            raise RuntimeError("No primary -set.xml found at:" + self._path)
+            raise RuntimeError("No primary -set.xml found at:" + self.path)
 
 
 
@@ -158,13 +158,14 @@ class PackageData:
 
     def validate(self):
         for t in self._thumbnails:
-            if not os.path.exists(os.path.join(self._path, t)):
+            if not os.path.exists(os.path.join(self.path, t)):
                 raise RuntimeError("missing thumbnail:" + t);
 
     def generateZip(self, outDir, globalExcludePath):
         self._revision = self._previousRevision + 1
 
-        zipName = os.path.basename(self.path) + ".zip"
+        baseName = os.path.basename(self.path)
+        zipName = baseName + ".zip"
         zipFilePath = os.path.join(outDir, zipName)
 
         os.chdir(os.path.dirname(self.path))
@@ -181,7 +182,7 @@ class PackageData:
             print self.id, "has zip exclude list"
             zipArgs += ["-x@" + excludePath]
 
-        zipArgs += [zipFilePath, self.path]
+        zipArgs += [zipFilePath, baseName]
         subprocess.call(zipArgs)
 
         zipFile = open(zipFilePath, 'r')
