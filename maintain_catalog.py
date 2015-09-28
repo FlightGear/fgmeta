@@ -25,6 +25,7 @@ parser.add_argument("--no-update",
 parser.add_argument("dir", help="Catalog directory")
 args = parser.parse_args()
 
+CATALOG_VERSION = 4
 includePaths = []
 packages = {}
 
@@ -184,8 +185,7 @@ else:
 catalogNode = sgprops.Node("catalog")
 sgprops.copy(config.getChild("template"), catalogNode)
 
-# version 3 catalog
-catalogNode.getChild("catalog-version", create = True).value = 3
+catalogNode.getChild("catalog-version", create = True).value = CATALOG_VERSION
 mirrorUrls = list(m.value for m in config.getChildren("mirror"))
 
 packagesToGenerate = []

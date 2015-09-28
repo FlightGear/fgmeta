@@ -199,8 +199,12 @@ class PackageData:
         self._node.getChild("revision", create = True).value = int(self._revision)
         self._node.getChild("scm-revision", create = True).value = self.scmRevision
 
+        baseName = os.path.basename(self.path)
+        self._node.getChild("dir", create = True).value = baseName
+        zipName = baseName + ".zip"
+
         for m in mirrorUrls:
-            self._node.addChild("url").value = m + "/" + self.id + ".zip"
+            self._node.addChild("url").value = m + "/" + zipName
 
         for t in self._thumbnails:
             self._node.addChild("thumbnail-path").value = t
