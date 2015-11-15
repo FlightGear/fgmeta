@@ -15,6 +15,9 @@ mkdir -p output
 rm -rf output/*
 rm -rf $WORKSPACE/dist/include/simgear $WORKSPACE/dist/libSim* $WORKSPACE/dist/libsg*.a
 
+PATH=$PATH:$QTPATH
+echo "Build path is: $PATH"
+
 ###############################################################################
 echo "Starting on SimGear"
 pushd sgBuild
