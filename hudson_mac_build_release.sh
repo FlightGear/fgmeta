@@ -21,29 +21,34 @@ echo "Build path is: $PATH"
 ###############################################################################
 echo "Starting on SimGear"
 pushd sgBuild
-cmake -DCMAKE_INSTALL_PREFIX:PATH=$WORKSPACE/dist -G Xcode ../simgear
+cmake -DCMAKE_INSTALL_PREFIX:PATH=$WORKSPACE/dist -DCMAKE_BUILD_TYPE=RelWithDebInfo ../simgear
 
 # compile
-xcodebuild -configuration RelWithDebInfo -target install  build
+make $MAKEOPTIONS
 
 if [ $? -ne '0' ]; then
     echo "make simgear failed"
     exit 1
 fi
 
+make install
+
+
 popd
 
 ################################################################################
 echo "Starting on FlightGear"
 pushd fgBuild
-cmake -DFG_NIGHTLY=1 -DCMAKE_INSTALL_PREFIX:PATH=$WORKSPACE/dist -G Xcode ../flightgear
+cmake -DFG_NIGHTLY=1 -DCMAKE_INSTALL_PREFIX:PATH=$WORKSPACE/dist -DCMAKE_BUILD_TYPE=RelWithDebInfo ../flightgear
 
-xcodebuild -configuration RelWithDebInfo -target install  build
+make $MAKEOPTIONS
 
 if [ $? -ne '0' ]; then
     echo "make flightgear failed"
     exit 1
 fi
+
+make install
 
 popd
 
