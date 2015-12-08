@@ -6,7 +6,7 @@ aircraftTypeTags = [
 manufacturerTags = [
     "boeing", "cessna", "diamond", "douglas", "bell", "piper",
     "airbus", "vickers", "lockheed", "fokker",
-    "embrarer", "bombardier", "pilatus", "robin",
+    "embraer", "bombardier", "pilatus", "robin",
     "eurocopter"
 ]
 
@@ -55,7 +55,7 @@ featureTags = [
     "etops",
     "floats",
     "amphibious",
-    "supersonic"
+    "airship"
 ]
 
 propulsionTags = [
