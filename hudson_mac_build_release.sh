@@ -24,7 +24,7 @@ pushd sgBuild
 cmake -DCMAKE_INSTALL_PREFIX:PATH=$WORKSPACE/dist -DCMAKE_BUILD_TYPE=RelWithDebInfo ../simgear
 
 # compile
-make $MAKEOPTIONS
+make
 
 if [ $? -ne '0' ]; then
     echo "make simgear failed"
@@ -41,7 +41,7 @@ echo "Starting on FlightGear"
 pushd fgBuild
 cmake -DFG_NIGHTLY=1 -DCMAKE_INSTALL_PREFIX:PATH=$WORKSPACE/dist -DCMAKE_BUILD_TYPE=RelWithDebInfo ../flightgear
 
-make $MAKEOPTIONS
+make
 
 if [ $? -ne '0' ]; then
     echo "make flightgear failed"
