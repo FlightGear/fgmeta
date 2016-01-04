@@ -15,16 +15,28 @@ class VariantData:
         #self._primary = primary
         self._path = path
         self._name = node.getValue("sim/description")
+        if (not self._name):
+            print "Missing description for " + path
+            self._name = "Missing description:" + self.id
 
         # ratings
 
         # seperate thumbnails
 
     @property
+    def name(self):
+        return self._name
+
+    @property
+    def id(self):
+        return self._path[:-8] # "remove -set.xml" (8 chars)
+
+    @property
     def catalogNode(self):
         n = sgprops.Node("variant")
-        n.addChild("id").value = self._path[:-8] # "remove -set.xml" (8 chars)
-        n.addChild("name").value = self._name
+        n.addChild("id").value = self.id
+        n.addChild("name").value = self.name
+        return n
 
 class PackageData:
     def __init__(self, path, scmRepo):

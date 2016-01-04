@@ -22,6 +22,10 @@ parser.add_argument("--no-update",
      dest = "noupdate",
      help="Disable updating from SCM source",
      action="store_true")
+parser.add_argument("--no-upload",
+     dest = "noupload",
+     help="Disable uploading to destination server",
+     action="store_true")
 parser.add_argument("dir", help="Catalog directory")
 args = parser.parse_args()
 
@@ -75,7 +79,7 @@ def initRepositories():
     return repositories
 
 def processUpload(node, outputPath):
-    if not node.getValue("enabled", True):
+    if args.noupload or not node.getValue("enabled", True):
         print "Upload disabled"
         return
 
