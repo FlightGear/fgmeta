@@ -55,7 +55,8 @@ featureTags = [
     "etops",
     "floats",
     "amphibious",
-    "airship"
+    "airship",
+    "aerobatic"
 ]
 
 propulsionTags = [

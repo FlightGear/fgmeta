@@ -120,6 +120,7 @@ class PackageData:
             if foundPrimary:
                 if not foundMultiple:
                     print "Multiple primary -set.xml files at:" + self.path
+                    print "\t" + p
                     foundMultiple = True
                 continue
             else:
