@@ -166,8 +166,11 @@ repositories = initRepositories()
 
 for scm in repositories:
     for p in scanPackages(scm):
-        p.scanSetXmlFiles(includePaths)
-        packages[p.id] = p
+        try:
+            p.scanSetXmlFiles(includePaths)
+            packages[p.id] = p
+        except:
+            print "Skipping SCM package due to exception:", p.path
 
 if os.path.exists(existingCatalogPath):
     try:

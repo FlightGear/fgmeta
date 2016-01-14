@@ -106,7 +106,8 @@ class PackageData:
                 continue
 
             simNode = node.getChild("sim")
-            if (simNode.getValue("exclude", False)):
+            # honour variosu exclusion flags
+            if (simNode.getValue("exclude-from-catalog", False) or simNode.getValue("exclude-from-gui", False)):
                 continue
 
             primary = simNode.getValue("variant-of", None)
