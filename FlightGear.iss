@@ -189,8 +189,8 @@ Name: "{userdocs}\FlightGear\TerraSync"; Permissions: everyone-modify; Check: no
 Name: "{userdocs}\FlightGear\Custom Scenery"; Permissions: everyone-modify; Check: not DirExists(ExpandConstant('{userdocs}\FlightGear\Custom Scenery'))
 
 [Icons]
-Name: "{userdesktop}\FlightGear {#FGVersion}"; Filename: "{app}\bin\fgfs.exe"; Parameters: "--launcher"; WorkingDir: "{app}"; Tasks: desktopicon;
-Name: "{group}\FlightGear Launcher"; Filename: "{app}\bin\fgfs.exe"; Parameters: "--launcher"; WorkingDir: "{app}";
+Name: "{userdesktop}\FlightGear {#FGVersion}"; Filename: "{app}\bin\fgfs.exe"; Parameters: "--launcher"; WorkingDir: "{app}\bin"; Tasks: desktopicon;
+Name: "{group}\FlightGear Launcher"; Filename: "{app}\bin\fgfs.exe"; Parameters: "--launcher"; WorkingDir: "{app}\bin";
 Name: "{group}\FlightGear Manual"; Filename: "{app}\fgdata\Docs\getstart.pdf"
 Name: "{group}\FlightGear Documentation"; Filename: "{app}\fgdata\Docs\index.html"
 Name: "{group}\Flightgear Wiki"; Filename: "http://wiki.flightgear.org"
