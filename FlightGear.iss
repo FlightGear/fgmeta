@@ -198,7 +198,6 @@ Name: "{group}\FlightGear Documentation"; Filename: "{app}\fgdata\Docs\index.htm
 Name: "{group}\Flightgear Wiki"; Filename: "http://wiki.flightgear.org"
 Name: "{group}\Tools\FGRun"; Filename: "{app}\bin\fgrun.exe"; WorkingDir: "{app}";
 Name: "{group}\Tools\Install & Uninstall Scenery"; Filename: "{app}\bin\fgadmin.exe"; WorkingDir: "{app}"
-Name: "{group}\Tools\TerraSync"; Filename: "{app}\bin\terrasync.exe"; Parameters: "-S -p 5505 -d ""{userdocs}\FlightGear\TerraSync"""; WorkingDir: "{app}"
 Name: "{group}\Tools\Uninstall FlightGear"; Filename: "{uninstallexe}"
 Name: "{group}\Tools\js_demo"; Filename: "{app}\bin\js_demo.exe"
 Name: "{group}\Tools\fgjs"; Filename: "cmd"; Parameters: "/k fgjs.exe ""--fg-root={app}\fgdata"""; WorkingDir: "{app}\bin"
@@ -354,8 +353,6 @@ begin
           AddAdvancedFirewallException('FlightGear', 'Allows FlightGear to send and receive data over the multiplayer network and to get METARs.', ExpandConstant('{app}') + '\bin\fgfs.exe', NET_FW_IP_PROTOCOL_ALL, '', '', NET_FW_RULE_DIR_IN);
           AddAdvancedFirewallException('FlightGear', 'Allows FlightGear to send and receive data over the multiplayer network and to get METARs.', ExpandConstant('{app}') + '\bin\fgfs.exe', NET_FW_IP_PROTOCOL_ALL, '', '', NET_FW_RULE_DIR_OUT);
           AddAdvancedFirewallException('FlightGear METAR Utility', 'Allows the FlightGear METAR utility to receive METARs.', ExpandConstant('{app}') + '\bin\metar.exe', NET_FW_IP_PROTOCOL_TCP, '', '80', NET_FW_RULE_DIR_OUT);
-          AddAdvancedFirewallException('FlightGear TerraSync', 'Allows TerraSync to download additional scenery while FlightGear is running.', ExpandConstant('{app}') + '\bin\terrasync.exe', NET_FW_IP_PROTOCOL_ALL, '', '', NET_FW_RULE_DIR_IN);
-          AddAdvancedFirewallException('FlightGear TerraSync', 'Allows TerraSync to download additional scenery while FlightGear is running.', ExpandConstant('{app}') + '\bin\terrasync.exe', NET_FW_IP_PROTOCOL_ALL, '', '', NET_FW_RULE_DIR_OUT);
           AddAdvancedFirewallException('FlightGear FGCom', 'Allows FGCom to establish a connection to FlightGear and the VoIP server for voice ATC communication.', ExpandConstant('{app}') + '\bin\fgcom.exe', NET_FW_IP_PROTOCOL_ALL, '', '', NET_FW_RULE_DIR_IN);
           AddAdvancedFirewallException('FlightGear FGCom', 'Allows FGCom to establish a connection to FlightGear and the VoIP server for voice ATC communication.', ExpandConstant('{app}') + '\bin\fgcom.exe', NET_FW_IP_PROTOCOL_ALL, '', '', NET_FW_RULE_DIR_OUT);
         end
@@ -363,7 +360,6 @@ begin
         begin
           { The Windows XP/Server 2003 firewall does not block outgoing connections at all, so only listening processes should be added }
           AddBasicFirewallException('FlightGear', ExpandConstant('{app}') + '\bin\fgfs.exe');
-          AddBasicFirewallException('FlightGear TerraSync', ExpandConstant('{app}') + '\bin\terrasync.exe');
           AddBasicFirewallException('FlightGear FGCom', ExpandConstant('{app}') + '\bin\fgcom.exe');
         end;
     end;
@@ -375,7 +371,6 @@ begin
     begin
       RemoveFirewallException('FlightGear', ExpandConstant('{app}') + '\bin\fgfs.exe');
       RemoveFirewallException('FlightGear METAR Utility', ExpandConstant('{app}') + '\bin\metar.exe');
-      RemoveFirewallException('FlightGear TerraSync', ExpandConstant('{app}') + '\bin\terrasync.exe');
       RemoveFirewallException('FlightGear FGCom', ExpandConstant('{app}') + '\bin\fgcom.exe');
     end;
 end;
