@@ -75,6 +75,7 @@ Source: "X:\install\msvc100\FGRun\share\locale\*"; DestDir: "{app}\bin\locale"; 
 Source: "X:\3rdParty\bin\zlib.dll"; DestDir: "{app}\bin"; Check: not Is64BitInstallMode
 Source: "X:\3rdParty\bin\OpenAL32.dll"; DestDir: "{app}\bin"; Check: not Is64BitInstallMode
 Source: "X:\3rdParty\bin\libpng16.dll"; DestDir: "{app}\bin"; Check: not Is64BitInstallMode
+Source: "X:\3rdParty\bin\libcurl.dll"; DestDir: "{app}\bin"; Check: not Is64BitInstallMode
 Source: "X:\3rdParty\bin\libintl-8.dll"; DestDir: "{app}\bin"; Check: not Is64BitInstallMode
 Source: "X:\3rdParty\bin\CrashRpt1402.dll"; DestDir: "{app}\bin"; Check: not Is64BitInstallMode
 Source: "X:\3rdParty\bin\crashrpt_lang.ini"; DestDir: "{app}\bin"; Check: not Is64BitInstallMode
@@ -90,6 +91,7 @@ Source: "X:\3rdParty.x64\bin\zlib.dll"; DestDir: "{app}\bin"; Check: Is64BitInst
 Source: "X:\3rdParty.x64\bin\OpenAL32.dll"; DestDir: "{app}\bin"; Check: Is64BitInstallMode
 Source: "X:\3rdParty.x64\bin\vcredist_x64.exe"; DestDir: "{app}\bin"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode
 Source: "X:\3rdParty.x64\bin\libpng16.dll"; DestDir: "{app}\bin"; Check: Is64BitInstallMode
+Source: "X:\3rdParty.x64\bin\libcurl.dll"; DestDir: "{app}\bin"; Check: Is64BitInstallMode
 Source: "X:\3rdParty.x64\bin\libintl-8.dll"; DestDir: "{app}\bin"; Check: Is64BitInstallMode
 Source: "X:\3rdParty.x64\bin\CrashRpt1402.dll"; DestDir: "{app}\bin"; Check: Is64BitInstallMode
 Source: "X:\3rdParty.x64\bin\crashrpt_lang.ini"; DestDir: "{app}\bin"; Check: Is64BitInstallMode

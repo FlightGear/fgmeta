@@ -21,7 +21,7 @@ echo "Build path is: $PATH"
 ###############################################################################
 echo "Starting on SimGear"
 pushd sgBuild
-cmake -DCMAKE_INSTALL_PREFIX:PATH=$WORKSPACE/dist -DCMAKE_BUILD_TYPE=RelWithDebInfo ../simgear
+cmake -DCMAKE_INSTALL_PREFIX:PATH=$WORKSPACE/dist -DENABLE_CURL:BOOL="ON" -DCMAKE_BUILD_TYPE=RelWithDebInfo ../simgear
 
 # compile
 make
