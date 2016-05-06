@@ -19,7 +19,7 @@ rm -rf dist/*
 #####################################################################################
 echo "Starting on SimGear"
 cd sgBuild
-cmake -DCMAKE_INSTALL_PREFIX:PATH=$WORKSPACE/dist -DENABLE_CURL:BOOL="ON" -DSIMGEAR_SHARED:BOOL="ON" ../simgear
+cmake -DCMAKE_INSTALL_PREFIX:PATH=$WORKSPACE/dist -DENABLE_CURL:BOOL="ON" -DENABLE_DNS:BOOL="ON" -DSIMGEAR_SHARED:BOOL="ON" ../simgear
 
 # compile
 make
