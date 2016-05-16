@@ -193,14 +193,14 @@ Name: "{userdocs}\FlightGear\Custom Scenery"; Permissions: everyone-modify; Chec
 [Icons]
 Name: "{userdesktop}\FlightGear {#FGVersion}"; Filename: "{app}\bin\fgfs.exe"; Parameters: "--launcher"; WorkingDir: "{app}\bin"; Tasks: desktopicon;
 Name: "{group}\FlightGear Launcher"; Filename: "{app}\bin\fgfs.exe"; Parameters: "--launcher"; WorkingDir: "{app}\bin";
-Name: "{group}\FlightGear Manual"; Filename: "{app}\fgdata\Docs\getstart.pdf"
-Name: "{group}\FlightGear Documentation"; Filename: "{app}\fgdata\Docs\index.html"
+Name: "{group}\FlightGear Manual"; Filename: "{app}\data\Docs\getstart.pdf"
+Name: "{group}\FlightGear Documentation"; Filename: "{app}\data\Docs\index.html"
 Name: "{group}\Flightgear Wiki"; Filename: "http://wiki.flightgear.org"
 Name: "{group}\Tools\FGRun"; Filename: "{app}\bin\fgrun.exe"; WorkingDir: "{app}";
 Name: "{group}\Tools\Install & Uninstall Scenery"; Filename: "{app}\bin\fgadmin.exe"; WorkingDir: "{app}"
 Name: "{group}\Tools\Uninstall FlightGear"; Filename: "{uninstallexe}"
 Name: "{group}\Tools\js_demo"; Filename: "{app}\bin\js_demo.exe"
-Name: "{group}\Tools\fgjs"; Filename: "cmd"; Parameters: "/k fgjs.exe ""--fg-root={app}\fgdata"""; WorkingDir: "{app}\bin"
+Name: "{group}\Tools\fgjs"; Filename: "cmd"; Parameters: "/k fgjs.exe ""--fg-root={app}\data"""; WorkingDir: "{app}\bin"
 Name: "{group}\Tools\GPSsmooth"; Filename: "cmd"; Parameters: "/k ""{app}\bin\GPSsmooth.exe"" -h"; WorkingDir: "{app}\bin"
 Name: "{group}\Tools\UGsmooth"; Filename: "cmd"; Parameters: "/k ""{app}\bin\UGsmooth.exe"" -h"; WorkingDir: "{app}\bin"
 Name: "{group}\Tools\MIDGsmooth"; Filename: "cmd"; Parameters: "/k ""{app}\bin\MIDGsmooth.exe"" -h"; WorkingDir: "{app}\bin"
@@ -209,7 +209,7 @@ Name: "{group}\Tools\yasim"; Filename: "cmd"; Parameters: "/k ""{app}\bin\yasim.
 Name: "{group}\Tools\fgpanel"; Filename: "cmd"; Parameters: "/k ""{app}\bin\fgpanel.exe"" -h"; WorkingDir: "{app}\bin"
 Name: "{group}\Tools\FGCom"; Filename: "{app}\bin\fgcom.exe"; WorkingDir: "{app}\bin"
 Name: "{group}\Tools\FGCom-testing"; Filename: "{app}\bin\fgcom.exe"; Parameters: "--frequency=910"; WorkingDir: "{app}\bin"
-Name: "{group}\Tools\Explore Documentation Folder"; Filename: "{app}\fgdata\Docs"
+Name: "{group}\Tools\Explore Documentation Folder"; Filename: "{app}\data\Docs"
 
 [Run]
 filename: "cmd.exe"; WorkingDir: "{app}\bin"; Parameters: "/C del msvc*.dll"; Check: FileExists(ExpandConstant('{app}\bin\vcredist_x86.exe'))
