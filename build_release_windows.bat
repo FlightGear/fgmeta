@@ -8,7 +8,6 @@ md build-fgrun32
 cd build-sg32
 cmake ..\simgear -G "Visual Studio 10" ^
                  -DMSVC_3RDPARTY_ROOT=%WORKSPACE% ^
-                 -DENABLE_CURL:BOOL="ON" ^
                  -DCMAKE_INSTALL_PREFIX:PATH=%WORKSPACE%/install/msvc100/SimGear ^
                  -DBOOST_ROOT=%WORKSPACE%/Boost
 cmake --build . --config Release --target INSTALL
@@ -43,7 +42,6 @@ cd build-sg64
 cmake ..\SimGear -G "Visual Studio 10 Win64" ^
                  -DMSVC_3RDPARTY_ROOT=%WORKSPACE% ^
                  -DCMAKE_INSTALL_PREFIX:PATH=%WORKSPACE%/install/msvc100-64/SimGear ^
-                 -DENABLE_CURL:BOOL="ON" ^
                  -DBOOST_ROOT=%WORKSPACE%/Boost
 cmake --build . --config Release --target INSTALL
 
