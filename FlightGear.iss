@@ -21,17 +21,23 @@
 #include "InstallConfig.iss"
 
 #if GetEnv("VSINSTALLDIR") == ""
-  #define VSInstallDir "C:\Program Files (x86)\Microsoft Visual Studio 10.0"
+  #define VSInstallDir "C:\Program Files (x86)\Microsoft Visual Studio 14.0"
 #else
   #define VSInstallDir GetEnv("VSINSTALLDIR")
 #endif
 
 #define VCInstallDir VSInstallDir + "\VC"
-#define OSGInstallDir "X:\install\msvc100\OpenSceneGraph"
-#define OSGPluginsDir OSGInstallDir + "\bin\osgPlugins-" + OSGVersion
+#define InstallDir32 "X:\install\msvc140"
+#define OSGPluginsDir InstallDir32 + "\bin\osgPlugins-" + OSGVersion
 
-#define OSG64InstallDir "X:\install\msvc100-64\OpenSceneGraph"
-#define OSG64PluginsDir OSG64InstallDir + "\bin\osgPlugins-" + OSGVersion
+#define InstallDir64 "X:\install\msvc140-64"
+#define OSG64PluginsDir InstallDir64 + "\bin\osgPlugins-" + OSGVersion
+
+#define ThirdPartyDir "X:\windows-3rd-party\msvc140"
+
+; we copy everything in install/<arch>/bin except these, which aren't
+; useful to the end-user to ship
+#define ExcludedBinaries "*smooth.exe,metar.exe,js_demo.exe,osg*.exe,present3D.exe,osgPlugins-*,*Shadow.dll,*Terrain.dll,*osgUI.dll,*Animation.dll,*Manipulator.dll,*Presentation.dll"
 
 [Setup]
 AppId=FlightGear
@@ -63,45 +69,44 @@ ArchitecturesAllowed=x86 x64
 [Tasks]
 ; NOTE: The following entry contains English phrases ("Create a desktop icon" and "Additional icons"). You are free to translate them into another language if required.
 Name: "desktopicon"; Description: "Create a &desktop icon"; GroupDescription: "Additional icons:"
-Name: "insoal"; Description: "Install OpenAL (the sound engine)"
+;Name: "insoal"; Description: "Install OpenAL (the sound engine)"
 
 [Files]
 ; NOTE: run subst X: F:\ (or whatever path the expanded tree resides at)
 ;Source: "X:\*.txt"; DestDir: "{app}"; Flags: ignoreversion
 ; 32 bits install
-Source: "X:\install\msvc100\FlightGear\bin\*"; DestDir: "{app}\bin"; Flags: ignoreversion recursesubdirs; Check: not Is64BitInstallMode
-Source: "X:\install\msvc100\FGRun\bin\fgrun.exe"; DestDir: "{app}\bin"; Flags: ignoreversion ; Check: not Is64BitInstallMode
-Source: "X:\install\msvc100\FGRun\share\locale\*"; DestDir: "{app}\bin\locale"; Flags: ignoreversion recursesubdirs; Check: not Is64BitInstallMode
-Source: "X:\3rdParty\bin\zlib.dll"; DestDir: "{app}\bin"; Check: not Is64BitInstallMode
-Source: "X:\3rdParty\bin\OpenAL32.dll"; DestDir: "{app}\bin"; Check: not Is64BitInstallMode
-Source: "X:\3rdParty\bin\libpng16.dll"; DestDir: "{app}\bin"; Check: not Is64BitInstallMode
-Source: "X:\3rdParty\bin\libcurl.dll"; DestDir: "{app}\bin"; Check: not Is64BitInstallMode
-Source: "X:\3rdParty\bin\libintl-8.dll"; DestDir: "{app}\bin"; Check: not Is64BitInstallMode
-Source: "X:\3rdParty\bin\CrashRpt1402.dll"; DestDir: "{app}\bin"; Check: not Is64BitInstallMode
-Source: "X:\3rdParty\bin\crashrpt_lang.ini"; DestDir: "{app}\bin"; Check: not Is64BitInstallMode
-Source: "X:\3rdParty\bin\CrashSender1402.exe"; DestDir: "{app}\bin"; Check: not Is64BitInstallMode
-Source: "{#VCInstallDir}\redist\x86\Microsoft.VC100.CRT\*.dll"; DestDir:  "{app}\bin"; Check: not Is64BitInstallMode
-Source: "X:\3rdParty\bin\vcredist_x86.exe"; DestDir: "{app}\bin"; Flags: skipifsourcedoesntexist; Check: not Is64BitInstallMode
+
+Source: "{#InstallDir32}\bin\*.*"; DestDir: "{app}\bin"; Excludes: "{#ExcludedBinaries}"; Flags: ignoreversion recursesubdirs; Check: not Is64BitInstallMode
+Source: "{#InstallDir32}\share\locale\*"; DestDir: "{app}\bin\locale"; Flags: ignoreversion recursesubdirs; Check: not Is64BitInstallMode
+
+Source: "{#ThirdPartyDir}\3rdParty\bin\zlib.dll"; DestDir: "{app}\bin"; Check: not Is64BitInstallMode
+Source: "{#ThirdPartyDir}\3rdParty\bin\OpenAL32.dll"; DestDir: "{app}\bin"; Check: not Is64BitInstallMode
+Source: "{#ThirdPartyDir}\3rdParty\bin\libpng.dll"; DestDir: "{app}\bin"; Check: not Is64BitInstallMode
+Source: "{#ThirdPartyDir}\3rdParty\bin\libcurl.dll"; DestDir: "{app}\bin"; Check: not Is64BitInstallMode
+Source: "{#ThirdPartyDir}\3rdParty\bin\libintl-8.dll"; DestDir: "{app}\bin"; Check: not Is64BitInstallMode
+;Source: "X:\3rdParty\bin\CrashRpt1402.dll"; DestDir: "{app}\bin"; Check: not Is64BitInstallMode
+;Source: "X:\3rdParty\bin\crashrpt_lang.ini"; DestDir: "{app}\bin"; Check: not Is64BitInstallMode
+;Source: "X:\3rdParty\bin\CrashSender1402.exe"; DestDir: "{app}\bin"; Check: not Is64BitInstallMode
+Source: "{#VCInstallDir}\redist\x86\Microsoft.VC140.CRT\*.dll"; DestDir:  "{app}\bin"; Check: not Is64BitInstallMode
 
 ; 64 bits install
-Source: "X:\install\msvc100-64\FlightGear\bin\*"; DestDir: "{app}\bin"; Flags: ignoreversion recursesubdirs; Check: Is64BitInstallMode
-Source: "X:\install\msvc100-64\FGRun\bin\fgrun.exe"; DestDir: "{app}\bin"; Flags: ignoreversion; Check: Is64BitInstallMode
-Source: "X:\install\msvc100-64\FGRun\share\locale\*"; DestDir: "{app}\bin\locale"; Flags: ignoreversion recursesubdirs; Check: Is64BitInstallMode
-Source: "X:\3rdParty.x64\bin\zlib.dll"; DestDir: "{app}\bin"; Check: Is64BitInstallMode
-Source: "X:\3rdParty.x64\bin\OpenAL32.dll"; DestDir: "{app}\bin"; Check: Is64BitInstallMode
-Source: "X:\3rdParty.x64\bin\vcredist_x64.exe"; DestDir: "{app}\bin"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode
-Source: "X:\3rdParty.x64\bin\libpng16.dll"; DestDir: "{app}\bin"; Check: Is64BitInstallMode
-Source: "X:\3rdParty.x64\bin\libcurl.dll"; DestDir: "{app}\bin"; Check: Is64BitInstallMode
-Source: "X:\3rdParty.x64\bin\libintl-8.dll"; DestDir: "{app}\bin"; Check: Is64BitInstallMode
-Source: "X:\3rdParty.x64\bin\CrashRpt1402.dll"; DestDir: "{app}\bin"; Check: Is64BitInstallMode
-Source: "X:\3rdParty.x64\bin\crashrpt_lang.ini"; DestDir: "{app}\bin"; Check: Is64BitInstallMode
-Source: "X:\3rdParty.x64\bin\CrashSender1402.exe"; DestDir: "{app}\bin"; Check: Is64BitInstallMode
-Source: "{#VCInstallDir}\redist\x64\Microsoft.VC100.CRT\*.dll"; DestDir: "{app}\bin"; Check: Is64BitInstallMode
+Source: "{#InstallDir64}\bin\*.*"; DestDir: "{app}\bin"; Excludes: "{#ExcludedBinaries}"; Flags: ignoreversion recursesubdirs; Check: Is64BitInstallMode
+Source: "{#InstallDir64}\share\locale\*"; DestDir: "{app}\bin\locale"; Flags: ignoreversion recursesubdirs; Check: Is64BitInstallMode
+
+Source: "{#ThirdPartyDir}\3rdParty.x64\bin\zlib.dll"; DestDir: "{app}\bin"; Check: Is64BitInstallMode
+Source: "{#ThirdPartyDir}\3rdParty.x64\bin\OpenAL32.dll"; DestDir: "{app}\bin"; Check: Is64BitInstallMode
+Source: "{#ThirdPartyDir}\3rdParty.x64\bin\libpng.dll"; DestDir: "{app}\bin"; Check: Is64BitInstallMode
+Source: "{#ThirdPartyDir}\3rdParty.x64\bin\libcurl.dll"; DestDir: "{app}\bin"; Check: Is64BitInstallMode
+Source: "{#ThirdPartyDir}\3rdParty.x64\bin\libintl-8.dll"; DestDir: "{app}\bin"; Check: Is64BitInstallMode
+;Source: "X:\3rdParty.x64\bin\CrashRpt1402.dll"; DestDir: "{app}\bin"; Check: Is64BitInstallMode
+;Source: "X:\3rdParty.x64\bin\crashrpt_lang.ini"; DestDir: "{app}\bin"; Check: Is64BitInstallMode
+;Source: "X:\3rdParty.x64\bin\CrashSender1402.exe"; DestDir: "{app}\bin"; Check: Is64BitInstallMode
+Source: "{#VCInstallDir}\redist\x64\Microsoft.VC140.CRT\*.dll"; DestDir: "{app}\bin"; Check: Is64BitInstallMode
 
 ; 32/64 bits install
 ;NOTE: FGPanel has no 64 bits equivalent, so we are using the 32 bits binary for 32&64 bits OS
-Source: "X:\install\msvc100\FlightGear\bin\fgpanel.exe"; DestDir: "{app}\bin"; Flags: ignoreversion
-Source: "X:\3rdParty\bin\oalinst.exe"; DestDir: "{app}\bin"; Flags: ignoreversion skipifsourcedoesntexist
+Source: "{#InstallDir32}\bin\fgpanel.exe"; DestDir: "{app}\bin"; Flags: ignoreversion
+;Source: "X:\3rdParty\bin\oalinst.exe"; DestDir: "{app}\bin"; Flags: ignoreversion skipifsourcedoesntexist
 
 ; Include the base package
 #if IncludeData == "TRUE"
@@ -109,16 +114,6 @@ Source: "X:\fgdata\*.*"; DestDir: "{app}\data"; Flags: ignoreversion recursesubd
 #endif
 
 ; 32 bits install
-Source: "{#OSGInstallDir}\bin\osg{#OSGSoNumber}-osg.dll"; DestDir: "{app}\bin"; Check: not Is64BitInstallMode
-Source: "{#OSGInstallDir}\bin\osg{#OSGSoNumber}-osgDB.dll"; DestDir: "{app}\bin"; Check: not Is64BitInstallMode
-Source: "{#OSGInstallDir}\bin\osg{#OSGSoNumber}-osgGA.dll"; DestDir: "{app}\bin"; Check: not Is64BitInstallMode
-Source: "{#OSGInstallDir}\bin\osg{#OSGSoNumber}-osgParticle.dll"; DestDir: "{app}\bin"; Check: not Is64BitInstallMode
-Source: "{#OSGInstallDir}\bin\osg{#OSGSoNumber}-osgText.dll"; DestDir: "{app}\bin"; Check: not Is64BitInstallMode
-Source: "{#OSGInstallDir}\bin\osg{#OSGSoNumber}-osgUtil.dll"; DestDir: "{app}\bin"; Check: not Is64BitInstallMode
-Source: "{#OSGInstallDir}\bin\osg{#OSGSoNumber}-osgViewer.dll"; DestDir: "{app}\bin"; Check: not Is64BitInstallMode
-Source: "{#OSGInstallDir}\bin\osg{#OSGSoNumber}-osgSim.dll"; DestDir: "{app}\bin"; Check: not Is64BitInstallMode
-Source: "{#OSGInstallDir}\bin\osg{#OSGSoNumber}-osgFX.dll"; DestDir: "{app}\bin"; Check: not Is64BitInstallMode
-Source: "{#OSGInstallDir}\bin\ot{#OTSoNumber}-OpenThreads.dll"; DestDir: "{app}\bin"; Check: not Is64BitInstallMode
 Source: "{#OSGPluginsDir}\osgdb_ac.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Check: not Is64BitInstallMode
 Source: "{#OSGPluginsDir}\osgdb_osg.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Check: not Is64BitInstallMode
 Source: "{#OSGPluginsDir}\osgdb_osga.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Check: not Is64BitInstallMode
@@ -130,8 +125,6 @@ Source: "{#OSGPluginsDir}\osgdb_png.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVe
 Source: "{#OSGPluginsDir}\osgdb_dds.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Check: not Is64BitInstallMode
 Source: "{#OSGPluginsDir}\osgdb_txf.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Check: not Is64BitInstallMode
 Source: "{#OSGPluginsDir}\osgdb_tiff.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Check: not Is64BitInstallMode
-Source: "{#OSGPluginsDir}\osgdb_ogr.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Check: not Is64BitInstallMode
-Source: "{#OSGPluginsDir}\osgdb_gdal.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Check: not Is64BitInstallMode
 Source: "{#OSGPluginsDir}\osgdb_freetype.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Check: not Is64BitInstallMode
 Source: "{#OSGPluginsDir}\osgdb_serializers_osg.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Check: not Is64BitInstallMode
 Source: "{#OSGPluginsDir}\osgdb_serializers_osganimation.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Check: not Is64BitInstallMode
@@ -147,16 +140,6 @@ Source: "{#OSGPluginsDir}\osgdb_deprecated_osg.dll"; DestDir: "{app}\bin\osgPlug
 Source: "{#OSGPluginsDir}\osgdb_deprecated_osgparticle.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Check: not Is64BitInstallMode
 
 ; 64 bits install
-Source: "{#OSG64InstallDir}\bin\osg{#OSGSoNumber}-osg.dll"; DestDir: "{app}\bin"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode
-Source: "{#OSG64InstallDir}\bin\osg{#OSGSoNumber}-osgDB.dll"; DestDir: "{app}\bin"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode
-Source: "{#OSG64InstallDir}\bin\osg{#OSGSoNumber}-osgGA.dll"; DestDir: "{app}\bin"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode
-Source: "{#OSG64InstallDir}\bin\osg{#OSGSoNumber}-osgParticle.dll"; DestDir: "{app}\bin"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode
-Source: "{#OSG64InstallDir}\bin\osg{#OSGSoNumber}-osgText.dll"; DestDir: "{app}\bin"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode
-Source: "{#OSG64InstallDir}\bin\osg{#OSGSoNumber}-osgUtil.dll"; DestDir: "{app}\bin"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode
-Source: "{#OSG64InstallDir}\bin\osg{#OSGSoNumber}-osgViewer.dll"; DestDir: "{app}\bin"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode
-Source: "{#OSG64InstallDir}\bin\osg{#OSGSoNumber}-osgSim.dll"; DestDir: "{app}\bin"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode
-Source: "{#OSG64InstallDir}\bin\osg{#OSGSoNumber}-osgFX.dll"; DestDir: "{app}\bin"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode
-Source: "{#OSG64InstallDir}\bin\ot{#OTSoNumber}-OpenThreads.dll"; DestDir: "{app}\bin"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode
 Source: "{#OSG64PluginsDir}\osgdb_ac.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode
 Source: "{#OSG64PluginsDir}\osgdb_osg.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode
 Source: "{#OSG64PluginsDir}\osgdb_osga.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode
@@ -168,8 +151,6 @@ Source: "{#OSG64PluginsDir}\osgdb_png.dll"; DestDir: "{app}\bin\osgPlugins-{#OSG
 Source: "{#OSG64PluginsDir}\osgdb_dds.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode
 Source: "{#OSG64PluginsDir}\osgdb_txf.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode
 Source: "{#OSG64PluginsDir}\osgdb_tiff.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode
-Source: "{#OSG64PluginsDir}\osgdb_ogr.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode
-Source: "{#OSG64PluginsDir}\osgdb_gdal.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode
 Source: "{#OSG64PluginsDir}\osgdb_freetype.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode
 Source: "{#OSG64PluginsDir}\osgdb_serializers_osg.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode
 Source: "{#OSG64PluginsDir}\osgdb_serializers_osganimation.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode
@@ -197,14 +178,8 @@ Name: "{group}\FlightGear Manual"; Filename: "{app}\data\Docs\getstart.pdf"
 Name: "{group}\FlightGear Documentation"; Filename: "{app}\data\Docs\index.html"
 Name: "{group}\Flightgear Wiki"; Filename: "http://wiki.flightgear.org"
 Name: "{group}\Tools\FGRun"; Filename: "{app}\bin\fgrun.exe"; WorkingDir: "{app}";
-Name: "{group}\Tools\Install & Uninstall Scenery"; Filename: "{app}\bin\fgadmin.exe"; WorkingDir: "{app}"
 Name: "{group}\Tools\Uninstall FlightGear"; Filename: "{uninstallexe}"
-Name: "{group}\Tools\js_demo"; Filename: "{app}\bin\js_demo.exe"
 Name: "{group}\Tools\fgjs"; Filename: "cmd"; Parameters: "/k fgjs.exe ""--fg-root={app}\data"""; WorkingDir: "{app}\bin"
-Name: "{group}\Tools\GPSsmooth"; Filename: "cmd"; Parameters: "/k ""{app}\bin\GPSsmooth.exe"" -h"; WorkingDir: "{app}\bin"
-Name: "{group}\Tools\UGsmooth"; Filename: "cmd"; Parameters: "/k ""{app}\bin\UGsmooth.exe"" -h"; WorkingDir: "{app}\bin"
-Name: "{group}\Tools\MIDGsmooth"; Filename: "cmd"; Parameters: "/k ""{app}\bin\MIDGsmooth.exe"" -h"; WorkingDir: "{app}\bin"
-Name: "{group}\Tools\metar"; Filename: "cmd"; Parameters: "/k ""{app}\bin\metar.exe"" -h"; WorkingDir: "{app}\bin"
 Name: "{group}\Tools\yasim"; Filename: "cmd"; Parameters: "/k ""{app}\bin\yasim.exe"" -h"; WorkingDir: "{app}\bin"
 Name: "{group}\Tools\fgpanel"; Filename: "cmd"; Parameters: "/k ""{app}\bin\fgpanel.exe"" -h"; WorkingDir: "{app}\bin"
 Name: "{group}\Tools\FGCom"; Filename: "{app}\bin\fgcom.exe"; WorkingDir: "{app}\bin"
@@ -212,15 +187,9 @@ Name: "{group}\Tools\FGCom-testing"; Filename: "{app}\bin\fgcom.exe"; Parameters
 Name: "{group}\Tools\Explore Documentation Folder"; Filename: "{app}\data\Docs"
 
 [Run]
-filename: "cmd.exe"; WorkingDir: "{app}\bin"; Parameters: "/C del msvc*.dll"; Check: FileExists(ExpandConstant('{app}\bin\vcredist_x86.exe'))
-filename: "cmd.exe"; WorkingDir: "{app}\bin"; Parameters: "/C del msvc*.dll"; Check: FileExists(ExpandConstant('{app}\bin\vcredist_x64.exe'))
-filename: "{app}\bin\vcredist_x86.exe"; WorkingDir: "{app}\bin"; Parameters: "/passive /norestart"; Description: "Installing MS Visual C++ runtime components"; Check: FileExists(ExpandConstant('{app}\bin\vcredist_x86.exe'))
-filename: "{app}\bin\vcredist_x64.exe"; WorkingDir: "{app}\bin"; Parameters: "/passive /norestart"; Description: "Installing MS Visual C++ runtime components"; Check: Is64BitInstallMode and FileExists(ExpandConstant('{app}\bin\vcredist_x64.exe'))
-filename: "{app}\bin\oalinst.exe"; WorkingDir: "{app}\bin"; Description: "Installing OpenAL"; Check: IsTaskSelected('insoal') and FileExists(ExpandConstant('{app}\bin\oalinst.exe'))
+; filename: "{app}\bin\oalinst.exe"; WorkingDir: "{app}\bin"; Description: "Installing OpenAL"; Check: IsTaskSelected('insoal') and FileExists(ExpandConstant('{app}\bin\oalinst.exe'))
 ; Put installation directory into the fgrun.prefs
 filename: "{app}\bin\fgrun.exe"; WorkingDir: "{app}\bin"; Parameters: "--silent ""--fg-exe={app}\bin\fgfs.exe"" ""--fg-root={app}\data"" ""--fg-scenery={userdocs}\FlightGear\Custom Scenery;{app}\data\Scenery;{userdocs}\FlightGear\TerraSync"" ""--fg-aircraft={userdocs}\FlightGear\Aircraft"" ""--terrasync-dir={userdocs}\FlightGear\TerraSync"" --version={#FGVersion}"
-; Put installation and source directories into the fgadmin.prefs
-filename: "{app}\bin\fgadmin.exe"; WorkingDir: "{app}\bin"; Parameters: "--silent ""--install-source={src}\..\Scenery"" ""--scenery-dest={userdocs}\FlightGear\Custom Scenery"""
 
 [Code]
 const
@@ -352,7 +321,6 @@ begin
           { IN and OUT rules must be specified separately, otherwise the firewall will create only the IN rule }
           AddAdvancedFirewallException('FlightGear', 'Allows FlightGear to send and receive data over the multiplayer network and to get METARs.', ExpandConstant('{app}') + '\bin\fgfs.exe', NET_FW_IP_PROTOCOL_ALL, '', '', NET_FW_RULE_DIR_IN);
           AddAdvancedFirewallException('FlightGear', 'Allows FlightGear to send and receive data over the multiplayer network and to get METARs.', ExpandConstant('{app}') + '\bin\fgfs.exe', NET_FW_IP_PROTOCOL_ALL, '', '', NET_FW_RULE_DIR_OUT);
-          AddAdvancedFirewallException('FlightGear METAR Utility', 'Allows the FlightGear METAR utility to receive METARs.', ExpandConstant('{app}') + '\bin\metar.exe', NET_FW_IP_PROTOCOL_TCP, '', '80', NET_FW_RULE_DIR_OUT);
           AddAdvancedFirewallException('FlightGear FGCom', 'Allows FGCom to establish a connection to FlightGear and the VoIP server for voice ATC communication.', ExpandConstant('{app}') + '\bin\fgcom.exe', NET_FW_IP_PROTOCOL_ALL, '', '', NET_FW_RULE_DIR_IN);
           AddAdvancedFirewallException('FlightGear FGCom', 'Allows FGCom to establish a connection to FlightGear and the VoIP server for voice ATC communication.', ExpandConstant('{app}') + '\bin\fgcom.exe', NET_FW_IP_PROTOCOL_ALL, '', '', NET_FW_RULE_DIR_OUT);
         end
@@ -370,7 +338,6 @@ begin
   if CurUninstallStep = usPostUninstall then
     begin
       RemoveFirewallException('FlightGear', ExpandConstant('{app}') + '\bin\fgfs.exe');
-      RemoveFirewallException('FlightGear METAR Utility', ExpandConstant('{app}') + '\bin\metar.exe');
       RemoveFirewallException('FlightGear FGCom', ExpandConstant('{app}') + '\bin\fgcom.exe');
     end;
 end;
