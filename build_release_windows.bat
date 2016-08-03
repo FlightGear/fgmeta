@@ -2,10 +2,13 @@
 IF NOT DEFINED WORKSPACE SET WORKSPACE=%~dp0
 
 REM following are for testing the script locally
-REM SET PATH=%PATH%;C:\"Program Files"\CMake\bin;C:\"Program Files (x86)\Inno Setup 5"\
+REM SET PATH=%PATH%;%ProgramFiles%\CMake\bin;%ProgramFiles(x86)%\"Inno Setup 5"\
 REM SET QT5SDK32=C:\Qt\5.6\msvc2015
 REM SET QT5SDK64=C:\Qt\5.6\msvc2015_64
 REM SET IS_NIGHTLY_BUILD=1
+
+SET OSG32=%WORKSPACE%\install\msvc140\OpenSceneGraph
+SET OSG64=%WORKSPACE%\install\msvc140-64\OpenSceneGraph
 
 REM 32bits
 md build-sg32
@@ -15,6 +18,7 @@ cd build-sg32
 cmake ..\simgear -G "Visual Studio 14" ^
                  -DMSVC_3RDPARTY_ROOT=%WORKSPACE%/windows-3rd-party/msvc140 ^
                  -DBOOST_ROOT=%WORKSPACE%/windows-3rd-party ^
+                 -DCMAKE_PREFIX_PATH:PATH=%OSG32% ^
                  -DCMAKE_INSTALL_PREFIX:PATH=%WORKSPACE%/install/msvc140
 cmake --build . --config Release --target INSTALL
 
@@ -22,14 +26,16 @@ cd ..\build-fg32
 cmake ..\flightgear -G "Visual Studio 14" ^
                     -DMSVC_3RDPARTY_ROOT=%WORKSPACE%/windows-3rd-party/msvc140 ^
                     -DCMAKE_INSTALL_PREFIX:PATH=%WORKSPACE%/install/msvc140 ^
+                    -DCMAKE_PREFIX_PATH:PATH=%WORKSPACE%/install/msvc140/OpenSceneGraph ^
                     -DBOOST_ROOT=%WORKSPACE%/windows-3rd-party ^
-                    -DCMAKE_PREFIX_PATH=%QT5SDK32%
+                    -DCMAKE_PREFIX_PATH=%QT5SDK32%;%OSG32%
 cmake --build . --config Release --target INSTALL
 
 cd ..\build-fgrun32
 cmake ..\fgrun -G "Visual Studio 14" ^
                -DMSVC_3RDPARTY_ROOT:PATH=%WORKSPACE%/windows-3rd-party/msvc140 ^
                -DBOOST_ROOT=%WORKSPACE%/windows-3rd-party ^
+               -DCMAKE_PREFIX_PATH:PATH=%OSG32% ^
                -DCMAKE_INSTALL_PREFIX:PATH=%WORKSPACE%/install/msvc140
 cmake --build . --config Release --target INSTALL
 
@@ -43,6 +49,7 @@ cd build-sg64
 cmake ..\SimGear -G "Visual Studio 14 Win64" ^
                  -DMSVC_3RDPARTY_ROOT=%WORKSPACE%/windows-3rd-party/msvc140 ^
                  -DBOOST_ROOT=%WORKSPACE%/windows-3rd-party ^
+                 -DCMAKE_PREFIX_PATH:PATH=%OSG64% ^
                  -DCMAKE_INSTALL_PREFIX:PATH=%WORKSPACE%/install/msvc140-64
 cmake --build . --config Release --target INSTALL
 
@@ -51,13 +58,14 @@ cmake ..\flightgear -G "Visual Studio 14 Win64" ^
                     -DMSVC_3RDPARTY_ROOT=%WORKSPACE%/windows-3rd-party/msvc140 ^
                     -DBOOST_ROOT=%WORKSPACE%/windows-3rd-party ^
                     -DCMAKE_INSTALL_PREFIX:PATH=%WORKSPACE%/install/msvc140-64 ^
-                    -DCMAKE_PREFIX_PATH=%QT5SDK64%
+                    -DCMAKE_PREFIX_PATH=%QT5SDK64%;%OSG64%
 cmake --build . --config Release --target INSTALL
 
 cd ..\build-fgrun64
 cmake ..\fgrun -G "Visual Studio 14 Win64" ^
                -DMSVC_3RDPARTY_ROOT=%WORKSPACE%/windows-3rd-party/msvc140 ^
                -DBOOST_ROOT=%WORKSPACE%/windows-3rd-party ^
+               -DCMAKE_PREFIX_PATH:PATH=%OSG64% ^
                -DCMAKE_INSTALL_PREFIX:PATH=%WORKSPACE%/install/msvc140-64
 
 cmake --build . --config Release --target INSTALL
@@ -82,7 +90,7 @@ copy %WORKSPACE%\build-fg32\src\Main\RelWithDebInfo\fgfs.pdb %WORKSPACE%\Output\
 copy %WORKSPACE%\build-fg64\src\Main\RelWithDebInfo\fgfs.pdb %WORKSPACE%\Output\fgfs-x64-%BUILD_NUMBER%.pdb
 
 REM indirect way to get command output into an environment variable
-set PATH=%WORKSPACE%\install\msvc140\bin;%PATH%
+set PATH=%OSG32%\bin;%PATH%
 osgversion --so-number > %TEMP%\osg-so-number.txt
 osgversion --version-number > %TEMP%\osg-version.txt
 osgversion --openthreads-soversion-number > %TEMP%\openthreads-so-number.txt
