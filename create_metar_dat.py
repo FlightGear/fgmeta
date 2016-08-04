@@ -2,7 +2,7 @@
 #
 # create_metar_dat.py
 #
-# Script to create metar.dat.gz by checking weather.noaa.gov for stations
+# Script to create metar.dat.gz by checking tgftp.nws.noaa.gov for stations
 # that have reported recently.
 #
 # Usage: create_metar_dat.py [OUTPUT_FILENAME]
@@ -36,7 +36,7 @@ import urllib.request
 
 filename = "metar.dat.gz" if len(sys.argv) <= 1 else sys.argv[1]
 max_age_days = 7
-url = "http://weather.noaa.gov/pub/data/observations/metar/stations/"
+url = "http://tgftp.nws.noaa.gov/data/observations/metar/stations/"
 
 now = datetime.datetime.now()
 script = os.path.basename(__file__)
