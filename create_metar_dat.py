@@ -46,7 +46,7 @@ class ParseException(Exception):
 
 def stations():
     for line in urllib.request.urlopen(url).readlines():
-        if line.startswith(b"<img"):
+        if b".TXT" in line:
             yield line
 
 def active_stations():
@@ -54,9 +54,9 @@ def active_stations():
     icao_pattern = re.compile("[A-Z][A-Z0-9]{3}")
     for station in stations():
         tokens = station.split()
-        last_modified = tokens[5]
+        last_modified = tokens[2][14:25]
         if dateutil.parser.parse(last_modified) > cutoff:
-            icao = tokens[4][16:20:].decode()
+            icao = tokens[1][16:20:].decode()
             # Sanity check on parsed ICAO code.
             if not icao_pattern.match(icao):
                 raise ParseException("Dubious ICAO code: " + icao)
