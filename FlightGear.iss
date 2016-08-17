@@ -69,7 +69,7 @@ ArchitecturesAllowed=x86 x64
 
 ; Sign tool must be defined in the Inno Setup GUI, to avoid
 ; exposing the certificate password
-SignTool=fg_code_sign1
+; SignTool=fg_code_sign1
 
 [Tasks]
 ; NOTE: The following entry contains English phrases ("Create a desktop icon" and "Additional icons"). You are free to translate them into another language if required.
