@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--Template catalog - copy and modify for your site as required-->
+<PropertyList>
+  <local-output>/home/curt/Projects/FlightGear/ftp/Aircraft</local-output>
+  <download-url n="0">http://mirrors.ibiblio.org/flightgear/ftp/Aircraft/</download-url>
+  <thumbnail-url n="0">http://mirrors.ibiblio.org/flightgear/ftp/Aircraft/thumbnails</thumbnail-url>
+  <scm>
+    <type>svn</type>
+    <path>/home/curt/Projects/FlightGear/flightgear-fgaddon/Aircraft</path>
+    <skip>NTPS</skip>
+    <skip>c172</skip>
+    <skip>tu134</skip>
+  </scm>
+  <!-- <scm>
+       <type>git</type>
+       <update type="bool">false</update>
+       <path>/Users/jmt/FGFS/fgdata</path>
+       <url>git://git.code.sf.net/p/flightgear/fgdata</url>
+       </scm> -->
+  <upload n="0">
+    <enabled type="bool">true</enabled>
+    <type>rsync-ssh</type>
+    <remote>fgfs:/home/fgfs/fgfs.goneabitbursar.com/official</remote>
+  </upload>
+</PropertyList>
