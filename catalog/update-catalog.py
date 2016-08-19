@@ -124,6 +124,7 @@ def scan_dir_for_change_date_mtime(path):
 
 def make_aircraft_zip(repo_path, name, zip_file):
     print "Updating:", name + '.zip'
+    savedir = os.getcwd()
     os.chdir(repo_path)
     if os.path.exists(zip_file):
         os.remove(zip_file)
@@ -134,10 +135,12 @@ def make_aircraft_zip(repo_path, name, zip_file):
         print "warning: no zip-excludes.lst file provided", zip_excludes
     command += [zip_file, name]
     subprocess.call(command)
+    os.chdir(savedir)
 
 def get_md5sum(file):
     f = open(file, 'r')
     md5sum = hashlib.md5(f.read()).hexdigest()
+    f.close()
     return md5sum
 
 #def get_file_stats(file):
