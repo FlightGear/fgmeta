@@ -108,13 +108,13 @@ function _gitUpdate(){
   git diff --exit-code 2>&1 > /dev/null
   if [ $? != 1 ]; then
     set -e
-    git checkout -f $branch
     git pull -r
+    git checkout -f $branch
   else
     set -e
     git stash save -u -q
-    git checkout -f $branch
     git pull -r
+    git checkout -f $branch
     git stash pop -q
   fi
 }
