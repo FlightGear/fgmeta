@@ -16,7 +16,7 @@
 ;
 ;     C:\> subst X: F:\Path\to\FlightGear\root
 ;     C:\> subst X: F:\
-;                             
+;
 
 #include "InstallConfig.iss"
 
@@ -74,7 +74,7 @@ ArchitecturesAllowed=x86 x64
 [Tasks]
 ; NOTE: The following entry contains English phrases ("Create a desktop icon" and "Additional icons"). You are free to translate them into another language if required.
 Name: "desktopicon"; Description: "Create a &desktop icon"; GroupDescription: "Additional icons:"
-;Name: "insoal"; Description: "Install OpenAL (the sound engine)"
+Name: "insoal"; Description: "Install OpenAL (the sound engine)"
 
 [Files]
 ; NOTE: run subst X: F:\ (or whatever path the expanded tree resides at)
@@ -111,7 +111,7 @@ Source: "{#VCInstallDir}\redist\x64\Microsoft.VC140.CRT\*.dll"; DestDir: "{app}\
 ; 32/64 bits install
 ;NOTE: FGPanel has no 64 bits equivalent, so we are using the 32 bits binary for 32&64 bits OS
 Source: "{#InstallDir32}\bin\fgpanel.exe"; DestDir: "{app}\bin"; Flags: ignoreversion
-;Source: "X:\3rdParty\bin\oalinst.exe"; DestDir: "{app}\bin"; Flags: ignoreversion skipifsourcedoesntexist
+Source: "{#ThirdPartyDir}\..\oalinst.exe"; DestDir: "{app}\bin"; Flags: ignoreversion skipifsourcedoesntexist
 
 ; Include the base package
 #if IncludeData == "TRUE"
@@ -216,7 +216,7 @@ Name: "{group}\Tools\FGCom-testing"; Filename: "{app}\bin\fgcom.exe"; Parameters
 Name: "{group}\Tools\Explore Documentation Folder"; Filename: "{app}\data\Docs"
 
 [Run]
-; filename: "{app}\bin\oalinst.exe"; WorkingDir: "{app}\bin"; Description: "Installing OpenAL"; Check: IsTaskSelected('insoal') and FileExists(ExpandConstant('{app}\bin\oalinst.exe'))
+filename: "{app}\bin\oalinst.exe"; WorkingDir: "{app}\bin"; Description: "Installing OpenAL"; Check: IsTaskSelected('insoal') and FileExists(ExpandConstant('{app}\bin\oalinst.exe'))
 ; Put installation directory into the fgrun.prefs
 filename: "{app}\bin\fgrun.exe"; WorkingDir: "{app}\bin"; Parameters: "--silent ""--fg-exe={app}\bin\fgfs.exe"" ""--fg-root={app}\data"" ""--fg-scenery={userdocs}\FlightGear\Custom Scenery;{app}\data\Scenery;{userdocs}\FlightGear\TerraSync"" ""--fg-aircraft={userdocs}\FlightGear\Aircraft"" ""--terrasync-dir={userdocs}\FlightGear\TerraSync"" --version={#FGVersion}"
 
