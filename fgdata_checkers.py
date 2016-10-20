@@ -476,8 +476,8 @@ Nasal (Canvas map) probably wouldn't break anything, but guessing it's a bad ide
         base_texture_files=[]
         for t in find_unused_textures(input_path,return_used_noregions=True):
             base_texture_files.extend([path_join("Textures",t),path_join("Textures.high",t)])
-    #no longer a significant problem with exclude_dirs: if os.path.exists(path_join(input_path,".git")):
-        #print(input_path,"appears to be a git clone; this will work, but the result will be larger than starting from a standard flightgear-data package.\nTo create this use (adjusting paths as necessary) rsync -av --filter=\"merge /home/rnpalmer/fs_dev/git/fgmeta/base-package.rules\" ~/fs_dev/git/fgdata ~/fs_dev/flightgear/data_full")
+    #no longer a significant problem with exclude_dirs, and no longer exists for new fgdata: if os.path.exists(path_join(input_path,".git")):
+        #print(input_path,"""appears to be a git clone; this will work, but the result will be larger than starting from a standard flightgear-data package.\nTo create this use (adjusting paths as necessary) rsync -av --filter="merge /home/rnpalmer/FlightGear/source/fgmeta/base-package.rules" ~/FlightGear/source/fgdata ~/FlightGear/data_full""")
     if os.path.exists(output_path.format("base")) and os.listdir(output_path.format("base")):
         print("output path",output_path,"non-empty, aborting to avoid data loss\nIf you did want to lose its previous contents, run:\nrm -r",output_path,"\nthen re-run this script")
         return
