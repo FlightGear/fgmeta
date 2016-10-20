@@ -32,7 +32,7 @@ FGVERSION="release/$(git ls-remote --heads git://git.code.sf.net/p/flightgear/fl
 
 LOGFILE=compilation_log.txt
 WHATTOBUILD=
-#AVAILABLE VALUES: PLIB OPENRTI OSG SIMGEAR FGFS DATA FGRUN FGO FGX OPENRADAR ATCPIE TERRAGEAR TERRAGEARGUI
+#AVAILABLE VALUES: CMAKE PLIB OPENRTI OSG SIMGEAR FGFS DATA FGRUN FGO FGX OPENRADAR ATCPIE TERRAGEAR TERRAGEARGUI
 WHATTOBUILDALL=(SIMGEAR FGFS DATA)
 STABLE=
 APT_GET_UPDATE="y"
@@ -124,7 +124,7 @@ function _gitDownload(){
     return
   fi
   repo=$1
-  if [ -f "README" -o -f "README.txt" ]; then
+  if [ -f "README" -o -f "README.txt" -o -f "README.rst" ]; then
     echo "$repo exists already"
   else
     git clone $repo .
@@ -202,6 +202,8 @@ _logSep
 #######################################################
 # Minimum
 PKG="build-essential cmake git"
+# cmake
+PKG="$PKG libarchive-dev libbz2-dev libcurl4-gnutls-dev libexpat1-dev libjsoncpp-dev liblzma-dev libncurses5-dev procps zlib1g-dev"
 # TG
 PKG="$PKG libcgal-dev libgdal-dev libtiff5-dev"
 # TGGUI/OpenRTI
@@ -266,6 +268,37 @@ if [ -d "$CBD"/fgfs/flightgear ]; then
 fi
 
 #######################################################
+# cmake
+#######################################################
+CMAKE_INSTALL_DIR=cmake
+INSTALL_DIR_CMAKE=$INSTALL_DIR/$CMAKE_INSTALL_DIR
+cd "$CBD"
+if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="CMAKE"' ]]; then
+  echo "****************************************" | tee -a $LOGFILE
+  echo "*************** CMAKE ******************" | tee -a $LOGFILE
+  echo "****************************************" | tee -a $LOGFILE
+
+  mkdir -p "cmake"
+  cd "$CBD"/cmake
+  _gitDownload https://cmake.org/cmake.git
+  _gitUpdate master
+
+  if [ "$RECONFIGURE" = "y" ]; then
+    cd "$CBD"
+    mkdir -p build/cmake
+    echo "CONFIGURING cmake" >> $LOGFILE
+    cd "$CBD"/build/cmake
+    ../../cmake/configure --prefix="$INSTALL_DIR_CMAKE" \
+           2>&1 | tee -a $LOGFILE
+  fi
+
+  _make cmake
+  CMAKE="$INSTALL_DIR_CMAKE/bin/cmake"
+else
+  CMAKE=cmake
+fi
+
+#######################################################
 # PLIB
 #######################################################
 PLIB_INSTALL_DIR=plib
@@ -286,7 +319,7 @@ if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="PLIB"' ]]; then
     mkdir -p build/plib
     echo "CONFIGURING plib" >> $LOGFILE
     cd "$CBD"/build/plib
-    cmake -DCMAKE_INSTALL_PREFIX:PATH="$INSTALL_DIR_PLIB" \
+    "$CMAKE" -DCMAKE_INSTALL_PREFIX:PATH="$INSTALL_DIR_PLIB" \
           ../../plib 2>&1 | tee -a $LOGFILE
   fi
 
@@ -319,7 +352,7 @@ if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="OPENRTI"' ]]; then
     mkdir -p build/openrti
     cd "$CBD"/build/openrti
     rm -f CMakeCache.txt
-    cmake -DCMAKE_BUILD_TYPE="Release" \
+    "$CMAKE" -DCMAKE_BUILD_TYPE="Release" \
           -DCMAKE_INSTALL_PREFIX:PATH="$INSTALL_DIR_OPENRTI" \
           ../../openrti 2>&1 | tee -a $LOGFILE
   fi
@@ -347,7 +380,7 @@ cd "$CBD"
 mkdir -p build/openscenegraph
 cd "$CBD"/build/openscenegraph
 rm -f CMakeCache.txt
-cmake -DCMAKE_BUILD_TYPE="Release" \
+"$CMAKE" -DCMAKE_BUILD_TYPE="Release" \
 -DCMAKE_INSTALL_PREFIX:PATH="$INSTALL_DIR_OSG" ../../openscenegraph/ 2>&1 | tee -a $LOGFILE
 fi
 
@@ -383,7 +416,7 @@ if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="SIMGEAR"' ]]; then
     mkdir -p build/simgear
     cd "$CBD"/build/simgear
     rm -f CMakeCache.txt
-    cmake -DCMAKE_BUILD_TYPE="Release" \
+    "$CMAKE" -DCMAKE_BUILD_TYPE="Release" \
           -DCMAKE_INSTALL_PREFIX:PATH="$INSTALL_DIR_SIMGEAR" \
           -DCMAKE_PREFIX_PATH="$INSTALL_DIR_OSG;$INSTALL_DIR_OPENRTI" \
 	  $SG_CMAKEARGS \
@@ -416,7 +449,7 @@ if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="FGFS"' || "$(declare -p WHAT
       mkdir -p build/flightgear
       cd "$CBD"/build/flightgear
       rm -f CMakeCache.txt
-      cmake -DCMAKE_BUILD_TYPE="Release" \
+      "$CMAKE" -DCMAKE_BUILD_TYPE="Release" \
             -DENABLE_FLITE=ON \
             -DCMAKE_INSTALL_PREFIX:PATH="$INSTALL_DIR_FGFS" \
             -DCMAKE_PREFIX_PATH="$INSTALL_DIR_SIMGEAR;$INSTALL_DIR_OSG;$INSTALL_DIR_OPENRTI;$INSTALL_DIR_PLIB" \
@@ -485,7 +518,7 @@ if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="FGRUN"' ]]; then
     mkdir -p build/fgrun
     cd "$CBD"/build/fgrun
     rm -f CMakeCache.txt
-    cmake -DCMAKE_BUILD_TYPE="Release" \
+    "$CMAKE" -DCMAKE_BUILD_TYPE="Release" \
           -DCMAKE_INSTALL_PREFIX:PATH="$INSTALL_DIR_FGRUN" \
           -DCMAKE_PREFIX_PATH="$INSTALL_DIR_SIMGEAR" \
           ../../fgrun/ 2>&1 | tee -a $LOGFILE
@@ -666,7 +699,7 @@ if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="TERRAGEAR"' ]]; then
     mkdir -p build/terragear
     cd "$CBD"/build/terragear
     rm -f CMakeCache.txt
-    cmake -DCMAKE_BUILD_TYPE="Debug" \
+    "$CMAKE" -DCMAKE_BUILD_TYPE="Debug" \
           -DCMAKE_INSTALL_PREFIX:PATH="$INSTALL_DIR_TG" \
           -DCMAKE_PREFIX_PATH="$INSTALL_DIR_SIMGEAR;$INSTALL_DIR_CGAL" \
           ../../terragear/ 2>&1 | tee -a $LOGFILE
@@ -718,7 +751,7 @@ if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="TERRAGEARGUI"' ]]; then
     mkdir -p build/terrageargui
     cd "$CBD"/build/terrageargui
     rm -f ../../terrageargui/CMakeCache.txt
-    cmake -DCMAKE_BUILD_TYPE="Release" \
+    "$CMAKE" -DCMAKE_BUILD_TYPE="Release" \
           -DCMAKE_INSTALL_PREFIX="$INSTALL_DIR_TGGUI" \
           ../../terrageargui 2>&1 | tee -a $LOGFILE
   fi
