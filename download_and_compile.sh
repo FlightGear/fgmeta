@@ -295,7 +295,11 @@ if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="CMAKE"' ]]; then
   _make cmake
   CMAKE="$INSTALL_DIR_CMAKE/bin/cmake"
 else
-  CMAKE=cmake
+  if [ -x "$INSTALL_DIR_CMAKE/bin/cmake" ]; then
+    CMAKE="$INSTALL_DIR_CMAKE/bin/cmake"
+  else
+    CMAKE=cmake
+  fi
 fi
 
 #######################################################
