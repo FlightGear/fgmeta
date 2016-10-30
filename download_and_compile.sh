@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-VERSION="2.33"
+VERSION="2.34"
 FGVERSION="release/$(git ls-remote --heads git://git.code.sf.net/p/flightgear/flightgear|grep '\/release\/'|cut -f4 -d'/'|sort -t . -k 1,1n -k2,2n -k3,3n|tail -1)"
 
 #######################################################
@@ -42,11 +42,11 @@ RECONFIGURE="y"
 DOWNLOAD="y"
 JOPTION=""
 OOPTION=""
-DEBUG=""
+BUILD_TYPE="RelWithDebInfo"
 SG_CMAKEARGS=""
-FG_CMAKEARGE=""
+FG_CMAKEARGS=""
 
-while getopts "shc:p:a:d:r:j:O:i" OPTION; do
+while getopts "shc:p:a:d:r:j:O:ib:" OPTION; do
   case $OPTION in
     s) STABLE="STABLE" ;;
     h) HELP="HELP" ;;
@@ -58,6 +58,7 @@ while getopts "shc:p:a:d:r:j:O:i" OPTION; do
     j) JOPTION=" -j"$OPTARG" " ;;
     O) OOPTION=" -O"$OPTARG" " ;;
     i) OPENRTI="OPENRTI" ;;
+    b) BUILD_TYPE="$OPTARG" ;;
     ?) HELP="HELP" ;;
   esac
 done
@@ -85,8 +86,8 @@ fi
 
 
 if [ "$OPENRTI" = "OPENRTI" ]; then
-  SG_CMAKEARGS="$SG_CMAKEARGS-DENABLE_RTI=ON;"
-  FG_CMAKEARGS="$FG_CMAKEARGS-DENABLE_RTI=ON;"
+  SG_CMAKEARGS="$SG_CMAKEARGS -DENABLE_RTI=ON;"
+  FG_CMAKEARGS="$FG_CMAKEARGS -DENABLE_RTI=ON;"
   WHATTOBUILD=( "${WHATTOBUILD[@]}" OPENRTI )
 fi
 
@@ -149,14 +150,14 @@ set -e
 if [ "$HELP" = "HELP" ]; then
   echo "$0 Version $VERSION"
   echo "Usage:"
-  echo "./$0 [-h] [-s] [-e] [-f] [-i] [-g] [-a y|n] [-c y|n] [-p y|n] [-d y|n] [-r y|n] [ALL|PLIB|OPENRTI|SIMGEAR|FGFS|DATA|FGRUN|FGO|FGX|OPENRADAR|ATCPIE|TERRAGEAR|TERRAGEARGUI]"
+  echo "./$0 [-h] [-s] [-e] [-f] [-i] [-g] [-a y|n] [-c y|n] [-p y|n] [-d y|n] [-r y|n] [ALL|CMAKE|OSG|PLIB|OPENRTI|SIMGEAR|FGFS|DATA|FGRUN|FGO|FGX|OPENRADAR|ATCPIE|TERRAGEAR|TERRAGEARGUI]"
   echo "* without options or with ALL it recompiles the content of the WHATTOBUILDALL variable."
   echo "* Feel you free to customize the WHATTOBUILDALL variable available on the top of this script"
   echo "Switches:"
   echo "* -h  show this help"
   echo "* -e  compile FlightGear with --with-eventinput option (experimental)"
   echo "* -i  compile SimGear and FlightGear with -D ENABLE_RTI=ON option (experimental)"
-  echo "* -g  compile with debug info for gcc"
+  echo "* -b Release|RelWithDebInfo|Debug  set build type                  default=RelWithDebInfo"
   echo "* -a y|n  y=do an apt-get update n=skip apt-get update                          default=y"
   echo "* -p y|n  y=download packages n=skip download packages                          default=y"
   echo "* -c y|n  y=compile programs  n=do not compile programs                         default=y"
@@ -195,7 +196,7 @@ echo "RECONFIGURE=$RECONFIGURE" >> $LOGFILE
 echo "DOWNLOAD=$DOWNLOAD" >> $LOGFILE
 echo "JOPTION=$JOPTION" >> $LOGFILE
 echo "OOPTION=$OOPTION" >> $LOGFILE
-echo "DEBUG=$DEBUG" >> $LOGFILE
+echo "BUILD_TYPE=$BUILD_TYPE" >> $LOGFILE
 _logSep
 
 #######################################################
@@ -323,7 +324,8 @@ if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="PLIB"' ]]; then
     mkdir -p build/plib
     echo "CONFIGURING plib" >> $LOGFILE
     cd "$CBD"/build/plib
-    "$CMAKE" -DCMAKE_INSTALL_PREFIX:PATH="$INSTALL_DIR_PLIB" \
+    "$CMAKE" -DCMAKE_BUILD_TYPE="$BUILD_TYPE" \
+          -DCMAKE_INSTALL_PREFIX:PATH="$INSTALL_DIR_PLIB" \
           ../../plib 2>&1 | tee -a $LOGFILE
   fi
 
@@ -356,7 +358,7 @@ if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="OPENRTI"' ]]; then
     mkdir -p build/openrti
     cd "$CBD"/build/openrti
     rm -f CMakeCache.txt
-    "$CMAKE" -DCMAKE_BUILD_TYPE="Release" \
+    "$CMAKE" -DCMAKE_BUILD_TYPE="$BUILD_TYPE" \
           -DCMAKE_INSTALL_PREFIX:PATH="$INSTALL_DIR_OPENRTI" \
           ../../openrti 2>&1 | tee -a $LOGFILE
   fi
@@ -372,31 +374,36 @@ INSTALL_DIR_OSG=$INSTALL_DIR/$OSG_INSTALL_DIR
 cd "$CBD"
 mkdir -p "openscenegraph"
 if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="OSG"' ]]; then
-echo "****************************************" | tee -a $LOGFILE
-echo "**************** OSG *******************" | tee -a $LOGFILE
-echo "****************************************" | tee -a $LOGFILE
-cd "$CBD"/openscenegraph
-_gitDownload http://github.com/openscenegraph/osg.git
-_gitUpdate OpenSceneGraph-3.2
-
-if [ "$RECONFIGURE" = "y" ]; then
-cd "$CBD"
-mkdir -p build/openscenegraph
-cd "$CBD"/build/openscenegraph
-rm -f CMakeCache.txt
-"$CMAKE" -DCMAKE_BUILD_TYPE="Release" \
--DCMAKE_INSTALL_PREFIX:PATH="$INSTALL_DIR_OSG" ../../openscenegraph/ 2>&1 | tee -a $LOGFILE
-fi
-
-_make openscenegraph
-#FIX FOR 64 BIT COMPILATION
-if [ -d "$INSTALL_DIR_OSG/lib64" ]; then
-if [ -L "$INSTALL_DIR_OSG/lib" ]; then
-echo "link already done"
-else
-ln -s "$INSTALL_DIR_OSG/lib64" "$INSTALL_DIR_OSG/lib"
-fi
-fi
+  echo "****************************************" | tee -a $LOGFILE
+  echo "**************** OSG *******************" | tee -a $LOGFILE
+  echo "****************************************" | tee -a $LOGFILE
+  cd "$CBD"/openscenegraph
+  _gitDownload http://github.com/openscenegraph/osg.git
+  _gitUpdate OpenSceneGraph-3.2
+  
+  if [ "$RECONFIGURE" = "y" ]; then
+    cd "$CBD"
+    mkdir -p build/openscenegraph
+    cd "$CBD"/build/openscenegraph
+    rm -f CMakeCache.txt
+    if [ "$BUILD_TYPE" = "Debug" ]; then
+      OSG_BUILD_TYPE=Debug
+    else
+      OSG_BUILD_TYPE=Release
+    fi
+    "$CMAKE" -DCMAKE_BUILD_TYPE="$OSG_BUILD_TYPE" \
+         -DCMAKE_INSTALL_PREFIX:PATH="$INSTALL_DIR_OSG" ../../openscenegraph/ 2>&1 | tee -a $LOGFILE
+  fi
+  
+  _make openscenegraph
+  #FIX FOR 64 BIT COMPILATION
+  if [ -d "$INSTALL_DIR_OSG/lib64" ]; then
+    if [ -L "$INSTALL_DIR_OSG/lib" ]; then
+      echo "link already done"
+    else
+      ln -s "$INSTALL_DIR_OSG/lib64" "$INSTALL_DIR_OSG/lib"
+    fi
+  fi
 fi
 
 #######################################################
@@ -420,7 +427,7 @@ if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="SIMGEAR"' ]]; then
     mkdir -p build/simgear
     cd "$CBD"/build/simgear
     rm -f CMakeCache.txt
-    "$CMAKE" -DCMAKE_BUILD_TYPE="Release" \
+    "$CMAKE" -DCMAKE_BUILD_TYPE="$BUILD_TYPE" \
           -DCMAKE_INSTALL_PREFIX:PATH="$INSTALL_DIR_SIMGEAR" \
           -DCMAKE_PREFIX_PATH="$INSTALL_DIR_OSG;$INSTALL_DIR_OPENRTI" \
 	  $SG_CMAKEARGS \
@@ -453,7 +460,7 @@ if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="FGFS"' || "$(declare -p WHAT
       mkdir -p build/flightgear
       cd "$CBD"/build/flightgear
       rm -f CMakeCache.txt
-      "$CMAKE" -DCMAKE_BUILD_TYPE="Release" \
+      "$CMAKE" -DCMAKE_BUILD_TYPE="$BUILD_TYPE" \
             -DENABLE_FLITE=ON \
             -DCMAKE_INSTALL_PREFIX:PATH="$INSTALL_DIR_FGFS" \
             -DCMAKE_PREFIX_PATH="$INSTALL_DIR_SIMGEAR;$INSTALL_DIR_OSG;$INSTALL_DIR_OPENRTI;$INSTALL_DIR_PLIB" \
@@ -490,7 +497,7 @@ if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="FGFS"' || "$(declare -p WHAT
   echo "cd \$(dirname \$0)" >> $SCRIPT
   echo "cd $SUB_INSTALL_DIR/$FGFS_INSTALL_DIR/bin" >> $SCRIPT
   echo "export LD_LIBRARY_PATH=../../$SIMGEAR_INSTALL_DIR/lib:../../$OSG_INSTALL_DIR/lib:../../$OPENRTI_INSTALL_DIR/lib:../../$PLIB_INSTALL_DIR/lib" >> $SCRIPT
-  echo "gdb  --directory="\$P1"/fgfs/source/src/ --args fgfs --fg-root=\$PWD/../fgdata/ \$@" >> $SCRIPT
+  echo "gdb  --directory=$CBD/flightgear/src --args fgfs --fg-root=\$PWD/../fgdata/ \$@" >> $SCRIPT
   chmod 755 $SCRIPT
 
   SCRIPT=run_fgcom.sh
@@ -522,7 +529,7 @@ if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="FGRUN"' ]]; then
     mkdir -p build/fgrun
     cd "$CBD"/build/fgrun
     rm -f CMakeCache.txt
-    "$CMAKE" -DCMAKE_BUILD_TYPE="Release" \
+    "$CMAKE" -DCMAKE_BUILD_TYPE="$BUILD_TYPE" \
           -DCMAKE_INSTALL_PREFIX:PATH="$INSTALL_DIR_FGRUN" \
           -DCMAKE_PREFIX_PATH="$INSTALL_DIR_SIMGEAR" \
           ../../fgrun/ 2>&1 | tee -a $LOGFILE
@@ -536,7 +543,7 @@ if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="FGRUN"' ]]; then
   echo "#!/bin/sh" > $SCRIPT
   echo "cd \$(dirname \$0)" >> $SCRIPT
   echo "cd $SUB_INSTALL_DIR/$FGRUN_INSTALL_DIR/bin" >> $SCRIPT
-  echo "export LD_LIBRARY_PATH=$INSTALL_DIR_SIMGEAR/lib" >> $SCRIPT
+  echo "export LD_LIBRARY_PATH=../../$SIMGEAR_INSTALL_DIR/lib:../../$OSG_INSTALL_DIR/lib:../../$OPENRTI_INSTALL_DIR/lib:../../$PLIB_INSTALL_DIR/lib" >> $SCRIPT
   echo "./fgrun --fg-exe=\$PWD/../../$FGFS_INSTALL_DIR/bin/fgfs --fg-root=\$PWD/../../$FGFS_INSTALL_DIR/fgdata   \$@" >> $SCRIPT
   chmod 755 $SCRIPT
 fi
