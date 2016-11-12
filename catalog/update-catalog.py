@@ -264,6 +264,12 @@ for scm in scm_list:
                 package_node.append(variant_node)
                 variant_node.append( make_xml_leaf('id', variant['id']) )
                 variant_node.append( make_xml_leaf('name', variant['name']) )
+                if 'description' in variant:
+                    variant_node.append( make_xml_leaf('description', variant['description']) )
+
+                if 'authors' in variant:
+                    variant_node.append( make_xml_leaf('author', variant['author']) )
+
             package_node.append( make_xml_leaf('dir', name) )
             if not download_base.endswith('/'):
                 download_base += '/'
@@ -310,7 +316,7 @@ for scm in scm_list:
                 node.text = md5sum
             else:
                 md5sum_root.append( make_xml_leaf('aircraft_' + name, md5sum) )
-                
+
             # handle thumbnails
             thumbnail_src = os.path.join(aircraft_dir, 'thumbnail.jpg')
             thumbnail_dst = os.path.join(thumbnail_dir, name + '_thumbnail.jpg')
@@ -332,4 +338,3 @@ files = os.listdir(output_dir)
 for file in files:
     if file.endswith('.zip')and not file in valid_zips:
         print "orphaned zip:", file
- 
