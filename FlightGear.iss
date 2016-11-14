@@ -202,11 +202,10 @@ Name: "{userdocs}\FlightGear\Custom Scenery"; Permissions: everyone-modify; Chec
 
 [Icons]
 Name: "{userdesktop}\FlightGear {#FGVersion}"; Filename: "{app}\bin\fgfs.exe"; Parameters: "--launcher"; WorkingDir: "{app}\bin"; Tasks: desktopicon;
-Name: "{group}\FlightGear Launcher"; Filename: "{app}\bin\fgfs.exe"; Parameters: "--launcher"; WorkingDir: "{app}\bin";
+Name: "{group}\FlightGear"; Filename: "{app}\bin\fgfs.exe"; Parameters: "--launcher"; WorkingDir: "{app}\bin";
 Name: "{group}\FlightGear Manual"; Filename: "{app}\data\Docs\getstart.pdf"
 Name: "{group}\FlightGear Documentation"; Filename: "{app}\data\Docs\index.html"
 Name: "{group}\Flightgear Wiki"; Filename: "http://wiki.flightgear.org"
-Name: "{group}\Tools\FGRun"; Filename: "{app}\bin\fgrun.exe"; WorkingDir: "{app}";
 Name: "{group}\Tools\Uninstall FlightGear"; Filename: "{uninstallexe}"
 Name: "{group}\Tools\fgjs"; Filename: "cmd"; Parameters: "/k fgjs.exe ""--fg-root={app}\data"""; WorkingDir: "{app}\bin"
 Name: "{group}\Tools\yasim"; Filename: "cmd"; Parameters: "/k ""{app}\bin\yasim.exe"" -h"; WorkingDir: "{app}\bin"
@@ -217,8 +216,6 @@ Name: "{group}\Tools\Explore Documentation Folder"; Filename: "{app}\data\Docs"
 
 [Run]
 filename: "{app}\bin\oalinst.exe"; WorkingDir: "{app}\bin"; Description: "Installing OpenAL"; Check: IsTaskSelected('insoal') and FileExists(ExpandConstant('{app}\bin\oalinst.exe'))
-; Put installation directory into the fgrun.prefs
-filename: "{app}\bin\fgrun.exe"; WorkingDir: "{app}\bin"; Parameters: "--silent ""--fg-exe={app}\bin\fgfs.exe"" ""--fg-root={app}\data"" ""--fg-scenery={userdocs}\FlightGear\Custom Scenery;{app}\data\Scenery;{userdocs}\FlightGear\TerraSync"" ""--fg-aircraft={userdocs}\FlightGear\Aircraft"" ""--terrasync-dir={userdocs}\FlightGear\TerraSync"" --version={#FGVersion}"
 
 [Code]
 const
