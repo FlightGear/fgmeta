@@ -1,11 +1,11 @@
 [submodule "simgear"]
 	path = simgear
 	url = git://git.code.sf.net/p/flightgear/simgear
-	branch = next
+	branch = release/2016.4
 [submodule "flightgear"]
 	path = flightgear
 	url = git://git.code.sf.net/p/flightgear/flightgear
-	branch = next
+	branch = release/2016.4
 [submodule "fgrun"]
 	path = fgrun
 	url = git://git.code.sf.net/p/flightgear/fgrun
@@ -13,7 +13,7 @@
 [submodule "fgdata"]
 	path = fgdata
 	url = git://git.code.sf.net/p/flightgear/fgdata
-	branch = next
+	branch = release/2016.4
 [submodule "windows-3rd-party"]
 	path = windows-3rd-party
 	url = git://git.code.sf.net/p/flightgear/windows-3rd-party
