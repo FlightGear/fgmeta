@@ -267,7 +267,7 @@ for scm in scm_list:
                 if 'description' in variant:
                     variant_node.append( make_xml_leaf('description', variant['description']) )
 
-                if 'authors' in variant:
+                if 'author' in variant:
                     variant_node.append( make_xml_leaf('author', variant['author']) )
 
             package_node.append( make_xml_leaf('dir', name) )
