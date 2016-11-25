@@ -7,7 +7,8 @@
     <version n="2">3.6.*</version>
     <version n="3">3.7.*</version>
     <version n="4">2016.1.*</version>
-    <version n="4">2016.*.*</version>
+    <version n="5">2016.*.*</version>
+    <version n="6">2017.*.*</version>
     <id>org.flightgear.fgaddon</id>
     <license>GPL</license>
     <url>http://mirrors.ibiblio.org/flightgear/ftp/Aircraft/catalog.xml</url>
