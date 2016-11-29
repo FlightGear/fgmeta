@@ -26,6 +26,9 @@
   #define VSInstallDir GetEnv("VSINSTALLDIR")
 #endif
 
+; don't fill up the Jenkins logs with output, only show warnings
+#verbose 1
+
 #define VCInstallDir VSInstallDir + "\VC"
 #define InstallDir32 "X:\install\msvc140"
 #define OSGInstallDir InstallDir32 + "\OpenSceneGraph"
