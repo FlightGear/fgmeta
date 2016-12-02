@@ -86,17 +86,17 @@ IF %IS_NIGHTLY_BUILD% EQU 1 (
   REM FlightGear nightly: with fgdata, output filename would be "FlightGear-x.x.x-nightly-full.exe"
   CALL :writeBaseConfig
   CALL :writeNightlyFullConfig
-  iscc FlightGear.iss
+  iscc /Q FlightGear.iss
 
   REM FlightGear nightly: without fgdata, output filename would be "FlightGear-x.x.x-nightly.exe"
   CALL :writeBaseConfig
   CALL :writeNightlyDietConfig
-  iscc FlightGear.iss
+  iscc /Q FlightGear.iss
 ) ELSE (
   REM FlightGear release: with fgdata, output filename would be "FlightGear-x.x.x.exe"
   CALL :writeBaseConfig
   CALL :writeReleaseConfig
-  iscc FlightGear.iss
+  iscc /Q FlightGear.iss
 )
 GOTO End
 
