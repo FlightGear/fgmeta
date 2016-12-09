@@ -90,9 +90,9 @@ Source: "{#ThirdPartyDir}\3rdParty\bin\OpenAL32.dll"; DestDir: "{app}\bin"; Chec
 Source: "{#ThirdPartyDir}\3rdParty\bin\libpng.dll"; DestDir: "{app}\bin"; Check: not Is64BitInstallMode
 Source: "{#ThirdPartyDir}\3rdParty\bin\libcurl.dll"; DestDir: "{app}\bin"; Check: not Is64BitInstallMode
 Source: "{#ThirdPartyDir}\3rdParty\bin\libintl-8.dll"; DestDir: "{app}\bin"; Check: not Is64BitInstallMode
-;Source: "X:\3rdParty\bin\CrashRpt1402.dll"; DestDir: "{app}\bin"; Check: not Is64BitInstallMode
-;Source: "X:\3rdParty\bin\crashrpt_lang.ini"; DestDir: "{app}\bin"; Check: not Is64BitInstallMode
-;Source: "X:\3rdParty\bin\CrashSender1402.exe"; DestDir: "{app}\bin"; Check: not Is64BitInstallMode
+Source: "{#ThirdPartyDir}\3rdParty\bin\CrashRpt1403.dll"; DestDir: "{app}\bin"; Check: not Is64BitInstallMode
+Source: "{#ThirdPartyDir}\3rdParty\bin\crashrpt_lang.ini"; DestDir: "{app}\bin"; Check: not Is64BitInstallMode
+Source: "{#ThirdPartyDir}\3rdParty\bin\CrashSender1403.exe"; DestDir: "{app}\bin"; Check: not Is64BitInstallMode
 Source: "{#VCInstallDir}\redist\x86\Microsoft.VC140.CRT\*.dll"; DestDir:  "{app}\bin"; Check: not Is64BitInstallMode
 
 ; 64 bits install
@@ -105,9 +105,9 @@ Source: "{#ThirdPartyDir}\3rdParty.x64\bin\OpenAL32.dll"; DestDir: "{app}\bin"; 
 Source: "{#ThirdPartyDir}\3rdParty.x64\bin\libpng.dll"; DestDir: "{app}\bin"; Check: Is64BitInstallMode
 Source: "{#ThirdPartyDir}\3rdParty.x64\bin\libcurl.dll"; DestDir: "{app}\bin"; Check: Is64BitInstallMode
 Source: "{#ThirdPartyDir}\3rdParty.x64\bin\libintl-8.dll"; DestDir: "{app}\bin"; Check: Is64BitInstallMode
-;Source: "X:\3rdParty.x64\bin\CrashRpt1402.dll"; DestDir: "{app}\bin"; Check: Is64BitInstallMode
-;Source: "X:\3rdParty.x64\bin\crashrpt_lang.ini"; DestDir: "{app}\bin"; Check: Is64BitInstallMode
-;Source: "X:\3rdParty.x64\bin\CrashSender1402.exe"; DestDir: "{app}\bin"; Check: Is64BitInstallMode
+Source: "{#ThirdPartyDir}\3rdParty.x64\bin\CrashRpt1403.dll"; DestDir: "{app}\bin"; Check: Is64BitInstallMode
+Source: "{#ThirdPartyDir}\3rdParty.x64\bin\crashrpt_lang.ini"; DestDir: "{app}\bin"; Check: Is64BitInstallMode
+Source: "{#ThirdPartyDir}\3rdParty.x64\bin\CrashSender1403.exe"; DestDir: "{app}\bin"; Check: Is64BitInstallMode
 Source: "{#VCInstallDir}\redist\x64\Microsoft.VC140.CRT\*.dll"; DestDir: "{app}\bin"; Check: Is64BitInstallMode
 
 ; 32/64 bits install
