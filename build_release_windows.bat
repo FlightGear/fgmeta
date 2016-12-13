@@ -19,7 +19,7 @@ cmake ..\simgear -G "Visual Studio 14" ^
                  -DBOOST_ROOT=%WORKSPACE%/windows-3rd-party ^
                  -DCMAKE_PREFIX_PATH:PATH=%OSG32% ^
                  -DCMAKE_INSTALL_PREFIX:PATH=%WORKSPACE%/install/msvc140
-cmake --build . --config Release --target INSTALL
+cmake --build . --config RelWithDebInfo --target INSTALL
 
 cd ..\build-fg32
 cmake ..\flightgear -G "Visual Studio 14" ^
@@ -28,7 +28,7 @@ cmake ..\flightgear -G "Visual Studio 14" ^
                     -DCMAKE_PREFIX_PATH:PATH=%WORKSPACE%/install/msvc140/OpenSceneGraph ^
                     -DBOOST_ROOT=%WORKSPACE%/windows-3rd-party ^
                     -DCMAKE_PREFIX_PATH=%QT5SDK32%;%OSG32%
-cmake --build . --config Release --target INSTALL
+cmake --build . --config RelWithDebInfo --target INSTALL
 
 cd ..
 
@@ -42,7 +42,7 @@ cmake ..\SimGear -G "Visual Studio 14 Win64" ^
                  -DBOOST_ROOT=%WORKSPACE%/windows-3rd-party ^
                  -DCMAKE_PREFIX_PATH:PATH=%OSG64% ^
                  -DCMAKE_INSTALL_PREFIX:PATH=%WORKSPACE%/install/msvc140-64
-cmake --build . --config Release --target INSTALL
+cmake --build . --config RelWithDebInfo --target INSTALL
 
 cd ..\build-fg64
 cmake ..\flightgear -G "Visual Studio 14 Win64" ^
@@ -50,7 +50,7 @@ cmake ..\flightgear -G "Visual Studio 14 Win64" ^
                     -DBOOST_ROOT=%WORKSPACE%/windows-3rd-party ^
                     -DCMAKE_INSTALL_PREFIX:PATH=%WORKSPACE%/install/msvc140-64 ^
                     -DCMAKE_PREFIX_PATH=%QT5SDK64%;%OSG64%
-cmake --build . --config Release --target INSTALL
+cmake --build . --config RelWithDebInfo --target INSTALL
 
 cd ..
 
