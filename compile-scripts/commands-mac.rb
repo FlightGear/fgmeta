@@ -14,8 +14,9 @@ doInit = false
 doClean = false
 doPackage = false
 
-cmakeCommonArgs = "-G Xcode -DCMAKE_INSTALL_PREFIX=#{baseDir}/dist"
-cmakeSGArgs = "-DSIMGEAR_SHARED=1 -DENABLE_CURL=0"
+cmakePlatformArgs = "-G Xcode"
+cmakeCommonArgs = "-DCMAKE_INSTALL_PREFIX=#{baseDir}/dist"
+cmakeSGArgs = "-DSIMGEAR_SHARED=1"
 cmakeFGArgs = "-DSIMGEAR_SHARED=1"
 sfUser = "jmturner"
 
@@ -58,7 +59,7 @@ end
 def createDirs()
   `mkdir -p sgbuild`
   `mkdir -p fgbuild`
-  `mkdir -p osg_mac_release_build`
+  `mkdir -p osg_fg_build`
 end
 
 # path is needed for Cmake & running macdeployqt
@@ -70,14 +71,12 @@ if doClean
   puts "Cleaning build dirs"
   `rm -r sgbuild`
   `rm -r fgbuild`
-  `rm -r osg_mac_release_build`
-  createDirs()
+  `rm -r osg_fg_build`
 end
 
 if doInit
   puts "Doing init"
     cloneEverything()
-    createDirs();
 end
 
 if doPull
@@ -95,9 +94,11 @@ if doPull
   `git pull #{gitArgs}`
 end
 
-Dir.chdir "#{baseDir}/osg_mac_release_build"
+createDirs()
+
+Dir.chdir "#{baseDir}/osg_fg_build"
 if doCMake or !File.exist?("#{Dir.pwd}/Makefile")
-  `cmake ../osg -DCMAKE_INSTALL_PREFIX=#{baseDir}/dist`
+  `cmake ../osg #{cmakeCommonArgs}`
 end
 
 puts "Building OpenSceneGraph"
@@ -107,7 +108,7 @@ puts "Building OpenSceneGraph"
 Dir.chdir "#{baseDir}/sgbuild"
 
 if doCMake or !File.exist?("#{Dir.pwd}/SimGear.xcodeproj")
-  `cmake ../simgear #{cmakeCommonArgs} #{cmakeSGArgs}`
+  `cmake ../simgear #{cmakePlatformArgs} #{cmakeCommonArgs} #{cmakeSGArgs}`
 end
 
 puts "Building SimGear Debug"
@@ -122,7 +123,7 @@ if doCMake or !File.exist?("#{Dir.pwd}/FlightGear.xcodeproj")
   if qtPath != ""
     cmakeFGArgs = '-DENABLE_QT=1'
   end
-  `cmake ../flightgear #{cmakeCommonArgs} #{cmakeFGArgs}`
+  `cmake ../flightgear #{cmakePlatformArgs} #{cmakeCommonArgs} #{cmakeFGArgs}`
 end
 
 puts "Building FlightGear Debug"
