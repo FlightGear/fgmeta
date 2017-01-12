@@ -72,6 +72,14 @@ def scan_set_file(aircraft_dir, set_file):
     variant['description'] = sim_node.getValue("long-description", None)
     variant['id'] = base_id
 
+    # allow -set.xml files to declare themselves as primary.
+    # we use this avoid needing a variant-of in every other -set.xml
+    variant['primary-set'] = sim_node.getValue('primary-set', False)
+
+    # extract and record previews for each variant
+    if sim_node.hasChild('previews'):
+        variant['previews'] = extract_previews(sim_node.getChild('previews'), aircraft_dir)
+
     if sim_node.hasChild('rating'):
         rating_node = sim_node.getChild("rating")
         variant['rating_FDM'] = rating_node.getValue("FDM", 0)
@@ -83,33 +91,66 @@ def scan_set_file(aircraft_dir, set_file):
     #print '    ', variant
     return variant
 
+def extract_previews(previews_node, aircraft_dir):
+    result = []
+    for node in previews_node.getChildren("preview"):
+        previewType = node.getValue("type", None)
+        previewPath = node.getValue("path", None)
+
+        # check path exists in base-name-dir
+        fullPath = os.path.join(aircraft_dir, previewPath)
+        if not os.path.isfile(fullPath):
+            print "Bad preview path, skipping:" + fullPath
+            continue
+        result.append({'type':previewType, 'path':previewPath})
+
+    return result
+
 # scan all the -set.xml files in an aircraft directory.  Returns a
 # package dict and a list of variants.
 def scan_aircraft_dir(aircraft_dir):
+    # old way of finding the master aircraft: it's the only one whose
+    # variant-of is empty. All the others have an actual value
+    # newer alternative is to specify one -set.xml as the primary. All the
+    # others are therefore variants.
+    setDicts = []
     found_master = False
     package = None
-    variants = []
+
     files = os.listdir(aircraft_dir)
     for file in sorted(files, key=lambda s: s.lower()):
         if file.endswith('-set.xml'):
             try:
-                variant = scan_set_file(aircraft_dir, file)
-                if variant == None:
+                d = scan_set_file(aircraft_dir, file)
+                if d == None:
                     continue
-                if package == None:
-                    # just in case no one claims to be master, the first
-                    # variant defaults to master, but we will overwrite
-                    # this if we find something better.
-                    package = variant
-                if not found_master and variant['variant-of'] == '':
-                    found_master = True
-                    package = variant
-                else:
-                    variants.append( {'id': variant['id'],
-                                      'name': variant['name'] } )
             except:
-                print "Scanning aircraft -set.xml failed", os.path.join(aircraft_dir, file)
+                print "Skipping set file since couldn't be parsed:", os.path.join(aircraft_dir, file)
+                continue
 
+            setDicts.append(d)
+            if d['primary-set']:
+                found_master = True
+                package = d
+
+    # didn't find a dict identified explicitly as the primary, look for one
+    # with an undefined variant-of
+    if not found_master:
+        for d in setDicts:
+            if d['variant-of'] == '':
+                found_master = True
+                package = d
+                break
+
+    if not found_master:
+        if len(setDicts) > 1:
+            print "Warning, no explicit primary set.xml in " + aircraft_dir
+        # use the first one
+        package = setDicts[0]
+
+    # variants is just all the set dicts except the master
+    variants = setDicts
+    variants.remove(package)
     return (package, variants)
 
 # use svn commands to report the last change date within dir
@@ -160,6 +201,33 @@ def get_md5sum(file):
     f.close()
     return md5sum
 
+def append_preview_nodes(node, variant, download_base, package_name):
+    if not 'previews' in variant:
+        return
+
+    for preview in variant['previews']:
+        preview_node = ET.Element('preview')
+        preview_url = download_base + 'previews/' + package_name + '_' + preview['path']
+        preview_node.append( make_xml_leaf('type', preview['type']) )
+        preview_node.append( make_xml_leaf('url', preview_url) )
+        preview_node.append( make_xml_leaf('path', preview['path']) )
+        node.append(preview_node)
+
+def copy_previews_for_variant(variant, package_name, package_dir, previews_dir):
+    if not 'previews' in variant:
+        return
+
+    for preview in variant['previews']:
+        preview_src = os.path.join(package_dir, preview['path'])
+        preview_dst = os.path.join(previews_dir, package_name + '_' + preview['path'])
+        if os.path.exists(preview_src):
+            shutil.copy2(preview_src, preview_dst)
+
+def copy_previews_for_package(package, variants, package_name, package_dir, previews_dir):
+    copy_previews_for_variant(package, package_name, package_dir, previews_dir)
+    for v in variants:
+        copy_previews_for_variant(v, package_name, package_dir, previews_dir)
+
 #def get_file_stats(file):
 #    f = open(file, 'r')
 #    md5 = hashlib.md5(f.read()).hexdigest()
@@ -197,9 +265,15 @@ if output_dir == '':
     output_dir = os.path.join(args.dir, 'output')
 if not os.path.isdir(output_dir):
     os.mkdir(output_dir)
+
 thumbnail_dir = os.path.join(output_dir, 'thumbnails')
 if not os.path.isdir(thumbnail_dir):
     os.mkdir(thumbnail_dir)
+
+previews_dir = os.path.join(output_dir, 'previews')
+if not os.path.isdir(previews_dir):
+    os.mkdir(previews_dir)
+
 tmp = os.path.join(args.dir, 'zip-excludes.lst')
 zip_excludes = os.path.realpath(tmp)
 
@@ -258,6 +332,7 @@ for scm in scm_list:
         if name in skip_list:
             print "skipping:", name
             continue
+
         aircraft_dir = os.path.join(repo_path, name)
         if os.path.isdir(aircraft_dir):
             print "%s:" % name,
@@ -296,6 +371,8 @@ for scm in scm_list:
                 if 'author' in variant:
                     variant_node.append( make_xml_leaf('author', variant['author']) )
 
+                append_preview_nodes(variant_node, variant, download_base, name)
+
             package_node.append( make_xml_leaf('dir', name) )
             if not download_base.endswith('/'):
                 download_base += '/'
@@ -303,6 +380,8 @@ for scm in scm_list:
             thumbnail_url = download_base + 'thumbnails/' + name + '_thumbnail.jpg'
             package_node.append( make_xml_leaf('url', download_url) )
             package_node.append( make_xml_leaf('thumbnail', thumbnail_url) )
+
+            append_preview_nodes(package_node, package, download_base, name)
 
             # todo: url (download), thumbnail (download url)
 
@@ -350,6 +429,10 @@ for scm in scm_list:
                 shutil.copy2(thumbnail_src, thumbnail_dst)
             catalog_node.append(package_node)
             package_node.append( make_xml_leaf('thumbnail-path', 'thumbnail.jpg') )
+
+            # copy previews for the package and variants into the
+            # output directory
+            copy_previews_for_package(package, variants, name, aircraft_dir, previews_dir)
 
 # write out the master catalog file
 cat_file = os.path.join(output_dir, 'catalog.xml')

@@ -163,6 +163,9 @@ class PropsHandler(handler.ContentHandler):
 
     def startElement(self, name, attrs):
         self._content = None
+        if 'include' in attrs.keys():
+            self.handleInclude(attrs['include'])
+
         if (name == 'PropertyList'):
             return
 
@@ -177,10 +180,6 @@ class PropsHandler(handler.ContentHandler):
             self._current = self._current.getChild(name, index, create=True)
         else:
             self._current = self._current.addChild(name)
-
-
-        if 'include' in attrs.keys():
-            self.handleInclude(attrs['include'])
 
         self._currentTy = None;
         if 'type' in attrs.keys():
