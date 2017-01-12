@@ -11,6 +11,9 @@
     <skip>c172</skip>
     <skip>tu134</skip>
   </scm>
+    <include-dir>/home/curt/Projects/FlightGear/flightgear-fgdata</include-dir>
+    <include-dir>/home/curt/Projects/FlightGear/flightgear-fgaddon</include-dir>
+    
   <!-- <scm>
        <type>git</type>
        <update type="bool">false</update>

@@ -9,6 +9,7 @@ import re
 import shutil
 import subprocess
 import time
+import sgprops
 
 CATALOG_VERSION = 4
 
@@ -22,6 +23,8 @@ parser.add_argument("--clean", help="Force regeneration of all zip files",
                     action="store_true")
 parser.add_argument("dir", help="Catalog directory")
 args = parser.parse_args()
+
+includes = []
 
 # xml node (robust) get text helper
 def get_xml_text(e):
@@ -44,29 +47,39 @@ def make_xml_leaf(name, text):
 
 # return all available aircraft information from the set file as a
 # dict
-def scan_set_file(set_file):
+def scan_set_file(aircraft_dir, set_file):
+    global includes
+
     base_file = os.path.basename(set_file)
     base_id = base_file[:-8]
-    #print '  scanning:', base_file
-    parser = ET.XMLParser(remove_blank_text=True)
-    set_xml = ET.parse(set_file, parser)
-    set_node = set_xml.getroot()
-    sim_node = set_node.find('sim')
+    set_path = os.path.join(aircraft_dir, set_file)
+
+    local_includes = includes
+    local_includes.append(aircraft_dir)
+    root_node = sgprops.readProps(set_path, includePaths = local_includes)
+
+    if not root_node.hasChild("sim"):
+        return None
+
+    sim_node = root_node.getChild("sim")
     if sim_node == None:
         return None
+
     variant = {}
-    variant['name'] = get_xml_text(sim_node.find('description'))
-    variant['status'] = get_xml_text(sim_node.find('status'))
-    variant['author'] = get_xml_text(sim_node.find('author'))
-    variant['description'] = get_xml_text(sim_node.find('long-description'))
+    variant['name'] = sim_node.getValue("description", None)
+    variant['status'] = sim_node.getValue("status", None)
+    variant['author'] = sim_node.getValue("author", None)
+    variant['description'] = sim_node.getValue("long-description", None)
     variant['id'] = base_id
-    rating_node = sim_node.find('rating')
-    if rating_node != None:
-        variant['rating_FDM'] = int(get_xml_text(rating_node.find('FDM')))
-        variant['rating_systems'] = int(get_xml_text(rating_node.find('systems')))
-        variant['rating_cockpit'] = int(get_xml_text(rating_node.find('cockpit')))
-        variant['rating_model'] = int(get_xml_text(rating_node.find('model')))
-    variant['variant-of'] = get_xml_text(sim_node.find('variant-of'))
+
+    if sim_node.hasChild('rating'):
+        rating_node = sim_node.getChild("rating")
+        variant['rating_FDM'] = rating_node.getValue("FDM", 0)
+        variant['rating_systems'] = rating_node.getValue("systems", 0)
+        variant['rating_cockpit'] = rating_node.getValue("cockpit", 0)
+        variant['rating_model'] = rating_node.getValue("model", 0)
+
+    variant['variant-of'] = sim_node.getValue("variant-of", None)
     #print '    ', variant
     return variant
 
@@ -79,20 +92,24 @@ def scan_aircraft_dir(aircraft_dir):
     files = os.listdir(aircraft_dir)
     for file in sorted(files, key=lambda s: s.lower()):
         if file.endswith('-set.xml'):
-            variant = scan_set_file(os.path.join(aircraft_dir, file))
-            if variant == None:
-                continue
-            if package == None:
-                # just in case no one claims to be master, the first
-                # variant defaults to master, but we will overwrite
-                # this if we find something better.
-                package = variant
-            if not found_master and variant['variant-of'] == '':
-                found_master = True
-                package = variant
-            else:
-                variants.append( {'id': variant['id'],
-                                  'name': variant['name'] } )
+            try:
+                variant = scan_set_file(aircraft_dir, file)
+                if variant == None:
+                    continue
+                if package == None:
+                    # just in case no one claims to be master, the first
+                    # variant defaults to master, but we will overwrite
+                    # this if we find something better.
+                    package = variant
+                if not found_master and variant['variant-of'] == '':
+                    found_master = True
+                    package = variant
+                else:
+                    variants.append( {'id': variant['id'],
+                                      'name': variant['name'] } )
+            except:
+                print "Scanning aircraft -set.xml failed", os.path.join(aircraft_dir, file)
+
     return (package, variants)
 
 # use svn commands to report the last change date within dir
@@ -186,6 +203,13 @@ if not os.path.isdir(thumbnail_dir):
 tmp = os.path.join(args.dir, 'zip-excludes.lst')
 zip_excludes = os.path.realpath(tmp)
 
+for i in config_node.findall("include-dir"):
+    path = get_xml_text(i)
+    if not os.path.exists(path):
+        print "Skipping missing include path:", path
+        continue
+    includes.append(path)
+
 # freshen repositories
 if args.no_update:
     print 'Skipping repository updates.'
@@ -194,6 +218,8 @@ else:
     for scm in scm_list:
         repo_type = get_xml_text(scm.find('type'))
         repo_path = get_xml_text(scm.find('path'))
+        includes.append(repo_path)
+
         if repo_type == 'svn':
             print 'SVN update:', repo_path
             subprocess.call(['svn', 'update', repo_path])
