@@ -179,7 +179,9 @@ class PropsHandler(handler.ContentHandler):
 
             self._current = self._current.getChild(name, index, create=True)
         else:
-            self._current = self._current.addChild(name)
+            # important we use getChild here, so that includes are resolved
+            # correctly
+            self._current = self._current.getChild(name, create=True)
 
         self._currentTy = None;
         if 'type' in attrs.keys():
