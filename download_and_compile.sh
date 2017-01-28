@@ -18,7 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 VERSION="2.34"
-FGVERSION="release/$(git ls-remote --heads git://git.code.sf.net/p/flightgear/flightgear|grep '\/release\/'|cut -f4 -d'/'|sort -t . -k 1,1n -k2,2n -k3,3n|tail -1)"
+FGVERSION="release/$(git ls-remote --heads https://git.code.sf.net/p/flightgear/flightgear|grep '\/release\/'|cut -f4 -d'/'|sort -t . -k 1,1n -k2,2n -k3,3n|tail -1)"
 
 #######################################################
 # THANKS TO
@@ -316,7 +316,7 @@ if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="PLIB"' ]]; then
 
   mkdir -p "plib"
   cd "$CBD"/plib
-  _gitDownload git://git.code.sf.net/p/libplib/code
+  _gitDownload https://git.code.sf.net/p/libplib/code
   _gitUpdate master
 
   if [ "$RECONFIGURE" = "y" ]; then
@@ -345,7 +345,7 @@ if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="OPENRTI"' ]]; then
 
   mkdir -p "openrti"
   cd "$CBD"/openrti
-  _gitDownload git://git.code.sf.net/p/openrti/OpenRTI
+  _gitDownload https://git.code.sf.net/p/openrti/OpenRTI
 
   if [ "$STABLE" = "STABLE" ]; then
     _gitUpdate release-0.7
@@ -378,7 +378,7 @@ if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="OSG"' ]]; then
   echo "**************** OSG *******************" | tee -a $LOGFILE
   echo "****************************************" | tee -a $LOGFILE
   cd "$CBD"/openscenegraph
-  _gitDownload http://github.com/openscenegraph/osg.git
+  _gitDownload https://github.com/openscenegraph/osg.git
   _gitUpdate OpenSceneGraph-3.2
   
   if [ "$RECONFIGURE" = "y" ]; then
@@ -419,7 +419,7 @@ if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="SIMGEAR"' ]]; then
 
   mkdir -p "simgear"
   cd "$CBD"/simgear
-  _gitDownload git://git.code.sf.net/p/flightgear/simgear
+  _gitDownload https://git.code.sf.net/p/flightgear/simgear
   _gitUpdate $FGVERSION
 	
   if [ "$RECONFIGURE" = "y" ]; then
@@ -452,7 +452,7 @@ if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="FGFS"' || "$(declare -p WHAT
   cd "$CBD"/flightgear
 
   if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="FGFS"' ]]; then
-    _gitDownload git://git.code.sf.net/p/flightgear/flightgear
+    _gitDownload https://git.code.sf.net/p/flightgear/flightgear
     _gitUpdate $FGVERSION
 
     if [ "$RECONFIGURE" = "y" ]; then
@@ -479,7 +479,7 @@ if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="FGFS"' || "$(declare -p WHAT
     echo "**************** DATA ******************" | tee -a $LOGFILE
     echo "****************************************" | tee -a $LOGFILE
 
-    _gitDownload git://git.code.sf.net/p/flightgear/fgdata
+    _gitDownload https://git.code.sf.net/p/flightgear/fgdata
     _gitUpdate $FGVERSION
   fi
   cd "$CBD"
@@ -521,7 +521,7 @@ if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="FGRUN"' ]]; then
 
   mkdir -p "fgrun"
   cd "$CBD"/fgrun
-  _gitDownload git://git.code.sf.net/p/flightgear/fgrun
+  _gitDownload https://git.code.sf.net/p/flightgear/fgrun
   _gitUpdate $FGVERSION
 
   if [ "$RECONFIGURE" = "y" ]; then
@@ -649,7 +649,7 @@ if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="ATCPIE"' ]]; then
 
   mkdir -p "$INSTALL_DIR_ATCPIE"
   cd $INSTALL_DIR_ATCPIE
-  _gitDownload git://git.code.sf.net/p/atc-pie/code
+  _gitDownload https://git.code.sf.net/p/atc-pie/code
   _gitUpdate master
 
   cd "$CBD"
@@ -702,7 +702,7 @@ if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="TERRAGEAR"' ]]; then
 
   mkdir -p "terragear"
   cd "$CBD"/terragear
-  _gitDownload git://git.code.sf.net/p/flightgear/terragear
+  _gitDownload https://git.code.sf.net/p/flightgear/terragear
   _gitUpdate scenery/ws2.0
 
   if [ "$RECONFIGURE" = "y" ]; then
@@ -753,7 +753,7 @@ if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="TERRAGEARGUI"' ]]; then
 
   mkdir -p "terrageargui"
   cd "$CBD"/terrageargui
-  _gitDownload git://git.code.sf.net/p/flightgear/fgscenery/terrageargui
+  _gitDownload https://git.code.sf.net/p/flightgear/fgscenery/terrageargui
   _gitUpdate master
 	
 
