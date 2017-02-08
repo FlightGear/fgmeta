@@ -74,7 +74,6 @@ ArchitecturesAllowed=x86 x64
 [Tasks]
 ; NOTE: The following entry contains English phrases ("Create a desktop icon" and "Additional icons"). You are free to translate them into another language if required.
 Name: "desktopicon"; Description: "Create a &desktop icon"; GroupDescription: "Additional icons:"
-Name: "insoal"; Description: "Install OpenAL (the sound engine)"
 
 [Files]
 ; NOTE: run subst X: F:\ (or whatever path the expanded tree resides at)
@@ -113,7 +112,6 @@ Source: "{#VCInstallDir}\redist\x64\Microsoft.VC140.CRT\*.dll"; DestDir: "{app}\
 ; 32/64 bits install
 ;NOTE: FGPanel has no 64 bits equivalent, so we are using the 32 bits binary for 32&64 bits OS
 Source: "{#InstallDir32}\bin\fgpanel.exe"; DestDir: "{app}\bin"; Flags: ignoreversion
-Source: "{#ThirdPartyDir}\..\oalinst.exe"; DestDir: "{app}\bin"; Flags: ignoreversion skipifsourcedoesntexist
 
 ; Include the base package
 #if IncludeData == "TRUE"
@@ -215,9 +213,6 @@ Name: "{group}\Tools\fgpanel"; Filename: "cmd"; Parameters: "/k ""{app}\bin\fgpa
 Name: "{group}\Tools\FGCom"; Filename: "{app}\bin\fgcom.exe"; WorkingDir: "{app}\bin"
 Name: "{group}\Tools\FGCom-testing"; Filename: "{app}\bin\fgcom.exe"; Parameters: "--frequency=910"; WorkingDir: "{app}\bin"
 Name: "{group}\Tools\Explore Documentation Folder"; Filename: "{app}\data\Docs"
-
-[Run]
-filename: "{app}\bin\oalinst.exe"; WorkingDir: "{app}\bin"; Description: "Installing OpenAL"; Check: IsTaskSelected('insoal') and FileExists(ExpandConstant('{app}\bin\oalinst.exe'))
 
 [Code]
 const
