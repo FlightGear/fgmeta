@@ -8,14 +8,19 @@ import os, sys, re, fnmatch
 from subprocess import call
 
 suffix = '.dmg'
+release_version = "unknown"
+
 if sys.argv[1] == 'windows':
     suffix = '.exe'
 if sys.argv[1] == 'linux':
     suffix = '.tar.bz2'
 
-isReleaseCandidate = False
+isRelease = False
 if len(sys.argv) > 2 and sys.argv[2] == 'release':
-    isReleaseCandidate = True
+    isRelease = True
+
+if len(sys.argv) > 3:
+    release_version = sys.argv[3]
 
 allSuffix = '*' + suffix
 
@@ -25,10 +30,10 @@ sourceForgeUserHost = "jmturner@frs.sourceforge.net"
 sftpCommandFile = "sftp-commands"
 symbolDir = "/home/jenkins/symbols"
 
-if isReleaseCandidate:
+if isRelease:
     publicRoot = "/var/www/html/builds/rc"
     incomingDir = "/home/jenkins/incoming"
-    sourceForgePath = "/home/frs/project/f/fl/flightgear/release-candidate/"
+    sourceForgePath = "/home/frs/project/f/fl/flightgear/release-" + release_version + "/"
 else:
     publicRoot = "/var/www/html/builds/nightly"
     incomingDir = "/home/jenkins/nightly-incoming"
@@ -81,15 +86,15 @@ for file in incomingFiles:
 
     outFile = file
     # insert -rc before suffix
-    if isReleaseCandidate:
-        m = re.match(r'(\w+-\d+\.\d+\.\d+[\w-]*)' + suffix, file)
-        outFile = m.group(1) + '-rc' + suffix
-        print "RC out name is " + outFile
+    #if isRelease:
+        #m = re.match(r'(\w+-\d+\.\d+\.\d+[\w-]*)' + suffix, file)
+        #outFile = m.group(1) + '-rc' + suffix
+        #print "RC out name is " + outFile
 
     os.rename(srcFile, outFile)
     newFiles.append(outFile)
 
-    if not isReleaseCandidate:
+    if not isRelease:
         # symlink for stable web URL
         m = re.match(r'(\w+)-\d+\.\d+\.\d+-([\w-]+)' + suffix, file)
         latestName = m.group(1) + '-latest-' + m.group(2) + suffix
@@ -102,17 +107,17 @@ for file in incomingFiles:
 
 
 # remove files from SF
-if len(oldFiles) > 0:
-    f = open(sftpCommandFile, 'w')
-    f.write("cd " + sourceForgePath + '\n')
-    for file in oldFiles:
-        print "Removing file " + file + " from SourceForge"
-        f.write("rm " + file + '\n')
-    f.write("bye\n")
-    f.close()
-
-    call(["sftp", "-b", sftpCommandFile, sourceForgeUserHost])
-    os.remove(sftpCommandFile)
+#if len(oldFiles) > 0:
+#    f = open(sftpCommandFile, 'w')
+#    f.write("cd " + sourceForgePath + '\n')
+#    for file in oldFiles:
+#        print "Removing file " + file + " from SourceForge"
+#        f.write("rm " + file + '\n')
+#    f.write("bye\n")
+#    f.close()
+#
+#    call(["sftp", "-b", sftpCommandFile, sourceForgeUserHost])
+#    os.remove(sftpCommandFile)
 
 # upload to SourceForge
 for file in newFiles:
