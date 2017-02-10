@@ -1,0 +1,22 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<PropertyList>
+  <value type="int">42</value>
+  <value type="int">43</value>
+  <value type="int">44</value>
+
+  <sim>
+    <views>
+    </views>
+
+    <preview>
+    </preview>
+
+    <preview>
+    </preview>
+  </sim>
+
+  <payload>
+    <weight>
+    </weight>
+  </payload>
+</PropertyList>

@@ -1,0 +1,25 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<PropertyList>
+  <value type="int">42</value>
+
+  <thing>
+      <value>apple</value>
+  </thing>
+
+  <thing>
+    <value>lemon</value>
+  </thing>
+
+  <thing>
+    <value>pear</value>
+  </thing>
+
+  <!-- ensure explicit indexing works -->
+  <sub>
+      <value n="1">a</value>
+      <value n="3">b</value>
+      <value n="99">c</value>
+      <value>d</value> <!-- should be assigned n=100 -->
+  </sub>
+
+</PropertyList>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PropertyList>
+  <sim>
+    <!-- found in the F-15 XML -->
+    <uhf n="[0]">
+      <frequencies>
+        <selected-mhz type="int">225000</selected-mhz>
+      </frequencies>
+    </uhf>
+  </sim>
+</PropertyList>

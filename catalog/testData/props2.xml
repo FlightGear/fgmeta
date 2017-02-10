@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<PropertyList include="root-include.xml">
+  <value type="int">33</value>
+
+  <thing>
+      <value>apple</value>
+  </thing>
+
+  <thing>
+    <value>lemon</value>
+  </thing>
+
+
+  <sub include ="sub-include.xml">
+    <!-- different index to avoid being included over -->
+    <widget n="100" type="int">99</widget>
+
+  </sub>
+
+</PropertyList>

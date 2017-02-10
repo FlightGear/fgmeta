@@ -10,6 +10,7 @@ import shutil
 import subprocess
 import time
 import sgprops
+import sys
 
 CATALOG_VERSION = 4
 
@@ -125,7 +126,7 @@ def scan_aircraft_dir(aircraft_dir):
                 if d == None:
                     continue
             except:
-                print "Skipping set file since couldn't be parsed:", os.path.join(aircraft_dir, file)
+                print "Skipping set file since couldn't be parsed:", os.path.join(aircraft_dir, file), sys.exc_info()[0]
                 continue
 
             setDicts.append(d)

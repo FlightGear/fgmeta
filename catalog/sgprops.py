@@ -144,6 +144,22 @@ class Node(object):
 
         return n;
 
+class ParseState:
+    def __init__(self):
+        self._counters = {}
+
+    def getNextIndex(self, name):
+        if name in self._counters:
+            self._counters[name] += 1
+        else:
+            self._counters[name] = 0
+        return self._counters[name]
+
+    def recordExplicitIndex(self, name, index):
+        if not name in self._counters:
+            self._counters[name] = index
+        else:
+            self._counters[name] = max(self._counters[name], index)
 
 class PropsHandler(handler.ContentHandler):
     def __init__(self, root = None, path = None, includePaths = []):
@@ -152,6 +168,7 @@ class PropsHandler(handler.ContentHandler):
         self._basePath = os.path.dirname(path)
         self._includes = includePaths
         self._locator = None
+        self._stateStack = [ParseState()]
 
         if root is None:
             # make a nameless root node
@@ -163,25 +180,31 @@ class PropsHandler(handler.ContentHandler):
 
     def startElement(self, name, attrs):
         self._content = None
-        if 'include' in attrs.keys():
-            self.handleInclude(attrs['include'])
-
         if (name == 'PropertyList'):
+            # still need to handle includes on the root element
+            if 'include' in attrs.keys():
+                self.handleInclude(attrs['include'])
             return
-
+            
+        currentState = self._stateStack[-1]
         if 'n' in attrs.keys():
             try:
                 index = int(attrs['n'])
             except:
-                print "Invalid index at line:", self._locator.getLineNumber(), "of", self._path
-                self._current = self._current.addChild(name)
-                return
+                raise IndexError("Invalid index at line:", self._locator.getLineNumber(), "of", self._path)
 
+            currentState.recordExplicitIndex(name, index)
             self._current = self._current.getChild(name, index, create=True)
         else:
+            index = currentState.getNextIndex(name)
             # important we use getChild here, so that includes are resolved
             # correctly
-            self._current = self._current.getChild(name, create=True)
+            self._current = self._current.getChild(name, index, create=True)
+
+        self._stateStack.append(ParseState())
+
+        if 'include' in attrs.keys():
+            self.handleInclude(attrs['include'])
 
         self._currentTy = None;
         if 'type' in attrs.keys():
@@ -229,6 +252,7 @@ class PropsHandler(handler.ContentHandler):
         self._current = self._current.parent
         self._content = None
         self._currentTy = None
+        self._stateStack.pop()
 
 
     def parsePropsBool(self, content):
