@@ -66,6 +66,7 @@ def scan_set_file(aircraft_dir, set_file):
     if sim_node == None:
         return None
 
+    root_node.write('/tmp/junk/' + base_id + '-props.xml')
     variant = {}
     variant['name'] = sim_node.getValue("description", None)
     variant['status'] = sim_node.getValue("status", None)
@@ -79,6 +80,7 @@ def scan_set_file(aircraft_dir, set_file):
 
     # extract and record previews for each variant
     if sim_node.hasChild('previews'):
+        print "has previews ..."
         variant['previews'] = extract_previews(sim_node.getChild('previews'), aircraft_dir)
 
     if sim_node.hasChild('rating'):
@@ -128,6 +130,9 @@ def scan_aircraft_dir(aircraft_dir):
             except:
                 print "Skipping set file since couldn't be parsed:", os.path.join(aircraft_dir, file), sys.exc_info()[0]
                 continue
+            #except:
+            #    print "Skipping set file since couldn't be parsed:", os.path.join(aircraft_dir, file)
+            #    continue
 
             setDicts.append(d)
             if d['primary-set']:
@@ -221,6 +226,10 @@ def copy_previews_for_variant(variant, package_name, package_dir, previews_dir):
     for preview in variant['previews']:
         preview_src = os.path.join(package_dir, preview['path'])
         preview_dst = os.path.join(previews_dir, package_name + '_' + preview['path'])
+        #print preview_src, preview_dst, preview['path']
+        dir = os.path.dirname(preview_dst)
+        if not os.path.isdir(dir):
+            os.makedirs(dir)
         if os.path.exists(preview_src):
             shutil.copy2(preview_src, preview_dst)
 
