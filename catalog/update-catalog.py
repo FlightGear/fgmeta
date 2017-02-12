@@ -66,7 +66,6 @@ def scan_set_file(aircraft_dir, set_file):
     if sim_node == None:
         return None
 
-    root_node.write('/tmp/junk/' + base_id + '-props.xml')
     variant = {}
     variant['name'] = sim_node.getValue("description", None)
     variant['status'] = sim_node.getValue("status", None)
@@ -130,9 +129,6 @@ def scan_aircraft_dir(aircraft_dir):
             except:
                 print "Skipping set file since couldn't be parsed:", os.path.join(aircraft_dir, file), sys.exc_info()[0]
                 continue
-            #except:
-            #    print "Skipping set file since couldn't be parsed:", os.path.join(aircraft_dir, file)
-            #    continue
 
             setDicts.append(d)
             if d['primary-set']:
