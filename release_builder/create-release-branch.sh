@@ -1,10 +1,10 @@
 #!/bin/bash
 
-THIS_RELEASE="2016.4"
-NEXT_RELEASE="2017.1"
+THIS_RELEASE="2017.1"
+NEXT_RELEASE="2017.2"
 SUBMODULES="simgear flightgear fgdata"
 
-:<< 'COMMENT_END'
+#:<< 'COMMENT_END'
 git checkout next
 git pull --rebase
 
@@ -20,7 +20,10 @@ git add .gitmodules && echo "set correct release-branch for submodules" | git co
 # track submodule changes
 git checkout next
 git add $SUBMODULES && echo "track submodule changes for release" | git commit --file=-
-COMMENT_END
+#COMMENT_END
+
+echo "Check this and submodules $SUBMODULES - hit <enter> to push or <ctrl-c> to cancel"
+read something
 
 for f in $SUBMODULES .; do
   pushd "$f"
