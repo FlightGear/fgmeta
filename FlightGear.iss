@@ -109,10 +109,6 @@ Source: "{#ThirdPartyDir}\3rdParty.x64\bin\crashrpt_lang.ini"; DestDir: "{app}\b
 Source: "{#ThirdPartyDir}\3rdParty.x64\bin\CrashSender1403.exe"; DestDir: "{app}\bin"; Check: Is64BitInstallMode
 Source: "{#VCInstallDir}\redist\x64\Microsoft.VC140.CRT\*.dll"; DestDir: "{app}\bin"; Check: Is64BitInstallMode
 
-; 32/64 bits install
-;NOTE: FGPanel has no 64 bits equivalent, so we are using the 32 bits binary for 32&64 bits OS
-Source: "{#InstallDir32}\bin\fgpanel.exe"; DestDir: "{app}\bin"; Flags: ignoreversion
-
 ; Include the base package
 #if IncludeData == "TRUE"
 Source: "X:\fgdata\*.*"; DestDir: "{app}\data"; Flags: ignoreversion recursesubdirs skipifsourcedoesntexist
