@@ -12,7 +12,7 @@
 	branch = next
 [submodule "fgdata"]
 	path = fgdata
-	url = https://git.code.sf.net/p/flightgear/fgdata
+	url = git://git.code.sf.net/p/flightgear/fgdata
 	branch = release/2017.1
 [submodule "windows-3rd-party"]
 	path = windows-3rd-party
