@@ -185,12 +185,13 @@ class PropsHandler(handler.ContentHandler):
             if 'include' in attrs.keys():
                 self.handleInclude(attrs['include'])
             return
-            
+
         currentState = self._stateStack[-1]
         if 'n' in attrs.keys():
             try:
                 index = int(attrs['n'])
             except:
+                print "Invalid index at line:", self._locator.getLineNumber(), "of", self._path
                 raise IndexError("Invalid index at line:", self._locator.getLineNumber(), "of", self._path)
 
             currentState.recordExplicitIndex(name, index)
