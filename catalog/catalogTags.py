@@ -78,3 +78,6 @@ simFeatureTags = [
 ]
 
 tags = aircraftTypeTags + manufacturerTags + eraTags + simFeatureTags + propulsionTags + featureTags
+
+def isValidTag(maybeTag):
+    return maybeTag in tags

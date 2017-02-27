@@ -11,6 +11,7 @@ import subprocess
 import time
 import sgprops
 import sys
+import catalogTags
 
 CATALOG_VERSION = 4
 
@@ -89,6 +90,9 @@ def scan_set_file(aircraft_dir, set_file):
         variant['rating_cockpit'] = rating_node.getValue("cockpit", 0)
         variant['rating_model'] = rating_node.getValue("model", 0)
 
+    if sim_node.hasChild('tags'):
+        variant['tags'] = extract_tags(sim_node.getChild('tags'), set_file)
+
     variant['variant-of'] = sim_node.getValue("variant-of", None)
     #print '    ', variant
     return variant
@@ -105,6 +109,17 @@ def extract_previews(previews_node, aircraft_dir):
             print "Bad preview path, skipping:" + fullPath
             continue
         result.append({'type':previewType, 'path':previewPath})
+
+    return result
+
+def extract_tags(tags_node, set_path):
+    result = []
+    for node in tags_node.getChildren("tag"):
+        tag = node.value
+        # check tag is in the allowed list
+        if not catalogTags.isValidTag(tag):
+            print "Unknown tag value:", tag, " in ", set_path
+        result.append(tag)
 
     return result
 
@@ -233,6 +248,13 @@ def copy_previews_for_package(package, variants, package_name, package_dir, prev
     copy_previews_for_variant(package, package_name, package_dir, previews_dir)
     for v in variants:
         copy_previews_for_variant(v, package_name, package_dir, previews_dir)
+
+def append_tag_nodes(node, variant):
+    if not 'tags' in variant:
+        return
+
+    for tag in variant['tags']:
+        node.append(make_xml_leaf('tag', tag))
 
 #def get_file_stats(file):
 #    f = open(file, 'r')
@@ -378,6 +400,7 @@ for scm in scm_list:
                     variant_node.append( make_xml_leaf('author', variant['author']) )
 
                 append_preview_nodes(variant_node, variant, download_base, name)
+                append_tag_nodes(variant_node, variant)
 
             package_node.append( make_xml_leaf('dir', name) )
             if not download_base.endswith('/'):
@@ -388,6 +411,7 @@ for scm in scm_list:
             package_node.append( make_xml_leaf('thumbnail', thumbnail_url) )
 
             append_preview_nodes(package_node, package, download_base, name)
+            append_tag_nodes(package_node, package)
 
             # todo: url (download), thumbnail (download url)
 
