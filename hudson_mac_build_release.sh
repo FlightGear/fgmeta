@@ -21,7 +21,7 @@ echo "Build path is: $PATH"
 ###############################################################################
 echo "Starting on SimGear"
 pushd sgBuild
-cmake -DCMAKE_INSTALL_PREFIX:PATH=$WORKSPACE/dist -DENABLE_CURL:BOOL="ON" -DCMAKE_BUILD_TYPE=RelWithDebInfo ../simgear
+cmake -DCMAKE_INSTALL_PREFIX:PATH=$WORKSPACE/dist -DCMAKE_BUILD_TYPE=RelWithDebInfo ../simgear
 
 # compile
 make
@@ -39,7 +39,14 @@ popd
 ################################################################################
 echo "Starting on FlightGear"
 pushd fgBuild
-cmake -DFG_NIGHTLY=1 -DCMAKE_INSTALL_PREFIX:PATH=$WORKSPACE/dist -DCMAKE_BUILD_TYPE=RelWithDebInfo ../flightgear
+
+if [ $FG_IS_RELEASE == '1' ]; then
+  FGBUILDTYPE=Release
+else
+  FGBUILDTYPE=Nightly
+fi
+
+cmake -DFG_BUILD_TYPE=$FGBUILDTYPE -DCMAKE_INSTALL_PREFIX:PATH=$WORKSPACE/dist -DCMAKE_BUILD_TYPE=RelWithDebInfo ../flightgear
 
 make
 

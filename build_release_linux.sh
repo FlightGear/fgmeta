@@ -38,7 +38,7 @@ cp simgear-*.tar.bz2 ../output/.
 #####################################################################################
 echo "Starting on FlightGear"
 cd ../fgBuild
-cmake -DCMAKE_INSTALL_PREFIX:PATH=$WORKSPACE/dist -DSIMGEAR_SHARED:BOOL="ON" ../flightgear
+cmake -DCMAKE_INSTALL_PREFIX:PATH=$WORKSPACE/dist -DSIMGEAR_SHARED:BOOL="ON" -DFG_BUILD_TYPE=Release ../flightgear
 
 # compile
 make
@@ -60,4 +60,3 @@ echo "Assembling base package"
 cd $WORKSPACE
 
 tar cjf output/FlightGear-$VERSION-data.tar.bz2 fgdata/
-
