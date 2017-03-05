@@ -93,6 +93,9 @@ def scan_set_file(aircraft_dir, set_file):
     if sim_node.hasChild('tags'):
         variant['tags'] = extract_tags(sim_node.getChild('tags'), set_file)
 
+    if sim_node.hasChild('thumbnail'):
+        variant['thumbnail'] = sim_node.getValue("thumbnail", None)
+
     variant['variant-of'] = sim_node.getValue("variant-of", None)
     #print '    ', variant
     return variant
@@ -126,12 +129,8 @@ def extract_tags(tags_node, set_path):
 # scan all the -set.xml files in an aircraft directory.  Returns a
 # package dict and a list of variants.
 def scan_aircraft_dir(aircraft_dir):
-    # old way of finding the master aircraft: it's the only one whose
-    # variant-of is empty. All the others have an actual value
-    # newer alternative is to specify one -set.xml as the primary. All the
-    # others are therefore variants.
     setDicts = []
-    found_master = False
+    primaryAircraft = []
     package = None
 
     files = os.listdir(aircraft_dir)
@@ -147,25 +146,23 @@ def scan_aircraft_dir(aircraft_dir):
 
             setDicts.append(d)
             if d['primary-set']:
-                found_master = True
-                package = d
+                primaryAircraft.append(d)
+            elif d['variant-of'] == None:
+                primaryAircraft.append(d)
 
-    # didn't find a dict identified explicitly as the primary, look for one
-    # with an undefined variant-of
-    if not found_master:
-        for d in setDicts:
-            if d['variant-of'] == '':
-                found_master = True
-                package = d
-                break
+    if len(setDicts) == 0:
+        return None
 
-    if not found_master:
-        if len(setDicts) > 1:
-            print "Warning, no explicit primary set.xml in " + aircraft_dir
-        # use the first one
-        package = setDicts[0]
+    # use the first one
+    if len(primaryAircraft) == 0:
+        print "Aircraft has no primary aircraft at all:", aircraft_dir
+        primaryAircraft = [setDicts[0]]
 
-    # variants is just all the set dicts except the master
+    package = primaryAircraft[0]
+    if not 'thumbnail' in package:
+        package['thumbnail'] = "thumbnail.jpg"
+
+    # variants is just all the set dicts except the first one
     variants = setDicts
     variants.remove(package)
     return (package, variants)
@@ -248,6 +245,26 @@ def copy_previews_for_package(package, variants, package_name, package_dir, prev
     copy_previews_for_variant(package, package_name, package_dir, previews_dir)
     for v in variants:
         copy_previews_for_variant(v, package_name, package_dir, previews_dir)
+
+def copy_thumbnail_for_variant(variant, package_name, package_dir, thumbnails_dir):
+    if not 'thumbnail' in variant:
+        return
+
+    thumb_src = os.path.join(package_dir, variant['thumbnail'])
+    thumb_dst = os.path.join(thumbnails_dir, package_name + '_' + variant['thumbnail'])
+
+    dir = os.path.dirname(thumb_dst)
+    if not os.path.isdir(dir):
+        os.makedirs(dir)
+    if os.path.exists(thumb_src):
+        shutil.copy2(thumb_src, thumb_dst)
+
+def copy_thumbnails_for_package(package, variants, package_name, package_dir, thumbnails_dir):
+    copy_thumbnail_for_variant(package, package_name, package_dir, thumbnails_dir)
+
+    # and now each variant in turn
+    for v in variants:
+        copy_thumbnail_for_variant(v, package_name, package_dir, thumbnails_dir)
 
 def append_tag_nodes(node, variant):
     if not 'tags' in variant:
@@ -399,6 +416,13 @@ for scm in scm_list:
                 if 'author' in variant:
                     variant_node.append( make_xml_leaf('author', variant['author']) )
 
+                if 'thumbnail' in variant:
+                    # note here we prefix with the package name, since the thumbnail path
+                    # is assumed to be unique within the package
+                    thumbUrl = download_base + "thumbnails/" + name + '_' + variant['thumbnail']
+                    variant_node.append(make_xml_leaf('thumbnail', thumbUrl))
+                    variant_node.append(make_xml_leaf('thumbnail-path', variant['thumbnail']))
+
                 append_preview_nodes(variant_node, variant, download_base, name)
                 append_tag_nodes(variant_node, variant)
 
@@ -406,14 +430,14 @@ for scm in scm_list:
             if not download_base.endswith('/'):
                 download_base += '/'
             download_url = download_base + name + '.zip'
-            thumbnail_url = download_base + 'thumbnails/' + name + '_thumbnail.jpg'
+            thumbnail_url = download_base + 'thumbnails/' + name + '_' + package['thumbnail']
+
             package_node.append( make_xml_leaf('url', download_url) )
             package_node.append( make_xml_leaf('thumbnail', thumbnail_url) )
+            package_node.append( make_xml_leaf('thumbnail-path', package['thumbnail']))
 
             append_preview_nodes(package_node, package, download_base, name)
             append_tag_nodes(package_node, package)
-
-            # todo: url (download), thumbnail (download url)
 
             # get cached md5sum if it exists
             md5sum = get_xml_text(md5sum_root.find(str('aircraft_' + name)))
@@ -453,12 +477,9 @@ for scm in scm_list:
                 md5sum_root.append( make_xml_leaf('aircraft_' + name, md5sum) )
 
             # handle thumbnails
-            thumbnail_src = os.path.join(aircraft_dir, 'thumbnail.jpg')
-            thumbnail_dst = os.path.join(thumbnail_dir, name + '_thumbnail.jpg')
-            if os.path.exists(thumbnail_src):
-                shutil.copy2(thumbnail_src, thumbnail_dst)
+            copy_thumbnails_for_package(package, variants, name, aircraft_dir, thumbnail_dir)
+
             catalog_node.append(package_node)
-            package_node.append( make_xml_leaf('thumbnail-path', 'thumbnail.jpg') )
 
             # copy previews for the package and variants into the
             # output directory
