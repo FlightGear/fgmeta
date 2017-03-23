@@ -1,80 +1,110 @@
 aircraftTypeTags = [
-    "ga", "fighter", "helicopter", "glider", "spaceship", "bomber", "groundvehicle",
-    "tanker", "cargo", "transport", "bizjet", "trainer", "airship", "balloon"
+    "aerobatic",
+    "airship",
+    "balloon",
+    "bizjet",
+    "bomber",
+    "cargo",
+    "fighter",
+    "ga",
+    "glider",
+    "groundvehicle",
+    "helicopter",
+    "spaceship",
+    "tanker",
+    "trainer",
+    "transport",
+    "ultralight"
 ]
 
 manufacturerTags = [
-    "boeing", "cessna", "diamond", "douglas", "bell", "piper",
-    "airbus", "vickers", "lockheed", "fokker",
-    "embraer", "bombardier", "pilatus", "robin",
-    "eurocopter"
+    "airbus",
+    "avro",
+    "bell",
+    "boeing",
+    "bombardier",
+    "cessna",
+    "diamond",
+    "douglas",
+    "embraer",
+    "eurocopter",
+    "fokker",
+    "lockheed",
+    "pilatus",
+    "piper",
+    "robin",
+    "vickers"
 ]
 
 eraTags = [
-    "early-pioneers",
-    "ww1",
     "1920s",
     "1930s",
-    "golden-age",
-    "ww2",
-    "coldwar", "vietnam",
     "1950s",
     "1960s",
     "1970s",
     "1980s",
     "1990s",
     "2000s",
+    "coldwar",
+    "early-pioneers",
+    "golden-age",
     "gulfwar1",
-    "gulfwar2"
+    "gulfwar2",
+    "vietnam",
+    "ww1",
+    "ww2"
 ]
 
 featureTags = [
-    "ifr",
-    "retractable-gear",
-    "fixed-gear",
-    "tail-dragger",
-    "seaplane",
-    "vtol",
-    "stol",
-    "experimental",
-    "prototype",
-    "fictional",
+    "aerobatic",
+    "airship",
+    "amphibious",
     "biplane",
-    "triplane",
+    "cannard",
+    "delta",
+    "etops",
+    "experimental",
+    "fictional",
+    "fixed-gear",
+    "floats",
+    "glass-cockpit",
+    "high-wing",
+    "hud",
+    "ifr",
+    "prototype",
+    "refuel",
+    "retractable-gear",
+    "seaplane",
+    "stol",
     "supersonic",
     "t-tail",
-    "v-tail",
-    "high-wing",
-    "cannard",
+    "tail-dragger",
     "tail-hook",
-    "refuel",
-    "delta",
+    "triplane",
+    "v-tail",
     "variable-geometry",
-    "glass-cockpit",
-    "hud",
-    "etops",
-    "floats",
-    "amphibious",
-    "airship",
-    "aerobatic"
+    "vtol"
 ]
 
 propulsionTags = [
-    "piston", "radial",
+    "afterburner",
     "diesel",
-    "variable-pitch",
+    "electric",
+    "jet",
+    "piston",
+    "radial",
+    "rocket",
+    "single-engine",
     "supercharged",
     "turboprop",
-    "jet", "afterburner", "rocket",
-    "electric",
     "twin-engine",
-    "single-engine"
+    "variable-pitch"
 ]
 
 simFeatureTags = [
-    "tow",
     "dual-controls",
-    "rembrandt"
+    "rembrandt",
+    "tow"
 ]
 
 tags = aircraftTypeTags + manufacturerTags + eraTags + simFeatureTags + propulsionTags + featureTags
