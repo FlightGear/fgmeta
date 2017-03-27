@@ -60,7 +60,7 @@ featureTags = [
     "airship",
     "amphibious",
     "biplane",
-    "cannard",
+    "canard",
     "delta",
     "etops",
     "experimental",
