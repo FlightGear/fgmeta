@@ -24,27 +24,35 @@ manufacturerTags = [
     "boeing",
     "bombardier",
     "cessna",
+    "dassault",
     "diamond",
     "douglas",
     "embraer",
     "eurocopter",
+    "fairchild",
+    "fairey",
     "fokker",
+    "grumman",
     "lockheed",
     "pilatus",
     "piper",
     "robin",
-    "vickers"
+    "vickers",
+    "vought"
 ]
 
 eraTags = [
+    "1910s",
     "1920s",
     "1930s",
+    "1940s",
     "1950s",
     "1960s",
     "1970s",
     "1980s",
     "1990s",
     "2000s",
+    "2010s",
     "coldwar",
     "early-pioneers",
     "golden-age",
@@ -83,7 +91,8 @@ featureTags = [
     "triplane",
     "v-tail",
     "variable-geometry",
-    "vtol"
+    "vtol",
+    "wing-fold"
 ]
 
 propulsionTags = [
