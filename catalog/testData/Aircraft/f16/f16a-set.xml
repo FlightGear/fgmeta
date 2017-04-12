@@ -1,0 +1,36 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<PropertyList include="f16-common.xml">
+  <sim>
+    <name>f16a</name>
+    <description>F16-A</description>
+    <long-description>The F16 is compact, light-weight multi-role fighter used around the world</long-description>
+
+    <primary-set type="bool">true</primary-set>
+    
+    <rating>
+      <FDM type="int">3</FDM>
+      <systems type="int">1</systems>
+      <cockpit type="int">2</cockpit>
+      <model type="int">5</model>
+    </rating>
+
+    <previews>
+        <preview>
+          <type>exterior</type>
+          <splash type="bool">true</splash>
+          <path>Previews/exterior-1.png</path>
+        </preview>
+        <preview>
+          <type>exterior</type>
+          <splash type="bool">true</splash>
+          <path>Previews/exterior-f16a-2.png</path>
+        </preview>
+        <preview>
+          <type>panel</type>
+          <splash type="bool">false</splash>
+          <path>Previews/cockpit.png</path>
+        </preview>
+      </previews>
+  </sim>
+
+</PropertyList>

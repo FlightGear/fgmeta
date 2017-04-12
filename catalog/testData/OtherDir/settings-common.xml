@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='UTF-8'?>
+
+<!-- this file exists to test including + overlaying in the set XML -->
+
+<PropertyList>
+    <views>
+      <view n="0">
+        <foo>dsdddd</foo>
+      </view>
+    </views>
+
+</PropertyList>

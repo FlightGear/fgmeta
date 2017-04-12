@@ -12,6 +12,7 @@ import time
 import sgprops
 import sys
 import catalogTags
+import catalog
 
 CATALOG_VERSION = 4
 
@@ -34,138 +35,6 @@ def get_xml_text(e):
         return e.text
     else:
         return ''
-
-# create an xml node with text content
-def make_xml_leaf(name, text):
-    leaf = ET.Element(name)
-    if text != None:
-        if isinstance(text, (int, long)):
-            leaf.text = str(text)
-        else:
-            leaf.text = text
-    else:
-        leaf.text = ''
-    return leaf
-
-# return all available aircraft information from the set file as a
-# dict
-def scan_set_file(aircraft_dir, set_file):
-    global includes
-
-    base_file = os.path.basename(set_file)
-    base_id = base_file[:-8]
-    set_path = os.path.join(aircraft_dir, set_file)
-
-    local_includes = includes
-    local_includes.append(aircraft_dir)
-    root_node = sgprops.readProps(set_path, includePaths = local_includes)
-
-    if not root_node.hasChild("sim"):
-        return None
-
-    sim_node = root_node.getChild("sim")
-    if sim_node == None:
-        return None
-
-    variant = {}
-    variant['name'] = sim_node.getValue("description", None)
-    variant['status'] = sim_node.getValue("status", None)
-    variant['author'] = sim_node.getValue("author", None)
-    variant['description'] = sim_node.getValue("long-description", None)
-    variant['id'] = base_id
-
-    # allow -set.xml files to declare themselves as primary.
-    # we use this avoid needing a variant-of in every other -set.xml
-    variant['primary-set'] = sim_node.getValue('primary-set', False)
-
-    # extract and record previews for each variant
-    if sim_node.hasChild('previews'):
-        print "has previews ..."
-        variant['previews'] = extract_previews(sim_node.getChild('previews'), aircraft_dir)
-
-    if sim_node.hasChild('rating'):
-        rating_node = sim_node.getChild("rating")
-        variant['rating_FDM'] = rating_node.getValue("FDM", 0)
-        variant['rating_systems'] = rating_node.getValue("systems", 0)
-        variant['rating_cockpit'] = rating_node.getValue("cockpit", 0)
-        variant['rating_model'] = rating_node.getValue("model", 0)
-
-    if sim_node.hasChild('tags'):
-        variant['tags'] = extract_tags(sim_node.getChild('tags'), set_file)
-
-    if sim_node.hasChild('thumbnail'):
-        variant['thumbnail'] = sim_node.getValue("thumbnail", None)
-
-    variant['variant-of'] = sim_node.getValue("variant-of", None)
-    #print '    ', variant
-    return variant
-
-def extract_previews(previews_node, aircraft_dir):
-    result = []
-    for node in previews_node.getChildren("preview"):
-        previewType = node.getValue("type", None)
-        previewPath = node.getValue("path", None)
-
-        # check path exists in base-name-dir
-        fullPath = os.path.join(aircraft_dir, previewPath)
-        if not os.path.isfile(fullPath):
-            print "Bad preview path, skipping:" + fullPath
-            continue
-        result.append({'type':previewType, 'path':previewPath})
-
-    return result
-
-def extract_tags(tags_node, set_path):
-    result = []
-    for node in tags_node.getChildren("tag"):
-        tag = node.value
-        # check tag is in the allowed list
-        if not catalogTags.isValidTag(tag):
-            print "Unknown tag value:", tag, " in ", set_path
-        result.append(tag)
-
-    return result
-
-# scan all the -set.xml files in an aircraft directory.  Returns a
-# package dict and a list of variants.
-def scan_aircraft_dir(aircraft_dir):
-    setDicts = []
-    primaryAircraft = []
-    package = None
-
-    files = os.listdir(aircraft_dir)
-    for file in sorted(files, key=lambda s: s.lower()):
-        if file.endswith('-set.xml'):
-            try:
-                d = scan_set_file(aircraft_dir, file)
-                if d == None:
-                    continue
-            except:
-                print "Skipping set file since couldn't be parsed:", os.path.join(aircraft_dir, file), sys.exc_info()[0]
-                continue
-
-            setDicts.append(d)
-            if d['primary-set']:
-                primaryAircraft.append(d)
-            elif d['variant-of'] == None:
-                primaryAircraft.append(d)
-
-    if len(setDicts) == 0:
-        return None
-
-    # use the first one
-    if len(primaryAircraft) == 0:
-        print "Aircraft has no primary aircraft at all:", aircraft_dir
-        primaryAircraft = [setDicts[0]]
-
-    package = primaryAircraft[0]
-    if not 'thumbnail' in package:
-        package['thumbnail'] = "thumbnail.jpg"
-
-    # variants is just all the set dicts except the first one
-    variants = setDicts
-    variants.remove(package)
-    return (package, variants)
 
 # use svn commands to report the last change date within dir
 def last_change_date_svn(dir):
@@ -215,18 +84,6 @@ def get_md5sum(file):
     f.close()
     return md5sum
 
-def append_preview_nodes(node, variant, download_base, package_name):
-    if not 'previews' in variant:
-        return
-
-    for preview in variant['previews']:
-        preview_node = ET.Element('preview')
-        preview_url = download_base + 'previews/' + package_name + '_' + preview['path']
-        preview_node.append( make_xml_leaf('type', preview['type']) )
-        preview_node.append( make_xml_leaf('url', preview_url) )
-        preview_node.append( make_xml_leaf('path', preview['path']) )
-        node.append(preview_node)
-
 def copy_previews_for_variant(variant, package_name, package_dir, previews_dir):
     if not 'previews' in variant:
         return
@@ -266,12 +123,74 @@ def copy_thumbnails_for_package(package, variants, package_name, package_dir, th
     for v in variants:
         copy_thumbnail_for_variant(v, package_name, package_dir, thumbnails_dir)
 
-def append_tag_nodes(node, variant):
-    if not 'tags' in variant:
+def process_aircraft_dir(name, repo_path):
+    global includes
+    global download_base
+    global output_dir
+    global valid_zips
+    global previews_dir
+
+    aircraft_dir = os.path.join(repo_path, name)
+    if not os.path.isdir(aircraft_dir):
         return
 
-    for tag in variant['tags']:
-        node.append(make_xml_leaf('tag', tag))
+    (package, variants) = catalog.scan_aircraft_dir(aircraft_dir, includes)
+    if package == None:
+        print "skipping:", name, "(no -set.xml files)"
+        return
+
+    print "%s:" % name,
+
+    package_node = catalog.make_aircraft_node(name, package, variants, download_base)
+
+    download_url = download_base + name + '.zip'
+    thumbnail_url = download_base + 'thumbnails/' + name + '_' + package['thumbnail']
+
+    # get cached md5sum if it exists
+    md5sum = get_xml_text(md5sum_root.find(str('aircraft_' + name)))
+
+    # now do the packaging and rev number stuff
+    dir_mtime = scan_dir_for_change_date_mtime(aircraft_dir)
+    if repo_type == 'svn':
+        rev = last_change_date_svn(aircraft_dir)
+    else:
+        d = datetime.datetime.utcfromtimestamp(dir_mtime)
+        rev = d.strftime("%Y%m%d")
+    package_node.append( catalog.make_xml_leaf('revision', rev) )
+    #print "rev:", rev
+    #print "dir mtime:", dir_mtime
+    zipfile = os.path.join( output_dir, name + '.zip' )
+    valid_zips.append(name + '.zip')
+    if not os.path.exists(zipfile) \
+       or dir_mtime > os.path.getmtime(zipfile) \
+       or args.clean:
+        # rebuild zip file
+        print "updating:", zipfile
+        make_aircraft_zip(repo_path, name, zipfile)
+        md5sum = get_md5sum(zipfile)
+    else:
+        print "(no change)"
+        if md5sum == "":
+            md5sum = get_md5sum(zipfile)
+    filesize = os.path.getsize(zipfile)
+    package_node.append( catalog.make_xml_leaf('md5', md5sum) )
+    package_node.append( catalog.make_xml_leaf('file-size-bytes', filesize) )
+
+    # handle md5sum cache
+    node = md5sum_root.find('aircraft_' + name)
+    if node != None:
+        node.text = md5sum
+    else:
+        md5sum_root.append( catalog.make_xml_leaf('aircraft_' + name, md5sum) )
+
+    # handle thumbnails
+    copy_thumbnails_for_package(package, variants, name, aircraft_dir, thumbnail_dir)
+
+    catalog_node.append(package_node)
+
+    # copy previews for the package and variants into the
+    # output directory
+    copy_previews_for_package(package, variants, name, aircraft_dir, previews_dir)
 
 #def get_file_stats(file):
 #    f = open(file, 'r')
@@ -305,6 +224,9 @@ else:
 scm_list = config_node.findall('scm')
 upload_node = config_node.find('upload')
 download_base = get_xml_text(config_node.find('download-url'))
+if not download_base.endswith('/'):
+    download_base += '/'
+
 output_dir = get_xml_text(config_node.find('local-output'))
 if output_dir == '':
     output_dir = os.path.join(args.dir, 'output')
@@ -378,112 +300,8 @@ for scm in scm_list:
             print "skipping:", name
             continue
 
-        aircraft_dir = os.path.join(repo_path, name)
-        if os.path.isdir(aircraft_dir):
-            print "%s:" % name,
-            (package, variants) = scan_aircraft_dir(aircraft_dir)
-            if package == None:
-                print "skipping:", name, "(no -set.xml files)"
-                continue
-            #print "package:", package
-            #print "variants:", variants
-            package_node = ET.Element('package')
-            package_node.append( make_xml_leaf('name', package['name']) )
-            package_node.append( make_xml_leaf('status', package['status']) )
-            package_node.append( make_xml_leaf('author', package['author']) )
-            package_node.append( make_xml_leaf('description', package['description']) )
-            if 'rating_FDM' in package or 'rating_systems' in package \
-               or 'rating_cockpit' in package or 'rating_model' in package:
-                rating_node = ET.Element('rating')
-                package_node.append(rating_node)
-                rating_node.append( make_xml_leaf('FDM',
-                                                  package['rating_FDM']) )
-                rating_node.append( make_xml_leaf('systems',
-                                                  package['rating_systems']) )
-                rating_node.append( make_xml_leaf('cockpit',
-                                                  package['rating_cockpit']) )
-                rating_node.append( make_xml_leaf('model',
-                                                  package['rating_model']) )
-            package_node.append( make_xml_leaf('id', package['id']) )
-            for variant in variants:
-                variant_node = ET.Element('variant')
-                package_node.append(variant_node)
-                variant_node.append( make_xml_leaf('id', variant['id']) )
-                variant_node.append( make_xml_leaf('name', variant['name']) )
-                if 'description' in variant:
-                    variant_node.append( make_xml_leaf('description', variant['description']) )
-
-                if 'author' in variant:
-                    variant_node.append( make_xml_leaf('author', variant['author']) )
-
-                if 'thumbnail' in variant:
-                    # note here we prefix with the package name, since the thumbnail path
-                    # is assumed to be unique within the package
-                    thumbUrl = download_base + "thumbnails/" + name + '_' + variant['thumbnail']
-                    variant_node.append(make_xml_leaf('thumbnail', thumbUrl))
-                    variant_node.append(make_xml_leaf('thumbnail-path', variant['thumbnail']))
-
-                append_preview_nodes(variant_node, variant, download_base, name)
-                append_tag_nodes(variant_node, variant)
-
-            package_node.append( make_xml_leaf('dir', name) )
-            if not download_base.endswith('/'):
-                download_base += '/'
-            download_url = download_base + name + '.zip'
-            thumbnail_url = download_base + 'thumbnails/' + name + '_' + package['thumbnail']
-
-            package_node.append( make_xml_leaf('url', download_url) )
-            package_node.append( make_xml_leaf('thumbnail', thumbnail_url) )
-            package_node.append( make_xml_leaf('thumbnail-path', package['thumbnail']))
-
-            append_preview_nodes(package_node, package, download_base, name)
-            append_tag_nodes(package_node, package)
-
-            # get cached md5sum if it exists
-            md5sum = get_xml_text(md5sum_root.find(str('aircraft_' + name)))
-
-            # now do the packaging and rev number stuff
-            dir_mtime = scan_dir_for_change_date_mtime(aircraft_dir)
-            if repo_type == 'svn':
-                rev = last_change_date_svn(aircraft_dir)
-            else:
-                d = datetime.datetime.utcfromtimestamp(dir_mtime)
-                rev = d.strftime("%Y%m%d")
-            package_node.append( make_xml_leaf('revision', rev) )
-            #print "rev:", rev
-            #print "dir mtime:", dir_mtime
-            zipfile = os.path.join( output_dir, name + '.zip' )
-            valid_zips.append(name + '.zip')
-            if not os.path.exists(zipfile) \
-               or dir_mtime > os.path.getmtime(zipfile) \
-               or args.clean:
-                # rebuild zip file
-                print "updating:", zipfile
-                make_aircraft_zip(repo_path, name, zipfile)
-                md5sum = get_md5sum(zipfile)
-            else:
-                print "(no change)"
-                if md5sum == "":
-                    md5sum = get_md5sum(zipfile)
-            filesize = os.path.getsize(zipfile)
-            package_node.append( make_xml_leaf('md5', md5sum) )
-            package_node.append( make_xml_leaf('file-size-bytes', filesize) )
-
-            # handle md5sum cache
-            node = md5sum_root.find('aircraft_' + name)
-            if node != None:
-                node.text = md5sum
-            else:
-                md5sum_root.append( make_xml_leaf('aircraft_' + name, md5sum) )
-
-            # handle thumbnails
-            copy_thumbnails_for_package(package, variants, name, aircraft_dir, thumbnail_dir)
-
-            catalog_node.append(package_node)
-
-            # copy previews for the package and variants into the
-            # output directory
-            copy_previews_for_package(package, variants, name, aircraft_dir, previews_dir)
+        # process each aircraft in turn
+        process_aircraft_dir(name, repo_path)
 
 # write out the master catalog file
 cat_file = os.path.join(output_dir, 'catalog.xml')

@@ -1,0 +1,11 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<PropertyList include="f16-common.xml">
+  <sim>
+    <name>f16-trainer</name>
+    <description>F16 Trainer</description>
+    <long-description>Twin-seat trainer version of the F16</long-description>
+
+
+  </sim>
+
+</PropertyList>

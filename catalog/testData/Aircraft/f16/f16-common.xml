@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<PropertyList>
+  <sim include="settings-common.xml">
+    <author>Wilbur Wright</author>
+    <tags>
+      <tag>fighter</tag>
+      <tag>1980s</tag>
+      <tag>glass-cockpit</tag>
+    </tags>
+  </sim>
+
+</PropertyList>

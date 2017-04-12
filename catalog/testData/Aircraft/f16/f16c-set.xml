@@ -1,0 +1,10 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<PropertyList include="f16-common.xml">
+  <sim>
+    <name>f16c</name>
+    <description>F16-C</description>
+    <long-description>The F16-C is an upgraded version of the F16A.</long-description>
+    <variant-of>f16a</variant-of>
+  </sim>
+
+</PropertyList>

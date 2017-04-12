@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<PropertyList include="f16-common.xml">
+  <sim>
+    <name>f16b</name>
+    <description>F16-B</description>
+    <long-description>The F16-B is an upgraded version of the F16A.</long-description>
+    <variant-of>f16a</variant-of>
+
+    <author>James T Kirk</author>
+  </sim>
+
+</PropertyList>
