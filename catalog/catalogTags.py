@@ -14,7 +14,10 @@ aircraftTypeTags = [
     "tanker",
     "trainer",
     "transport",
-    "ultralight"
+    "ultralight",
+    "seacraft",
+    "crop-duster",
+    "bush-plane"
 ]
 
 manufacturerTags = [
@@ -32,13 +35,16 @@ manufacturerTags = [
     "fairchild",
     "fairey",
     "fokker",
+    "general-dynamics",
     "grumman",
     "lockheed",
+    "northrop",
     "pilatus",
     "piper",
     "robin",
     "vickers",
-    "vought"
+    "vought",
+    "yakovlev"
 ]
 
 eraTags = [
@@ -69,6 +75,7 @@ featureTags = [
     "amphibious",
     "biplane",
     "canard",
+    "castering-wheel",
     "delta",
     "etops",
     "experimental",
@@ -83,10 +90,12 @@ featureTags = [
     "refuel",
     "retractable-gear",
     "seaplane",
+    "skis",
     "stol",
     "supersonic",
     "t-tail",
     "tail-dragger",
+    "tricycle",
     "tail-hook",
     "triplane",
     "v-tail",
@@ -100,6 +109,7 @@ propulsionTags = [
     "diesel",
     "electric",
     "jet",
+    "propeller",
     "piston",
     "radial",
     "rocket",
@@ -107,13 +117,15 @@ propulsionTags = [
     "supercharged",
     "turboprop",
     "twin-engine",
-    "variable-pitch"
+    "variable-pitch",
+    "fixed-pitch"
 ]
 
 simFeatureTags = [
     "dual-controls",
     "rembrandt",
-    "tow"
+    "tow",
+    "wildfire"
 ]
 
 tags = aircraftTypeTags + manufacturerTags + eraTags + simFeatureTags + propulsionTags + featureTags
