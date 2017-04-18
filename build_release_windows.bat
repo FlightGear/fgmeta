@@ -75,9 +75,10 @@ subst X: %WORKSPACE%.
 REM ensure output dir is clean since we upload the entirety of it
 rmdir /S /Q output
 
-REM archiving PDB files
-copy %WORKSPACE%\build-fg32\src\Main\RelWithDebInfo\fgfs.pdb %WORKSPACE%\Output\fgfs-x86-%BUILD_NUMBER%.pdb
-copy %WORKSPACE%\build-fg64\src\Main\RelWithDebInfo\fgfs.pdb %WORKSPACE%\Output\fgfs-x64-%BUILD_NUMBER%.pdb
+SET CRASHFIX_UPLOAD_URL=http://crashes.flightgear.org/index.php/debugInfo/uploadExternal
+SET FGFS_PDB=src\Main\RelWithDebInfo\fgfs.pdb
+ECHO Uploading PDB files to %CRASHFIX_UPLOAD_URL%
+upload -v -u %CRASHFIX_UPLOAD_URL% FlightGear %WORKSPACE%\build-fg32\%FGFS_PDB% %WORKSPACE%\build-fg64\%FGFS_PDB%
 
 REM indirect way to get command output into an environment variable
 set PATH=%OSG32%\bin;%PATH%
