@@ -212,7 +212,7 @@ PKG="$PKG libqt4-dev"
 # SG/FG
 PKG="$PKG zlib1g-dev freeglut3-dev libboost-dev libopenscenegraph-dev"
 # FG
-PKG="$PKG libopenal-dev libudev-dev qt5-default libdbus-1-dev libpng12-dev libplib-dev"
+PKG="$PKG libopenal-dev libudev-dev qt5-default qtdeclarative5-dev libdbus-1-dev libpng12-dev libplib-dev"
 # FGPanel
 PKG="$PKG fluid libbz2-dev libfltk1.3-dev libxi-dev libxmu-dev"
 # FGAdmin
