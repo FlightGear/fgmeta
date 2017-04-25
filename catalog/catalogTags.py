@@ -27,6 +27,7 @@ manufacturerTags = [
     "boeing",
     "bombardier",
     "cessna",
+	"consolidated",
     "dassault",
     "diamond",
     "douglas",
@@ -34,14 +35,20 @@ manufacturerTags = [
     "eurocopter",
     "fairchild",
     "fairey",
+	"focke-wulf",
     "fokker",
     "general-dynamics",
     "grumman",
+	"handley page"
+	"heinkel"
     "lockheed",
+	"mitsubishi",
     "northrop",
     "pilatus",
     "piper",
     "robin",
+	"short",
+	"supermarine",
     "vickers",
     "vought",
     "yakovlev"
