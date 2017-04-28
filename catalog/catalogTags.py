@@ -5,6 +5,7 @@ aircraftTypeTags = [
     "bizjet",
     "bomber",
     "cargo",
+	"carrier",
     "fighter",
     "ga",
     "glider",
@@ -15,6 +16,7 @@ aircraftTypeTags = [
     "trainer",
     "transport",
     "ultralight",
+	"reconnaissance",
     "seacraft",
     "crop-duster",
     "bush-plane"
