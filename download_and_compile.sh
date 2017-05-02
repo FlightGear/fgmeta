@@ -279,9 +279,12 @@ PKG="$PKG libcgal-dev libgdal-dev libtiff5-dev"
 # TGGUI/OpenRTI
 PKG="$PKG libqt4-dev"
 # SG/FG
-PKG="$PKG zlib1g-dev freeglut3-dev libboost-dev libopenscenegraph-dev"
+PKG="$PKG zlib1g-dev freeglut3-dev libboost-dev"
+_package_alternative libopenscenegraph-3.4-dev libopenscenegraph-dev \
+                     'libopenscenegraph-[0-9]+\.[0-9]+-dev'
 # FG
-PKG="$PKG libopenal-dev libudev-dev qt5-default qtdeclarative5-dev libdbus-1-dev libpng12-dev libplib-dev"
+PKG="$PKG libopenal-dev libudev-dev qt5-default qtdeclarative5-dev libdbus-1-dev libplib-dev"
+_package_alternative libpng-dev libpng12-dev libpng16-dev
 # FGPanel
 PKG="$PKG fluid libbz2-dev libfltk1.3-dev libxi-dev libxmu-dev"
 # FGAdmin
@@ -444,8 +447,8 @@ if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="OSG"' ]]; then
   echo "****************************************" | tee -a $LOGFILE
   cd "$CBD"/openscenegraph
   _gitDownload https://github.com/openscenegraph/osg.git
-  _gitUpdate OpenSceneGraph-3.2
-  
+  _gitUpdate OpenSceneGraph-3.4
+
   if [ "$RECONFIGURE" = "y" ]; then
     cd "$CBD"
     mkdir -p build/openscenegraph
