@@ -100,6 +100,16 @@ function _logSep(){
   echo "***********************************" >> $LOGFILE
 }
 
+function _aptUpdate(){
+  echo "Asking password for 'apt-get update'..."
+  sudo apt-get update
+}
+
+function _aptInstall(){
+  echo "Asking password for 'apt-get install $*'..."
+  sudo apt-get install "$@"
+}
+
 function _gitUpdate(){
   if [ "$DOWNLOAD" != "y" ]; then
     return
@@ -140,6 +150,48 @@ function _make(){
     make $JOPTION $OOPTION 2>&1 | tee -a $LOGFILE
     echo "INSTALL $pkg" >> $LOGFILE
     make install 2>&1 | tee -a $LOGFILE
+  fi
+}
+
+# Find an available, non-virtual package matching one of the given regexps.
+#
+# Each positional parameter is interpreted as a POSIX extended regular
+# expression. These parameters are examined from left to right, and the first
+# available matching package is added to the global PKG variable. If no match
+# is found, the script aborts.
+function _package_alternative(){
+  if [[ $# -lt 1 ]]; then
+    echo "Empty package alternative: this is a bug in the script, aborting."
+    exit 1
+  fi
+
+  echo "Considering a package alternative:" "$@"
+  _package_alternative_inner "$@"
+}
+
+# This function requires the 'dctrl-tools' package
+function _package_alternative_inner(){
+  local pkg
+
+  if [[ $# -lt 1 ]]; then
+    echo "No match found for the package alternative, aborting."
+    exit 1
+  fi
+
+  # This finds non-virtual packages only (on purpose)
+  pkg="$(apt-cache dumpavail | \
+         grep-dctrl -e -sPackage -FPackage \
+           "^[[:space:]]*($1)[[:space:]]*\$" - | \
+         sed -ne '1s/^Package:[[:space:]]*//gp')"
+
+  if [[ -n "$pkg" ]]; then
+    echo "Package alternative matched for $pkg"
+    PKG="$PKG $pkg"
+    return 0
+  else
+    # Try with the next regexp
+    shift
+    _package_alternative_inner "$@"
   fi
 }
 
@@ -201,6 +253,23 @@ _logSep
 
 #######################################################
 #######################################################
+
+if [[ "$DOWNLOAD_PACKAGES" = "y" ]] && [[ "$APT_GET_UPDATE" = "y" ]]; then
+  _aptUpdate
+fi
+
+# Ensure 'dctrl-tools' is installed
+if [[ "$(dpkg-query --showformat='${db:Status-Status}\n' --show dctrl-tools \
+                    2>/dev/null)" != "installed" ]]; then
+  if [[ "$DOWNLOAD_PACKAGES" = "y" ]]; then
+    _aptInstall dctrl-tools
+  else
+    echo -n "The 'dctrl-tools' package is needed, but DOWNLOAD_PACKAGES is "
+    echo -e "not set to 'y'.\nAborting."
+    exit 1
+  fi
+fi
+
 # Minimum
 PKG="build-essential cmake git"
 # cmake
@@ -224,12 +293,8 @@ PKG="$PKG python-tk"
 # FGx (FGx is not compatible with Qt5, however we have installed Qt5 by default)
 #PKG="$PKG libqt5xmlpatterns5-dev libqt5webkit5-dev"
 
-if [ "$DOWNLOAD_PACKAGES" = "y" ]; then
-  echo "Asking password for apt-get operations..."
-  if [ "$APT_GET_UPDATE" = "y" ]; then
-    sudo apt-get update
-  fi
-  sudo apt-get install $PKG
+if [[ "$DOWNLOAD_PACKAGES" = "y" ]]; then
+  _aptInstall $PKG
 fi
 
 #######################################################
