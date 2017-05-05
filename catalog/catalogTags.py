@@ -11,6 +11,7 @@ aircraftTypeTags = [
     "glider",
     "groundvehicle",
     "helicopter",
+    "racer",
     "spaceship",
     "tanker",
     "trainer",
