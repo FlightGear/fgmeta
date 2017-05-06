@@ -25,6 +25,8 @@ aircraftTypeTags = [
 
 manufacturerTags = [
     "airbus",
+    "antonov",
+    "atr",
     "avro",
     "bell",
     "bleriot",
@@ -35,6 +37,7 @@ manufacturerTags = [
     "consolidated",
     "dassault",
     "diamond",
+    "dornier",
     "douglas",
     "embraer",
     "eurocopter",
@@ -48,8 +51,10 @@ manufacturerTags = [
     "handley-page",
     "hawker",
     "heinkel",
+    "ilyushin",
+    "junkers",
     "lockheed",
-    "mc-donnel-douglas",
+    "mc-donnell-douglas",
     "messerschmitt",
     "mikoyan-gurevich",
     "mitsubishi",
@@ -63,6 +68,7 @@ manufacturerTags = [
     "spad",
     "sukhoi",
     "supermarine",
+    "tupolev",
     "vickers",
     "vought",
     "yakovlev"
