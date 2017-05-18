@@ -17,7 +17,15 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-VERSION="2.34"
+script_blob_id='$Id$'
+# Slightly tricky substitution to avoid our regexp being wildly replaced with
+# the blob name (id) when the script is checked out:
+#
+# First extract the hexadecimal blob object name followed by a '$'
+VERSION="$(echo "$script_blob_id" | sed 's@\$Id: *\([0-9a-f]\+\) *@\1@')"
+# Then remove the trailing '$'
+VERSION="${VERSION%\$}"
+
 FGVERSION="release/$(git ls-remote --heads https://git.code.sf.net/p/flightgear/flightgear|grep '\/release\/'|cut -f4 -d'/'|sort -t . -k 1,1n -k2,2n -k3,3n|tail -1)"
 
 #######################################################

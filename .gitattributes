@@ -20,3 +20,4 @@ README.*                       text
 Makefile                       text
 ChangeLog                      text
 ChangeLog.*                    text
+/download_and_compile.sh       text ident
