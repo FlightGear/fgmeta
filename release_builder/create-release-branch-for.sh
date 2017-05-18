@@ -12,7 +12,7 @@
 #GNU General Public License for more details.
 #
 #You should have received a copy of the GNU General Public License
-#along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+#along with FlightGear  If not, see <http://www.gnu.org/licenses/>.
 
 if [ -z "$1" -o -z "$2" ]; then
   echo "usage: thismajor.thisminor nextmajor.nextminor path"
@@ -65,8 +65,6 @@ createBranch() {
 while [ $# -gt 0 ]; do
   echo "Processing $1"
   pushd $1 > /dev/null
-  git config user.name "Automatic Release Builder"
-  git config user.email "build@flightgear.org"
   createBranch
   popd > /dev/null
   shift  
