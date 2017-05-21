@@ -2,7 +2,7 @@
 
 THIS_RELEASE="2017.2"
 NEXT_RELEASE="2017.3"
-SUBMODULES="simgear flightgear fgdata"
+SUBMODULES="simgear flightgear fgdata getstart"
 
 #:<< 'COMMENT_END'
 git checkout next
@@ -28,7 +28,7 @@ read something
 for f in $SUBMODULES .; do
   pushd "$f"
     echo "Pushing $f"
-    git checkout release/${THIS_RELEASE} && git push origin release/${THIS_RELEASE} && git push origin version/${THIS_RELEASE}.1 && git push origin version/${NEXT_RELEASE}.0 && git checkout next && git push 
+    git checkout release/${THIS_RELEASE} && git push origin release/${THIS_RELEASE} && git push origin version/${THIS_RELEASE}.1 && git push origin version/${NEXT_RELEASE}.0 && git checkout next && git push
   popd
 done
 
@@ -42,4 +42,3 @@ done
 svn copy svn+ssh://svn.code.sf.net/p/flightgear/fgaddon/trunk \
          svn+ssh://svn.code.sf.net/p/flightgear/fgaddon/branches/release-${THIS_RELEASE} \
          -m "branching for release ${THIS_RELEASE}"
-
