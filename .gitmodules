@@ -18,3 +18,7 @@
 	path = windows-3rd-party
 	url = https://git.code.sf.net/p/flightgear/windows-3rd-party
 	branch = master
+[submodule "getstart"]
+	path = getstart
+	url = https://git.code.sf.net/p/flightgear/getstart
+	branch = next
