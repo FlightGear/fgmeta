@@ -58,6 +58,7 @@ manufacturerTags = [
     "messerschmitt",
     "mikoyan-gurevich",
     "mitsubishi",
+    "north-american",
     "northrop",
     "pilatus",
     "piper",
