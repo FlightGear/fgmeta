@@ -61,6 +61,7 @@ manufacturerTags = [
     "northrop",
     "pilatus",
     "piper",
+    "republic",
     "robin",
     "saab",
     "short",
