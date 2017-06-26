@@ -1,0 +1,184 @@
+#! /usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+# fg-update-translation-files --- Merge new default translation,
+#                                 remove obsolete strings from a translation
+# Copyright (C) 2017  Florent Rougon
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
+import argparse
+import enum
+import locale
+import os
+import sys
+
+try:
+    import xml.etree.ElementTree as et
+except ImportError:
+    import elementtree.ElementTree as et
+
+import flightgear.meta.logging
+import flightgear.meta.i18n as fg_i18n
+
+
+PROGNAME = os.path.basename(sys.argv[0])
+
+# Only messages with severity >= info will be printed to the terminal (it's
+# possible to also log all messages to a file regardless of their level, see
+# the Logger class). Of course, there is also the standard logging module...
+logger = flightgear.meta.logging.Logger(
+    progname=PROGNAME,
+    logLevel=flightgear.meta.logging.LogLevel.info,
+    defaultOutputStream=sys.stderr)
+
+
+def processCommandLine():
+    params = argparse.Namespace()
+
+    parser = argparse.ArgumentParser(
+        usage="""\
+%(prog)s [OPTION ...] ACTION LANGUAGE_CODE...
+Update FlightGear XLIFF localization files.""",
+        description="""\
+This program performs the following operations (actions) on FlightGear XLIFF
+translation files (*.xlf):
+
+  - [merge-new-master]
+    Read the default translation[1], add new translated strings it contains to
+    the XLIFF localization files corresponding to the specified language(s),
+    mark the translated strings in said files that need review (modified in
+    the default translation) as well as those that are not used anymore
+    (disappeared in the default translation, or marked in a way that says they
+    don't need to be translated);
+
+  - [mark-unused]
+    Read the default translation and mark translated strings (in the XLIFF
+    localization files corresponding to the specified language(s)) that are
+    not used anymore;
+
+  - [remove-unused]
+    In the XLIFF localization files corresponding to the specified
+    language(s), remove all translated strings that are marked as unused.
+
+A translated string that is marked as unused is still present in the XLIFF
+localization file; it is just presented in a way that tells translators they
+don't need to worry about it. On the other hand, when a translated string is
+removed, translators don't see it anymore and the translation is lost, except
+if rescued by external means such as backups or version control systems (Git,
+Subversion, etc.)
+
+Note that the 'remove-unused' action does *not* imply 'mark-unused'. It only
+removes translation units that are already marked as unused (i.e., with
+translate="no"). Thus, it makes sense to do 'mark-unused' followed by
+'remove-unused' if you really want to get rid of old translations (you need to
+invoke the program twice, or make a small change for this). Leaving unused
+translated strings marked as such in XLIFF files shouldn't harm much in
+general on the short or mid-term: they only take some space.
+
+[1] FlightGear XML files in $FG_ROOT/Translations/default containing strings
+    used for the default locale (English).""",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        # I want --help but not -h (it might be useful for something else)
+        add_help=False)
+
+    parser.add_argument("-t", "--transl-dir",
+                        help="""\
+                        directory containing all translation subdirs (such as
+                        {default!r}, 'en_GB', 'fr_FR', 'de', 'it'...). This
+                        "option" MUST be specified.""".format(
+                        default=fg_i18n.DEFAULT_LANG_DIR))
+    parser.add_argument("action", metavar="ACTION",
+                        choices=("merge-new-master",
+                                 "mark-unused",
+                                 "remove-unused"),
+                        help="""\
+                        what to do: merge a new default (= master)
+                        translation, or mark unused translation units, or
+                        remove those already marked as unused from the XLIFF
+                        files corresponding to each given LANGUAGE_CODE (i.e.,
+                        those that are not in the default translation)""")
+    parser.add_argument("lang_code", metavar="LANGUAGE_CODE", nargs="+",
+                        help="""\
+                        codes of languages to operate on (e.g., fr, en_GB, it,
+                        es_ES...)""")
+    parser.add_argument("--help", action="help",
+                        help="display this message and exit")
+
+    params = parser.parse_args(namespace=params)
+
+    if params.transl_dir is None:
+        logger.error("--transl-dir must be given, aborting")
+        sys.exit(1)
+
+    return params
+
+
+class MarkOrRemoveUnusedAction(enum.Enum):
+    mark, remove = range(2)
+
+
+def markOrRemoveUnused(l10nResPoolMgr, action):
+    formatHandler = fg_i18n.XliffFormatHandler()
+    masterTransl = l10nResPoolMgr.readFgMasterTranslation().transl
+
+    for langCode in params.lang_code:
+        xliffPath = formatHandler.defaultFilePath(params.transl_dir, langCode)
+        transl = formatHandler.readTranslation(xliffPath)
+
+        if action == MarkOrRemoveUnusedAction.mark:
+            transl.markObsoleteOrVanished(masterTransl, logger=logger)
+        elif action == MarkOrRemoveUnusedAction.remove:
+            transl.removeObsoleteOrVanished(logger=logger)
+        else:
+            assert False, "unexpected action: {!r}".format(action)
+
+        l10nResPoolMgr.writeTranslation(formatHandler, transl,
+                                        filePath=xliffPath)
+
+
+def mergeNewMaster(l10nResPoolMgr):
+    formatHandler = fg_i18n.XliffFormatHandler()
+    masterTransl = l10nResPoolMgr.readFgMasterTranslation().transl
+
+    for langCode in params.lang_code:
+        xliffPath = formatHandler.defaultFilePath(params.transl_dir, langCode)
+        transl = formatHandler.readTranslation(xliffPath)
+        transl.mergeMasterTranslation(masterTransl, logger=logger)
+        l10nResPoolMgr.writeTranslation(formatHandler, transl,
+                                        filePath=xliffPath)
+
+
+def main():
+    global params
+
+    locale.setlocale(locale.LC_ALL, '')
+    params = processCommandLine()
+
+    l10nResPoolMgr = fg_i18n.L10NResourcePoolManager(params.transl_dir, logger)
+
+    if params.action == "mark-unused":
+        markOrRemoveUnused(l10nResPoolMgr, MarkOrRemoveUnusedAction.mark)
+    elif params.action == "remove-unused":
+        markOrRemoveUnused(l10nResPoolMgr, MarkOrRemoveUnusedAction.remove)
+    elif params.action == "merge-new-master":
+        mergeNewMaster(l10nResPoolMgr)
+    else:
+        assert False, "Bug: unexpected action: {!r}".format(params.action)
+
+    sys.exit(0)
+
+
+if __name__ == "__main__": main()
