@@ -21,3 +21,4 @@ osgbuild
 CMakeCache.txt
 *.pyc
 build-*
+testOutput*

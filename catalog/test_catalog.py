@@ -17,6 +17,7 @@ class UpdateCatalogTests(unittest.TestCase):
         self.assertEqual(info['rating_FDM'], 3)
         self.assertEqual(info['rating_model'], 5)
         self.assertEqual(len(info['tags']), 3)
+        self.assertEqual(info['minimum-fg-version'], '2017.4')
 
     def test_scan_dir(self):
         (pkg, variants) = catalog.scan_aircraft_dir("testData/Aircraft/f16", ["testData/OtherDir"])
@@ -25,6 +26,7 @@ class UpdateCatalogTests(unittest.TestCase):
         f16trainer = next(v for v in variants if v['id'] == 'f16-trainer')
         self.assertEqual(pkg['author'], 'Wilbur Wright')
         self.assertEqual(len(variants), 3)
+        self.assertEqual(pkg['minimum-fg-version'], '2017.4')
 
         # test variant relatonship between
         self.assertEqual(pkg['variant-of'], None)
@@ -90,6 +92,8 @@ class UpdateCatalogTests(unittest.TestCase):
         self.assertEqual(parsedPkgNode.getValue('description'), pkg['description']);
         self.assertEqual(parsedPkgNode.getValue('author'), "Wilbur Wright");
 
+        self.assertEqual(parsedPkgNode.getValue('minimum-fg-version'), "2017.4");
+
         parsedVariants = parsedPkgNode.getChildren("variant")
         self.assertEqual(len(parsedVariants), 3)
 
@@ -109,8 +113,37 @@ class UpdateCatalogTests(unittest.TestCase):
                 self.assertEqual(pv.getValue('description'), 'The F16-B is an upgraded version of the F16A.')
                 self.assertEqual(pv.getValue('author'), "James T Kirk");
 
+    def test_minimalAircraft(self):
+        # test an aircraft with a deliberately spartan -set.xml file with
+        # most interesting data missing
+        (pkg, variants) = catalog.scan_aircraft_dir("testData/Aircraft/c150", ["testData/OtherDir"])
 
+        catalog_node = ET.Element('PropertyList')
+        catalog_root = ET.ElementTree(catalog_node)
 
+        pkgNode = catalog.make_aircraft_node('c150', pkg, variants, "http://foo.com/testOutput/")
+        catalog_node.append(pkgNode)
+
+        if not os.path.isdir("testOutput2"):
+            os.mkdir("testOutput2")
+
+        cat_file = os.path.join("testOutput2", 'catalog_fragment.xml')
+        catalog_root.write(cat_file, encoding='utf-8', xml_declaration=True, pretty_print=True)
+
+        parsed = sgprops.readProps(cat_file)
+        parsedPkgNode = parsed.getChild("package")
+
+        self.assertEqual(parsedPkgNode.getValue('id'), pkg['id'])
+        self.assertEqual(parsedPkgNode.getValue('dir'), 'c150')
+        self.assertEqual(parsedPkgNode.getValue('url'), 'http://foo.com/testOutput/c150.zip')
+        self.assertFalse(parsedPkgNode.hasChild('thumbnail'))
+        self.assertFalse(parsedPkgNode.hasChild('thumbnail-path'));
+
+        self.assertEqual(parsedPkgNode.getValue('name'), pkg['name']);
+        self.assertFalse(parsedPkgNode.hasChild('description'));
+        self.assertFalse(parsedPkgNode.hasChild('author'));
+        self.assertFalse(parsedPkgNode.hasChild('minimum-fg-version'));
+        self.assertFalse(parsedPkgNode.hasChild('variant'));
 
 if __name__ == '__main__':
     unittest.main()

@@ -38,8 +38,12 @@ def scan_set_file(aircraft_dir, set_file, includes):
     variant = {}
     variant['name'] = sim_node.getValue("description", None)
     variant['status'] = sim_node.getValue("status", None)
-    variant['author'] = sim_node.getValue("author", None)
-    variant['description'] = sim_node.getValue("long-description", None)
+
+    if sim_node.hasChild('author'):
+        variant['author'] = sim_node.getValue("author", None)
+
+    if sim_node.hasChild('long-description'):
+        variant['description'] = sim_node.getValue("long-description", None)
     variant['id'] = base_id
 
     # allow -set.xml files to declare themselves as primary.
@@ -64,6 +68,10 @@ def scan_set_file(aircraft_dir, set_file, includes):
         variant['thumbnail'] = sim_node.getValue("thumbnail", None)
 
     variant['variant-of'] = sim_node.getValue("variant-of", None)
+
+    if sim_node.hasChild('minimum-fg-version'):
+        variant['minimum-fg-version'] = sim_node.getValue('minimum-fg-version', None)
+
     #print '    ', variant
     return variant
 
@@ -128,7 +136,8 @@ def scan_aircraft_dir(aircraft_dir, includes):
 
     package = primaryAircraft[0]
     if not 'thumbnail' in package:
-        package['thumbnail'] = "thumbnail.jpg"
+        if (os.path.exists(os.path.join(aircraft_dir, "thumbnail.jpg"))):
+            package['thumbnail'] = "thumbnail.jpg"
 
     # variants is just all the set dicts except the first one
     variants = setDicts
@@ -172,8 +181,16 @@ def make_aircraft_node(aircraftDirName, package, variants, downloadBase):
     package_node = ET.Element('package')
     package_node.append( make_xml_leaf('name', package['name']) )
     package_node.append( make_xml_leaf('status', package['status']) )
-    package_node.append( make_xml_leaf('author', package['author']) )
-    package_node.append( make_xml_leaf('description', package['description']) )
+
+    if 'author' in package:
+        package_node.append( make_xml_leaf('author', package['author']) )
+
+    if 'description' in package:
+        package_node.append( make_xml_leaf('description', package['description']) )
+
+    if 'minimum-fg-version' in package:
+        package_node.append( make_xml_leaf('minimum-fg-version', package['minimum-fg-version']) )
+
     if 'rating_FDM' in package or 'rating_systems' in package \
        or 'rating_cockpit' in package or 'rating_model' in package:
         rating_node = ET.Element('rating')
@@ -217,11 +234,12 @@ def make_aircraft_node(aircraftDirName, package, variants, downloadBase):
     package_node.append( make_xml_leaf('dir', aircraftDirName) )
 
     download_url = downloadBase + aircraftDirName + '.zip'
-    thumbnail_url = downloadBase + 'thumbnails/' + aircraftDirName + '_' + package['thumbnail']
-
     package_node.append( make_xml_leaf('url', download_url) )
-    package_node.append( make_xml_leaf('thumbnail', thumbnail_url) )
-    package_node.append( make_xml_leaf('thumbnail-path', package['thumbnail']))
+
+    if 'thumbnail' in package:
+        thumbnail_url = downloadBase + 'thumbnails/' + aircraftDirName + '_' + package['thumbnail']
+        package_node.append( make_xml_leaf('thumbnail', thumbnail_url) )
+        package_node.append( make_xml_leaf('thumbnail-path', package['thumbnail']))
 
     append_preview_nodes(package_node, package, downloadBase, aircraftDirName)
     append_tag_nodes(package_node, package)

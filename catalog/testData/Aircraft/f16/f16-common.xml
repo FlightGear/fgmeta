@@ -7,6 +7,7 @@
       <tag>1980s</tag>
       <tag>glass-cockpit</tag>
     </tags>
+    <minimum-fg-version>2017.4</minimum-fg-version>
   </sim>
 
 </PropertyList>
