@@ -684,8 +684,7 @@ class Translation:
 
     def mergeMasterForCategory(self, masterTransl, cat, logger=dummyLogger):
         if cat not in masterTransl:
-            raise BadAPIUse("Bad API use: category {!r} not in " \
-                            "'masterTransl'".format(cat))
+            raise BadAPIUse("category {!r} not in 'masterTransl'".format(cat))
         elif cat not in self:
             # Category appeared in 'masterTransl' that wasn't in 'self'
             self.resetCategory(cat)

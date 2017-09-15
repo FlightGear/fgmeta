@@ -25,11 +25,6 @@ import locale
 import os
 import sys
 
-try:
-    import xml.etree.ElementTree as et
-except ImportError:
-    import elementtree.ElementTree as et
-
 import flightgear.meta.logging
 import flightgear.meta.i18n as fg_i18n
 
