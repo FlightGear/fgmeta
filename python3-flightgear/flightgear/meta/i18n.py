@@ -746,6 +746,110 @@ class Translation:
                 .format(lang=self.targetLanguage, cat=cat))
             del self[cat]
 
+    # Helper method for mergeNonMasterTranslForCategory()
+    def _mergeNonMasterTranslForCategory_CheckMatchingParams(
+            self, cat, tid, srcTu, logger):
+        translUnit = self.translations[cat][tid]
+
+        if srcTu.targetLanguage != translUnit.targetLanguage:
+            logger.warning(
+                "ignoring translatable string '{id}', because the target "
+                "languages don't match between the two translations"
+                .format(id=tid))
+            return False
+
+        if srcTu.sourceText != translUnit.sourceText:
+            logger.warning(
+                "ignoring translatable string '{id}', because the source "
+                "texts differ between the two translations"
+                .format(id=tid))
+            return False
+
+        if len(srcTu.targetTexts) != len(translUnit.targetTexts):
+            logger.warning(
+                "ignoring translatable string '{id}', because the lists "
+                "of target texts (= number of singular + plural forms) differ "
+                "between the two translations".format(id=tid))
+            return False
+
+        if srcTu.isPlural != translUnit.isPlural:
+            logger.warning(
+                "ignoring translatable string '{id}', because the plural "
+                "statuses don't match".format(id=tid))
+            return False
+
+        return True
+
+    def mergeNonMasterTranslForCategory(self, srcTransl, cat,
+                                        logger=dummyLogger):
+        """Merge a non-master Translation into 'self' for category 'cat'.
+
+        See mergeNonMasterTransl()'s docstring for more info.
+
+        """
+        if cat not in srcTransl:
+            return              # nothing to merge in this category
+        elif cat not in self:
+            raise BadAPIUse(
+                "cowardly refusing to create category {!r} in the destination "
+                "translation for an XLIFF-to-XLIFF merge operation "
+                "(new categories should be first added to the master "
+                "translation, then merged into each XLIFF translation file)"
+                .format(cat))
+
+        if srcTransl.targetLanguage != self.targetLanguage:
+            raise BadAPIUse(
+                "cowardly refusing to merge two XLIFF files with different "
+                "target languages")
+
+        thisCatTranslations = self.translations[cat]
+        idsSet = { str(tid) for tid in thisCatTranslations.keys() }
+
+        for tid, srcTu in srcTransl.translations[cat].items():
+            if str(tid) not in idsSet:
+                logger.warning(
+                    "translatable string '{id}' not found in the "
+                    "destination translation during an XLIFF-to-XLIFF merge "
+                    "operation. The string will be ignored, because new "
+                    "translatable strings must be brought by the default "
+                    "translation.".format(id=tid))
+                continue
+            # If some parameters don't match (sourceText, isPlural...), the
+            # translation in 'srcTu' is probably outdated, so don't use it.
+            elif not self._mergeNonMasterTranslForCategory_CheckMatchingParams(
+                    cat, tid, srcTu, logger):
+                continue
+            else:
+                translUnit = thisCatTranslations[tid]
+                translUnit.targetTexts = srcTu.targetTexts[:] # copy
+                translUnit.approved = srcTu.approved
+                translUnit.translatorComments = srcTu.translatorComments[:]
+
+    def mergeNonMasterTransl(self, srcTransl, logger=dummyLogger):
+        """Merge the non-master Translation 'srcTransl' into 'self'.
+
+        Contrary to mergeMasterTranslation(), this method doesn't add
+        new translatable strings to 'self', doesn't mark strings as
+        obsolete or vanished, nor does it add or remove categories in
+        'self'. It only updates strings in 'self' from 'srcTransl' when
+        they:
+          - already exist in 'self';
+          - have the same target language, source text, plural status
+            and number of plural forms in 'self' and in 'srcTransl'.
+
+        Expected use case: suppose that a translator is working on a
+        translation file, and meanwhile the official XLIFF file (for
+        instance) for this translation is updated in the project
+        repository (new translatable strings added, obsolete strings
+        marked or removed, etc.). This method can then be used to merge
+        the translator work into the project file for all strings for
+        which it makes sense (source text unchanged, same plural status,
+        etc.).
+
+        """
+        for cat in srcTransl:
+            self.mergeNonMasterTranslForCategory(srcTransl, cat, logger=logger)
+
     def nbPluralForms(self):
         return nbPluralFormsForLanguage(self.targetLanguage)
 
