@@ -133,6 +133,8 @@ class Node(object):
                         n.set('type', "bool")
         except UnicodeEncodeError:
             print "Encoding error with", self._value, type(self._value)
+        except:
+            print "Some other exceptiong in sgprops._createXMLElement()"
 
         # index in parent
         if (self.index != 0):
