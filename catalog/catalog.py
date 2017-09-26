@@ -111,6 +111,7 @@ def scan_aircraft_dir(aircraft_dir, includes):
     files = os.listdir(aircraft_dir)
     for file in sorted(files, key=lambda s: s.lower()):
         if file.endswith('-set.xml'):
+            # print 'trying:', file
             try:
                 d = scan_set_file(aircraft_dir, file, includes)
                 if d == None:
@@ -126,8 +127,10 @@ def scan_aircraft_dir(aircraft_dir, includes):
             elif d['variant-of'] == None:
                 primaryAircraft.append(d)
 
+    print setDicts
     if len(setDicts) == 0:
-        return None
+        print 'returning none'
+        return None, None
 
     # use the first one
     if len(primaryAircraft) == 0:
