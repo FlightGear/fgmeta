@@ -144,7 +144,10 @@ def process_aircraft_dir(name, repo_path):
     package_node = catalog.make_aircraft_node(name, package, variants, download_base)
 
     download_url = download_base + name + '.zip'
-    thumbnail_url = download_base + 'thumbnails/' + name + '_' + package['thumbnail']
+    if 'thumbnail' in package:
+        # this is never even used, but breaks the script by assuming
+        # all aircraft packages have thumbnails defined?
+        thumbnail_url = download_base + 'thumbnails/' + name + '_' + package['thumbnail']
 
     # get cached md5sum if it exists
     md5sum = get_xml_text(md5sum_root.find(str('aircraft_' + name)))
@@ -301,6 +304,7 @@ for scm in scm_list:
             continue
 
         # process each aircraft in turn
+        # print name, repo_path
         process_aircraft_dir(name, repo_path)
 
 # write out the master catalog file
