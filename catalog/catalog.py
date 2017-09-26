@@ -127,9 +127,8 @@ def scan_aircraft_dir(aircraft_dir, includes):
             elif d['variant-of'] == None:
                 primaryAircraft.append(d)
 
-    print setDicts
+    # print setDicts
     if len(setDicts) == 0:
-        print 'returning none'
         return None, None
 
     # use the first one
