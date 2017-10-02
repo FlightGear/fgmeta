@@ -161,29 +161,68 @@ function _make(){
   fi
 }
 
-# Find an available, non-virtual package matching one of the given regexps.
+# Add an available, non-virtual package matching one of the given regexps.
 #
 # Each positional parameter is interpreted as a POSIX extended regular
 # expression. These parameters are examined from left to right, and the first
 # available matching package is added to the global PKG variable. If no match
 # is found, the script aborts.
-function _package_alternative(){
+function _mandatory_pkg_alternative(){
+  local pkg
+
   if [[ $# -lt 1 ]]; then
     echo "Empty package alternative: this is a bug in the script, aborting."
     exit 1
   fi
 
   echo "Considering a package alternative:" "$@"
-  _package_alternative_inner "$@"
+  pkg=$(_find_package_alternative "$@")
+
+  if [[ -n "$pkg" ]]; then
+    echo "Package alternative matched for $pkg"
+    PKG="$PKG $pkg"
+  else
+    echo "No match found for the package alternative, aborting."
+    exit 1
+  fi
+
+  return 0
 }
 
-# This function requires the 'dctrl-tools' package
-function _package_alternative_inner(){
+# If available, add a non-virtual package matching one of the given regexps.
+#
+# Returning 0 or 1 on success to indicate whether a match was found could be
+# done, but must would need to be specifically handled at the calling site,
+# since the script is run under 'set -e' regime.
+function _optional_pkg_alternative(){
   local pkg
 
   if [[ $# -lt 1 ]]; then
-    echo "No match found for the package alternative, aborting."
+    echo "Empty optional package alternative: this is a bug in the script," \
+         "aborting."
     exit 1
+  fi
+
+  echo "Considering an optional package alternative:" "$@"
+  pkg=$(_find_package_alternative "$@")
+
+  if [[ -n "$pkg" ]]; then
+    echo "Optional package alternative matched for $pkg"
+    PKG="$PKG $pkg"
+  else
+    echo "No match found for the optional package alternative, continuing" \
+         "anyway."
+  fi
+
+  return 0
+}
+
+# This function requires the 'dctrl-tools' package
+function _find_package_alternative(){
+  local pkg
+
+  if [[ $# -lt 1 ]]; then
+    return 0                    # Nothing could be found
   fi
 
   # This finds non-virtual packages only (on purpose)
@@ -193,13 +232,12 @@ function _package_alternative_inner(){
          sed -ne '1s/^Package:[[:space:]]*//gp')"
 
   if [[ -n "$pkg" ]]; then
-    echo "Package alternative matched for $pkg"
-    PKG="$PKG $pkg"
+    echo "$pkg"
     return 0
   else
     # Try with the next regexp
     shift
-    _package_alternative_inner "$@"
+    _find_package_alternative "$@"
   fi
 }
 
@@ -288,11 +326,11 @@ PKG="$PKG libcgal-dev libgdal-dev libtiff5-dev"
 PKG="$PKG libqt4-dev"
 # SG/FG
 PKG="$PKG zlib1g-dev freeglut3-dev libboost-dev"
-_package_alternative libopenscenegraph-3.4-dev libopenscenegraph-dev \
-                     'libopenscenegraph-[0-9]+\.[0-9]+-dev'
+_mandatory_pkg_alternative libopenscenegraph-3.4-dev libopenscenegraph-dev \
+                           'libopenscenegraph-[0-9]+\.[0-9]+-dev'
 # FG
 PKG="$PKG libopenal-dev libudev-dev qt5-default qtdeclarative5-dev libdbus-1-dev libplib-dev"
-_package_alternative libpng-dev libpng12-dev libpng16-dev
+_mandatory_pkg_alternative libpng-dev libpng12-dev libpng16-dev
 # FGPanel
 PKG="$PKG fluid libbz2-dev libfltk1.3-dev libxi-dev libxmu-dev"
 # FGAdmin
