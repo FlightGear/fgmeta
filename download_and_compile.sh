@@ -174,18 +174,20 @@ function _mandatory_pkg_alternative(){
   local pkg
 
   if [[ $# -lt 1 ]]; then
-    echo "Empty package alternative: this is a bug in the script, aborting."
+    echo "Empty package alternative: this is a bug in the script, aborting." \
+      | tee -a "$LOGFILE"
     exit 1
   fi
 
-  echo "Considering a package alternative:" "$@"
+  echo "Considering a package alternative:" "$@" | tee -a "$LOGFILE"
   pkg=$(_find_package_alternative "$@")
 
   if [[ -n "$pkg" ]]; then
-    echo "Package alternative matched for $pkg"
+    echo "Package alternative matched for $pkg" | tee -a "$LOGFILE"
     PKG="$PKG $pkg"
   else
-    echo "No match found for the package alternative, aborting."
+    echo "No match found for the package alternative, aborting." \
+      | tee -a "$LOGFILE"
     exit 1
   fi
 
@@ -202,19 +204,19 @@ function _optional_pkg_alternative(){
 
   if [[ $# -lt 1 ]]; then
     echo "Empty optional package alternative: this is a bug in the script," \
-         "aborting."
+         "aborting." | tee -a "$LOGFILE"
     exit 1
   fi
 
-  echo "Considering an optional package alternative:" "$@"
+  echo "Considering an optional package alternative:" "$@" | tee -a "$LOGFILE"
   pkg=$(_find_package_alternative "$@")
 
   if [[ -n "$pkg" ]]; then
-    echo "Optional package alternative matched for $pkg"
+    echo "Optional package alternative matched for $pkg" | tee -a "$LOGFILE"
     PKG="$PKG $pkg"
   else
     echo "No match found for the optional package alternative, continuing" \
-         "anyway."
+         "anyway." | tee -a "$LOGFILE"
     # "$*" so that we only add one element to the array in this line
     UNMATCHED_OPTIONAL_PKG_ALTERNATIVES+=("$*")
   fi
