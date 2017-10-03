@@ -313,7 +313,7 @@ fi
 
 # Ensure 'dctrl-tools' is installed
 if [[ "$(dpkg-query --showformat='${db:Status-Status}\n' --show dctrl-tools \
-                    2>/dev/null | awk '{print $3}') " != "installed" ]]; then
+                    2>/dev/null | awk '{print $3}')" != "installed" ]]; then
   if [[ "$DOWNLOAD_PACKAGES" = "y" ]]; then
     _aptInstall dctrl-tools
   else
