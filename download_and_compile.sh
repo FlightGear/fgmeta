@@ -26,6 +26,7 @@ VERSION="$(echo "$script_blob_id" | sed 's@\$Id: *\([0-9a-f]\+\) *@\1@')"
 # Then remove the trailing '$'
 VERSION="${VERSION%\$}"
 
+PROGNAME=$(basename "$0")
 FGVERSION="release/$(git ls-remote --heads https://git.code.sf.net/p/flightgear/flightgear|grep '\/release\/'|cut -f4 -d'/'|sort -t . -k 1,1n -k2,2n -k3,3n|tail -1)"
 
 #######################################################
@@ -53,6 +54,8 @@ OOPTION=""
 BUILD_TYPE="RelWithDebInfo"
 SG_CMAKEARGS=""
 FG_CMAKEARGS=""
+
+declare -a UNMATCHED_OPTIONAL_PKG_ALTERNATIVES
 
 while getopts "shc:p:a:d:r:j:O:ib:" OPTION; do
   case $OPTION in
@@ -192,7 +195,7 @@ function _mandatory_pkg_alternative(){
 # If available, add a non-virtual package matching one of the given regexps.
 #
 # Returning 0 or 1 on success to indicate whether a match was found could be
-# done, but must would need to be specifically handled at the calling site,
+# done, but would need to be specifically handled at the calling site,
 # since the script is run under 'set -e' regime.
 function _optional_pkg_alternative(){
   local pkg
@@ -212,6 +215,8 @@ function _optional_pkg_alternative(){
   else
     echo "No match found for the optional package alternative, continuing" \
          "anyway."
+    # "$*" so that we only add one element to the array in this line
+    UNMATCHED_OPTIONAL_PKG_ALTERNATIVES+=("$*")
   fi
 
   return 0
@@ -903,6 +908,24 @@ if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="TERRAGEARGUI"' ]]; then
   echo "cd install/terrageargui/bin" >> run_terrageargui.sh
   echo "export LD_LIBRARY_PATH=$INSTALL_DIR_SIMGEAR/lib" >> run_terrageargui.sh
   echo "./TerraGUI \$@" >> run_terrageargui.sh
+fi
+
+# Print optional package alternatives that didn't match (this helps with
+# troubleshooting)
+if [[ ${#UNMATCHED_OPTIONAL_PKG_ALTERNATIVES[@]} -gt 0 ]]; then
+    echo | tee -a "$LOGFILE"
+    printf "The following optional package alternative(s) didn't match:\n\n" \
+        | tee -a "$LOGFILE"
+
+    for alt in "${UNMATCHED_OPTIONAL_PKG_ALTERNATIVES[@]}"; do
+        printf "  %s\n" "$alt" | tee -a "$LOGFILE"
+    done
+
+    printf "\nThis could explain missing optional features in FlightGear or \
+other software\ninstalled by $PROGNAME.\n" | tee -a "$LOGFILE"
+else
+    printf "All optional package alternatives have found a matching package.\n" \
+        | tee -a "$LOGFILE"
 fi
 
 echo ""
