@@ -14,7 +14,6 @@ mkdir -p sgBuild
 mkdir -p fgBuild
 mkdir -p output
 rm -rf output/*
-rm -rf dist/*
 
 #####################################################################################
 echo "Starting on SimGear"
