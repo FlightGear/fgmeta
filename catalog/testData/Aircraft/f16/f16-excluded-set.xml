@@ -1,0 +1,11 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<PropertyList include="f16-common.xml">
+  <sim>
+    <exclude-from-catalog type="bool">true</exclude-from-catalog> 
+    <name>f16-excluded</name>
+    <description>Fine</description>
+    <long-description>Blah blah blah</long-description>
+    <variant-of>f16a</variant-of>
+  </sim>
+
+</PropertyList>

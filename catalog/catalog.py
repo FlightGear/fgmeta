@@ -35,6 +35,11 @@ def scan_set_file(aircraft_dir, set_file, includes):
     if sim_node == None:
         return None
 
+    # allow -set.xml files to specifcially exclude themselves from
+    # the creation process, by setting <exclude-from-catalog>true</>
+    if (sim_node.getValue("exclude-from-catalog", False) == True):
+        return None
+
     variant = {}
     name = sim_node.getValue("description", None)
     if (name == None or len(name) == 0):
