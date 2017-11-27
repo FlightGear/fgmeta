@@ -36,7 +36,12 @@ def scan_set_file(aircraft_dir, set_file, includes):
         return None
 
     variant = {}
-    variant['name'] = sim_node.getValue("description", None)
+    name = sim_node.getValue("description", None)
+    if (name == None or len(name) == 0):
+        print "Set file " + set_file + " is missing a <description>, skipping"
+        return None
+
+    variant['name'] =  name
     variant['status'] = sim_node.getValue("status", None)
 
     if sim_node.hasChild('author'):
