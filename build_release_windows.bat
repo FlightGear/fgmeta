@@ -67,8 +67,9 @@ cmake --build . --config RelWithDebInfo --target INSTALL
 cd ..
 
 REM Qt5 deployment
-%QT5SDK32%\bin\windeployqt --release --list target %WORKSPACE%/install/msvc140/bin/fgfs.exe
-%QT5SDK64%\bin\windeployqt --release --list target %WORKSPACE%/install/msvc140-64/bin/fgfs.exe
+SET QMLDIR=%WORKSPACE%/flightgear/src/GUI/qml
+%QT5SDK32%\bin\windeployqt --release --list target --qmldir %QMLDIR% %WORKSPACE%/install/msvc140/bin/fgfs.exe
+%QT5SDK64%\bin\windeployqt --release --list target --qmldir %QMLDIR% %WORKSPACE%/install/msvc140-64/bin/fgfs.exe
 
 REM build setup
 ECHO Packaging root is %WORKSPACE%
