@@ -40,6 +40,7 @@ puts "Is-release? : ##{$isRelease}"
 $prefixDir=Dir.pwd + "/dist"
 dmgDir=Dir.pwd + "/image"
 srcDir=Dir.pwd + "/flightgear"
+qmlDir="#{srcDir}/src/GUI/qml"
 
 puts "Erasing previous image dir"
 `rm -rf #{dmgDir}`
@@ -49,7 +50,7 @@ bundle=dmgDir + "/FlightGear.app"
 # run macdeployt before we rename the bundle, otherwise it
 # can't find the bundle executable
 puts "Running macdeployqt on the bundle to copy Qt libraries"
-`macdeployqt #{$prefixDir}/fgfs.app`
+`macdeployqt -qmldir #{qmldir} #{$prefixDir}/fgfs.app`
 
 puts "Moving & renaming app bundle"
 `mkdir -p #{dmgDir}`
