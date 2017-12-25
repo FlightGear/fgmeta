@@ -8,6 +8,10 @@ fi
 VERSION=`cat flightgear/version`
 
 #####################################################################################
+# ensure fgrcc can run when linked against libSimGearCore, for example
+export LD_LIBRARY_PATH=$WORKSPACE/dist/lib64:$WORKSPACE/dist/lib:$LD_LIBRARY_PATH
+
+#####################################################################################
 # remove old and create fresh build directories
 cd $WORKSPACE
 mkdir -p sgBuild
