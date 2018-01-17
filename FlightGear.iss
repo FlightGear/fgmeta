@@ -319,6 +319,66 @@ begin
   end;
 end;
 
+var
+  UninstallCheckCleanPage: TNewNotebookPage;
+  UninstallBackButton: TNewButton;
+  UninstallNextButton: TNewButton;
+  DoCleanCheckbox : TNewCheckBox;
+  CleanHelp : TNewStaticText;
+
+procedure InitializeUninstallProgressForm();
+begin
+  UninstallProgressForm
+
+  UninstallCheckCleanPage := TNewNotebookPage.Create(UninstallProgressForm);
+  UninstallCheckCleanPage.Notebook := UninstallProgressForm.InnerNotebook;
+  UninstallCheckCleanPage.Parent := UninstallProgressForm.InnerNotebook;
+  UninstallCheckCleanPage.Align := alClient
+
+  DoCleanCheckbox := TNewCheckBox.Create(UninstallProgressForm);
+  DoCleanCheckbox.Parent := UninstallCheckCleanPage;
+  DoCleanCheckbox.Caption := 'Remove all settings, downloaded scenery and aircraft';
+  DoCleanCheckbox.Left := ScaleX(10);
+  DoCleanCheckbox.Top := ScaleY(10);
+
+  DoCleanCheckbox.Width := UninstallProgressForm.InnerNotebook.Width - ScaleX(20)
+  DoCleanCheckbox.Height := ScaleY(30)
+
+  CleanHelp := TNewStaticText.Create(UninstallProgressForm);
+  CleanHelp.Parent := UninstallCheckCleanPage;
+  CleanHelp.Top := DoCleanCheckbox.Top + DoCleanCheckbox.Height + ScaleY(10);
+  CleanHelp.Left := DoCleanCheckbox.Left;
+  CleanHelp.Width := DoCleanCheckbox.Width;
+  CleanHelp.Height := CleanHelp.AdjustHeight();
+
+  CleanHelp.WordWrap := True;
+  CleanHelp.Caption := 'FlightGear stores some settings in your user folder. In addition, ' +
+       'scenery or aircraft data may have been downloaded to the download directory. ' +
+       'To completely remove all these files, select this option.';
+
+  UninstallProgressForm.InnerNotebook.ActivePage := UninstallCheckCleanPage;
+
+   UninstallNextButton := TNewButton.Create(UninstallProgressForm);
+   UninstallNextButton.Caption := 'Next';
+    UninstallNextButton.Parent := UninstallProgressForm;
+    UninstallNextButton.Left :=
+      UninstallProgressForm.CancelButton.Left -
+      UninstallProgressForm.CancelButton.Width -
+      ScaleX(10);
+    UninstallNextButton.Top := UninstallProgressForm.CancelButton.Top;
+    UninstallNextButton.Width := UninstallProgressForm.CancelButton.Width;
+    UninstallNextButton.Height := UninstallProgressForm.CancelButton.Height;
+     UninstallNextButton.ModalResult := mrOk;
+
+    UninstallProgressForm.CancelButton.Enabled := True;
+    UninstallProgressForm.CancelButton.ModalResult := mrCancel;
+
+    if UninstallProgressForm.ShowModal = mrCancel then Abort;
+
+    UninstallProgressForm.InnerNotebook.ActivePage := UninstallProgressForm.InstallingPage;
+end;
+
+
 procedure CurStepChanged(CurStep: TSetupStep);
 var
   Version: TWindowsVersion;
@@ -344,7 +404,18 @@ begin
 end;
 
 procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
+     var ResultCode: Integer;
 begin
+  if CurUninstallStep = usUninstall then
+  begin
+     if DoCleanCheckbox.Checked = True then
+     begin
+         Log('Running clean uninstall');
+         Exec(ExpandConstant('{app}\bin\fgfs.exe'), '--uninstall', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+         Log('clean uninstall completed');
+     end;
+  end;
+
   if CurUninstallStep = usPostUninstall then
     begin
       RemoveFirewallException('FlightGear', ExpandConstant('{app}') + '\bin\fgfs.exe');
