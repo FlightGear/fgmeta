@@ -25,8 +25,10 @@ localization files in $FG_ROOT/Translations/<language_code>):
 
   languages="de en_US es fr it nl pl pt zh_CN"
 
-  # Your shell must expand $languages as several words. POSIX shell does that,
-  # but not zsh for instance. Otherwise, don't use a shell variable.
+  # Your shell must expand $languages as several words for the following
+  # commands to work. POSIX shell does that, Bash too apparently, but not Zsh
+  # (by default). In Zsh, you can use $=languages or ${=languages} to ensure
+  # the expansion uses word splitting.
   fg-convert-translation-files --transl-dir="$FG_ROOT/Translations" $languages
 
   # Add strings found in the default translation but missing in the legacy FG
