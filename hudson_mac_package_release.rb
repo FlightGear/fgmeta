@@ -49,8 +49,10 @@ bundle=dmgDir + "/FlightGear.app"
 
 # run macdeployt before we rename the bundle, otherwise it
 # can't find the bundle executable
+# also note if adding options here, the bundle path has to be
+# the first argument to macdeployqt
 puts "Running macdeployqt on the bundle to copy Qt libraries"
-`macdeployqt -qmldir=#{qmlDir} #{$prefixDir}/fgfs.app`
+`macdeployqt #{$prefixDir}/fgfs.app -qmldir=#{qmlDir}`
 
 puts "Moving & renaming app bundle"
 `mkdir -p #{dmgDir}`
