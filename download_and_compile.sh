@@ -338,10 +338,11 @@ _mandatory_pkg_alternative libopenscenegraph-3.4-dev libopenscenegraph-dev \
 # FG
 PKG="$PKG libopenal-dev libudev-dev qt5-default qtdeclarative5-dev libdbus-1-dev libplib-dev"
 _mandatory_pkg_alternative libpng-dev libpng12-dev libpng16-dev
-# These three packages are needed for the built-in launcher
+# The following packages are needed for the built-in launcher
 _optional_pkg_alternative qtbase5-private-dev
 _optional_pkg_alternative qtdeclarative5-private-dev
 _optional_pkg_alternative qml-module-qtquick2
+_optional_pkg_alternative qml-module-qtquick-window2
 # FGPanel
 PKG="$PKG fluid libbz2-dev libfltk1.3-dev libxi-dev libxmu-dev"
 # FGAdmin
