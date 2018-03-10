@@ -1,7 +1,18 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <PropertyList>
   <sim include="settings-common.xml">
-    <author>Wilbur Wright</author>
+    <authors>
+      <author n="0">
+        <name>Wilbur Wright</name>
+        <email>ww@wright.com</email>
+        <nick>wilburw</nick>
+        <description>Model, FDM and cockpit</description>
+      </author>
+      <author n="1">
+        <name>Orville Wright</name>
+        <description>Testing and systems</description>
+      </author>
+    </authors>
     <tags>
       <tag>fighter</tag>
       <tag>1980s</tag>

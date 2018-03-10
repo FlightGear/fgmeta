@@ -10,6 +10,16 @@ import sys
 import catalogTags
 
 CATALOG_VERSION = 4
+quiet = False
+verbose = False
+
+def warning(msg):
+    if not quiet:
+        print(msg)
+
+def log(msg):
+    if verbose:
+        print(msg)
 
 # xml node (robust) get text helper
 def get_xml_text(e):
@@ -43,13 +53,17 @@ def scan_set_file(aircraft_dir, set_file, includes):
     variant = {}
     name = sim_node.getValue("description", None)
     if (name == None or len(name) == 0):
-        print "Set file " + set_file + " is missing a <description>, skipping"
+        warning("Set file " + set_file + " is missing a <description>, skipping")
         return None
 
     variant['name'] =  name
     variant['status'] = sim_node.getValue("status", None)
 
-    if sim_node.hasChild('author'):
+    if sim_node.hasChild('authors'):
+        # aircraft has structured authors data, handle that
+        variant['authors'] = extract_authors(sim_node.getChild('authors'))
+
+    elif sim_node.hasChild('author'):
         variant['author'] = sim_node.getValue("author", None)
 
     if sim_node.hasChild('long-description'):
@@ -94,7 +108,7 @@ def extract_previews(previews_node, aircraft_dir):
         # check path exists in base-name-dir
         fullPath = os.path.join(aircraft_dir, previewPath)
         if not os.path.isfile(fullPath):
-            print "Bad preview path, skipping:" + fullPath
+            warning("Bad preview path, skipping:" + fullPath)
             continue
         result.append({'type':previewType, 'path':previewPath})
 
@@ -106,9 +120,23 @@ def extract_tags(tags_node, set_path):
         tag = node.value
         # check tag is in the allowed list
         if not catalogTags.isValidTag(tag):
-            print "Unknown tag value:", tag, " in ", set_path
+            warning("Unknown tag value:" + tag + " in " + set_path)
         result.append(tag)
 
+    return result
+
+def extract_authors(authors_node):
+    result = []
+    for author in authors_node.getChildren("author"):
+        authorName = author.getValue("name", None)
+        if (authorName == None):
+            continue
+
+        authorNick = author.getValue("nick", None)
+        authorEmail = author.getValue("email", None)
+        authorDesc = author.getValue("description", None)
+
+        result.append({'name':authorName, 'nick':authorNick, 'email':authorEmail, 'description':authorDesc})
     return result
 
 # scan all the -set.xml files in an aircraft directory.  Returns a
@@ -187,6 +215,25 @@ def append_tag_nodes(node, variant):
     for tag in variant['tags']:
         node.append(make_xml_leaf('tag', tag))
 
+def append_author_nodes(node, info):
+    if 'authors' in info:
+        authors_node = ET.Element('authors')
+        for a in info['authors']:
+            a_node = ET.Element('author')
+            a_node.append(make_xml_leaf('name', a['name']))
+            if (a['email'] != None):
+                a_node.append(make_xml_leaf('email', a['email']))
+            if (a['nick'] != None):
+                a_node.append(make_xml_leaf('nick', a['nick']))
+            if (a['description'] != None):
+                a_node.append(make_xml_leaf('description', a['description']))
+            authors_node.append(a_node)
+
+        node.append(authors_node)
+    elif 'author' in info:
+        # traditional single author string
+        node.append( make_xml_leaf('author', info['author']) )
+
 def make_aircraft_node(aircraftDirName, package, variants, downloadBase):
     #print "package:", package
     #print "variants:", variants
@@ -194,8 +241,7 @@ def make_aircraft_node(aircraftDirName, package, variants, downloadBase):
     package_node.append( make_xml_leaf('name', package['name']) )
     package_node.append( make_xml_leaf('status', package['status']) )
 
-    if 'author' in package:
-        package_node.append( make_xml_leaf('author', package['author']) )
+    append_author_nodes(package_node, package)
 
     if 'description' in package:
         package_node.append( make_xml_leaf('description', package['description']) )
@@ -242,6 +288,7 @@ def make_aircraft_node(aircraftDirName, package, variants, downloadBase):
 
         append_preview_nodes(variant_node, variant, downloadBase, aircraftDirName)
         append_tag_nodes(variant_node, variant)
+        append_author_nodes(variant_node, variant)
 
     package_node.append( make_xml_leaf('dir', aircraftDirName) )
 

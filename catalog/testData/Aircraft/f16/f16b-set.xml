@@ -6,7 +6,14 @@
     <long-description>The F16-B is an upgraded version of the F16A.</long-description>
     <variant-of>f16a</variant-of>
 
-    <author>James T Kirk</author>
+    <authors n="0">
+      <author n="0">
+        <name>James T Kirk</name>
+        <email>shatner@enterprise.com</email>
+        <nick>starlover</nick>
+        <description>Everything</description>
+      </author>
+    </authors>
   </sim>
 
 </PropertyList>

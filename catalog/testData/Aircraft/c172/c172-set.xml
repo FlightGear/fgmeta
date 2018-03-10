@@ -1,0 +1,9 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<PropertyList>
+  <sim>
+    <name>c172</name>
+    <description>Cessna 172P</description>
+    <author>Wilbur Wright</author>
+  </sim>
+
+</PropertyList>

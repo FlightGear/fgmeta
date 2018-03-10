@@ -6,6 +6,8 @@ import os
 import catalog
 import lxml.etree as ET
 
+catalog.quiet = True
+
 class UpdateCatalogTests(unittest.TestCase):
     def test_scan_set(self):
         info = catalog.scan_set_file("testData/Aircraft/f16", "f16a-set.xml", ["testData/OtherDir"])
@@ -13,18 +15,30 @@ class UpdateCatalogTests(unittest.TestCase):
         self.assertEqual(info['name'], 'F16-A')
         self.assertEqual(info['primary-set'], True)
         self.assertEqual(info['variant-of'], None)
-        self.assertEqual(info['author'], 'Wilbur Wright')
         self.assertEqual(info['rating_FDM'], 3)
         self.assertEqual(info['rating_model'], 5)
         self.assertEqual(len(info['tags']), 3)
         self.assertEqual(info['minimum-fg-version'], '2017.4')
+
+        authorsArray = info['authors']
+        self.assertNotIn('author', info)
+        self.assertEqual(len(authorsArray), 2)
+
+        author0 = authorsArray[0]
+        self.assertEqual(author0['name'], 'Wilbur Wright')
+        self.assertEqual(author0['nick'], 'wilburw')
+        self.assertEqual(author0['email'], 'ww@wright.com')
+
+        author1 = authorsArray[1]
+        self.assertEqual(author1['name'], 'Orville Wright')
+       # self.assertNotIn('nick', author1)
+      #  self.assertNotIn('email', author1)
 
     def test_scan_dir(self):
         (pkg, variants) = catalog.scan_aircraft_dir("testData/Aircraft/f16", ["testData/OtherDir"])
 
         self.assertEqual(pkg['id'], 'f16a')
         f16trainer = next(v for v in variants if v['id'] == 'f16-trainer')
-        self.assertEqual(pkg['author'], 'Wilbur Wright')
         self.assertEqual(len(variants), 3)
         self.assertEqual(pkg['minimum-fg-version'], '2017.4')
 
@@ -38,14 +52,29 @@ class UpdateCatalogTests(unittest.TestCase):
         f16b = next(v for v in variants if v['id'] == 'f16b')
         self.assertEqual(f16b['variant-of'], 'f16a')
         self.assertEqual(f16b['primary-set'], False)
-        self.assertEqual(f16b['author'], 'James T Kirk')
+
+        authorsArray = f16b['authors']
+        self.assertNotIn('author', f16b)
+        self.assertEqual(len(authorsArray), 2)
+
+        author0 = authorsArray[0]
+        self.assertEqual(author0['name'], 'James T Kirk')
+        self.assertEqual(author0['nick'], 'starlover')
 
         f16c = next(v for v in variants if v['id'] == 'f16c')
         self.assertEqual(f16c['variant-of'], 'f16a')
         self.assertEqual(f16c['primary-set'], False)
 
-        self.assertEqual(f16c['author'], 'Wilbur Wright')
+        authorsArray = f16c['authors']
+        self.assertNotIn('author', f16c)
+        self.assertEqual(len(authorsArray), 2)
 
+    # test some older constructs for compat
+    def test_scan_dir_legacy(self):
+        (pkg, variants) = catalog.scan_aircraft_dir("testData/Aircraft/c172", [])
+
+        self.assertEqual(pkg['id'], 'c172')
+        self.assertEqual(pkg['author'], 'Wilbur Wright')
 
     def test_extract_previews(self):
         info = catalog.scan_set_file("testData/Aircraft/f16", "f16a-set.xml", ["testData/OtherDir"])
@@ -90,12 +119,24 @@ class UpdateCatalogTests(unittest.TestCase):
 
         self.assertEqual(parsedPkgNode.getValue('name'), pkg['name']);
         self.assertEqual(parsedPkgNode.getValue('description'), pkg['description']);
-        self.assertEqual(parsedPkgNode.getValue('author'), "Wilbur Wright");
 
         self.assertEqual(parsedPkgNode.getValue('minimum-fg-version'), "2017.4");
 
         parsedVariants = parsedPkgNode.getChildren("variant")
         self.assertEqual(len(parsedVariants), 3)
+
+# author data verification
+        self.assertFalse(parsedPkgNode.hasChild('author'));
+        parsedAuthors = parsedPkgNode.getChild("authors").getChildren('author')
+
+        self.assertEqual(len(parsedAuthors), 2)
+        author1 = parsedAuthors[0]
+        self.assertEqual(author1.getValue("name"), "Wilbur Wright")
+        self.assertEqual(author1.getValue("nick"), "wilburw")
+        self.assertEqual(author1.getValue("email"), "ww@wright.com")
+
+        author2 = parsedAuthors[1]
+        self.assertEqual(author2.getValue("name"), "Orville Wright")
 
         f16ANode = parsedPkgNode
         self.assertEqual(f16ANode.getValue('name'), 'F16-A');
@@ -107,11 +148,18 @@ class UpdateCatalogTests(unittest.TestCase):
 
             if (var['id'] == 'f16-trainer'):
                 self.assertEqual(pv.getValue('variant-of'), '_primary_')
-                self.assertEqual(pv.getValue('author'), "Wilbur Wright");
+            #    self.assertEqual(pv.getValue('author'), "Wilbur Wright");
             elif (var['id'] == 'f16b'):
                 self.assertEqual(pv.getValue('variant-of'), 'f16a')
                 self.assertEqual(pv.getValue('description'), 'The F16-B is an upgraded version of the F16A.')
-                self.assertEqual(pv.getValue('author'), "James T Kirk");
+
+                # variant author verification
+                parsedAuthors = pv.getChild("authors").getChildren('author')
+                author1 = parsedAuthors[0]
+                self.assertEqual(author1.getValue("name"), "James T Kirk")
+                self.assertEqual(author1.getValue("nick"), "starlover")
+                self.assertEqual(author1.getValue("email"), "shatner@enterprise.com")
+                self.assertEqual(author1.getValue("description"), "Everything")
 
     def test_minimalAircraft(self):
         # test an aircraft with a deliberately spartan -set.xml file with
