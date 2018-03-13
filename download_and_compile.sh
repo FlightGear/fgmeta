@@ -325,8 +325,9 @@ fi
 
 # Minimum
 PKG="build-essential cmake git"
+_mandatory_pkg_alternative libcurl4-openssl-dev libcurl4-gnutls-dev
 # cmake
-PKG="$PKG libarchive-dev libbz2-dev libcurl4-gnutls-dev libexpat1-dev libjsoncpp-dev liblzma-dev libncurses5-dev procps zlib1g-dev"
+PKG="$PKG libarchive-dev libbz2-dev libexpat1-dev libjsoncpp-dev liblzma-dev libncurses5-dev procps zlib1g-dev"
 # TG
 PKG="$PKG libcgal-dev libgdal-dev libtiff5-dev"
 # TGGUI/OpenRTI
