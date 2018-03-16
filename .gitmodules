@@ -1,24 +1,24 @@
 [submodule "simgear"]
 	path = simgear
-	url = git://git.code.sf.net/p/flightgear/simgear
+	url = ../simgear
 	branch = next
 [submodule "flightgear"]
 	path = flightgear
-	url = git://git.code.sf.net/p/flightgear/flightgear
+	url = ../flightgear
 	branch = next
 [submodule "fgrun"]
 	path = fgrun
-	url = git://git.code.sf.net/p/flightgear/fgrun
+	url = ../fgrun
 	branch = next
 [submodule "fgdata"]
 	path = fgdata
-	url = git://git.code.sf.net/p/flightgear/fgdata
+	url = ../fgdata
 	branch = next
 [submodule "windows-3rd-party"]
 	path = windows-3rd-party
-	url = git://git.code.sf.net/p/flightgear/windows-3rd-party
+	url = ../windows-3rd-party
 	branch = master
 [submodule "getstart"]
 	path = getstart
-	url = git://git.code.sf.net/p/flightgear/getstart
+	url = ../getstart
 	branch = next
