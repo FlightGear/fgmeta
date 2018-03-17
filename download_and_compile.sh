@@ -344,6 +344,7 @@ _optional_pkg_alternative qtbase5-private-dev
 _optional_pkg_alternative qtdeclarative5-private-dev
 _optional_pkg_alternative qml-module-qtquick2
 _optional_pkg_alternative qml-module-qtquick-window2
+_optional_pkg_alternative qml-module-qtquick-dialogs
 # FGPanel
 PKG="$PKG fluid libbz2-dev libfltk1.3-dev libxi-dev libxmu-dev"
 # FGAdmin
