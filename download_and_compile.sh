@@ -340,11 +340,13 @@ _mandatory_pkg_alternative libopenscenegraph-3.4-dev libopenscenegraph-dev \
 PKG="$PKG libopenal-dev libudev-dev qt5-default qtdeclarative5-dev libdbus-1-dev libplib-dev"
 _mandatory_pkg_alternative libpng-dev libpng12-dev libpng16-dev
 # The following packages are needed for the built-in launcher
-_optional_pkg_alternative qtbase5-private-dev
-_optional_pkg_alternative qtdeclarative5-private-dev
 _optional_pkg_alternative qml-module-qtquick2
 _optional_pkg_alternative qml-module-qtquick-window2
 _optional_pkg_alternative qml-module-qtquick-dialogs
+# The following packages are only needed for the Qt-based remote Canvas
+# (comment written at the time of FG 2018.2).
+_optional_pkg_alternative qtbase5-private-dev
+_optional_pkg_alternative qtdeclarative5-private-dev
 # FGPanel
 PKG="$PKG fluid libbz2-dev libfltk1.3-dev libxi-dev libxmu-dev"
 # FGAdmin
