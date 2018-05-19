@@ -1,7 +1,7 @@
 #!/bin/bash
 
-THIS_RELEASE="2018.1"
-NEXT_RELEASE="2018.2"
+THIS_RELEASE="2018.2"
+NEXT_RELEASE="2018.3"
 SUBMODULES="simgear flightgear fgdata getstart"
 
 #:<< 'COMMENT_END'
