@@ -86,6 +86,10 @@ SET FGFS_PDB=src\Main\RelWithDebInfo\fgfs.pdb
 ECHO Uploading PDB files to %CRASHFIX_UPLOAD_URL%
 upload -v -u %CRASHFIX_UPLOAD_URL% FlightGear %WORKSPACE%\build-fg32\%FGFS_PDB% %WORKSPACE%\build-fg64\%FGFS_PDB%
 
+REM also save the PDB to Output\ so they get uploaded
+copy %WORKSPACE%\build-fg64\%FGFS_PDB% %WORKSPACE%\Output\fgfs_64.pdb
+copy %WORKSPACE%\build-fg32\%FGFS_PDB% %WORKSPACE%\Output\fgfs_32.pdb
+
 REM indirect way to get command output into an environment variable
 set PATH=%OSG32%\bin;%PATH%
 osgversion --so-number > %TEMP%\osg-so-number.txt
