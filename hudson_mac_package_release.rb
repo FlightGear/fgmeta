@@ -144,7 +144,7 @@ if !$isRelease
   `codesign --deep -s "#{$codeSignIdentity}" #{bundle}`
   puts "Creating DMG"
 
-  `rm #{dmgPath}`
+  `rm -f #{dmgPath}`
   `hdiutil create -srcfolder #{dmgDir} #{createArgs} #{dmgPath}`
 end
 
@@ -157,5 +157,5 @@ puts "Copying base package files into the image"
 puts "Re-signing full #{bundle}"
 `codesign --force --deep -s "#{$codeSignIdentity}" #{bundle}`
 
-`rm #{dmgFullPath}`
+`rm -f #{dmgFullPath}`
 `hdiutil create -srcfolder #{dmgDir} #{createArgs} #{dmgFullPath}`
