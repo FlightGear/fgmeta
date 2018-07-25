@@ -2,7 +2,7 @@
 
 import argparse
 import datetime
-import lxml.etree as ET
+import xml.etree.cElementTree as ET
 import os
 import re
 import sgprops
@@ -61,10 +61,18 @@ def scan_set_file(aircraft_dir, set_file, includes):
 
     if sim_node.hasChild('authors'):
         # aircraft has structured authors data, handle that
-        variant['authors'] = extract_authors(sim_node.getChild('authors'))
-
-    elif sim_node.hasChild('author'):
+        variant['authors'] = sim_node.getChild('authors')
+    
+    # can have legacy author tag alongside new strucutred data for
+    # backwards FG compatability
+    if sim_node.hasChild('author'):
         variant['author'] = sim_node.getValue("author", None)
+
+    if sim_node.hasChild('maintainers'):
+        variant['maintainers'] = sim_node.getChild('maintainers')
+
+    if sim_node.hasChild('urls'):
+        variant['urls'] = sim_node.getChild('urls')
 
     if sim_node.hasChild('long-description'):
         variant['description'] = sim_node.getValue("long-description", None)
@@ -79,11 +87,7 @@ def scan_set_file(aircraft_dir, set_file, includes):
         variant['previews'] = extract_previews(sim_node.getChild('previews'), aircraft_dir)
 
     if sim_node.hasChild('rating'):
-        rating_node = sim_node.getChild("rating")
-        variant['rating_FDM'] = rating_node.getValue("FDM", 0)
-        variant['rating_systems'] = rating_node.getValue("systems", 0)
-        variant['rating_cockpit'] = rating_node.getValue("cockpit", 0)
-        variant['rating_model'] = rating_node.getValue("model", 0)
+        variant['rating'] = sim_node.getChild("rating")
 
     if sim_node.hasChild('tags'):
         variant['tags'] = extract_tags(sim_node.getChild('tags'), set_file)
@@ -123,20 +127,6 @@ def extract_tags(tags_node, set_path):
             warning("Unknown tag value:" + tag + " in " + set_path)
         result.append(tag)
 
-    return result
-
-def extract_authors(authors_node):
-    result = []
-    for author in authors_node.getChildren("author"):
-        authorName = author.getValue("name", None)
-        if (authorName == None):
-            continue
-
-        authorNick = author.getValue("nick", None)
-        authorEmail = author.getValue("email", None)
-        authorDesc = author.getValue("description", None)
-
-        result.append({'name':authorName, 'nick':authorNick, 'email':authorEmail, 'description':authorDesc})
     return result
 
 # scan all the -set.xml files in an aircraft directory.  Returns a
@@ -217,20 +207,8 @@ def append_tag_nodes(node, variant):
 
 def append_author_nodes(node, info):
     if 'authors' in info:
-        authors_node = ET.Element('authors')
-        for a in info['authors']:
-            a_node = ET.Element('author')
-            a_node.append(make_xml_leaf('name', a['name']))
-            if (a['email'] != None):
-                a_node.append(make_xml_leaf('email', a['email']))
-            if (a['nick'] != None):
-                a_node.append(make_xml_leaf('nick', a['nick']))
-            if (a['description'] != None):
-                a_node.append(make_xml_leaf('description', a['description']))
-            authors_node.append(a_node)
-
-        node.append(authors_node)
-    elif 'author' in info:
+        node.append(info['authors']._createXMLElement())
+    if 'author' in info:
         # traditional single author string
         node.append( make_xml_leaf('author', info['author']) )
 
@@ -249,18 +227,9 @@ def make_aircraft_node(aircraftDirName, package, variants, downloadBase):
     if 'minimum-fg-version' in package:
         package_node.append( make_xml_leaf('minimum-fg-version', package['minimum-fg-version']) )
 
-    if 'rating_FDM' in package or 'rating_systems' in package \
-       or 'rating_cockpit' in package or 'rating_model' in package:
-        rating_node = ET.Element('rating')
-        package_node.append(rating_node)
-        rating_node.append( make_xml_leaf('FDM',
-                                          package['rating_FDM']) )
-        rating_node.append( make_xml_leaf('systems',
-                                          package['rating_systems']) )
-        rating_node.append( make_xml_leaf('cockpit',
-                                          package['rating_cockpit']) )
-        rating_node.append( make_xml_leaf('model',
-                                          package['rating_model']) )
+    if 'rating' in package:
+        package_node.append(package['rating']._createXMLElement())
+       
     package_node.append( make_xml_leaf('id', package['id']) )
     for variant in variants:
         variant_node = ET.Element('variant')
@@ -302,5 +271,11 @@ def make_aircraft_node(aircraftDirName, package, variants, downloadBase):
 
     append_preview_nodes(package_node, package, downloadBase, aircraftDirName)
     append_tag_nodes(package_node, package)
+
+    if 'maintainers' in package:
+        package_node.append(package['maintainers']._createXMLElement())
+
+    if 'urls' in package:
+        package_node.append(package['urls']._createXMLElement())
 
     return package_node

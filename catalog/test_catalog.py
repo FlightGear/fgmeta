@@ -4,7 +4,7 @@ import unittest
 import sgprops
 import os
 import catalog
-import lxml.etree as ET
+import xml.etree.cElementTree as ET
 
 catalog.quiet = True
 
@@ -15,24 +15,25 @@ class UpdateCatalogTests(unittest.TestCase):
         self.assertEqual(info['name'], 'F16-A')
         self.assertEqual(info['primary-set'], True)
         self.assertEqual(info['variant-of'], None)
-        self.assertEqual(info['rating_FDM'], 3)
-        self.assertEqual(info['rating_model'], 5)
+       # self.assertEqual(info['rating_FDM'], 3)
+      #  self.assertEqual(info['rating_model'], 5)
+
+        ratings = info['rating']
+        self.assertEqual(ratings.getValue('FDM'), 3)
+        self.assertEqual(ratings.getValue('model'), 5)
+
         self.assertEqual(len(info['tags']), 3)
         self.assertEqual(info['minimum-fg-version'], '2017.4')
 
-        authorsArray = info['authors']
+        authors = info['authors']
         self.assertNotIn('author', info)
-        self.assertEqual(len(authorsArray), 2)
+        self.assertEqual(len(authors.getChildren()), 2)
 
-        author0 = authorsArray[0]
-        self.assertEqual(author0['name'], 'Wilbur Wright')
-        self.assertEqual(author0['nick'], 'wilburw')
-        self.assertEqual(author0['email'], 'ww@wright.com')
+        self.assertEqual(authors.getValue('author[0]/name'), 'Wilbur Wright')
+        self.assertEqual(authors.getValue('author[0]/nick'), 'wilburw')
+        self.assertEqual(authors.getValue('author[0]/email'), 'ww@wright.com')
+        self.assertEqual(authors.getValue('author[1]/name'), 'Orville Wright')
 
-        author1 = authorsArray[1]
-        self.assertEqual(author1['name'], 'Orville Wright')
-       # self.assertNotIn('nick', author1)
-      #  self.assertNotIn('email', author1)
 
     def test_scan_dir(self):
         (pkg, variants) = catalog.scan_aircraft_dir("testData/Aircraft/f16", ["testData/OtherDir"])
@@ -55,19 +56,17 @@ class UpdateCatalogTests(unittest.TestCase):
 
         authorsArray = f16b['authors']
         self.assertNotIn('author', f16b)
-        self.assertEqual(len(authorsArray), 2)
 
-        author0 = authorsArray[0]
-        self.assertEqual(author0['name'], 'James T Kirk')
-        self.assertEqual(author0['nick'], 'starlover')
+        self.assertEqual(authorsArray.getValue('author[0]/name'), 'James T Kirk')
+        self.assertEqual(authorsArray.getValue('author[0]/nick'), 'starlover')
 
         f16c = next(v for v in variants if v['id'] == 'f16c')
         self.assertEqual(f16c['variant-of'], 'f16a')
         self.assertEqual(f16c['primary-set'], False)
 
-        authorsArray = f16c['authors']
+        authors = f16c['authors']
         self.assertNotIn('author', f16c)
-        self.assertEqual(len(authorsArray), 2)
+        self.assertEqual(len(authors.getChildren()), 2)
 
     # test some older constructs for compat
     def test_scan_dir_legacy(self):
@@ -104,7 +103,7 @@ class UpdateCatalogTests(unittest.TestCase):
             os.mkdir("testOutput")
 
         cat_file = os.path.join("testOutput", 'catalog_fragment.xml')
-        catalog_root.write(cat_file, encoding='utf-8', xml_declaration=True, pretty_print=True)
+        catalog_root.write(cat_file, encoding='utf-8', xml_declaration=True)
 
         parsed = sgprops.readProps(cat_file)
         parsedPkgNode = parsed.getChild("package")
@@ -124,6 +123,12 @@ class UpdateCatalogTests(unittest.TestCase):
 
         parsedVariants = parsedPkgNode.getChildren("variant")
         self.assertEqual(len(parsedVariants), 3)
+
+        # verify rating copying
+        self.assertEqual(parsedPkgNode.getValue('rating/FDM'), 3)
+        self.assertEqual(parsedPkgNode.getValue('rating/cockpit'), 2)
+        self.assertEqual(parsedPkgNode.getValue('rating/model'), 5)
+
 
 # author data verification
         self.assertFalse(parsedPkgNode.hasChild('author'));
@@ -161,6 +166,42 @@ class UpdateCatalogTests(unittest.TestCase):
                 self.assertEqual(author1.getValue("email"), "shatner@enterprise.com")
                 self.assertEqual(author1.getValue("description"), "Everything")
 
+    def test_node_creation2(self):
+        (pkg, variants) = catalog.scan_aircraft_dir("testData/Aircraft/dc3", ["testData/OtherDir"])
+
+        catalog_node = ET.Element('PropertyList')
+        catalog_root = ET.ElementTree(catalog_node)
+
+        pkgNode = catalog.make_aircraft_node('dc3', pkg, variants, "http://foo.com/testOutput/")
+        catalog_node.append(pkgNode)
+
+        if not os.path.isdir("testOutput"):
+            os.mkdir("testOutput")
+
+        cat_file = os.path.join("testOutput", 'catalog_fragment2.xml')
+        catalog_root.write(cat_file, encoding='utf-8', xml_declaration=True)
+
+        parsed = sgprops.readProps(cat_file)
+        parsedPkgNode = parsed.getChild("package")
+
+        self.assertEqual(parsedPkgNode.name, "package");
+
+        self.assertEqual(parsedPkgNode.getValue('id'), pkg['id']);
+        self.assertEqual(parsedPkgNode.getValue('dir'), 'dc3');
+        self.assertEqual(parsedPkgNode.getValue('url'), 'http://foo.com/testOutput/dc3.zip');
+      
+        self.assertEqual(parsedPkgNode.getValue('author'), 'Donald Douglas');
+
+        parsedAuthors = parsedPkgNode.getChild("authors").getChildren('author')
+        self.assertEqual(len(parsedAuthors), 1)
+        author1 = parsedAuthors[0]
+        self.assertEqual(author1.getValue("name"), "Donald Douglas")
+        self.assertEqual(author1.getValue("nick"), "dd")
+        self.assertEqual(author1.getValue("email"), "dd@douglas.com")
+
+        urls = parsedPkgNode.getChild('urls')
+        self.assertEqual(urls.getValue('home-page'), 'http://www.douglas.com')
+
     def test_minimalAircraft(self):
         # test an aircraft with a deliberately spartan -set.xml file with
         # most interesting data missing
@@ -176,7 +217,7 @@ class UpdateCatalogTests(unittest.TestCase):
             os.mkdir("testOutput2")
 
         cat_file = os.path.join("testOutput2", 'catalog_fragment.xml')
-        catalog_root.write(cat_file, encoding='utf-8', xml_declaration=True, pretty_print=True)
+        catalog_root.write(cat_file, encoding='utf-8', xml_declaration=True)
 
         parsed = sgprops.readProps(cat_file)
         parsedPkgNode = parsed.getChild("package")

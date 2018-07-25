@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<PropertyList>
+  <sim>
+    <name>dc3</name>
+    <description>Douglas DC-3</description>
+    <author>Donald Douglas</author>
+    <authors>
+        <author>
+            <name>Donald Douglas</name>
+            <nick>dd</nick>
+            <email>dd@douglas.com</email>
+            <description>Made all the stuff</description>
+        </author>
+    </authors>
+    <urls>
+        <support>https://bugtracker.douglas.com/</support>
+        <home-page>http://www.douglas.com</home-page>
+    </urls>
+  </sim>
+
+</PropertyList>
