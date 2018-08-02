@@ -30,7 +30,7 @@ Windows 10
 
 	Qt 5.10.1
 		https://www.qt.io/download/
-		The script assumes the installation folder is C:\Qt\Qt5\.
+		The script assumes the installation folder is C:\Qt\.
 
 	Git 2.17.1
 		https://git-scm.com/download/win/

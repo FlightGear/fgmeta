@@ -20,7 +20,7 @@ REM Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, U
 SET ROOT_DIR=%CD%
 SET PATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/bin;%PATH%
 SET CMAKE_TOOLCHAIN="Visual Studio 15 2017 Win64"
-SET QT5x64=C:/Qt/Qt5/5.10.1/msvc2017_64
+SET QT5x64=C:/Qt/5.10.1/msvc2017_64
 
 IF NOT EXIST vcpkg-git/NUL (
 	echo Preparing to install external libraries via vcpkg . . .
@@ -68,25 +68,35 @@ IF NOT EXIST simgear-git/NUL (
 )
 cd %ROOT_DIR%
 
-REM Intended for future use.
-REM IF NOT EXIST flightgear-git/NUL (
-REM 	mkdir flightgear-build
-REM 	echo Downloading FlightGear . . .
-REM 	git clone -b next https://git.code.sf.net/p/flightgear/flightgear flightgear-git
-REM ) ELSE (
-REM 	echo Updating FlightGear . . .
-REM 	cd flightgear-git
-REM 	git pull
-REM )
+IF NOT EXIST plib-git/NUL (
+	mkdir plib-build
+	echo Downloading PLib . . .
+	git clone https://github.com/congocongo/plib.git plib-git
+) ELSE (
+	echo Updating PLib . . .
+	cd plib-git
+	git pull
+)
 cd %ROOT_DIR%
 
-IF NOT EXIST terragear-ws2.0-git/NUL (
-	mkdir terragear-ws2.0-build
+IF NOT EXIST flightgear-git/NUL (
+	mkdir flightgear-build
+	echo Downloading FlightGear . . .
+	git clone -b next https://git.code.sf.net/p/flightgear/flightgear flightgear-git
+) ELSE (
+	echo Updating FlightGear . . .
+	cd flightgear-git
+	git pull
+)
+cd %ROOT_DIR%
+
+IF NOT EXIST terragear-git/NUL (
+	mkdir terragear-build
 	echo Downloading TerraGear . . .
-	git clone -b scenery/ws2.0 https://git.code.sf.net/p/flightgear/terragear terragear-ws2.0-git
+	git clone -b next https://git.code.sf.net/p/flightgear/terragear terragear-git
 ) ELSE (
 	echo Updating TerraGear . . .
-	cd terragear-ws2.0-git
+	cd terragear-git
 	git pull
 )
 cd %ROOT_DIR%
@@ -149,40 +159,39 @@ cmake ..\simgear-git -G  %CMAKE_TOOLCHAIN% ^
 cmake --build . --config Release --target INSTALL
 cd %ROOT_DIR%
 
-REM Currently broken. Intended for future use.
-REM ECHO Compiling FlightGear . . .
-REM cd flightgear-build
-REM cmake ..\flightgear-git -G  %CMAKE_TOOLCHAIN% ^
-	REM -DMSVC_3RDPARTY_ROOT=%ROOT_DIR%/vcpkg-git/installed/x64-windows ^
-	REM -DCMAKE_PREFIX_PATH:PATH=%ROOT_DIR%/Stage/lib;%ROOT_DIR%/vcpkg-git/installed/x64-windows/lib;%QT5x64% ^
-	REM -DCMAKE_CONFIGURATION_TYPES=Debug;Release ^
-	REM -DCMAKE_INSTALL_PREFIX:PATH=%ROOT_DIR%/Stage ^
-	REM -DOSG_FSTREAM_EXPORT_FIXED:BOOL=1 ^
-	REM -DENABLE_GDAL:BOOL=1 ^
-	REM -DENABLE_OPENMP:BOOL=1 ^
-	REM -DENABLE_JSBSIM:BOOL=1 ^
-	REM -DENABLE_GPSSMOOTH:BOOL=1 ^
-	REM -DENABLE_FGVIEWER:BOOL=0 ^
-	REM -DENABLE_STGMERGE:BOOL=0 ^
-	REM -DWITH_FGPANEL:BOOL=0 ^
-	REM -DUSE_AEONWAVE:BOOL=0 ^
-	REM -DHAVE_CONFIG_H:BOOL=0 ^
-	REM -DFREETYPE_INCLUDE_DIR_ft2build=%ROOT_DIR%/vcpkg-git/packages/freetype_x64-windows/include ^
-	REM -DGDAL_INCLUDE_DIR=%ROOT_DIR%/vcpkg-git/installed/x64-windows/include ^
-	REM -DGDAL_LIBRARY=%ROOT_DIR%/vcpkg-git/installed/x64-windows/lib/gdal.lib ^
-	REM -DOPENAL_INCLUDE_DIR=%ROOT_DIR%/vcpkg-git/installed/x64-windows/include ^
-	REM -DOPENAL_LIBRARY=%ROOT_DIR%/vcpkg-git/installed/x64-windows/lib/OpenAL32.lib ^
-	REM -DPLIB_INCLUDE_DIR=C:/src/3rdParty.x64/VS2017-x64-MD/include ^
-	REM -DPNG_PNG_INCLUDE_DIR=%ROOT_DIR%/vcpkg-git/installed/x64-windows/include ^
-	REM -DPNG_LIBRARY=%ROOT_DIR%/vcpkg-git/installed/x64-windows/lib/libpng16.lib ^
-	REM -DZLIB_INCLUDE_DIR=%ROOT_DIR%/vcpkg-git/installed/x64-windows/include ^
-	REM -DZLIB_LIBRARY=%ROOT_DIR%/vcpkg-git/installed/x64-windows/lib/zlib.lib
-REM cmake --build . --config Release --target INSTALL
-REM cd %ROOT_DIR%
+ECHO Compiling FlightGear . . .
+cd flightgear-build
+cmake ..\flightgear-git -G  %CMAKE_TOOLCHAIN% ^
+	-DMSVC_3RDPARTY_ROOT=%ROOT_DIR%/vcpkg-git/installed/x64-windows ^
+	-DCMAKE_PREFIX_PATH:PATH=%ROOT_DIR%/Stage/lib;%ROOT_DIR%/vcpkg-git/installed/x64-windows/lib;%QT5x64% ^
+	-DCMAKE_CONFIGURATION_TYPES=Debug;Release ^
+	-DCMAKE_INSTALL_PREFIX:PATH=%ROOT_DIR%/Stage ^
+	-DOSG_FSTREAM_EXPORT_FIXED:BOOL=1 ^
+	-DENABLE_GDAL:BOOL=1 ^
+	-DENABLE_OPENMP:BOOL=1 ^
+	-DENABLE_JSBSIM:BOOL=1 ^
+	-DENABLE_GPSSMOOTH:BOOL=1 ^
+	-DENABLE_FGVIEWER:BOOL=1 ^
+	-DENABLE_STGMERGE:BOOL=0 ^
+	-DWITH_FGPANEL:BOOL=0 ^
+	-DUSE_AEONWAVE:BOOL=0 ^
+	-DHAVE_CONFIG_H:BOOL=0 ^
+	-DFREETYPE_INCLUDE_DIR_ft2build=%ROOT_DIR%/vcpkg-git/packages/freetype_x64-windows/include ^
+	-DGDAL_INCLUDE_DIR=%ROOT_DIR%/vcpkg-git/installed/x64-windows/include ^
+	-DGDAL_LIBRARY=%ROOT_DIR%/vcpkg-git/installed/x64-windows/lib/gdal.lib ^
+	-DOPENAL_INCLUDE_DIR=%ROOT_DIR%/vcpkg-git/installed/x64-windows/include ^
+	-DOPENAL_LIBRARY=%ROOT_DIR%/vcpkg-git/installed/x64-windows/lib/OpenAL32.lib ^
+	-DPLIB_INCLUDE_DIR=%ROOT_DIR%/Stage/include ^
+	-DPNG_PNG_INCLUDE_DIR=%ROOT_DIR%/vcpkg-git/installed/x64-windows/include ^
+	-DPNG_LIBRARY=%ROOT_DIR%/vcpkg-git/installed/x64-windows/lib/libpng16.lib ^
+	-DZLIB_INCLUDE_DIR=%ROOT_DIR%/vcpkg-git/installed/x64-windows/include ^
+	-DZLIB_LIBRARY=%ROOT_DIR%/vcpkg-git/installed/x64-windows/lib/zlib.lib
+cmake --build . --config Release --target INSTALL
+cd %ROOT_DIR%
 
 ECHO Compiling TerraGear . . .
-cd terragear-ws2.0-build
-cmake ..\terragear-ws2.0-git -G  %CMAKE_TOOLCHAIN% ^
+cd terragear-build
+cmake ..\terragear-git -G  %CMAKE_TOOLCHAIN% ^
 	-DCMAKE_PREFIX_PATH:PATH=%ROOT_DIR%/Stage/lib;%ROOT_DIR%/vcpkg-git/installed/x64-windows/lib;%QT5x64% ^
 	-DCMAKE_CONFIGURATION_TYPES=Debug;Release ^
 	-DCMAKE_INSTALL_PREFIX:PATH=%ROOT_DIR%/Stage ^
