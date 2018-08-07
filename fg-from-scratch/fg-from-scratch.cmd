@@ -31,7 +31,7 @@ IF NOT EXIST vcpkg-git/NUL (
 	call ./bootstrap-vcpkg
 
 	echo Compiling external libraries . . .
-	vcpkg install --triplet x64-windows boost cgal curl freeglut freetype gdal glew jasper libxml2 openal-soft openjpeg openssl sdl2 tiff zlib
+	vcpkg install --triplet x64-windows boost cgal curl freeglut freetype gdal glew jasper libxml2 openal-soft openjpeg openssl plib sdl2 tiff zlib
 ) ELSE (
 	echo Updating vcpkg . . .
 	cd vcpkg-git
@@ -42,7 +42,7 @@ IF NOT EXIST vcpkg-git/NUL (
 	vcpkg upgrade --triplet x64-windows --no-dry-run
 
     REM Okay to comment out this line once all the packages have been confirmed to have been installed
-	vcpkg install --triplet x64-windows boost cgal curl freeglut freetype gdal glew jasper libxml2 openal-soft openjpeg openssl sdl2 tiff zlib
+	vcpkg install --triplet x64-windows boost cgal curl freeglut freetype gdal glew jasper libxml2 openal-soft openjpeg openssl plib sdl2 tiff zlib
 )
 cd %ROOT_DIR%
 
@@ -64,17 +64,6 @@ IF NOT EXIST simgear-git/NUL (
 ) ELSE (
 	echo Updating SimGear . . .
 	cd simgear-git
-	git pull
-)
-cd %ROOT_DIR%
-
-IF NOT EXIST plib-git/NUL (
-	mkdir plib-build
-	echo Downloading PLib . . .
-	git clone https://github.com/congocongo/plib.git plib-git
-) ELSE (
-	echo Updating PLib . . .
-	cd plib-git
 	git pull
 )
 cd %ROOT_DIR%
@@ -181,7 +170,7 @@ cmake ..\flightgear-git -G  %CMAKE_TOOLCHAIN% ^
 	-DGDAL_LIBRARY=%ROOT_DIR%/vcpkg-git/installed/x64-windows/lib/gdal.lib ^
 	-DOPENAL_INCLUDE_DIR=%ROOT_DIR%/vcpkg-git/installed/x64-windows/include ^
 	-DOPENAL_LIBRARY=%ROOT_DIR%/vcpkg-git/installed/x64-windows/lib/OpenAL32.lib ^
-	-DPLIB_INCLUDE_DIR=%ROOT_DIR%/Stage/include ^
+	-DPLIB_INCLUDE_DIR=%ROOT_DIR%/vcpkg-git/installed/x64-windows/include ^
 	-DPNG_PNG_INCLUDE_DIR=%ROOT_DIR%/vcpkg-git/installed/x64-windows/include ^
 	-DPNG_LIBRARY=%ROOT_DIR%/vcpkg-git/installed/x64-windows/lib/libpng16.lib ^
 	-DZLIB_INCLUDE_DIR=%ROOT_DIR%/vcpkg-git/installed/x64-windows/include ^
