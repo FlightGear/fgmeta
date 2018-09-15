@@ -579,14 +579,26 @@ FGFS_INSTALL_DIR=flightgear
 INSTALL_DIR_FGFS=$INSTALL_DIR/$FGFS_INSTALL_DIR
 cd "$CBD"
 if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="FGFS"' || "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="DATA"' ]]; then
-  echo "****************************************" | tee -a $LOGFILE
-  echo "************** FLIGHTGEAR **************" | tee -a $LOGFILE
-  echo "****************************************" | tee -a $LOGFILE
+  mkdir -p "$INSTALL_DIR_FGFS"/fgdata
+  cd "$INSTALL_DIR_FGFS"/fgdata
 
-  mkdir -p "flightgear"
+  if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="DATA"' ]]; then
+    echo "****************************************" | tee -a $LOGFILE
+    echo "**************** DATA ******************" | tee -a $LOGFILE
+    echo "****************************************" | tee -a $LOGFILE
+
+    _gitDownload https://git.code.sf.net/p/flightgear/fgdata
+    _gitUpdate $FGVERSION
+  fi
+
+  mkdir -p "$CBD"/flightgear
   cd "$CBD"/flightgear
 
   if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="FGFS"' ]]; then
+    echo "****************************************" | tee -a $LOGFILE
+    echo "************** FLIGHTGEAR **************" | tee -a $LOGFILE
+    echo "****************************************" | tee -a $LOGFILE
+
     _gitDownload https://git.code.sf.net/p/flightgear/flightgear
     _gitUpdate $FGVERSION
 
@@ -599,23 +611,12 @@ if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="FGFS"' || "$(declare -p WHAT
             -DENABLE_FLITE=ON \
             -DCMAKE_INSTALL_PREFIX:PATH="$INSTALL_DIR_FGFS" \
             -DCMAKE_PREFIX_PATH="$INSTALL_DIR_SIMGEAR;$INSTALL_DIR_OSG;$INSTALL_DIR_OPENRTI;$INSTALL_DIR_PLIB" \
+            -DFG_DATA_DIR="$INSTALL_DIR_FGFS/fgdata" \
             $FG_CMAKEARGS \
             ../../flightgear 2>&1 | tee -a $LOGFILE
     fi
 
     _make flightgear
-  fi
-
-  mkdir -p $INSTALL_DIR_FGFS/fgdata
-  cd $INSTALL_DIR_FGFS/fgdata
-
-  if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="DATA"' ]]; then
-    echo "****************************************" | tee -a $LOGFILE
-    echo "**************** DATA ******************" | tee -a $LOGFILE
-    echo "****************************************" | tee -a $LOGFILE
-
-    _gitDownload https://git.code.sf.net/p/flightgear/fgdata
-    _gitUpdate $FGVERSION
   fi
   cd "$CBD"
 
