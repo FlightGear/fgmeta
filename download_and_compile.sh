@@ -333,16 +333,21 @@ PKG="$PKG libcgal-dev libgdal-dev libtiff5-dev"
 # TGGUI/OpenRTI
 PKG="$PKG libqt4-dev"
 # SG/FG
-PKG="$PKG zlib1g-dev freeglut3-dev libboost-dev"
+PKG="$PKG zlib1g-dev freeglut3-dev libglew-dev libboost-dev"
 _mandatory_pkg_alternative libopenscenegraph-3.4-dev libopenscenegraph-dev \
                            'libopenscenegraph-[0-9]+\.[0-9]+-dev'
 # FG
-PKG="$PKG libopenal-dev libudev-dev qt5-default qtdeclarative5-dev libdbus-1-dev libplib-dev"
+PKG="$PKG libopenal-dev libudev-dev libdbus-1-dev libplib-dev"
 _mandatory_pkg_alternative libpng-dev libpng12-dev libpng16-dev
 # The following packages are needed for the built-in launcher
+_optional_pkg_alternative qt5-default
+_optional_pkg_alternative qtdeclarative5-dev
 _optional_pkg_alternative qml-module-qtquick2
 _optional_pkg_alternative qml-module-qtquick-window2
 _optional_pkg_alternative qml-module-qtquick-dialogs
+_optional_pkg_alternative libqt5opengl5-dev
+_optional_pkg_alternative libqt5svg5-dev
+_optional_pkg_alternative libqt5websockets5-dev
 # The following packages are only needed for the Qt-based remote Canvas
 # (comment written at the time of FG 2018.2).
 _optional_pkg_alternative qtbase5-private-dev
