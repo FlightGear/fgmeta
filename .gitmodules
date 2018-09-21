@@ -1,11 +1,11 @@
 [submodule "simgear"]
 	path = simgear
 	url = ../simgear
-	branch = next
+	branch = release/2018.3
 [submodule "flightgear"]
 	path = flightgear
 	url = ../flightgear
-	branch = next
+	branch = release/2018.3
 [submodule "fgrun"]
 	path = fgrun
 	url = ../fgrun
@@ -13,7 +13,7 @@
 [submodule "fgdata"]
 	path = fgdata
 	url = ../fgdata
-	branch = next
+	branch = release/2018.3
 [submodule "windows-3rd-party"]
 	path = windows-3rd-party
 	url = ../windows-3rd-party
@@ -21,4 +21,4 @@
 [submodule "getstart"]
 	path = getstart
 	url = ../getstart
-	branch = next
+	branch = release/2018.3
