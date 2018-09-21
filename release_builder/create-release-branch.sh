@@ -1,7 +1,7 @@
 #!/bin/bash
 
-THIS_RELEASE="2018.2"
-NEXT_RELEASE="2018.3"
+THIS_RELEASE="2018.3"
+NEXT_RELEASE="2018.4"
 SUBMODULES="simgear flightgear fgdata getstart"
 
 #:<< 'COMMENT_END'
@@ -28,7 +28,7 @@ read something
 for f in $SUBMODULES .; do
   pushd "$f"
     echo "Pushing $f"
-    git checkout release/${THIS_RELEASE} && git push origin release/${THIS_RELEASE} && git push origin version/${THIS_RELEASE}.1 && git push origin version/${NEXT_RELEASE}.0 && git checkout next && git push
+    git checkout release/${THIS_RELEASE} && git push origin release/${THIS_RELEASE} && git checkout next && git push
   popd
 done
 
