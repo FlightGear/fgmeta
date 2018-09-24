@@ -46,8 +46,10 @@ IF NOT EXIST vcpkg-git/NUL (
 )
 cd %ROOT_DIR%
 
-IF NOT EXIST openscenegraph-3.4-git/NUL (
+IF NOT EXIST openscenegraph-3.4-build/NUL (
 	mkdir openscenegraph-3.4-build
+)
+IF NOT EXIST openscenegraph-3.4-git/NUL (
 	echo Downloading OpenSceneGraph . . .
 	git clone -b OpenSceneGraph-3.4 https://github.com/openscenegraph/OpenSceneGraph.git openscenegraph-3.4-git
 ) ELSE (
@@ -57,8 +59,10 @@ IF NOT EXIST openscenegraph-3.4-git/NUL (
 )
 cd %ROOT_DIR%
 
-IF NOT EXIST simgear-git/NUL (
+IF NOT EXIST simgear-build/NUL (
 	mkdir simgear-build
+)
+IF NOT EXIST simgear-git/NUL (
 	echo Downloading SimGear . . .
 	git clone -b next https://git.code.sf.net/p/flightgear/simgear simgear-git
 ) ELSE (
@@ -68,8 +72,10 @@ IF NOT EXIST simgear-git/NUL (
 )
 cd %ROOT_DIR%
 
-IF NOT EXIST flightgear-git/NUL (
+IF NOT EXIST flightgear-build/NUL (
 	mkdir flightgear-build
+)
+IF NOT EXIST flightgear-git/NUL (
 	echo Downloading FlightGear . . .
 	git clone -b next https://git.code.sf.net/p/flightgear/flightgear flightgear-git
 ) ELSE (
@@ -79,8 +85,10 @@ IF NOT EXIST flightgear-git/NUL (
 )
 cd %ROOT_DIR%
 
-IF NOT EXIST terragear-git/NUL (
+IF NOT EXIST terragear-build/NUL (
 	mkdir terragear-build
+)
+IF NOT EXIST terragear-git/NUL (
 	echo Downloading TerraGear . . .
 	git clone -b next https://git.code.sf.net/p/flightgear/terragear terragear-git
 ) ELSE (
