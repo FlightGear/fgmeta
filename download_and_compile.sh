@@ -42,6 +42,21 @@ FGVERSION="release/$(git ls-remote --heads https://git.code.sf.net/p/flightgear/
 #############################################################"
 # Some helper functions for redundant tasks
 
+# Return 0 if $1 is identical to one of $2, $3, etc., else return 1.
+_elementIn(){
+  local valueToCheck="$1"
+  local e
+
+  shift
+  for e; do
+    if [[ "$e" == "$valueToCheck" ]]; then
+      return 0
+    fi
+  done
+
+  return 1
+}
+
 function _logSep(){
   echo "***********************************" >> $LOGFILE
 }
@@ -183,12 +198,39 @@ function _find_package_alternative(){
   fi
 }
 
+function _usage() {
+  echo "$PROGNAME [OPTION...] [--] [COMPONENT...]"
+  echo "Download and compile components belonging to the FlightGear ecosystem."
+  echo
+  echo "Without any COMPONENT listed, or if ALL is specified, recompile all"
+  echo "components listed in the WHATTOBUILDALL variable. Each COMPONENT may"
+  echo "be one of the following words:"
+  echo
+  echo "  ALL, CMAKE, OSG, PLIB, OPENRTI, SIMGEAR, FGFS, DATA, FGRUN, FGO, FGX,"
+  echo "  OPENRADAR, ATCPIE, TERRAGEAR, TERRAGEARGUI"
+  echo
+  echo "Available options:"
+  echo "  -h, --help    show this help message and exit"
+  echo "  -e            compile FlightGear with --with-eventinput option (experimental)"
+  echo "  -i            compile SimGear and FlightGear with -D ENABLE_RTI=ON option (experimental)"
+  echo "  -b RELEASE_TYPE                                                                     default=RelWithDebInfo"
+  echo "                set build type to RELEASE_TYPE (Release|RelWithDebInfo|Debug)"
+  echo "  -a y|n        y=do an apt-get update, n=don't                                       default=y"
+  echo "  -p y|n        y=download packages, n=don't                                          default=y"
+  echo "  -c y|n        y=compile programs, n=don't                                           default=y"
+  echo "  -d y|n        y=fetch programs from internet (cvs, svn, etc...), n=don't            default=y"
+  echo "  -j X          pass -jX to the Make program"
+  echo "  -O X          pass -OX to the Make program"
+  echo "  -r y|n        y=reconfigure programs before compiling them, n=don't reconfigure     default=y"
+  echo "  -s            compile only the last known stable versions"
+}
+
 #######################################################
 # set script to stop if an error occours
 set -e
 
 LOGFILE=compilation_log.txt
-WHATTOBUILD=
+
 #AVAILABLE VALUES: CMAKE PLIB OPENRTI OSG SIMGEAR FGFS DATA FGRUN FGO FGX OPENRADAR ATCPIE TERRAGEAR TERRAGEARGUI
 WHATTOBUILDALL=(SIMGEAR FGFS DATA)
 STABLE=
@@ -205,69 +247,56 @@ FG_CMAKEARGS=""
 
 declare -a UNMATCHED_OPTIONAL_PKG_ALTERNATIVES
 
-while getopts "shc:p:a:d:r:j:O:ib:" OPTION; do
-  case $OPTION in
-    s) STABLE="STABLE" ;;
-    h) HELP="HELP" ;;
-    a) APT_GET_UPDATE=$OPTARG ;;
-    c) COMPILE=$OPTARG ;;
-    p) DOWNLOAD_PACKAGES=$OPTARG ;;
-    d) DOWNLOAD=$OPTARG ;;
-    r) RECONFIGURE=$OPTARG ;;
-    j) JOPTION=" -j"$OPTARG" " ;;
-    O) OOPTION=" -O"$OPTARG" " ;;
-    i) OPENRTI="OPENRTI" ;;
-    b) BUILD_TYPE="$OPTARG" ;;
-    ?) HELP="HELP" ;;
+# getopt is from the util-linux package (in Debian). Contrary to bash's getopts
+# built-in function, it allows one to define long options.
+TEMP=$(getopt -o '+shc:p:a:d:r:j:O:ib:' \
+  --longoptions help \
+  -n "$PROGNAME" -- "$@")
+
+case $? in
+    0) : ;;
+    1) _usage >&2; exit 1 ;;
+    *) exit 1 ;;
+esac
+
+# Don't remove the quotes around $TEMP!
+eval set -- "$TEMP"
+
+while true; do
+  case "$1" in
+    -s) STABLE="STABLE"; shift ;;
+    -a) APT_GET_UPDATE="$2"; shift 2 ;;
+    -c) COMPILE="$2"; shift 2 ;;
+    -p) DOWNLOAD_PACKAGES="$2"; shift 2 ;;
+    -d) DOWNLOAD="$2"; shift 2 ;;
+    -r) RECONFIGURE="$2"; shift 2 ;;
+    -j) JOPTION=" -j$2"; shift 2 ;;
+    -O) OOPTION=" -O$2"; shift 2 ;;
+    -i) OPENRTI="OPENRTI"; shift ;;
+    -b) BUILD_TYPE="$2"; shift 2 ;;
+    -h|--help) _usage; exit 0 ;;
+    --) shift; break ;;
+    *) echo "$PROGNAME: unexpected option '$1'; please report a bug." >&2
+       exit 1 ;;
   esac
 done
-shift $(($OPTIND - 1))
 
-if [ ! "$#" = "0" ]; then
-  for arg in $*
-  do
-    WHATTOBUILD=( "${WHATTOBUILD[@]}" "$arg" )
-  done
-else
+declare -a WHATTOBUILD=()
+
+if [[ $# == 0 ]] || _elementIn ALL "$@"; then
   WHATTOBUILD=( "${WHATTOBUILDALL[@]}" )
+else
+  WHATTOBUILD=( "$@" )
 fi
 
-if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="ALL"' ]]; then
-  WHATTOBUILD=( "${WHATTOBUILDALL[@]}" )
-fi
-
-if [ "$STABLE" = "STABLE" ]; then
-  FGVERSION=$FGVERSION
-else
+if [[ "$STABLE" != "STABLE" ]]; then
   FGVERSION="next"
 fi
 
 if [ "$OPENRTI" = "OPENRTI" ]; then
   SG_CMAKEARGS="$SG_CMAKEARGS -DENABLE_RTI=ON;"
   FG_CMAKEARGS="$FG_CMAKEARGS -DENABLE_RTI=ON;"
-  WHATTOBUILD=( "${WHATTOBUILD[@]}" OPENRTI )
-fi
-
-if [ "$HELP" = "HELP" ]; then
-  echo "$0 Version $VERSION"
-  echo "Usage:"
-  echo "./$0 [-h] [-s] [-e] [-f] [-i] [-g] [-a y|n] [-c y|n] [-p y|n] [-d y|n] [-r y|n] [ALL|CMAKE|OSG|PLIB|OPENRTI|SIMGEAR|FGFS|DATA|FGRUN|FGO|FGX|OPENRADAR|ATCPIE|TERRAGEAR|TERRAGEARGUI]"
-  echo "* without options or with ALL it recompiles the content of the WHATTOBUILDALL variable."
-  echo "* Feel you free to customize the WHATTOBUILDALL variable available on the top of this script"
-  echo "Switches:"
-  echo "* -h  show this help"
-  echo "* -e  compile FlightGear with --with-eventinput option (experimental)"
-  echo "* -i  compile SimGear and FlightGear with -D ENABLE_RTI=ON option (experimental)"
-  echo "* -b Release|RelWithDebInfo|Debug  set build type                  default=RelWithDebInfo"
-  echo "* -a y|n  y=do an apt-get update n=skip apt-get update                          default=y"
-  echo "* -p y|n  y=download packages n=skip download packages                          default=y"
-  echo "* -c y|n  y=compile programs  n=do not compile programs                         default=y"
-  echo "* -d y|n  y=fetch programs from internet (cvs, svn, etc...)  n=do not fetch     default=y"
-  echo "* -j X    Add -jX to the make compilation                                       default=None"
-  echo "* -O X    Add -OX to the make compilation                                       default=None"
-  echo "* -r y|n  y=reconfigure programs before compiling them  n=do not reconfigure    default=y"
-  echo "* -s compile only last stable known versions                                    default=y"
-  exit
+  WHATTOBUILD+=( "OPENRTI" )
 fi
 
 #######################################################
