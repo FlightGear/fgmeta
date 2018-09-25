@@ -39,73 +39,8 @@ FGVERSION="release/$(git ls-remote --heads https://git.code.sf.net/p/flightgear/
 # Thanks again to "F-JJTH" for OpenRTI and FGX 
 # Thanks to André, (taureau89_9) for debian stable packages fixes
 
-LOGFILE=compilation_log.txt
-WHATTOBUILD=
-#AVAILABLE VALUES: CMAKE PLIB OPENRTI OSG SIMGEAR FGFS DATA FGRUN FGO FGX OPENRADAR ATCPIE TERRAGEAR TERRAGEARGUI
-WHATTOBUILDALL=(SIMGEAR FGFS DATA)
-STABLE=
-APT_GET_UPDATE="y"
-DOWNLOAD_PACKAGES="y"
-COMPILE="y"
-RECONFIGURE="y"
-DOWNLOAD="y"
-JOPTION=""
-OOPTION=""
-BUILD_TYPE="RelWithDebInfo"
-SG_CMAKEARGS=""
-FG_CMAKEARGS=""
-
-declare -a UNMATCHED_OPTIONAL_PKG_ALTERNATIVES
-
-while getopts "shc:p:a:d:r:j:O:ib:" OPTION; do
-  case $OPTION in
-    s) STABLE="STABLE" ;;
-    h) HELP="HELP" ;;
-    a) APT_GET_UPDATE=$OPTARG ;;
-    c) COMPILE=$OPTARG ;;
-    p) DOWNLOAD_PACKAGES=$OPTARG ;;
-    d) DOWNLOAD=$OPTARG ;;
-    r) RECONFIGURE=$OPTARG ;;
-    j) JOPTION=" -j"$OPTARG" " ;;
-    O) OOPTION=" -O"$OPTARG" " ;;
-    i) OPENRTI="OPENRTI" ;;
-    b) BUILD_TYPE="$OPTARG" ;;
-    ?) HELP="HELP" ;;
-  esac
-done
-shift $(($OPTIND - 1))
-
-if [ ! "$#" = "0" ]; then
-  for arg in $*
-  do
-    WHATTOBUILD=( "${WHATTOBUILD[@]}" "$arg" )
-  done
-else
-  WHATTOBUILD=( "${WHATTOBUILDALL[@]}" )
-fi
-
-if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="ALL"' ]]; then
-  WHATTOBUILD=( "${WHATTOBUILDALL[@]}" )
-fi
-
-
-if [ "$STABLE" = "STABLE" ]; then
-  FGVERSION=$FGVERSION
-else
-  FGVERSION="next"
-fi
-
-
-if [ "$OPENRTI" = "OPENRTI" ]; then
-  SG_CMAKEARGS="$SG_CMAKEARGS -DENABLE_RTI=ON;"
-  FG_CMAKEARGS="$FG_CMAKEARGS -DENABLE_RTI=ON;"
-  WHATTOBUILD=( "${WHATTOBUILD[@]}" OPENRTI )
-fi
-
-
-
 #############################################################"
-# Some helper for redundant task
+# Some helper functions for redundant tasks
 
 function _logSep(){
   echo "***********************************" >> $LOGFILE
@@ -251,6 +186,67 @@ function _find_package_alternative(){
 #######################################################
 # set script to stop if an error occours
 set -e
+
+LOGFILE=compilation_log.txt
+WHATTOBUILD=
+#AVAILABLE VALUES: CMAKE PLIB OPENRTI OSG SIMGEAR FGFS DATA FGRUN FGO FGX OPENRADAR ATCPIE TERRAGEAR TERRAGEARGUI
+WHATTOBUILDALL=(SIMGEAR FGFS DATA)
+STABLE=
+APT_GET_UPDATE="y"
+DOWNLOAD_PACKAGES="y"
+COMPILE="y"
+RECONFIGURE="y"
+DOWNLOAD="y"
+JOPTION=""
+OOPTION=""
+BUILD_TYPE="RelWithDebInfo"
+SG_CMAKEARGS=""
+FG_CMAKEARGS=""
+
+declare -a UNMATCHED_OPTIONAL_PKG_ALTERNATIVES
+
+while getopts "shc:p:a:d:r:j:O:ib:" OPTION; do
+  case $OPTION in
+    s) STABLE="STABLE" ;;
+    h) HELP="HELP" ;;
+    a) APT_GET_UPDATE=$OPTARG ;;
+    c) COMPILE=$OPTARG ;;
+    p) DOWNLOAD_PACKAGES=$OPTARG ;;
+    d) DOWNLOAD=$OPTARG ;;
+    r) RECONFIGURE=$OPTARG ;;
+    j) JOPTION=" -j"$OPTARG" " ;;
+    O) OOPTION=" -O"$OPTARG" " ;;
+    i) OPENRTI="OPENRTI" ;;
+    b) BUILD_TYPE="$OPTARG" ;;
+    ?) HELP="HELP" ;;
+  esac
+done
+shift $(($OPTIND - 1))
+
+if [ ! "$#" = "0" ]; then
+  for arg in $*
+  do
+    WHATTOBUILD=( "${WHATTOBUILD[@]}" "$arg" )
+  done
+else
+  WHATTOBUILD=( "${WHATTOBUILDALL[@]}" )
+fi
+
+if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="ALL"' ]]; then
+  WHATTOBUILD=( "${WHATTOBUILDALL[@]}" )
+fi
+
+if [ "$STABLE" = "STABLE" ]; then
+  FGVERSION=$FGVERSION
+else
+  FGVERSION="next"
+fi
+
+if [ "$OPENRTI" = "OPENRTI" ]; then
+  SG_CMAKEARGS="$SG_CMAKEARGS -DENABLE_RTI=ON;"
+  FG_CMAKEARGS="$FG_CMAKEARGS -DENABLE_RTI=ON;"
+  WHATTOBUILD=( "${WHATTOBUILD[@]}" OPENRTI )
+fi
 
 if [ "$HELP" = "HELP" ]; then
   echo "$0 Version $VERSION"
