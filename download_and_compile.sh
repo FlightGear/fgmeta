@@ -57,6 +57,13 @@ _elementIn(){
   return 1
 }
 
+function _printLog(){
+ # Possible special case for the terminal: echo "${PROGNAME}: $@"
+ # That would be more precise but rather verbose, and not all output uses
+ # _printLog() for now, so it would look too inconsistent.
+ echo "$@" | tee -a "$LOGFILE"
+}
+
 function _logSep(){
   echo "***********************************" >> $LOGFILE
 }
@@ -91,15 +98,53 @@ function _gitUpdate(){
   fi
 }
 
+function _gitProtoSpec(){
+ local proto="$1"
+ local username="$2"
+ local component="$3"
+ local complement
+
+ case "$proto" in
+   ssh)
+     if [[ -z "$username" ]]; then
+       if [[ -n "$component" ]]; then
+         complement=" (used to retrieve component $component)"
+       fi
+
+       _printLog "Protocol ssh$complement requires a username,"
+       _printLog "but none was specified! Aborting."
+       exit 1
+     fi
+     echo "${proto}://${username}@"
+     ;;
+   https|git)
+     echo "${proto}://"
+     ;;
+   *)
+     _printLog "Unknown protocol in _gitProtoSpec(): '$proto'. Aborting."
+     exit 1
+     ;;
+ esac
+}
+
 function _gitDownload(){
+  local component="$1"
+  local clone_arg
+
   if [ "$DOWNLOAD" != "y" ]; then
     return
   fi
-  repo=$1
+
+
   if [ -f "README" -o -f "README.txt" -o -f "README.rst" ]; then
-    echo "$repo exists already"
+    _printLog "$component: the repository already exists"
   else
-    git clone $repo .
+    proto_spec=$(_gitProtoSpec "${REPO_PROTO[$component]}" \
+                               "${REPO_USERNAME[$component]}" \
+                               "$component")
+    clone_arg="${proto_spec}${REPO_ADDRESS[$component]}"
+    _printLog "Fetching $component with 'git clone $clone_arg'"
+    git clone "$clone_arg" .
   fi
 }
 
@@ -219,6 +264,14 @@ function _usage() {
   echo "  -p y|n        y=download packages, n=don't                                          default=y"
   echo "  -c y|n        y=compile programs, n=don't                                           default=y"
   echo "  -d y|n        y=fetch programs from internet (cvs, svn, etc...), n=don't            default=y"
+  echo "      --git-clone-default-proto=PROTO                                                 default=https"
+  echo "                default protocol to use for 'git clone' (https, git or ssh)"
+  echo "      --git-clone-site-params=SITE=PROTOCOL[:USERNAME]"
+  echo "                use PROTOCOL as USERNAME when cloning a Git repository located"
+  echo "                at SITE (sample sites: 'sourceforge', 'github'; valid"
+  echo "                protocols: 'ssh', 'https', 'git'; USERNAME is required when"
+  echo "                using 'ssh'). You may pass this option several times with"
+  echo "                different sites."
   echo "  -j X          pass -jX to the Make program"
   echo "  -O X          pass -OX to the Make program"
   echo "  -r y|n        y=reconfigure programs before compiling them, n=don't reconfigure     default=y"
@@ -231,14 +284,34 @@ set -e
 
 LOGFILE=compilation_log.txt
 
-#AVAILABLE VALUES: CMAKE PLIB OPENRTI OSG SIMGEAR FGFS DATA FGRUN FGO FGX OPENRADAR ATCPIE TERRAGEAR TERRAGEARGUI
+# Available values for WHATTOBUILD and WHATTOBUILDALL:
+declare -a WHATTOBUILD_AVAIL=(
+  'CMAKE' 'PLIB' 'OPENRTI' 'OSG' 'SIMGEAR' 'FGFS' 'DATA' 'FGRUN' 'FGO' 'FGX'
+  'OPENRADAR' 'ATCPIE' 'TERRAGEAR' 'TERRAGEARGUI'
+)
 WHATTOBUILDALL=(SIMGEAR FGFS DATA)
+
 STABLE=
 APT_GET_UPDATE="y"
 DOWNLOAD_PACKAGES="y"
 COMPILE="y"
 RECONFIGURE="y"
 DOWNLOAD="y"
+
+# How to download Git repositories:
+#
+# - 'https' used to be fine, but is currently unreliable at SourceForge (esp.
+#   for FGData, see
+#   <https://forum.flightgear.org/viewtopic.php?f=20&t=33620&start=90&sid=afb8b688a02c01ea4ea9306c35487bd0>);
+# - 'git' is insecure (no way to guarantee you are downloading what you expect
+#   to be downloading);
+# - 'ssh' is secure, but requires an account at SourceForge (may be created at
+#   no cost, though).
+#
+# These are the default values but may be overridden via command-line options.
+REPO_DEFAULT_PROTO='https'
+REPO_DEFAULT_USERNAME=''
+
 JOPTION=""
 OOPTION=""
 BUILD_TYPE="RelWithDebInfo"
@@ -247,10 +320,50 @@ FG_CMAKEARGS=""
 
 declare -a UNMATCHED_OPTIONAL_PKG_ALTERNATIVES
 
+# Will hold the per-repository download settings.
+declare -A REPO_PROTO
+declare -A REPO_USERNAME
+
+# Allows one to set a default (username, protocol) combination for each hosting
+# site (SouceForge, GitHub, GitLab, etc.) when cloning a new repository.
+declare -A PROTO_AT_SITE
+declare -A USERNAME_AT_SITE
+
+# Most specific settings: per-repository (actually, one current assumes that
+# there is at most one repository per component such as SIMGEAR, FGFS, DATA,
+# etc.)
+declare -A REPO_ADDRESS
+declare -A REPO_SITE
+
+REPO_ADDRESS[CMAKE]="cmake.org/cmake.git"
+REPO_SITE[CMAKE]="cmake.org"
+REPO_ADDRESS[PLIB]="git.code.sf.net/p/libplib/code"
+REPO_SITE[PLIB]="SourceForge"
+REPO_ADDRESS[OPENRTI]="git.code.sf.net/p/openrti/OpenRTI"
+REPO_SITE[OPENRTI]="SourceForge"
+REPO_ADDRESS[OSG]="github.com/openscenegraph/osg.git"
+REPO_SITE[OSG]="GitHub"
+REPO_ADDRESS[SIMGEAR]="git.code.sf.net/p/flightgear/simgear"
+REPO_SITE[SIMGEAR]="SourceForge"
+REPO_ADDRESS[DATA]="git.code.sf.net/p/flightgear/fgdata"
+REPO_SITE[DATA]="SourceForge"
+REPO_ADDRESS[FGFS]="git.code.sf.net/p/flightgear/flightgear"
+REPO_SITE[FGFS]="SourceForge"
+REPO_ADDRESS[FGRUN]="git.code.sf.net/p/flightgear/fgrun"
+REPO_SITE[FGRUN]="SourceForge"
+REPO_ADDRESS[FGX]="github.com/fgx/fgx.git"
+REPO_SITE[FGX]="GitHub"
+REPO_ADDRESS[ATCPIE]="git.code.sf.net/p/atc-pie/code"
+REPO_SITE[ATCPIE]="SourceForge"
+REPO_ADDRESS[TERRAGEAR]="git.code.sf.net/p/flightgear/terragear"
+REPO_SITE[TERRAGEAR]="SourceForge"
+REPO_ADDRESS[TERRAGEARGUI]="git.code.sf.net/p/flightgear/fgscenery/terrageargui"
+REPO_SITE[TERRAGEARGUI]="SourceForge"
+
 # getopt is from the util-linux package (in Debian). Contrary to bash's getopts
 # built-in function, it allows one to define long options.
 TEMP=$(getopt -o '+shc:p:a:d:r:j:O:ib:' \
-  --longoptions help \
+  --longoptions git-clone-default-proto:,git-clone-site-params:,help \
   -n "$PROGNAME" -- "$@")
 
 case $? in
@@ -269,6 +382,55 @@ while true; do
     -c) COMPILE="$2"; shift 2 ;;
     -p) DOWNLOAD_PACKAGES="$2"; shift 2 ;;
     -d) DOWNLOAD="$2"; shift 2 ;;
+    --git-clone-default-proto)
+      proto="${2,,}"            # convert to lowercase
+
+      if ! _elementIn "$proto" ssh https git; then
+        echo "Invalid protocol passed to option" \
+             "--git-clone-default-proto: '$2'." >&2
+        echo "Allowed protocols are 'ssh', 'https' and 'git'." >&2
+        exit 1
+      fi
+
+      REPO_DEFAULT_PROTO="$proto"
+      unset -v proto
+      shift 2
+      ;;
+    --git-clone-site-params)
+      # Convert the argument to lowercase, then match it against the regexp
+      if [[ "${2,,}" =~ ^([[:alnum:]]+)=([[:alpha:]]+)(:([[:alnum:]]+))?$ ]]; then
+        site="${BASH_REMATCH[1]}"
+        proto="${BASH_REMATCH[2]}"
+        username="${BASH_REMATCH[4]}"
+        if ! _elementIn "$proto" ssh https git; then
+          echo "Invalid protocol passed to option --git-clone-site-params:" \
+               "'$proto'." >&2
+          echo "Allowed protocols are 'ssh', 'https' and 'git'." >&2
+          exit 1
+        fi
+
+        PROTO_AT_SITE[$site]="$proto"
+        if [[ -n "$username" ]]; then
+          USERNAME_AT_SITE[$site]="$username"
+        fi
+
+        if [[ "$proto" == "ssh" && -z "$username" ]]; then
+          echo "Invalid value passed to option --git-clone-site-params: '$2'" >&2
+          echo "The 'ssh' protocol requires a username (use" >&2
+          echo "--git-clone-site-params SITE=ssh:USERNAME)." >&2
+          exit 1
+        fi
+
+        unset -v site proto username
+      else
+        echo "Invalid value passed to option --git-clone-site-params: '$2'." >&2
+        echo "The correct syntax is" \
+             "--git-clone-site-params SITE=PROTOCOL[:USERNAME]" >&2
+        echo "(or --git-clone-site-params=SITE=PROTOCOL[:USERNAME])." >&2
+        exit 1
+      fi
+      shift 2
+      ;;
     -r) RECONFIGURE="$2"; shift 2 ;;
     -j) JOPTION=" -j$2"; shift 2 ;;
     -O) OOPTION=" -O$2"; shift 2 ;;
@@ -298,6 +460,26 @@ if [ "$OPENRTI" = "OPENRTI" ]; then
   FG_CMAKEARGS="$FG_CMAKEARGS -DENABLE_RTI=ON;"
   WHATTOBUILD+=( "OPENRTI" )
 fi
+
+# Set the default download settings for each repository
+for component in "${WHATTOBUILD_AVAIL[@]}"; do
+  REPO_PROTO[$component]="$REPO_DEFAULT_PROTO"
+  REPO_USERNAME[$component]="$REPO_DEFAULT_USERNAME"
+
+  site="${REPO_SITE[$component]}"
+  site="${site,,}"              # convert to lowercase
+
+  # Is there a specific protocol for this repo's hosting site?
+  if [[ -n "$site" && -n "${PROTO_AT_SITE[$site]}" ]]; then
+    REPO_PROTO[$component]="${PROTO_AT_SITE[$site]}"
+  fi
+
+  # Is there a specific username for this repo's hosting site?
+  if [[ -n "$site" && -n "${USERNAME_AT_SITE[$site]}" ]]; then
+    REPO_USERNAME[$component]="${USERNAME_AT_SITE[$site]}"
+  fi
+done
+unset -v site
 
 #######################################################
 #######################################################
@@ -441,7 +623,7 @@ if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="CMAKE"' ]]; then
 
   mkdir -p "cmake"
   cd "$CBD"/cmake
-  _gitDownload https://cmake.org/cmake.git
+  _gitDownload CMAKE
   _gitUpdate master
 
   if [ "$RECONFIGURE" = "y" ]; then
@@ -476,7 +658,7 @@ if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="PLIB"' ]]; then
 
   mkdir -p "plib"
   cd "$CBD"/plib
-  _gitDownload https://git.code.sf.net/p/libplib/code
+  _gitDownload PLIB
   _gitUpdate master
 
   if [ "$RECONFIGURE" = "y" ]; then
@@ -505,7 +687,7 @@ if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="OPENRTI"' ]]; then
 
   mkdir -p "openrti"
   cd "$CBD"/openrti
-  _gitDownload https://git.code.sf.net/p/openrti/OpenRTI
+  _gitDownload OPENRTI
 
   if [ "$STABLE" = "STABLE" ]; then
     _gitUpdate release-0.7
@@ -538,7 +720,7 @@ if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="OSG"' ]]; then
   echo "**************** OSG *******************" | tee -a $LOGFILE
   echo "****************************************" | tee -a $LOGFILE
   cd "$CBD"/openscenegraph
-  _gitDownload https://github.com/openscenegraph/osg.git
+  _gitDownload OSG
   _gitUpdate OpenSceneGraph-3.4
 
   if [ "$RECONFIGURE" = "y" ]; then
@@ -579,7 +761,7 @@ if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="SIMGEAR"' ]]; then
 
   mkdir -p "simgear"
   cd "$CBD"/simgear
-  _gitDownload https://git.code.sf.net/p/flightgear/simgear
+  _gitDownload SIMGEAR
   _gitUpdate $FGVERSION
 	
   if [ "$RECONFIGURE" = "y" ]; then
@@ -612,7 +794,7 @@ if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="FGFS"' || "$(declare -p WHAT
     echo "**************** DATA ******************" | tee -a $LOGFILE
     echo "****************************************" | tee -a $LOGFILE
 
-    _gitDownload https://git.code.sf.net/p/flightgear/fgdata
+    _gitDownload DATA
     _gitUpdate $FGVERSION
   fi
 
@@ -624,7 +806,7 @@ if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="FGFS"' || "$(declare -p WHAT
     echo "************** FLIGHTGEAR **************" | tee -a $LOGFILE
     echo "****************************************" | tee -a $LOGFILE
 
-    _gitDownload https://git.code.sf.net/p/flightgear/flightgear
+    _gitDownload FGFS
     _gitUpdate $FGVERSION
 
     if [ "$RECONFIGURE" = "y" ]; then
@@ -682,7 +864,7 @@ if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="FGRUN"' ]]; then
 
   mkdir -p "fgrun"
   cd "$CBD"/fgrun
-  _gitDownload https://git.code.sf.net/p/flightgear/fgrun
+  _gitDownload FGRUN
   _gitUpdate $FGVERSION
 
   if [ "$RECONFIGURE" = "y" ]; then
@@ -753,7 +935,7 @@ if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="FGX"' ]]; then
 
   mkdir -p "fgx"
   cd "$CBD"/fgx
-  _gitDownload https://github.com/fgx/fgx.git
+  _gitDownload FGX
   _gitUpdate master
 
   cd "$CBD"/fgx/src/
@@ -810,7 +992,7 @@ if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="ATCPIE"' ]]; then
 
   mkdir -p "$INSTALL_DIR_ATCPIE"
   cd $INSTALL_DIR_ATCPIE
-  _gitDownload https://git.code.sf.net/p/atc-pie/code
+  _gitDownload ATCPIE
   _gitUpdate master
 
   cd "$CBD"
@@ -863,7 +1045,7 @@ if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="TERRAGEAR"' ]]; then
 
   mkdir -p "terragear"
   cd "$CBD"/terragear
-  _gitDownload https://git.code.sf.net/p/flightgear/terragear
+  _gitDownload TERRAGEAR
   _gitUpdate scenery/ws2.0
 
   if [ "$RECONFIGURE" = "y" ]; then
@@ -914,7 +1096,7 @@ if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="TERRAGEARGUI"' ]]; then
 
   mkdir -p "terrageargui"
   cd "$CBD"/terrageargui
-  _gitDownload https://git.code.sf.net/p/flightgear/fgscenery/terrageargui
+  _gitDownload TERRAGEARGUI
   _gitUpdate master
 	
 
