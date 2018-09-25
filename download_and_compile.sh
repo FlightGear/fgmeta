@@ -243,6 +243,25 @@ function _find_package_alternative(){
   fi
 }
 
+function _printVersion(){
+  echo "$PROGNAME version $VERSION"
+  echo
+  echo "This script is part of the FlightGear project."
+  echo
+  echo "This program is free software: you can redistribute it and/or modify"
+  echo "it under the terms of the GNU General Public License as published by"
+  echo "the Free Software Foundation, either version 3 of the License, or"
+  echo "(at your option) any later version."
+  echo
+  echo "This program is distributed in the hope that it will be useful,"
+  echo "but WITHOUT ANY WARRANTY; without even the implied warranty of"
+  echo "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the"
+  echo "GNU General Public License for more details."
+  echo
+  echo "You should have received a copy of the GNU General Public License"
+  echo "along with this program.  If not, see <http://www.gnu.org/licenses/>."
+}
+
 function _usage() {
   echo "$PROGNAME [OPTION...] [--] [COMPONENT...]"
   echo "Download and compile components belonging to the FlightGear ecosystem."
@@ -256,6 +275,7 @@ function _usage() {
   echo
   echo "Available options:"
   echo "  -h, --help    show this help message and exit"
+  echo "      --version print version and license information, then exit"
   echo "  -e            compile FlightGear with --with-eventinput option (experimental)"
   echo "  -i            compile SimGear and FlightGear with -D ENABLE_RTI=ON option (experimental)"
   echo "  -b RELEASE_TYPE                                                                     default=RelWithDebInfo"
@@ -363,7 +383,7 @@ REPO_SITE[TERRAGEARGUI]="SourceForge"
 # getopt is from the util-linux package (in Debian). Contrary to bash's getopts
 # built-in function, it allows one to define long options.
 TEMP=$(getopt -o '+shc:p:a:d:r:j:O:ib:' \
-  --longoptions git-clone-default-proto:,git-clone-site-params:,help \
+  --longoptions git-clone-default-proto:,git-clone-site-params:,help,version \
   -n "$PROGNAME" -- "$@")
 
 case $? in
@@ -437,6 +457,7 @@ while true; do
     -i) OPENRTI="OPENRTI"; shift ;;
     -b) BUILD_TYPE="$2"; shift 2 ;;
     -h|--help) _usage; exit 0 ;;
+    --version) _printVersion; exit 0 ;;
     --) shift; break ;;
     *) echo "$PROGNAME: unexpected option '$1'; please report a bug." >&2
        exit 1 ;;
