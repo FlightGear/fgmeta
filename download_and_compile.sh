@@ -417,14 +417,15 @@ while true; do
       shift 2
       ;;
     --git-clone-site-params)
-      # Convert the argument to lowercase, then match it against the regexp
-      if [[ "${2,,}" =~ ^([[:alnum:]]+)=([[:alpha:]]+)(:([[:alnum:]]+))?$ ]]; then
-        site="${BASH_REMATCH[1]}"
-        proto="${BASH_REMATCH[2]}"
-        username="${BASH_REMATCH[4]}"
+      if [[ "$2" =~ ^([[:alnum:]]+)=([[:alpha:]]+)(:([[:alnum:]]+))?$ ]]; then
+        site="${BASH_REMATCH[1],,}"         # convert the site to lowercase
+        proto="${BASH_REMATCH[2],,}"        # ditto for the protocol
+        verbatim_proto="${BASH_REMATCH[2]}"
+        username="${BASH_REMATCH[4]}"       # but take the username verbatim
+
         if ! _elementIn "$proto" ssh https git; then
           echo "Invalid protocol passed to option --git-clone-site-params:" \
-               "'$proto'." >&2
+               "'$verbatim_proto'." >&2
           echo "Allowed protocols are 'ssh', 'https' and 'git'." >&2
           exit 1
         fi
@@ -441,7 +442,7 @@ while true; do
           exit 1
         fi
 
-        unset -v site proto username
+        unset -v site proto verbatim_proto username
       else
         echo "Invalid value passed to option --git-clone-site-params: '$2'." >&2
         echo "The correct syntax is" \
