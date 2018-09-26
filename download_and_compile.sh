@@ -638,7 +638,7 @@ fi
 CMAKE_INSTALL_DIR=cmake
 INSTALL_DIR_CMAKE=$INSTALL_DIR/$CMAKE_INSTALL_DIR
 cd "$CBD"
-if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="CMAKE"' ]]; then
+if _elementIn "CMAKE" "${WHATTOBUILD[@]}"; then
   echo "****************************************" | tee -a $LOGFILE
   echo "*************** CMAKE ******************" | tee -a $LOGFILE
   echo "****************************************" | tee -a $LOGFILE
@@ -673,7 +673,7 @@ fi
 PLIB_INSTALL_DIR=plib
 INSTALL_DIR_PLIB=$INSTALL_DIR/$PLIB_INSTALL_DIR
 cd "$CBD"
-if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="PLIB"' ]]; then
+if _elementIn "PLIB" "${WHATTOBUILD[@]}"; then
   echo "****************************************" | tee -a $LOGFILE
   echo "**************** PLIB ******************" | tee -a $LOGFILE
   echo "****************************************" | tee -a $LOGFILE
@@ -702,7 +702,7 @@ fi
 OPENRTI_INSTALL_DIR=openrti
 INSTALL_DIR_OPENRTI=$INSTALL_DIR/$OPENRTI_INSTALL_DIR
 cd "$CBD"
-if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="OPENRTI"' ]]; then
+if _elementIn "OPENRTI" "${WHATTOBUILD[@]}"; then
   echo "****************************************" | tee -a $LOGFILE
   echo "**************** OPENRTI ***************" | tee -a $LOGFILE
   echo "****************************************" | tee -a $LOGFILE
@@ -737,7 +737,7 @@ OSG_INSTALL_DIR=openscenegraph
 INSTALL_DIR_OSG=$INSTALL_DIR/$OSG_INSTALL_DIR
 cd "$CBD"
 mkdir -p "openscenegraph"
-if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="OSG"' ]]; then
+if _elementIn "OSG" "${WHATTOBUILD[@]}"; then
   echo "****************************************" | tee -a $LOGFILE
   echo "**************** OSG *******************" | tee -a $LOGFILE
   echo "****************************************" | tee -a $LOGFILE
@@ -776,7 +776,7 @@ fi
 SIMGEAR_INSTALL_DIR=simgear
 INSTALL_DIR_SIMGEAR=$INSTALL_DIR/$SIMGEAR_INSTALL_DIR
 cd "$CBD"
-if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="SIMGEAR"' ]]; then
+if _elementIn "SIMGEAR" "${WHATTOBUILD[@]}"; then
   echo "****************************************" | tee -a $LOGFILE
   echo "**************** SIMGEAR ***************" | tee -a $LOGFILE
   echo "****************************************" | tee -a $LOGFILE
@@ -807,11 +807,12 @@ fi
 FGFS_INSTALL_DIR=flightgear
 INSTALL_DIR_FGFS=$INSTALL_DIR/$FGFS_INSTALL_DIR
 cd "$CBD"
-if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="FGFS"' || "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="DATA"' ]]; then
+if _elementIn "FGFS" "${WHATTOBUILD[@]}" || \
+   _elementIn "DATA" "${WHATTOBUILD[@]}"; then
   mkdir -p "$INSTALL_DIR_FGFS"/fgdata
   cd "$INSTALL_DIR_FGFS"/fgdata
 
-  if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="DATA"' ]]; then
+  if _elementIn "DATA" "${WHATTOBUILD[@]}"; then
     echo "****************************************" | tee -a $LOGFILE
     echo "**************** DATA ******************" | tee -a $LOGFILE
     echo "****************************************" | tee -a $LOGFILE
@@ -823,7 +824,7 @@ if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="FGFS"' || "$(declare -p WHAT
   mkdir -p "$CBD"/flightgear
   cd "$CBD"/flightgear
 
-  if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="FGFS"' ]]; then
+  if _elementIn "FGFS" "${WHATTOBUILD[@]}"; then
     echo "****************************************" | tee -a $LOGFILE
     echo "************** FLIGHTGEAR **************" | tee -a $LOGFILE
     echo "****************************************" | tee -a $LOGFILE
@@ -879,7 +880,7 @@ fi
 FGRUN_INSTALL_DIR=fgrun
 INSTALL_DIR_FGRUN=$INSTALL_DIR/$FGRUN_INSTALL_DIR
 cd "$CBD"
-if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="FGRUN"' ]]; then
+if _elementIn "FGRUN" "${WHATTOBUILD[@]}"; then
   echo "****************************************" | tee -a $LOGFILE
   echo "**************** FGRUN *****************" | tee -a $LOGFILE
   echo "****************************************" | tee -a $LOGFILE
@@ -919,7 +920,7 @@ fi
 FGO_INSTALL_DIR=fgo
 INSTALL_DIR_FGO=$INSTALL_DIR/$FGO_INSTALL_DIR
 cd "$CBD"
-if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="FGO"' ]]; then
+if _elementIn "FGO" "${WHATTOBUILD[@]}"; then
   echo "****************************************" | tee -a $LOGFILE
   echo "***************** FGO ******************" | tee -a $LOGFILE
   echo "****************************************" | tee -a $LOGFILE
@@ -950,7 +951,7 @@ fi
 FGX_INSTALL_DIR=fgx
 INSTALL_DIR_FGX=$INSTALL_DIR/$FGX_INSTALL_DIR
 cd "$CBD"
-if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="FGX"' ]]; then
+if _elementIn "FGX" "${WHATTOBUILD[@]}"; then
   echo "****************************************" | tee -a $LOGFILE
   echo "***************** FGX ******************" | tee -a $LOGFILE
   echo "****************************************" | tee -a $LOGFILE
@@ -1007,7 +1008,7 @@ fi
 ATCPIE_INSTALL_DIR=atc-pie
 INSTALL_DIR_ATCPIE=$INSTALL_DIR/$ATCPIE_INSTALL_DIR
 cd "$CBD"
-if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="ATCPIE"' ]]; then
+if _elementIn "ATCPIE" "${WHATTOBUILD[@]}"; then
   echo "****************************************" | tee -a $LOGFILE
   echo "**************** ATCPIE ***************" | tee -a $LOGFILE
   echo "****************************************" | tee -a $LOGFILE
@@ -1033,7 +1034,7 @@ fi
 OR_INSTALL_DIR=openradar
 INSTALL_DIR_OR=$INSTALL_DIR/$OR_INSTALL_DIR
 cd "$CBD"
-if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="OPENRADAR"' ]]; then
+if _elementIn "OPENRADAR" "${WHATTOBUILD[@]}"; then
   echo "****************************************" | tee -a $LOGFILE
   echo "************** OPENRADAR ***************" | tee -a $LOGFILE
   echo "****************************************" | tee -a $LOGFILE
@@ -1060,7 +1061,7 @@ fi
 TG_INSTALL_DIR=terragear
 INSTALL_DIR_TG=$INSTALL_DIR/$TG_INSTALL_DIR
 cd "$CBD"
-if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="TERRAGEAR"' ]]; then
+if _elementIn "TERRAGEAR" "${WHATTOBUILD[@]}"; then
   echo "****************************************" | tee -a $LOGFILE
   echo "*************** TERRAGEAR **************" | tee -a $LOGFILE
   echo "****************************************" | tee -a $LOGFILE
@@ -1111,7 +1112,7 @@ _logSep
 TGGUI_INSTALL_DIR=terrageargui
 INSTALL_DIR_TGGUI=$INSTALL_DIR/$TGGUI_INSTALL_DIR
 cd "$CBD"
-if [[ "$(declare -p WHATTOBUILD)" =~ '['([0-9]+)']="TERRAGEARGUI"' ]]; then
+if _elementIn "TERRAGEARGUI" "${WHATTOBUILD[@]}"; then
   echo "****************************************" | tee -a $LOGFILE
   echo "************* TERRAGEAR GUI ************" | tee -a $LOGFILE
   echo "****************************************" | tee -a $LOGFILE
