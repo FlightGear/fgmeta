@@ -32,11 +32,11 @@ FGVERSION="release/$(git ls-remote --heads https://git.code.sf.net/p/flightgear/
 #######################################################
 # THANKS TO
 #######################################################
-# Special thanks to Alessandro Garosi for FGComGui and 
+# Special thanks to Alessandro Garosi for FGComGui and
 # other patches
 # Thanks to "Pat Callahan" for patches for fgrun compilation
 # Thanks to "F-JJTH" for bug fixes and suggestions
-# Thanks again to "F-JJTH" for OpenRTI and FGX 
+# Thanks again to "F-JJTH" for OpenRTI and FGX
 # Thanks to André, (taureau89_9) for debian stable packages fixes
 
 #############################################################"
@@ -419,8 +419,8 @@ while true; do
     --git-clone-site-params)
       if [[ "$2" =~ ^([[:alnum:]]+)=([[:alpha:]]+)(:([[:alnum:]]+))?$ ]]; then
         site="${BASH_REMATCH[1],,}"         # convert the site to lowercase
-        proto="${BASH_REMATCH[2],,}"        # ditto for the protocol
         verbatim_proto="${BASH_REMATCH[2]}"
+        proto="${verbatim_proto,,}"         # ditto for the protocol
         username="${BASH_REMATCH[4]}"       # but take the username verbatim
 
         if ! _elementIn "$proto" ssh https git; then
@@ -726,7 +726,7 @@ if _elementIn "OPENRTI" "${WHATTOBUILD[@]}"; then
           -DCMAKE_INSTALL_PREFIX:PATH="$INSTALL_DIR_OPENRTI" \
           ../../openrti 2>&1 | tee -a $LOGFILE
   fi
-	
+
   _make openrti
 fi
 
@@ -758,7 +758,7 @@ if _elementIn "OSG" "${WHATTOBUILD[@]}"; then
     "$CMAKE" -DCMAKE_BUILD_TYPE="$OSG_BUILD_TYPE" \
          -DCMAKE_INSTALL_PREFIX:PATH="$INSTALL_DIR_OSG" ../../openscenegraph/ 2>&1 | tee -a $LOGFILE
   fi
-  
+
   _make openscenegraph
   #FIX FOR 64 BIT COMPILATION
   if [ -d "$INSTALL_DIR_OSG/lib64" ]; then
@@ -785,7 +785,7 @@ if _elementIn "SIMGEAR" "${WHATTOBUILD[@]}"; then
   cd "$CBD"/simgear
   _gitDownload SIMGEAR
   _gitUpdate $FGVERSION
-	
+
   if [ "$RECONFIGURE" = "y" ]; then
     cd "$CBD"
     mkdir -p build/simgear
@@ -797,7 +797,7 @@ if _elementIn "SIMGEAR" "${WHATTOBUILD[@]}"; then
 	  $SG_CMAKEARGS \
           ../../simgear 2>&1 | tee -a $LOGFILE
   fi
-	
+
   _make simgear
 fi
 
@@ -900,7 +900,7 @@ if _elementIn "FGRUN" "${WHATTOBUILD[@]}"; then
           -DCMAKE_PREFIX_PATH="$INSTALL_DIR_SIMGEAR" \
           ../../fgrun/ 2>&1 | tee -a $LOGFILE
   fi
-	
+
   _make fgrun
 
   cd "$CBD"
@@ -1121,7 +1121,7 @@ if _elementIn "TERRAGEARGUI" "${WHATTOBUILD[@]}"; then
   cd "$CBD"/terrageargui
   _gitDownload TERRAGEARGUI
   _gitUpdate master
-	
+
 
   if [ "$RECONFIGURE" = "y" ]; then
     cd "$CBD"
@@ -1171,8 +1171,5 @@ else
         | tee -a "$LOGFILE"
 fi
 
-echo ""
+echo
 echo "download_and_compile.sh has finished to work"
-
-cd "$CBD"
-
