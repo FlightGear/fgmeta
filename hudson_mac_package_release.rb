@@ -5,7 +5,7 @@ require 'fileutils' #I know, no underscore is not ruby-like
 include FileUtils
 
 $osgLibs = ['osgFX', 'osgParticle', 'osg', 'osgGA', 'osgText', 'osgUtil', 'osgSim', 'osgViewer', 'osgDB']
-$osgPlugins = ['ac', 'osg', 'freetype', 'imageio', 'rgb', 'txf', 'mdl', '3ds']
+$osgPlugins = ['ac', 'osg', 'freetype', 'imageio', 'rgb', 'txf', 'mdl', '3ds', 'dds']
 
 # from http://drawingablank.me/blog/ruby-boolean-typecasting.html
 class String
