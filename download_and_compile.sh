@@ -321,7 +321,8 @@ function _usage() {
 # set script to stop if an error occours
 set -e
 
-LOGFILE=compilation_log.txt
+CBD="$PWD"
+LOGFILE="$CBD/compilation_log.txt"
 
 # Available values for WHATTOBUILD and WHATTOBUILDALL:
 declare -a WHATTOBUILD_AVAIL=(
@@ -550,6 +551,7 @@ _log "DOWNLOAD=$DOWNLOAD"
 _log "JOPTION=$JOPTION"
 _log "OOPTION=$OOPTION"
 _log "BUILD_TYPE=$BUILD_TYPE"
+_log "DIRECTORY=$CBD"
 _logSep
 
 #######################################################
@@ -618,22 +620,18 @@ fi
 #######################################################
 #######################################################
 
-CBD=$(pwd)
-LOGFILE="$CBD/$LOGFILE"
-_log "DIRECTORY=$CBD"
-_logSep
-mkdir -p install
 SUB_INSTALL_DIR=install
 INSTALL_DIR="$CBD/$SUB_INSTALL_DIR"
 cd "$CBD"
-mkdir -p build
+mkdir -p build install
 
 #######################################################
 # BACKWARD COMPATIBILITY WITH 1.9.14a
 #######################################################
 
 if [ -d "$CBD"/fgfs/flightgear ]; then
-  echo "Move to the new folder structure"
+  _logSep
+  _printLog "Move to the new folder structure"
   rm -rf OpenSceneGraph
   rm -rf plib
   rm -rf build
@@ -650,6 +648,8 @@ if [ -d "$CBD"/fgfs/flightgear ]; then
   mkdir -p install/flightgear && mv install/fgfs/fgdata install/flightgear/fgdata
   echo "Done"
 fi
+
+_printLog
 
 #######################################################
 # cmake
