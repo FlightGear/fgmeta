@@ -91,6 +91,7 @@ PLURAL_FORMS = {
     "nl": ["singular", "plural"],
     "pl": ["singular", "paucal", "plural"],
     "pt": ["singular", "plural"],
+    "ru": ["singular", "plural"],
     "zh": ["universal"]         # universal form
 }
 
