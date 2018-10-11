@@ -169,20 +169,19 @@ function _mandatory_pkg_alternative(){
   local pkg
 
   if [[ $# -lt 1 ]]; then
-    echo "Empty package alternative: this is a bug in the script, aborting." \
-      | tee -a "$LOGFILE"
+    _printLog \
+      "Empty package alternative: this is a bug in the script, aborting."
     exit 1
   fi
 
-  echo "Considering a package alternative:" "$@" | tee -a "$LOGFILE"
+  _printLog "Considering a package alternative: $*"
   pkg=$(_find_package_alternative "$@")
 
   if [[ -n "$pkg" ]]; then
-    echo "Package alternative matched for $pkg" | tee -a "$LOGFILE"
+    _printLog "Package alternative matched for $pkg"
     PKG="$PKG $pkg"
   else
-    echo "No match found for the package alternative, aborting." \
-      | tee -a "$LOGFILE"
+    _printLog "No match found for the package alternative, aborting."
     exit 1
   fi
 
@@ -198,20 +197,20 @@ function _optional_pkg_alternative(){
   local pkg
 
   if [[ $# -lt 1 ]]; then
-    echo "Empty optional package alternative: this is a bug in the script," \
-         "aborting." | tee -a "$LOGFILE"
+    _printLog "Empty optional package alternative: this is a bug in the" \
+              "script, aborting."
     exit 1
   fi
 
-  echo "Considering an optional package alternative:" "$@" | tee -a "$LOGFILE"
+  _printLog "Considering an optional package alternative: $*"
   pkg=$(_find_package_alternative "$@")
 
   if [[ -n "$pkg" ]]; then
-    echo "Optional package alternative matched for $pkg" | tee -a "$LOGFILE"
+    _printLog "Optional package alternative matched for $pkg"
     PKG="$PKG $pkg"
   else
-    echo "No match found for the optional package alternative, continuing" \
-         "anyway." | tee -a "$LOGFILE"
+    _printLog "No match found for the optional package alternative," \
+              "continuing anyway."
     # "$*" so that we only add one element to the array in this line
     UNMATCHED_OPTIONAL_PKG_ALTERNATIVES+=("$*")
   fi
@@ -639,9 +638,9 @@ CMAKE_INSTALL_DIR=cmake
 INSTALL_DIR_CMAKE=$INSTALL_DIR/$CMAKE_INSTALL_DIR
 cd "$CBD"
 if _elementIn "CMAKE" "${WHATTOBUILD[@]}"; then
-  echo "****************************************" | tee -a $LOGFILE
-  echo "*************** CMAKE ******************" | tee -a $LOGFILE
-  echo "****************************************" | tee -a $LOGFILE
+  _printLog "****************************************"
+  _printLog "*************** CMAKE ******************"
+  _printLog "****************************************"
 
   mkdir -p "cmake"
   cd "$CBD"/cmake
@@ -651,7 +650,7 @@ if _elementIn "CMAKE" "${WHATTOBUILD[@]}"; then
   if [ "$RECONFIGURE" = "y" ]; then
     cd "$CBD"
     mkdir -p build/cmake
-    echo "CONFIGURING cmake" >> $LOGFILE
+    _printLog "CONFIGURING CMake"
     cd "$CBD"/build/cmake
     ../../cmake/configure --prefix="$INSTALL_DIR_CMAKE" \
            2>&1 | tee -a $LOGFILE
@@ -674,9 +673,9 @@ PLIB_INSTALL_DIR=plib
 INSTALL_DIR_PLIB=$INSTALL_DIR/$PLIB_INSTALL_DIR
 cd "$CBD"
 if _elementIn "PLIB" "${WHATTOBUILD[@]}"; then
-  echo "****************************************" | tee -a $LOGFILE
-  echo "**************** PLIB ******************" | tee -a $LOGFILE
-  echo "****************************************" | tee -a $LOGFILE
+  _printLog "****************************************"
+  _printLog "**************** PLIB ******************"
+  _printLog "****************************************"
 
   mkdir -p "plib"
   cd "$CBD"/plib
@@ -703,9 +702,9 @@ OPENRTI_INSTALL_DIR=openrti
 INSTALL_DIR_OPENRTI=$INSTALL_DIR/$OPENRTI_INSTALL_DIR
 cd "$CBD"
 if _elementIn "OPENRTI" "${WHATTOBUILD[@]}"; then
-  echo "****************************************" | tee -a $LOGFILE
-  echo "**************** OPENRTI ***************" | tee -a $LOGFILE
-  echo "****************************************" | tee -a $LOGFILE
+  _printLog "****************************************"
+  _printLog "**************** OPENRTI ***************"
+  _printLog "****************************************"
 
   mkdir -p "openrti"
   cd "$CBD"/openrti
@@ -738,9 +737,10 @@ INSTALL_DIR_OSG=$INSTALL_DIR/$OSG_INSTALL_DIR
 cd "$CBD"
 mkdir -p "openscenegraph"
 if _elementIn "OSG" "${WHATTOBUILD[@]}"; then
-  echo "****************************************" | tee -a $LOGFILE
-  echo "**************** OSG *******************" | tee -a $LOGFILE
-  echo "****************************************" | tee -a $LOGFILE
+  _printLog "****************************************"
+  _printLog "**************** OSG *******************"
+  _printLog "****************************************"
+
   cd "$CBD"/openscenegraph
   _gitDownload OSG
   _gitUpdate OpenSceneGraph-3.4
@@ -777,9 +777,9 @@ SIMGEAR_INSTALL_DIR=simgear
 INSTALL_DIR_SIMGEAR=$INSTALL_DIR/$SIMGEAR_INSTALL_DIR
 cd "$CBD"
 if _elementIn "SIMGEAR" "${WHATTOBUILD[@]}"; then
-  echo "****************************************" | tee -a $LOGFILE
-  echo "**************** SIMGEAR ***************" | tee -a $LOGFILE
-  echo "****************************************" | tee -a $LOGFILE
+  _printLog "****************************************"
+  _printLog "**************** SIMGEAR ***************"
+  _printLog "****************************************"
 
   mkdir -p "simgear"
   cd "$CBD"/simgear
@@ -813,9 +813,9 @@ if _elementIn "FGFS" "${WHATTOBUILD[@]}" || \
   cd "$INSTALL_DIR_FGFS"/fgdata
 
   if _elementIn "DATA" "${WHATTOBUILD[@]}"; then
-    echo "****************************************" | tee -a $LOGFILE
-    echo "**************** DATA ******************" | tee -a $LOGFILE
-    echo "****************************************" | tee -a $LOGFILE
+    _printLog "****************************************"
+    _printLog "**************** DATA ******************"
+    _printLog "****************************************"
 
     _gitDownload DATA
     _gitUpdate $FGVERSION
@@ -825,9 +825,9 @@ if _elementIn "FGFS" "${WHATTOBUILD[@]}" || \
   cd "$CBD"/flightgear
 
   if _elementIn "FGFS" "${WHATTOBUILD[@]}"; then
-    echo "****************************************" | tee -a $LOGFILE
-    echo "************** FLIGHTGEAR **************" | tee -a $LOGFILE
-    echo "****************************************" | tee -a $LOGFILE
+    _printLog "****************************************"
+    _printLog "************** FLIGHTGEAR **************"
+    _printLog "****************************************"
 
     _gitDownload FGFS
     _gitUpdate $FGVERSION
@@ -881,9 +881,9 @@ FGRUN_INSTALL_DIR=fgrun
 INSTALL_DIR_FGRUN=$INSTALL_DIR/$FGRUN_INSTALL_DIR
 cd "$CBD"
 if _elementIn "FGRUN" "${WHATTOBUILD[@]}"; then
-  echo "****************************************" | tee -a $LOGFILE
-  echo "**************** FGRUN *****************" | tee -a $LOGFILE
-  echo "****************************************" | tee -a $LOGFILE
+  _printLog "****************************************"
+  _printLog "**************** FGRUN *****************"
+  _printLog "****************************************"
 
   mkdir -p "fgrun"
   cd "$CBD"/fgrun
@@ -921,9 +921,9 @@ FGO_INSTALL_DIR=fgo
 INSTALL_DIR_FGO=$INSTALL_DIR/$FGO_INSTALL_DIR
 cd "$CBD"
 if _elementIn "FGO" "${WHATTOBUILD[@]}"; then
-  echo "****************************************" | tee -a $LOGFILE
-  echo "***************** FGO ******************" | tee -a $LOGFILE
-  echo "****************************************" | tee -a $LOGFILE
+  _printLog "****************************************"
+  _printLog "***************** FGO ******************"
+  _printLog "****************************************"
 
   if [ "$DOWNLOAD" = "y" ]; then
     rm -rf fgo*.tar.gz
@@ -952,9 +952,9 @@ FGX_INSTALL_DIR=fgx
 INSTALL_DIR_FGX=$INSTALL_DIR/$FGX_INSTALL_DIR
 cd "$CBD"
 if _elementIn "FGX" "${WHATTOBUILD[@]}"; then
-  echo "****************************************" | tee -a $LOGFILE
-  echo "***************** FGX ******************" | tee -a $LOGFILE
-  echo "****************************************" | tee -a $LOGFILE
+  _printLog "****************************************"
+  _printLog "***************** FGX ******************"
+  _printLog "****************************************"
 
   mkdir -p "fgx"
   cd "$CBD"/fgx
@@ -1009,9 +1009,9 @@ ATCPIE_INSTALL_DIR=atc-pie
 INSTALL_DIR_ATCPIE=$INSTALL_DIR/$ATCPIE_INSTALL_DIR
 cd "$CBD"
 if _elementIn "ATCPIE" "${WHATTOBUILD[@]}"; then
-  echo "****************************************" | tee -a $LOGFILE
-  echo "**************** ATCPIE ***************" | tee -a $LOGFILE
-  echo "****************************************" | tee -a $LOGFILE
+  _printLog "****************************************"
+  _printLog "**************** ATCPIE ***************"
+  _printLog "****************************************"
 
   mkdir -p "$INSTALL_DIR_ATCPIE"
   cd $INSTALL_DIR_ATCPIE
@@ -1035,9 +1035,9 @@ OR_INSTALL_DIR=openradar
 INSTALL_DIR_OR=$INSTALL_DIR/$OR_INSTALL_DIR
 cd "$CBD"
 if _elementIn "OPENRADAR" "${WHATTOBUILD[@]}"; then
-  echo "****************************************" | tee -a $LOGFILE
-  echo "************** OPENRADAR ***************" | tee -a $LOGFILE
-  echo "****************************************" | tee -a $LOGFILE
+  _printLog "****************************************"
+  _printLog "************** OPENRADAR ***************"
+  _printLog "****************************************"
 
   if [ "$DOWNLOAD" = "y" ]; then
     wget http://wagnerw.de/OpenRadar.zip -O OpenRadar.zip
@@ -1062,9 +1062,9 @@ TG_INSTALL_DIR=terragear
 INSTALL_DIR_TG=$INSTALL_DIR/$TG_INSTALL_DIR
 cd "$CBD"
 if _elementIn "TERRAGEAR" "${WHATTOBUILD[@]}"; then
-  echo "****************************************" | tee -a $LOGFILE
-  echo "*************** TERRAGEAR **************" | tee -a $LOGFILE
-  echo "****************************************" | tee -a $LOGFILE
+  _printLog "****************************************"
+  _printLog "*************** TERRAGEAR **************"
+  _printLog "****************************************"
 
   mkdir -p "terragear"
   cd "$CBD"/terragear
@@ -1113,9 +1113,9 @@ TGGUI_INSTALL_DIR=terrageargui
 INSTALL_DIR_TGGUI=$INSTALL_DIR/$TGGUI_INSTALL_DIR
 cd "$CBD"
 if _elementIn "TERRAGEARGUI" "${WHATTOBUILD[@]}"; then
-  echo "****************************************" | tee -a $LOGFILE
-  echo "************* TERRAGEAR GUI ************" | tee -a $LOGFILE
-  echo "****************************************" | tee -a $LOGFILE
+  _printLog "****************************************"
+  _printLog "************* TERRAGEAR GUI ************"
+  _printLog "****************************************"
 
   mkdir -p "terrageargui"
   cd "$CBD"/terrageargui
@@ -1156,20 +1156,21 @@ fi
 # Print optional package alternatives that didn't match (this helps with
 # troubleshooting)
 if [[ ${#UNMATCHED_OPTIONAL_PKG_ALTERNATIVES[@]} -gt 0 ]]; then
-    echo | tee -a "$LOGFILE"
-    printf "The following optional package alternative(s) didn't match:\n\n" \
-        | tee -a "$LOGFILE"
+  _printLog
+  _printLog "The following optional package alternative(s) didn't match:"
+  _printLog
 
-    for alt in "${UNMATCHED_OPTIONAL_PKG_ALTERNATIVES[@]}"; do
-        printf "  %s\n" "$alt" | tee -a "$LOGFILE"
-    done
+  for alt in "${UNMATCHED_OPTIONAL_PKG_ALTERNATIVES[@]}"; do
+    _printLog "  $alt"
+  done
 
-    printf "\nThis could explain missing optional features in FlightGear or \
-other software\ninstalled by $PROGNAME.\n" | tee -a "$LOGFILE"
+  _printLog
+  _printLog "This could explain missing optional features in FlightGear" \
+            "or other software"
+  _printLog "installed by $PROGNAME."
 else
-    printf "All optional package alternatives have found a matching package.\n" \
-        | tee -a "$LOGFILE"
+  _printLog "All optional package alternatives have found a matching package."
 fi
 
-echo
-echo "download_and_compile.sh has finished to work"
+_printLog
+_printLog "$PROGNAME has finished to work."
