@@ -61,11 +61,15 @@ function _log(){
   echo "$@" >> "$LOGFILE"
 }
 
+function _logSep(){
+  _log "***********************************"
+}
+
 function _printLog(){
- # Possible special case for the terminal: echo "${PROGNAME}: $@"
- # That would be more precise but rather verbose, and not all output uses
- # _printLog() for now, so it would look too inconsistent.
- echo "$@" | tee -a "$LOGFILE"
+  # Possible special case for the terminal: echo "${PROGNAME}: $@"
+  # That would be more precise but rather verbose, and not all output uses
+  # _printLog() for now, so it would look too inconsistent.
+  echo "$@" | tee -a "$LOGFILE"
 }
 
 # Echo the contents of stdin to the terminal and/or to $LOGFILE.
@@ -82,10 +86,6 @@ function _logOutput(){
                 "of _logOutput(): '$1'"
       exit 1 ;;
   esac
-}
-
-function _logSep(){
-  echo "***********************************" >> $LOGFILE
 }
 
 function _aptUpdate(){
@@ -540,7 +540,7 @@ echo "**************************************"
 #######################################################
 #######################################################
 
-echo $0 $* > $LOGFILE
+echo "$0 $*" > "$LOGFILE"
 _log "VERSION=$VERSION"
 _log "APT_GET_UPDATE=$APT_GET_UPDATE"
 _log "DOWNLOAD_PACKAGES=$DOWNLOAD_PACKAGES"
@@ -619,12 +619,12 @@ fi
 #######################################################
 
 CBD=$(pwd)
-LOGFILE=$CBD/$LOGFILE
+LOGFILE="$CBD/$LOGFILE"
 _log "DIRECTORY=$CBD"
 _logSep
 mkdir -p install
 SUB_INSTALL_DIR=install
-INSTALL_DIR=$CBD/$SUB_INSTALL_DIR
+INSTALL_DIR="$CBD/$SUB_INSTALL_DIR"
 cd "$CBD"
 mkdir -p build
 
