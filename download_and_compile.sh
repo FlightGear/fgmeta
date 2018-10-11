@@ -64,6 +64,22 @@ function _printLog(){
  echo "$@" | tee -a "$LOGFILE"
 }
 
+# Echo the contents of stdin to the terminal and/or to $LOGFILE.
+function _logOutput(){
+  case "$1" in
+    term)
+      cat ;;
+    file)
+      cat >> "$LOGFILE" ;;
+    ""|term+file)
+      tee -a "$LOGFILE" ;;
+    *)
+      _printLog "Bug in ${PROGNAME}: unexpected value for the first parameter" \
+                "of _logOutput(): '$1'"
+      exit 1 ;;
+  esac
+}
+
 function _logSep(){
   echo "***********************************" >> $LOGFILE
 }
@@ -153,9 +169,9 @@ function _make(){
     pkg=$1
     cd "$CBD"/build/$pkg
     echo "MAKE $pkg" >> $LOGFILE
-    make $JOPTION $OOPTION 2>&1 | tee -a $LOGFILE
+    make $JOPTION $OOPTION 2>&1 | _logOutput
     echo "INSTALL $pkg" >> $LOGFILE
-    make install 2>&1 | tee -a $LOGFILE
+    make install 2>&1 | _logOutput
   fi
 }
 
@@ -653,7 +669,7 @@ if _elementIn "CMAKE" "${WHATTOBUILD[@]}"; then
     _printLog "CONFIGURING CMake"
     cd "$CBD"/build/cmake
     ../../cmake/configure --prefix="$INSTALL_DIR_CMAKE" \
-           2>&1 | tee -a $LOGFILE
+           2>&1 | _logOutput
   fi
 
   _make cmake
@@ -689,7 +705,7 @@ if _elementIn "PLIB" "${WHATTOBUILD[@]}"; then
     cd "$CBD"/build/plib
     "$CMAKE" -DCMAKE_BUILD_TYPE="$BUILD_TYPE" \
           -DCMAKE_INSTALL_PREFIX:PATH="$INSTALL_DIR_PLIB" \
-          ../../plib 2>&1 | tee -a $LOGFILE
+          ../../plib 2>&1 | _logOutput
   fi
 
   _make plib
@@ -723,7 +739,7 @@ if _elementIn "OPENRTI" "${WHATTOBUILD[@]}"; then
     rm -f CMakeCache.txt
     "$CMAKE" -DCMAKE_BUILD_TYPE="$BUILD_TYPE" \
           -DCMAKE_INSTALL_PREFIX:PATH="$INSTALL_DIR_OPENRTI" \
-          ../../openrti 2>&1 | tee -a $LOGFILE
+          ../../openrti 2>&1 | _logOutput
   fi
 
   _make openrti
@@ -756,7 +772,8 @@ if _elementIn "OSG" "${WHATTOBUILD[@]}"; then
       OSG_BUILD_TYPE=Release
     fi
     "$CMAKE" -DCMAKE_BUILD_TYPE="$OSG_BUILD_TYPE" \
-         -DCMAKE_INSTALL_PREFIX:PATH="$INSTALL_DIR_OSG" ../../openscenegraph/ 2>&1 | tee -a $LOGFILE
+         -DCMAKE_INSTALL_PREFIX:PATH="$INSTALL_DIR_OSG" ../../openscenegraph \
+         2>&1 | _logOutput
   fi
 
   _make openscenegraph
@@ -795,7 +812,7 @@ if _elementIn "SIMGEAR" "${WHATTOBUILD[@]}"; then
           -DCMAKE_INSTALL_PREFIX:PATH="$INSTALL_DIR_SIMGEAR" \
           -DCMAKE_PREFIX_PATH="$INSTALL_DIR_OSG;$INSTALL_DIR_OPENRTI" \
 	  $SG_CMAKEARGS \
-          ../../simgear 2>&1 | tee -a $LOGFILE
+          ../../simgear 2>&1 | _logOutput
   fi
 
   _make simgear
@@ -843,7 +860,7 @@ if _elementIn "FGFS" "${WHATTOBUILD[@]}" || \
             -DCMAKE_PREFIX_PATH="$INSTALL_DIR_SIMGEAR;$INSTALL_DIR_OSG;$INSTALL_DIR_OPENRTI;$INSTALL_DIR_PLIB" \
             -DFG_DATA_DIR="$INSTALL_DIR_FGFS/fgdata" \
             $FG_CMAKEARGS \
-            ../../flightgear 2>&1 | tee -a $LOGFILE
+            ../../flightgear 2>&1 | _logOutput
     fi
 
     _make flightgear
@@ -898,7 +915,7 @@ if _elementIn "FGRUN" "${WHATTOBUILD[@]}"; then
     "$CMAKE" -DCMAKE_BUILD_TYPE="$BUILD_TYPE" \
           -DCMAKE_INSTALL_PREFIX:PATH="$INSTALL_DIR_FGRUN" \
           -DCMAKE_PREFIX_PATH="$INSTALL_DIR_SIMGEAR" \
-          ../../fgrun/ 2>&1 | tee -a $LOGFILE
+          ../../fgrun/ 2>&1 | _logOutput
   fi
 
   _make fgrun
@@ -986,7 +1003,7 @@ if _elementIn "FGX" "${WHATTOBUILD[@]}"; then
     cd $INSTALL_DIR_FGX
     echo "MAKE AND INSTALL FGX" >> $LOGFILE
     echo "make $JOPTION $OOPTION " >> $LOGFILE
-    make $JOPTION $OOPTION | tee -a $LOGFILE
+    make $JOPTION $OOPTION 2>&1 | _logOutput
     cd ..
   fi
 
@@ -1079,7 +1096,7 @@ if _elementIn "TERRAGEAR" "${WHATTOBUILD[@]}"; then
     "$CMAKE" -DCMAKE_BUILD_TYPE="Debug" \
           -DCMAKE_INSTALL_PREFIX:PATH="$INSTALL_DIR_TG" \
           -DCMAKE_PREFIX_PATH="$INSTALL_DIR_SIMGEAR;$INSTALL_DIR_CGAL" \
-          ../../terragear/ 2>&1 | tee -a $LOGFILE
+          ../../terragear/ 2>&1 | _logOutput
   fi
 
   _make terragear
@@ -1130,7 +1147,7 @@ if _elementIn "TERRAGEARGUI" "${WHATTOBUILD[@]}"; then
     rm -f ../../terrageargui/CMakeCache.txt
     "$CMAKE" -DCMAKE_BUILD_TYPE="Release" \
           -DCMAKE_INSTALL_PREFIX="$INSTALL_DIR_TGGUI" \
-          ../../terrageargui 2>&1 | tee -a $LOGFILE
+          ../../terrageargui 2>&1 | _logOutput
   fi
 
   _make terrageargui
