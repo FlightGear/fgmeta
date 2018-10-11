@@ -57,6 +57,10 @@ _elementIn(){
   return 1
 }
 
+function _log(){
+  echo "$@" >> "$LOGFILE"
+}
+
 function _printLog(){
  # Possible special case for the terminal: echo "${PROGNAME}: $@"
  # That would be more precise but rather verbose, and not all output uses
@@ -168,9 +172,9 @@ function _make(){
   if [ "$COMPILE" = "y" ]; then
     pkg=$1
     cd "$CBD"/build/$pkg
-    echo "MAKE $pkg" >> $LOGFILE
+    _printLog "MAKE $pkg"
     make $JOPTION $OOPTION 2>&1 | _logOutput
-    echo "INSTALL $pkg" >> $LOGFILE
+    _printLog "INSTALL $pkg"
     make install 2>&1 | _logOutput
   fi
 }
@@ -537,15 +541,15 @@ echo "**************************************"
 #######################################################
 
 echo $0 $* > $LOGFILE
-echo "VERSION=$VERSION" >> $LOGFILE
-echo "APT_GET_UPDATE=$APT_GET_UPDATE" >> $LOGFILE
-echo "DOWNLOAD_PACKAGES=$DOWNLOAD_PACKAGES" >> $LOGFILE
-echo "COMPILE=$COMPILE" >> $LOGFILE
-echo "RECONFIGURE=$RECONFIGURE" >> $LOGFILE
-echo "DOWNLOAD=$DOWNLOAD" >> $LOGFILE
-echo "JOPTION=$JOPTION" >> $LOGFILE
-echo "OOPTION=$OOPTION" >> $LOGFILE
-echo "BUILD_TYPE=$BUILD_TYPE" >> $LOGFILE
+_log "VERSION=$VERSION"
+_log "APT_GET_UPDATE=$APT_GET_UPDATE"
+_log "DOWNLOAD_PACKAGES=$DOWNLOAD_PACKAGES"
+_log "COMPILE=$COMPILE"
+_log "RECONFIGURE=$RECONFIGURE"
+_log "DOWNLOAD=$DOWNLOAD"
+_log "JOPTION=$JOPTION"
+_log "OOPTION=$OOPTION"
+_log "BUILD_TYPE=$BUILD_TYPE"
 _logSep
 
 #######################################################
@@ -616,7 +620,7 @@ fi
 
 CBD=$(pwd)
 LOGFILE=$CBD/$LOGFILE
-echo "DIRECTORY= $CBD" >> $LOGFILE
+_log "DIRECTORY=$CBD"
 _logSep
 mkdir -p install
 SUB_INSTALL_DIR=install
@@ -701,7 +705,7 @@ if _elementIn "PLIB" "${WHATTOBUILD[@]}"; then
   if [ "$RECONFIGURE" = "y" ]; then
     cd "$CBD"
     mkdir -p build/plib
-    echo "CONFIGURING plib" >> $LOGFILE
+    _log "CONFIGURING plib"
     cd "$CBD"/build/plib
     "$CMAKE" -DCMAKE_BUILD_TYPE="$BUILD_TYPE" \
           -DCMAKE_INSTALL_PREFIX:PATH="$INSTALL_DIR_PLIB" \
@@ -1001,8 +1005,8 @@ if _elementIn "FGX" "${WHATTOBUILD[@]}"; then
 
   if [ "$COMPILE" = "y" ]; then
     cd $INSTALL_DIR_FGX
-    echo "MAKE AND INSTALL FGX" >> $LOGFILE
-    echo "make $JOPTION $OOPTION " >> $LOGFILE
+    _printLog "MAKE AND INSTALL FGX"
+    _printLog "make $JOPTION $OOPTION"
     make $JOPTION $OOPTION 2>&1 | _logOutput
     cd ..
   fi
@@ -1155,14 +1159,14 @@ if _elementIn "TERRAGEARGUI" "${WHATTOBUILD[@]}"; then
   cd "$CBD"
   # Fill TerraGear Root field
   if [ ! -f ~/.config/TerraGear/TerraGearGUI.conf ]; then
-    echo "Fill TerraGear Root field" >> $LOGFILE
+    _log "Fill TerraGear Root field"
     echo "[paths]" > TerraGearGUI.conf
     echo "terragear=$INSTALL_DIR_TG/bin" >> TerraGearGUI.conf
     mkdir -p ~/.config/TerraGear
     mv TerraGearGUI.conf ~/.config/TerraGear
   fi
 
-  echo "Create run_terrageargui.sh" >> $LOGFILE
+  _log "Create run_terrageargui.sh"
   echo "#!/bin/sh" > run_terrageargui.sh
   echo "cd \$(dirname \$0)" >> run_terrageargui.sh
   echo "cd install/terrageargui/bin" >> run_terrageargui.sh
