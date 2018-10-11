@@ -577,10 +577,25 @@ class Translation:
         return ''.join(l)
 
     def __getitem__(self, cat):
+        """Get all translations for a given category.
+
+        Return a mapping where each key is a tid (instance of a subclass
+        of AbstractTranslationUnitId) and each value a TranslationUnit
+        instance.
+
+        """
         return self.translations[cat]
 
-    def __setitem__(self, cat, translUnit):
-        self.translations[cat] = translUnit
+    def __setitem__(self, cat, mapping):
+        """Replace all translations for a given category.
+
+        cat:     a category name (string such as 'sys', 'options', etc.)
+        mapping: a mapping where each key is a tid (instance of a
+                 subclass of AbstractTranslationUnitId) and each value a
+                 TranslationUnit instance.
+
+        """
+        self.translations[cat] = dict(mapping)
 
     def __iter__(self):
         return iter(self.translations)
