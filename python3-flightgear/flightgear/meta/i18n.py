@@ -1670,10 +1670,8 @@ registerFormatHandler("xliff", XliffFormatHandler)
 # Could also be a dict
 def L10nResMgrForCat(category):
     """Map from category/resource name to L10NResourceManager class."""
-    if category in ("menu", "options", "tips"):
+    if category in ("menu", "options", "sys", "tips"):
         return BasicL10NResourceManager
-    elif category == "sys":
-        return SysL10NResourceManager
     else:
         assert False, "unexpected category: {!r}".format(category)
 
@@ -1859,7 +1857,7 @@ class L10NResourceManagerBase:
 class BasicL10NResourceManager(L10NResourceManagerBase):
     """Resource manager for FG XML i18n files with the simplest structure.
 
-    This is suitable for resources (menu, options, tips) where
+    This is suitable for resources (menu, options, tips, etc.) where
     translations are in direct children of the <PropertyList> element,
     with no more structure.
 
@@ -1867,7 +1865,16 @@ class BasicL10NResourceManager(L10NResourceManagerBase):
     @classmethod
     def _findMainNode(cls, rootNode):
         """
-        Return the node directly containing the translations in an FG XML file."""
+        Return the node directly containing the translations in an FG XML file.
+
+        This method was added when sys.xml had all its useful contents
+        inside a 'splash' top-level node, instead of having a flat
+        structure like the other FG XML i18n files (options.xml,
+        menu.xml, etc.). At that time, we thus had a
+        SysL10NResourceManager class derived from this class only to
+        override this method.
+
+        """
         assert rootNode.tag == "PropertyList", rootNode.tag
         return rootNode
 
@@ -1925,17 +1932,3 @@ class BasicL10NResourceManager(L10NResourceManagerBase):
                     [text], isPlural=isPlural, logger=logger)
 
         return nbWhitespaceProblems
-
-
-class SysL10NResourceManager(BasicL10NResourceManager):
-
-    @classmethod
-    def _findMainNode(cls, rootNode):
-        """
-        Return the node directly containing the translations in sys.xml."""
-        assert rootNode.tag == "PropertyList", rootNode.tag
-        # In sys.xml, all translations are inside a <splash> element
-        mainNode = rootNode.find("splash")
-        assert mainNode is not None
-
-        return mainNode
