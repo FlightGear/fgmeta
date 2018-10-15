@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PropertyList>
+  <local-output>/home/fgaddon/output-trunk</local-output>
+  <download-url n="0">http://mirrors.ibiblio.org/flightgear/ftp/Aircraft/</download-url>
+  <download-url n="1">http://ukmirror.flightgear.org/official/Aircraft/</download-url>
+
+  <thumbnail-url n="0">http://mirrors.ibiblio.org/flightgear/ftp/Aircraft/thumbnails</thumbnail-url>
+  <thumbnail-url n="1">http://ukmirror.flightgear.org/official/Aircraft/thumbnails</thumbnail-url>
+
+  <scm>
+    <type>svn</type>
+    <path>/home/fgaddon/svn/Aircraft</path>
+    <skip>NTPS</skip>
+    <skip>c172</skip>
+    <skip>tu134</skip>
+  </scm>
+    <include-dir>/home/fgaddon/fgdata</include-dir>
+    <include-dir>/home/fgaddon/fgaddon-trunk</include-dir>
+    
+  <!-- <scm>
+       <type>git</type>
+       <update type="bool">false</update>
+       <path>/Users/jmt/FGFS/fgdata</path>
+       <url>git://git.code.sf.net/p/flightgear/fgdata</url>
+       </scm> -->
+  <upload n="0">
+    <enabled type="bool">true</enabled>
+    <type>rsync-ssh</type>
+    <remote>ibiblio:/public/mirrors/flightgear/ftp/Aircraft</remote>
+  </upload>
+</PropertyList>

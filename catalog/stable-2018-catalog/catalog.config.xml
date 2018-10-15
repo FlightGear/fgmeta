@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--Template catalog - copy and modify for your site as required-->
+<PropertyList>
+  <local-output>/home/fgaddon/stable/output-stable-2018</local-output>
+  <download-url n="0">http://mirrors.ibiblio.org/flightgear/ftp/Aircraft-2018/</download-url>
+  <download-url n="1">http://ukmirror.flightgear.org/official/Aircraft-2018/</download-url>
+
+  <thumbnail-url n="0">http://mirrors.ibiblio.org/flightgear/ftp/Aircraft-2018/thumbnails</thumbnail-url>
+  <thumbnail-url n="1">http://ukmirror.flightgear.org/official/Aircraft-2018/thumbnails</thumbnail-url>
+
+  <scm>
+    <type>svn</type>
+    <path>/home/fgaddon/fgaddon-release-2018.3</path>
+    <skip>NTPS</skip>
+    <skip>c172</skip>
+    <skip>tu134</skip>
+  </scm>
+
+    <include-dir>/home/fgaddon/fgdata-release_2018.3</include-dir>
+    <include-dir>/home/fgaddon/fgaddon-release-2018.3</include-dir>
+    
+  <upload n="0">
+    <enabled type="bool">true</enabled>
+    <type>rsync-ssh</type>
+    <remote>ibiblio:/public/mirrors/flightgear/ftp/Aircraft-2018</remote>
+  </upload>
+</PropertyList>

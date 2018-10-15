@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PropertyList>
+  <template>
+    <version n="0">2019.*</version>
+    <id>org.flightgear.fgaddon</id>
+    <license>GPL</license>
+    <url>http://mirrors.ibiblio.org/flightgear/ftp/Aircraft/catalog.xml</url>
+    <name>FlightGear aircraft distribution from fgaddon</name>
+    <description>This hangar provides aircraft officially supported and maintained by the FlightGear project, 
+    under a free-software license.</description>
+    <!-- <de>
+      <description>Auf Deutsch</description>
+    </de>
+    <fr>
+      <description>En Francais</description>
+    </fr> -->
+
+
+    <alternate-version>
+      <version>2018.*</version>
+      <url>http://mirrors.ibiblio.org/flightgear/ftp/Aircraft-2018/catalog.xml</url>
+      <id>org.flightgear.fgaddon.stable_2018</id>
+    </alternate-version>
+
+    <alternate-version>
+      <version>2017.*</version>
+      <url>http://mirrors.ibiblio.org/flightgear/ftp/Aircraft-legacy/catalog.xml</url>
+      <id>org.flightgear.fgaddon.legacy</id>
+    </alternate-version>
+
+    <!-- alternate version previously did not allow multiple version entries, so we
+    duplicate the alternate version here -->
+    <alternate-version>
+      <version>2016.*</version>
+      <url>http://mirrors.ibiblio.org/flightgear/ftp/Aircraft-legacy/catalog.xml</url>
+      <id>org.flightgear.fgaddon.legacy</id>
+    </alternate-version>
+  </template>
+</PropertyList>
