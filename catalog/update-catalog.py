@@ -24,6 +24,8 @@ parser.add_argument("--no-update",
                     action="store_true")
 parser.add_argument("--clean", help="Force regeneration of all zip files",
                     action="store_true")
+parser.add_argument("--quiet", help="Only print warnings and errors",
+                    action="store_true")
 parser.add_argument("dir", help="Catalog directory")
 args = parser.parse_args()
 
@@ -64,7 +66,8 @@ def scan_dir_for_change_date_mtime(path):
     return maxsec
 
 def make_aircraft_zip(repo_path, name, zip_file):
-    print "Updating:", name + '.zip'
+    if (not args.quiet):
+        print "Updating:", name + '.zip'
     savedir = os.getcwd()
     os.chdir(repo_path)
     if os.path.exists(zip_file):
@@ -136,7 +139,8 @@ def process_aircraft_dir(name, repo_path):
 
     (package, variants) = catalog.scan_aircraft_dir(aircraft_dir, includes)
     if package == None:
-        print "skipping:", name, "(no -set.xml files)"
+        if not args.quiet:
+            print "skipping:", name, "(no -set.xml files)"
         return
 
     print "%s:" % name,
@@ -168,11 +172,13 @@ def process_aircraft_dir(name, repo_path):
        or dir_mtime > os.path.getmtime(zipfile) \
        or args.clean:
         # rebuild zip file
-        print "updating:", zipfile
+        if not args.quiet:
+            print "updating:", zipfile
         make_aircraft_zip(repo_path, name, zipfile)
         md5sum = get_md5sum(zipfile)
     else:
-        print "(no change)"
+        if not args.quiet:
+            print "(no change)"
         if md5sum == "":
             md5sum = get_md5sum(zipfile)
     filesize = os.path.getsize(zipfile)
@@ -300,7 +306,8 @@ for scm in scm_list:
     names = os.listdir(repo_path)
     for name in sorted(names, key=lambda s: s.lower()):
         if name in skip_list:
-            print "skipping:", name
+            if not args.quiet:
+                print "skipping:", name
             continue
 
         # process each aircraft in turn
