@@ -2,7 +2,8 @@
 from xml.sax import make_parser, handler, expatreader
 
 # ElementTree for writing
-import xml.etree.cElementTree as ET
+#import xml.etree.cElementTree as ET
+import lxml.etree as ET
 
 import re, os
 

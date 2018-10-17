@@ -2,7 +2,8 @@
 
 import argparse
 import datetime
-import xml.etree.cElementTree as ET
+#import xml.etree.cElementTree as ET
+import lxml.etree as ET
 import os
 import re
 import sgprops
