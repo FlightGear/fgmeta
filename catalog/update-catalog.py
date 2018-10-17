@@ -143,7 +143,8 @@ def process_aircraft_dir(name, repo_path):
             print "skipping:", name, "(no -set.xml files)"
         return
 
-    print "%s:" % name,
+    if not args.quiet:
+        print "%s:" % name,
 
     package_node = catalog.make_aircraft_node(name, package, variants, download_base)
 
@@ -192,6 +193,18 @@ def process_aircraft_dir(name, repo_path):
     else:
         md5sum_root.append( catalog.make_xml_leaf('aircraft_' + name, md5sum) )
 
+    # handle sharing
+    if share_md5sum_root != None:
+        sharedNode = share_md5sum_root.find(str('aircraft_' + name))
+        if node != None:
+            shared_md5 = get_xml_text(sharedNode)
+            if shared_md5 == md5sum:
+                if not args.quiet:
+                    print "Sharing zip with share catalog for:",name
+                os.remove(zipfile)
+                os.symlink(os.path.join( share_output_dir, name + '.zip' ), zipfile)
+
+
     # handle thumbnails
     copy_thumbnails_for_package(package, variants, name, aircraft_dir, thumbnail_dir)
 
@@ -230,6 +243,17 @@ else:
     md5sum_root = ET.Element('PropertyList')
     md5sum_tree = ET.ElementTree(md5sum_root)
 
+# share .zip files with other output dirs
+share_output_dir = get_xml_text(config_node.find('share-output'))
+share_md5_file = get_xml_text(config_node.find('share-md5-sums'))
+if share_output_dir != '' and share_md5_file != '':
+    print 'Output shared with:', share_output_dir
+    share_md5sum_tree = ET.parse(share_md5_file, parser)
+    share_md5sum_root = share_md5sum_tree.getroot()
+else:
+    share_md5sum_root = None
+
+# SCM providers
 scm_list = config_node.findall('scm')
 upload_node = config_node.find('upload')
 download_base = get_xml_text(config_node.find('download-url'))
