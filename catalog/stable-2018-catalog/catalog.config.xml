@@ -1,12 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--Template catalog - copy and modify for your site as required-->
 <PropertyList>
-  <local-output>/home/fgaddon/output-stable-2018</local-output>
+	<local-output>/home/fgaddon/output/Aircraft-2018</local-output>
   <download-url n="0">http://mirrors.ibiblio.org/flightgear/ftp/Aircraft-2018/</download-url>
   <download-url n="1">http://ukmirror.flightgear.org/official/Aircraft-2018/</download-url>
 
   <thumbnail-url n="0">http://mirrors.ibiblio.org/flightgear/ftp/Aircraft-2018/thumbnails</thumbnail-url>
   <thumbnail-url n="1">http://ukmirror.flightgear.org/official/Aircraft-2018/thumbnails</thumbnail-url>
+
+
+  <!-- share zips with the trunk catalog where possible -->
+  <share-output>/home/fgaddon/output/Aircraft</share-output>
+  <share-md5-sums>/home/fgaddon/fgmeta/catalog/fgaddon-catalog-ukmirror/md5sum.xml</share-md5-sums>
 
   <scm>
     <type>svn</type>

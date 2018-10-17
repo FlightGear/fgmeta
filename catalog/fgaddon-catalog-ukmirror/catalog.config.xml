@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <PropertyList>
-  <local-output>/home/fgaddon/output-trunk</local-output>
+	<local-output>/home/fgaddon/output/Aircraft</local-output>
   <download-url n="0">http://mirrors.ibiblio.org/flightgear/ftp/Aircraft/</download-url>
   <download-url n="1">http://ukmirror.flightgear.org/official/Aircraft/</download-url>
 

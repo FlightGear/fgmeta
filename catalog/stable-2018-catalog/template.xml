@@ -2,7 +2,9 @@
 <!--Template catalog - copy and modify for your site as required-->
 <PropertyList>
   <template>
-    <version n="0">2018.*.*</version>
+	  <version n="0">2018.1.*</version>
+	  <version n="1">2018.2.*</version>
+	  <version n="2">2018.3.*</version>
     <id>org.flightgear.fgaddon.stable_2018</id>
     <license>GPL</license>
     <url>http://mirrors.ibiblio.org/flightgear/ftp/Aircraft-2018/catalog.xml</url>
@@ -12,7 +14,8 @@
     are compatible with FlightGear versions from 2018.</description>
     
     <alternate-version>
-      <version>2019.*</version>
+	    <version>2019.*</version>
+	    <version>2018.4.*</version>
       <url>http://mirrors.ibiblio.org/flightgear/ftp/Aircraft/catalog.xml</url>
       <id>org.flightgear.fgaddon</id>
     </alternate-version>

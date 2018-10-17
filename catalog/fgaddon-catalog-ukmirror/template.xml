@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <PropertyList>
   <template>
-    <version n="0">2019.*</version>
+	  <version n="0">2019.*</version>
+	  <version n="1">2018.4.*</version>
+
     <id>org.flightgear.fgaddon</id>
     <license>GPL</license>
     <url>http://mirrors.ibiblio.org/flightgear/ftp/Aircraft/catalog.xml</url>
@@ -16,11 +18,25 @@
     </fr> -->
 
 
+<!-- be nice to older versions which only accept one version element per alternate -->
     <alternate-version>
-      <version>2018.*</version>
+      <version>2018.1.*</version>
       <url>http://mirrors.ibiblio.org/flightgear/ftp/Aircraft-2018/catalog.xml</url>
       <id>org.flightgear.fgaddon.stable_2018</id>
     </alternate-version>
+    
+    <alternate-version>
+      <version>2018.2.*</version>
+      <url>http://mirrors.ibiblio.org/flightgear/ftp/Aircraft-2018/catalog.xml</url>
+      <id>org.flightgear.fgaddon.stable_2018</id>
+    </alternate-version>
+	 <alternate-version>
+      <version>2018.3.*</version>
+      <url>http://mirrors.ibiblio.org/flightgear/ftp/Aircraft-2018/catalog.xml</url>
+      <id>org.flightgear.fgaddon.stable_2018</id>
+    </alternate-version>
+
+
 
     <alternate-version>
       <version>2017.*</version>
