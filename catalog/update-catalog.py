@@ -30,6 +30,7 @@ parser.add_argument("dir", help="Catalog directory")
 args = parser.parse_args()
 
 includes = []
+mirrors = [] # mirror base URLs
 
 # xml node (robust) get text helper
 def get_xml_text(e):
@@ -132,6 +133,7 @@ def process_aircraft_dir(name, repo_path):
     global output_dir
     global valid_zips
     global previews_dir
+    global mirrors
 
     aircraft_dir = os.path.join(repo_path, name)
     if not os.path.isdir(aircraft_dir):
@@ -146,7 +148,7 @@ def process_aircraft_dir(name, repo_path):
     if not args.quiet:
         print "%s:" % name,
 
-    package_node = catalog.make_aircraft_node(name, package, variants, download_base)
+    package_node = catalog.make_aircraft_node(name, package, variants, download_base, mirrors)
 
     download_url = download_base + name + '.zip'
     if 'thumbnail' in package:
@@ -256,9 +258,18 @@ else:
 # SCM providers
 scm_list = config_node.findall('scm')
 upload_node = config_node.find('upload')
-download_base = get_xml_text(config_node.find('download-url'))
-if not download_base.endswith('/'):
-    download_base += '/'
+
+download_base = None
+for i in config_node.findall("download-url"):
+    url = get_xml_text(i)
+    if not url.endswith('/'):
+        url += '/'
+
+    if download_base == None:
+        # download_base is the first entry
+        download_base = url
+    else:
+        mirrors.append(url)
 
 output_dir = get_xml_text(config_node.find('local-output'))
 if output_dir == '':

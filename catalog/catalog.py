@@ -213,7 +213,7 @@ def append_author_nodes(node, info):
         # traditional single author string
         node.append( make_xml_leaf('author', info['author']) )
 
-def make_aircraft_node(aircraftDirName, package, variants, downloadBase):
+def make_aircraft_node(aircraftDirName, package, variants, downloadBase, mirrors):
     #print "package:", package
     #print "variants:", variants
     package_node = ET.Element('package')
@@ -262,8 +262,14 @@ def make_aircraft_node(aircraftDirName, package, variants, downloadBase):
 
     package_node.append( make_xml_leaf('dir', aircraftDirName) )
 
+    # primary URL is first
     download_url = downloadBase + aircraftDirName + '.zip'
     package_node.append( make_xml_leaf('url', download_url) )
+
+    for m in mirrors:
+        mu = m + aircraftDirName + '.zip'
+        package_node.append( make_xml_leaf('url', mu) )
+
 
     if 'thumbnail' in package:
         thumbnail_url = downloadBase + 'thumbnails/' + aircraftDirName + '_' + package['thumbnail']
