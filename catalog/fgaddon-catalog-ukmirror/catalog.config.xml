@@ -9,7 +9,7 @@
 
   <scm>
     <type>svn</type>
-    <path>/home/fgaddon/svn/Aircraft</path>
+    <path>/home/fgaddon/fgaddon-trunk/Aircraft</path>
     <skip>NTPS</skip>
     <skip>c172</skip>
     <skip>tu134</skip>

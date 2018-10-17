@@ -30,4 +30,5 @@
       <url>http://mirrors.ibiblio.org/flightgear/ftp/Aircraft-legacy/catalog.xml</url>
       <id>org.flightgear.fgaddon.legacy</id>
     </alternate-version>
+    </template>
 </PropertyList>
