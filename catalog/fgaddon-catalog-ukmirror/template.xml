@@ -4,12 +4,12 @@
 	  <version n="0">2019.*</version>
 	  <version n="1">2018.4.*</version>
 
-    <id>org.flightgear.fgaddon</id>
+    <id>org.flightgear.fgaddon.trunk</id>
     <license>GPL</license>
-    <url>http://mirrors.ibiblio.org/flightgear/ftp/Aircraft/catalog.xml</url>
+    <url>http://mirrors.ibiblio.org/flightgear/ftp/Aircraft-trunk/catalog.xml</url>
     <name>FlightGear aircraft distribution from fgaddon</name>
     <description>This hangar provides aircraft officially supported and maintained by the FlightGear project, 
-    under a free-software license.</description>
+    under a free-software license. It tracks latest aircraft developments in the FGaddon repository.</description>
     <!-- <de>
       <description>Auf Deutsch</description>
     </de>
@@ -18,38 +18,36 @@
     </fr> -->
 
 
-<!-- be nice to older versions which only accept one version element per alternate -->
     <alternate-version>
-      <version>2018.1.*</version>
-      <url>http://mirrors.ibiblio.org/flightgear/ftp/Aircraft-2018/catalog.xml</url>
-      <id>org.flightgear.fgaddon.stable_2018</id>
-    </alternate-version>
-    
-    <alternate-version>
-      <version>2018.2.*</version>
-      <url>http://mirrors.ibiblio.org/flightgear/ftp/Aircraft-2018/catalog.xml</url>
-      <id>org.flightgear.fgaddon.stable_2018</id>
-    </alternate-version>
-	 <alternate-version>
       <version>2018.3.*</version>
       <url>http://mirrors.ibiblio.org/flightgear/ftp/Aircraft-2018/catalog.xml</url>
       <id>org.flightgear.fgaddon.stable_2018</id>
     </alternate-version>
-
-
-
-    <alternate-version>
-      <version>2017.*</version>
-      <url>http://mirrors.ibiblio.org/flightgear/ftp/Aircraft-legacy/catalog.xml</url>
-      <id>org.flightgear.fgaddon.legacy</id>
-    </alternate-version>
-
+    
+  
     <!-- alternate version previously did not allow multiple version entries, so we
     duplicate the alternate version here -->
     <alternate-version>
+      <version>2018.2.*</version>
+      <url>http://mirrors.ibiblio.org/flightgear/ftp/Aircraft/catalog.xml</url>
+      <id>org.flightgear.fgaddon</id>
+    </alternate-version>
+	 <alternate-version>
+      <version>2018.1.*</version>
+      <url>http://mirrors.ibiblio.org/flightgear/ftp/Aircraft/catalog.xml</url>
+      <id>org.flightgear.fgaddon</id>
+    </alternate-version>
+
+    <alternate-version>
+      <version>2017.*</version>
+      <url>http://mirrors.ibiblio.org/flightgear/ftp/Aircraft/catalog.xml</url>
+      <id>org.flightgear.fgaddon</id>
+    </alternate-version>
+
+    <alternate-version>
       <version>2016.*</version>
-      <url>http://mirrors.ibiblio.org/flightgear/ftp/Aircraft-legacy/catalog.xml</url>
-      <id>org.flightgear.fgaddon.legacy</id>
+      <url>http://mirrors.ibiblio.org/flightgear/ftp/Aircraft/catalog.xml</url>
+      <id>org.flightgear.fgaddon</id>
     </alternate-version>
   </template>
 </PropertyList>

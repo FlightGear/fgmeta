@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <PropertyList>
-	<local-output>/home/fgaddon/output/Aircraft</local-output>
-  <download-url n="0">http://mirrors.ibiblio.org/flightgear/ftp/Aircraft/</download-url>
-  <download-url n="1">http://ukmirror.flightgear.org/official/Aircraft/</download-url>
+	<local-output>/home/fgaddon/output/Aircraft-trunk</local-output>
+  <download-url n="0">http://mirrors.ibiblio.org/flightgear/ftp/Aircraft-trunk/</download-url>
+  <download-url n="1">http://ukmirror.flightgear.org/official/Aircraft-trunk/</download-url>
 
-  <thumbnail-url n="0">http://mirrors.ibiblio.org/flightgear/ftp/Aircraft/thumbnails</thumbnail-url>
-  <thumbnail-url n="1">http://ukmirror.flightgear.org/official/Aircraft/thumbnails</thumbnail-url>
+  <thumbnail-url n="0">http://mirrors.ibiblio.org/flightgear/ftp/Aircraft-trunk/thumbnails</thumbnail-url>
+  <thumbnail-url n="1">http://ukmirror.flightgear.org/official/Aircraft-trunk/thumbnails</thumbnail-url>
 
   <scm>
     <type>svn</type>

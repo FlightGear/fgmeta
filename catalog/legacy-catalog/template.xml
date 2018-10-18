@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--Template catalog - copy and modify for your site as required-->
+
 <PropertyList>
   <template>
     <version n="0">3.4.*</version>
@@ -8,22 +8,31 @@
     <version n="3">3.7.*</version>
     <version n="5">2016.*.*</version>
     <version n="6">2017.*.*</version>
-    <id>org.flightgear.fgaddon.legacy</id>
+
+    <!-- legacy is also used by these version since they don't know how to
+     handle migrating to another ID -->
+    <version n="7">2018.1.*</version>
+    <version n="8">2018.2.*</version>
+
+    <!-- the legacy catalog has to have this ID, becuase this is what older FG
+    clients expect -->
+    <id>org.flightgear.fgaddon</id>
     <license>GPL</license>
-    <url>http://mirrors.ibiblio.org/flightgear/ftp/Aircraft-legacy/catalog.xml</url>
+    <url>http://mirrors.ibiblio.org/flightgear/ftp/Aircraft/catalog.xml</url>
     <name>FlightGear aircraft(legacy support)</name>
     <description>This hangar provides aircraft officially supported and maintained by the 
     FlightGear project, under a free-software license. Aircraft are intended for
-    use with FlightGear versions from 2017 and older.</description>
+    use with FlightGear versions 2018.2 and older.</description>
 
     <alternate-version>
       <version>2019.*</version>
-      <url>http://mirrors.ibiblio.org/flightgear/ftp/Aircraft/catalog.xml</url>
-      <id>org.flightgear.fgaddon</id>
+      <version>2018.4.*</version>
+      <url>http://mirrors.ibiblio.org/flightgear/ftp/Aircraft-trunk/catalog.xml</url>
+      <id>org.flightgear.fgaddon.trunk</id>
     </alternate-version>
 
     <alternate-version>
-      <version>2018.*</version>
+      <version>2018.3.*</version>
       <url>http://mirrors.ibiblio.org/flightgear/ftp/Aircraft-2018/catalog.xml</url>
       <id>org.flightgear.fgaddon.stable_2018</id>
     </alternate-version>
