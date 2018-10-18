@@ -2,10 +2,10 @@
 <PropertyList>
   <local-output>/home/fgaddon/output/Aircraft</local-output>
   <download-url n="0">http://mirrors.ibiblio.org/flightgear/ftp/Aircraft/</download-url>
-  <download-url n="1">http://ukmirror.flightgear.org/official/Aircraft/</download-url>
+  <download-url n="1">http://ukmirror.flightgear.org/fgaddon/Aircraft/</download-url>
 
   <thumbnail-url n="0">http://mirrors.ibiblio.org/flightgear/ftp/Aircraft/thumbnails</thumbnail-url>
-  <thumbnail-url n="1">http://ukmirror.flightgear.org/official/Aircraft/thumbnails</thumbnail-url>
+  <thumbnail-url n="1">http://ukmirror.flightgear.org/fgaddon/Aircraft/thumbnails</thumbnail-url>
 
   <scm>
     <type>svn</type>
