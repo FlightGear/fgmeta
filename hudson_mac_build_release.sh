@@ -24,15 +24,14 @@ pushd sgBuild
 cmake -DCMAKE_INSTALL_PREFIX:PATH=$WORKSPACE/dist -DCMAKE_BUILD_TYPE=RelWithDebInfo ../simgear
 
 # compile
-make
+cmake --build . -j
 
 if [ $? -ne '0' ]; then
     echo "make simgear failed"
     exit 1
 fi
 
-make install
-
+cmake --build . --target install
 
 popd
 
@@ -48,14 +47,14 @@ fi
 
 cmake -DFG_BUILD_TYPE=$FGBUILDTYPE -DCMAKE_INSTALL_PREFIX:PATH=$WORKSPACE/dist -DCMAKE_BUILD_TYPE=RelWithDebInfo ../flightgear
 
-make
+cmake --build . -j
 
 if [ $? -ne '0' ]; then
     echo "make flightgear failed"
     exit 1
 fi
 
-make install
+cmake --build . --target install
 
 popd
 
