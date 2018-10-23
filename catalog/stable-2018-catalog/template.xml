@@ -1,47 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <PropertyList>
   <template>
-	  <version n="0">2018.3.*</version>
+	  <version n="0">2018.*</version>
     <id>org.flightgear.fgaddon.stable_2018</id>
     <license>GPL</license>
     <url>http://mirrors.ibiblio.org/flightgear/ftp/Aircraft-2018/catalog.xml</url>
-    <name>FlightGear aircraft distribution for 2108.x versions</name>
+    <name>FlightGear aircraft distribution for 2018.x versions</name>
     <description>This hangar provides aircraft officially supported and maintained 
     by the FlightGear project, under a free-software license. These aircraft
     are compatible with FlightGear versions from 2018.</description>
     
-    <alternate-version>
-	    <version>2019.*</version>
-	    <version>2018.4.*</version>
-      <url>http://mirrors.ibiblio.org/flightgear/ftp/Aircraft-trunk/catalog.xml</url>
-      <id>org.flightgear.fgaddon.trunk</id>
-    </alternate-version>
-
-
-    <!-- alternate version previously did not allow multiple version entries, so we
-    duplicate the alternate version here -->
-    <alternate-version>
-      <version>2018.2.*</version>
-      <url>http://mirrors.ibiblio.org/flightgear/ftp/Aircraft/catalog.xml</url>
-      <id>org.flightgear.fgaddon</id>
-    </alternate-version>
-
-	 <alternate-version>
-      <version>2018.1.*</version>
-      <url>http://mirrors.ibiblio.org/flightgear/ftp/Aircraft/catalog.xml</url>
-      <id>org.flightgear.fgaddon</id>
-    </alternate-version>
-
-    <alternate-version>
-      <version>2017.*</version>
-      <url>http://mirrors.ibiblio.org/flightgear/ftp/Aircraft/catalog.xml</url>
-      <id>org.flightgear.fgaddon</id>
-    </alternate-version>
-
-    <alternate-version>
-      <version>2016.*</version>
-      <url>http://mirrors.ibiblio.org/flightgear/ftp/Aircraft/catalog.xml</url>
-      <id>org.flightgear.fgaddon</id>
-    </alternate-version>
-    </template>
+   </template>
 </PropertyList>
