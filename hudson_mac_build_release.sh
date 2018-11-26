@@ -23,8 +23,8 @@ echo "Starting on SimGear"
 pushd sgBuild
 cmake -DCMAKE_INSTALL_PREFIX:PATH=$WORKSPACE/dist -DCMAKE_BUILD_TYPE=RelWithDebInfo ../simgear
 
-# compile
-cmake --build . -j
+# compile (with out-j for now, it's hitting process limits)
+cmake --build .
 
 if [ $? -ne '0' ]; then
     echo "make simgear failed"
@@ -47,7 +47,8 @@ fi
 
 cmake -DFG_BUILD_TYPE=$FGBUILDTYPE -DCMAKE_INSTALL_PREFIX:PATH=$WORKSPACE/dist -DCMAKE_BUILD_TYPE=RelWithDebInfo ../flightgear
 
-cmake --build . -j
+# compile (with out-j for now, it's hitting process limits)
+cmake --build .
 
 if [ $? -ne '0' ]; then
     echo "make flightgear failed"
