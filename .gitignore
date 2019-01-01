@@ -1,6 +1,6 @@
 dist
 .DS_Store
-install
+install*/
 3rdParty
 3rdParty.x64
 boost_1_44_0

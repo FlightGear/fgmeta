@@ -21,6 +21,7 @@ QT_SELECT=qt5
 ROOT_DIR=${PWD}
 PATH=${ROOT_DIR}/vcpkg-git/installed/x64-linux/bin:${PATH}
 CMAKE_TOOLCHAIN="Ninja"
+CHIPSET=$(gcc -march=native -Q --help=target | grep -- '-march=' | cut -f3)
 
 QT5x64=$(qtpaths --install-prefix)
 QT5x64_LIB=${QT5x64}/lib
@@ -40,18 +41,24 @@ then
 	./bootstrap-vcpkg.sh
 
 	echo Compiling external libraries . . .
-	./vcpkg install --triplet x64-linux boost curl freeglut freetype glew jasper libxml2 openal-soft openssl plib sdl2 tiff zlib
+	./vcpkg install --triplet x64-linux boost cgal curl freeglut freetype glew jasper libxml2 openal-soft openssl plib sdl2 tiff zlib
 else
     echo Updating vcpkg . . .
 	cd vcpkg-git
-	git pull
+	PULL_RESULT=$(git pull)
+
+    if [ "${PULL_RESULT}" != "Already up to date." ]
+    then
+        echo Compiling vcpkg
+        ./bootstrap-vcpkg.sh
+    fi
 
 	echo Updating external libraries . . .
 	./vcpkg update
 	./vcpkg upgrade --triplet x64-linux --no-dry-run
 
-    # Okay to comment out this line once all the packages have been confirmed to have been installed
-	./vcpkg install --triplet x64-linux boost curl freeglut freetype glew jasper libxml2 openal-soft openssl plib sdl2 tiff zlib
+    echo Compiling external libraries . . .
+	./vcpkg install --triplet x64-linux boost cgal curl freeglut freetype glew jasper libxml2 openal-soft openssl plib sdl2 tiff zlib
 fi
 cd ${ROOT_DIR}
 
@@ -134,8 +141,8 @@ cmake ../../scratch-source/openscenegraph-3.4-git -G ${CMAKE_TOOLCHAIN} \
 	-DCMAKE_BUILD_TYPE=Release \
 	-DCMAKE_INSTALL_PREFIX=${ROOT_DIR}/scratch-install \
 	-DCMAKE_PREFIX_PATH=${ROOT_DIR}/scratch-install/lib:${ROOT_DIR}/vcpkg-git/installed/x64-linux/lib:${QT5x64_LIB} \
-    -DCMAKE_CXX_FLAGS="-march=native" \
-    -DCMAKE_C_FLAGS="-march=native" \
+    -DCMAKE_CXX_FLAGS="-march=${CHIPSET} -mtune=${CHIPSET}" \
+    -DCMAKE_C_FLAGS="-march=${CHIPSET} -mtune=${CHIPSET}" \
     -DBUILD_DOCUMENTATION:BOOL=1 \
     -DBUILD_OSG_APPLICATIONS:BOOL=1 \
     -DQt5Core_DIR=${QT5x64_CMAKE}/Qt5Core \
@@ -151,8 +158,8 @@ cmake ../../scratch-source/simgear-git -G  ${CMAKE_TOOLCHAIN} \
 	-DCMAKE_BUILD_TYPE=Release \
 	-DCMAKE_INSTALL_PREFIX=${ROOT_DIR}/scratch-install \
 	-DCMAKE_PREFIX_PATH=${ROOT_DIR}/scratch-install/lib:${ROOT_DIR}/vcpkg-git/installed/x64-linux/lib:${QT5x64} \
-    -DCMAKE_CXX_FLAGS="-march=native" \
-    -DCMAKE_C_FLAGS="-march=native"
+    -DCMAKE_CXX_FLAGS="-march=${CHIPSET} -mtune=${CHIPSET}" \
+    -DCMAKE_C_FLAGS="-march=${CHIPSET} -mtune=${CHIPSET}"
 cmake --build . --config Release --target install
 cd ${ROOT_DIR}
 
@@ -162,8 +169,8 @@ cmake ../../scratch-source/flightgear-git -G  ${CMAKE_TOOLCHAIN} \
 	-DCMAKE_BUILD_TYPE=Release \
 	-DCMAKE_INSTALL_PREFIX=${ROOT_DIR}/scratch-install \
 	-DCMAKE_PREFIX_PATH=${ROOT_DIR}/scratch-install/lib:${ROOT_DIR}/vcpkg-git/installed/x64-linux/lib:${QT5x64_LIB} \
-    -DCMAKE_CXX_FLAGS="-march=native" \
-    -DCMAKE_C_FLAGS="-march=native" \
+    -DCMAKE_CXX_FLAGS="-march=${CHIPSET} -mtune=${CHIPSET}" \
+    -DCMAKE_C_FLAGS="-march=${CHIPSET} -mtune=${CHIPSET}" \
 	-DOSG_FSTREAM_EXPORT_FIXED:BOOL=1 \
 	-DENABLE_JSBSIM:BOOL=1 \
 	-DENABLE_GPSSMOOTH:BOOL=1 \
@@ -187,8 +194,8 @@ cmake ../../scratch-source/terragear-git -G  ${CMAKE_TOOLCHAIN} \
 	-DCMAKE_BUILD_TYPE=Release \
 	-DCMAKE_INSTALL_PREFIX=${ROOT_DIR}/scratch-install \
 	-DCMAKE_PREFIX_PATH=${ROOT_DIR}/scratch-install/lib:${ROOT_DIR}/vcpkg-git/installed/x64-linux/lib:${QT5x64_LIB} \
-    -DCMAKE_CXX_FLAGS="-march=native" \
-    -DCMAKE_C_FLAGS="-march=native"
+    -DCMAKE_CXX_FLAGS="-march=${CHIPSET} -mtune=${CHIPSET}" \
+    -DCMAKE_C_FLAGS="-march=${CHIPSET} -mtune=${CHIPSET}"
 cmake --build . --config Release --target install
 cd ${ROOT_DIR}
 
