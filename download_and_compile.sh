@@ -89,13 +89,29 @@ function _logOutput(){
 }
 
 function _aptUpdate(){
-  echo "Asking password for 'apt-get update'..."
-  sudo apt-get update
+  local cmd=()
+
+  if [[ -n "$SUDO" ]]; then
+    cmd+=("$SUDO")
+  fi
+
+  cmd+=("$PKG_MGR" "update")
+
+  _printLog "Running '${cmd[*]}'..."
+  "${cmd[@]}"
 }
 
 function _aptInstall(){
-  echo "Asking password for 'apt-get install $*'..."
-  sudo apt-get install "$@"
+  local cmd=()
+
+  if [[ -n "$SUDO" ]]; then
+    cmd+=("$SUDO")
+  fi
+
+  cmd+=("$PKG_MGR" "install" "$@")
+
+  _printLog "Running '${cmd[*]}'..."
+  "${cmd[@]}"
 }
 
 function _gitUpdate(){
@@ -199,7 +215,7 @@ function _mandatory_pkg_alternative(){
 
   if [[ -n "$pkg" ]]; then
     _printLog "Package alternative matched for $pkg"
-    PKG="$PKG $pkg"
+    PKG+=("$pkg")
   else
     _printLog "No match found for the package alternative, aborting."
     exit 1
@@ -227,7 +243,7 @@ function _optional_pkg_alternative(){
 
   if [[ -n "$pkg" ]]; then
     _printLog "Optional package alternative matched for $pkg"
-    PKG="$PKG $pkg"
+    PKG+=("$pkg")
   else
     _printLog "No match found for the optional package alternative," \
               "continuing anyway."
@@ -299,10 +315,11 @@ function _usage() {
   echo "  -i            compile SimGear and FlightGear with -D ENABLE_RTI=ON option (experimental)"
   echo "  -b RELEASE_TYPE                                                                     default=RelWithDebInfo"
   echo "                set build type to RELEASE_TYPE (Release|RelWithDebInfo|Debug)"
-  echo "  -a y|n        y=do an apt-get update, n=don't                                       default=y"
-  echo "  -p y|n        y=download packages, n=don't                                          default=y"
+  echo "  -a y|n        y=run 'PACKAGE_MANAGER update', n=don't                               default=y"
+  echo "                (PACKAGE_MANAGER being a program like 'apt-get', see below)"
+  echo "  -p y|n        y=install packages using PACKAGE_MANAGER, n=don't                     default=y"
   echo "  -c y|n        y=compile programs, n=don't                                           default=y"
-  echo "  -d y|n        y=fetch programs from internet (cvs, svn, etc...), n=don't            default=y"
+  echo "  -d y|n        y=fetch programs from the Internet (Git, svn, etc.), n=don't          default=y"
   echo "      --git-clone-default-proto=PROTO                                                 default=https"
   echo "                default protocol to use for 'git clone' (https, git or ssh)"
   echo "      --git-clone-site-params=SITE=PROTOCOL[:USERNAME]"
@@ -311,6 +328,15 @@ function _usage() {
   echo "                protocols: 'ssh', 'https', 'git'; USERNAME is required when"
   echo "                using 'ssh'). You may pass this option several times with"
   echo "                different sites."
+  echo "      --package-manager=PACKAGE_MANAGER                                               default=apt-get"
+  echo "                program used to install packages; must be compatible with"
+  echo "                'apt-get' for the operations performed by $PROGNAME."
+  echo "      --sudo=SUDO_PROGRAM                                                             default=sudo"
+  echo "                program used to run PACKAGE_MANAGER with appropriate rights"
+  echo "                (pass an empty value to run the package manager directly)."
+  echo "                Passing 'echo' as the SUDO_PROGRAM can be useful to see what"
+  echo "                would be done with the package manager without actually running"
+  echo "                the commands."
   echo "  -j X          pass -jX to the Make program"
   echo "  -O X          pass -OX to the Make program"
   echo "  -r y|n        y=reconfigure programs before compiling them, n=don't reconfigure     default=y"
@@ -337,6 +363,9 @@ DOWNLOAD_PACKAGES="y"
 COMPILE="y"
 RECONFIGURE="y"
 DOWNLOAD="y"
+
+SUDO="sudo"
+PKG_MGR="apt-get"
 
 # How to download Git repositories:
 #
@@ -403,7 +432,8 @@ REPO_SITE[TERRAGEARGUI]="SourceForge"
 # getopt is from the util-linux package (in Debian). Contrary to bash's getopts
 # built-in function, it allows one to define long options.
 TEMP=$(getopt -o '+shc:p:a:d:r:j:O:ib:' \
-  --longoptions git-clone-default-proto:,git-clone-site-params:,help,version \
+  --longoptions git-clone-default-proto:,git-clone-site-params:,help \
+  --longoptions package-manager:,sudo:,version \
   -n "$PROGNAME" -- "$@")
 
 case $? in
@@ -472,6 +502,8 @@ while true; do
       fi
       shift 2
       ;;
+    --package-manager) PKG_MGR="$2"; shift 2 ;;
+    --sudo) SUDO="$2"; shift 2 ;;
     -r) RECONFIGURE="$2"; shift 2 ;;
     -j) JOPTION=" -j$2"; shift 2 ;;
     -O) OOPTION=" -O$2"; shift 2 ;;
@@ -557,66 +589,67 @@ _logSep
 #######################################################
 #######################################################
 
-if [[ "$DOWNLOAD_PACKAGES" = "y" ]] && [[ "$APT_GET_UPDATE" = "y" ]]; then
-  _aptUpdate
-fi
-
-# Ensure 'dctrl-tools' is installed
-if [[ "$(dpkg-query --showformat='${Status}\n' --show dctrl-tools \
-                    2>/dev/null | awk '{print $3}')" != "installed" ]]; then
-  if [[ "$DOWNLOAD_PACKAGES" = "y" ]]; then
-    _aptInstall dctrl-tools
-  else
-    echo -n "The 'dctrl-tools' package is needed, but DOWNLOAD_PACKAGES is "
-    echo -e "not set to 'y'.\nAborting."
-    exit 1
-  fi
-fi
-
-# Minimum
-PKG="build-essential cmake git"
-_mandatory_pkg_alternative libcurl4-openssl-dev libcurl4-gnutls-dev
-# cmake
-PKG="$PKG libarchive-dev libbz2-dev libexpat1-dev libjsoncpp-dev liblzma-dev libncurses5-dev procps zlib1g-dev"
-# TG
-PKG="$PKG libcgal-dev libgdal-dev libtiff5-dev"
-# TGGUI/OpenRTI
-PKG="$PKG libqt4-dev"
-# SG/FG
-PKG="$PKG zlib1g-dev freeglut3-dev libglew-dev libboost-dev"
-_mandatory_pkg_alternative libopenscenegraph-3.4-dev libopenscenegraph-dev \
-                           'libopenscenegraph-[0-9]+\.[0-9]+-dev'
-# FG
-PKG="$PKG libopenal-dev libudev-dev libdbus-1-dev libplib-dev"
-_mandatory_pkg_alternative libpng-dev libpng12-dev libpng16-dev
-# The following packages are needed for the built-in launcher
-_optional_pkg_alternative qt5-default
-_optional_pkg_alternative qtdeclarative5-dev
-_optional_pkg_alternative qtbase5-dev-tools            # for rcc
-_optional_pkg_alternative qttools5-dev-tools           # for lrelease
-_optional_pkg_alternative qml-module-qtquick2
-_optional_pkg_alternative qml-module-qtquick-window2
-_optional_pkg_alternative qml-module-qtquick-dialogs
-_optional_pkg_alternative libqt5opengl5-dev
-_optional_pkg_alternative libqt5svg5-dev
-_optional_pkg_alternative libqt5websockets5-dev
-# The following packages are only needed for the Qt-based remote Canvas
-# (comment written at the time of FG 2018.2).
-_optional_pkg_alternative qtbase5-private-dev
-_optional_pkg_alternative qtdeclarative5-private-dev
-# FGPanel
-PKG="$PKG fluid libbz2-dev libfltk1.3-dev libxi-dev libxmu-dev"
-# FGAdmin
-PKG="$PKG libxinerama-dev libjpeg-dev libxft-dev"
-# ATC-Pie
-PKG="$PKG python3-pyqt5 python3-pyqt5.qtmultimedia libqt5multimedia5-plugins"
-# FGo
-PKG="$PKG python-tk"
-# FGx (FGx is not compatible with Qt5, however we have installed Qt5 by default)
-#PKG="$PKG libqt5xmlpatterns5-dev libqt5webkit5-dev"
-
 if [[ "$DOWNLOAD_PACKAGES" = "y" ]]; then
-  _aptInstall $PKG
+  if [[ "$APT_GET_UPDATE" = "y" ]]; then
+    _aptUpdate
+  fi
+
+  # Ensure 'dctrl-tools' is installed
+  if [[ "$(dpkg-query --showformat='${Status}\n' --show dctrl-tools \
+                      2>/dev/null | awk '{print $3}')" != "installed" ]]; then
+    _aptInstall dctrl-tools
+  fi
+
+  # Minimum
+  PKG=(build-essential cmake git)
+  _mandatory_pkg_alternative libcurl4-openssl-dev libcurl4-gnutls-dev
+  # cmake
+  PKG+=(libarchive-dev libbz2-dev libexpat1-dev libjsoncpp-dev liblzma-dev
+        libncurses5-dev procps zlib1g-dev)
+  # TG
+  PKG+=(libcgal-dev libgdal-dev libtiff5-dev)
+  # TGGUI/OpenRTI
+  PKG+=(libqt4-dev)
+  # SG/FG
+  PKG+=(zlib1g-dev freeglut3-dev libglew-dev libboost-dev)
+  _mandatory_pkg_alternative libopenscenegraph-3.4-dev libopenscenegraph-dev \
+                             'libopenscenegraph-[0-9]+\.[0-9]+-dev'
+  # FG
+  PKG+=(libopenal-dev libudev-dev libdbus-1-dev libplib-dev)
+  _mandatory_pkg_alternative libpng-dev libpng12-dev libpng16-dev
+  # The following packages are needed for the built-in launcher
+  _optional_pkg_alternative qt5-default
+  _optional_pkg_alternative qtdeclarative5-dev
+  _optional_pkg_alternative qtbase5-dev-tools            # for rcc
+  _optional_pkg_alternative qttools5-dev-tools           # for lrelease
+  _optional_pkg_alternative qml-module-qtquick2
+  _optional_pkg_alternative qml-module-qtquick-window2
+  _optional_pkg_alternative qml-module-qtquick-dialogs
+  _optional_pkg_alternative libqt5opengl5-dev
+  _optional_pkg_alternative libqt5svg5-dev
+  _optional_pkg_alternative libqt5websockets5-dev
+  # The following packages are only needed for the Qt-based remote Canvas
+  # (comment written at the time of FG 2018.2).
+  _optional_pkg_alternative qtbase5-private-dev
+  _optional_pkg_alternative qtdeclarative5-private-dev
+  # FGPanel
+  PKG+=(fluid libbz2-dev libfltk1.3-dev libxi-dev libxmu-dev)
+  # FGAdmin
+  PKG+=(libxinerama-dev libjpeg-dev libxft-dev)
+  # ATC-Pie
+  PKG+=(python3-pyqt5 python3-pyqt5.qtmultimedia libqt5multimedia5-plugins)
+  # FGo
+  PKG+=(python-tk)
+  # FGx (FGx is not compatible with Qt5, however we have installed Qt5 by default)
+  #PKG+=(libqt5xmlpatterns5-dev libqt5webkit5-dev)
+
+  _aptInstall "${PKG[@]}"
+else
+  _printLog
+  _printLog "Note: option -p of $PROGNAME set to 'n' (no), therefore no"
+  _printLog "      package will be installed via ${PKG_MGR}. Compilation of" \
+                  "some components"
+  _printLog "      may fail if mandatory dependencies are missing."
 fi
 
 #######################################################
