@@ -790,13 +790,13 @@ fi
 OSG_INSTALL_DIR=openscenegraph
 INSTALL_DIR_OSG=$INSTALL_DIR/$OSG_INSTALL_DIR
 cd "$CBD"
-mkdir -p "openscenegraph"
 if _elementIn "OSG" "${WHATTOBUILD[@]}"; then
   _printLog "****************************************"
   _printLog "**************** OSG *******************"
   _printLog "****************************************"
 
-  cd "$CBD"/openscenegraph
+  mkdir -p "openscenegraph"
+  cd "openscenegraph"
   _gitDownload OSG
   _gitUpdate OpenSceneGraph-3.4
 
