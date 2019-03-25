@@ -620,6 +620,7 @@ if [[ "$DOWNLOAD_PACKAGES" = "y" ]]; then
   # The following packages are needed for the built-in launcher
   _optional_pkg_alternative qt5-default
   _optional_pkg_alternative qtdeclarative5-dev
+  _optional_pkg_alternative qttools5-dev
   _optional_pkg_alternative qtbase5-dev-tools            # for rcc
   _optional_pkg_alternative qttools5-dev-tools           # for lrelease
   _optional_pkg_alternative qml-module-qtquick2
