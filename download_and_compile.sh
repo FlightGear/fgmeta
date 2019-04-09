@@ -601,13 +601,15 @@ if [[ "$DOWNLOAD_PACKAGES" = "y" ]]; then
   fi
 
   # Minimum
-  PKG=(build-essential cmake git)
+  PKG=(build-essential git)
   _mandatory_pkg_alternative libcurl4-openssl-dev libcurl4-gnutls-dev
 
   # CMake
   if _elementIn "CMAKE" "${WHATTOBUILD[@]}"; then
     PKG+=(libarchive-dev libbz2-dev libexpat1-dev libjsoncpp-dev liblzma-dev
           libncurses5-dev procps zlib1g-dev)
+  else
+    PKG+=(cmake)
   fi
 
   # TerraGear
