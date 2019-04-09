@@ -603,50 +603,77 @@ if [[ "$DOWNLOAD_PACKAGES" = "y" ]]; then
   # Minimum
   PKG=(build-essential cmake git)
   _mandatory_pkg_alternative libcurl4-openssl-dev libcurl4-gnutls-dev
-  # cmake
-  PKG+=(libarchive-dev libbz2-dev libexpat1-dev libjsoncpp-dev liblzma-dev
-        libncurses5-dev procps zlib1g-dev)
-  # TG
-  PKG+=(libcgal-dev libgdal-dev libtiff5-dev)
-  # TGGUI/OpenRTI
-  PKG+=(libqt4-dev)
-  # SG/FG
-  PKG+=(zlib1g-dev freeglut3-dev libglew-dev libboost-dev)
-  _mandatory_pkg_alternative libopenscenegraph-3.4-dev libopenscenegraph-dev \
-                             'libopenscenegraph-[0-9]+\.[0-9]+-dev'
-  # FG
-  PKG+=(libopenal-dev libudev-dev libdbus-1-dev libplib-dev)
-  _mandatory_pkg_alternative libpng-dev libpng12-dev libpng16-dev
-  # CppUnit is shipped with the FG sources, but if installed via the distro
-  # package manager, 1) the FG build will be quicker and 2) libcppunit-dev
-  # will be updated like other distro packages (e.g., security updates).
-  _optional_pkg_alternative libcppunit-dev
-  # The following packages are needed for the built-in launcher
-  _optional_pkg_alternative qt5-default
-  _optional_pkg_alternative qtdeclarative5-dev
-  _optional_pkg_alternative qttools5-dev
-  _optional_pkg_alternative qtbase5-dev-tools            # for rcc
-  _optional_pkg_alternative qttools5-dev-tools           # for lrelease
-  _optional_pkg_alternative qml-module-qtquick2
-  _optional_pkg_alternative qml-module-qtquick-window2
-  _optional_pkg_alternative qml-module-qtquick-dialogs
-  _optional_pkg_alternative libqt5opengl5-dev
-  _optional_pkg_alternative libqt5svg5-dev
-  _optional_pkg_alternative libqt5websockets5-dev
-  # The following packages are only needed for the Qt-based remote Canvas
-  # (comment written at the time of FG 2018.2).
-  _optional_pkg_alternative qtbase5-private-dev
-  _optional_pkg_alternative qtdeclarative5-private-dev
-  # FGPanel
-  PKG+=(fluid libbz2-dev libfltk1.3-dev libxi-dev libxmu-dev)
-  # FGAdmin
-  PKG+=(libxinerama-dev libjpeg-dev libxft-dev)
-  # ATC-Pie
-  PKG+=(python3-pyqt5 python3-pyqt5.qtmultimedia libqt5multimedia5-plugins)
-  # FGo
-  PKG+=(python-tk)
-  # FGx (FGx is not compatible with Qt5, however we have installed Qt5 by default)
-  #PKG+=(libqt5xmlpatterns5-dev libqt5webkit5-dev)
+
+  # CMake
+  if _elementIn "CMAKE" "${WHATTOBUILD[@]}"; then
+    PKG+=(libarchive-dev libbz2-dev libexpat1-dev libjsoncpp-dev liblzma-dev
+          libncurses5-dev procps zlib1g-dev)
+  fi
+
+  # TerraGear
+  if _elementIn "TERRAGEAR" "${WHATTOBUILD[@]}"; then
+    PKG+=(libcgal-dev libgdal-dev libtiff5-dev)
+  fi
+
+  # TerraGear GUI and OpenRTI
+  if _elementIn "TERRAGEARGUI" "${WHATTOBUILD[@]}" || \
+     _elementIn "OPENRTI" "${WHATTOBUILD[@]}"; then
+    PKG+=(libqt4-dev)
+  fi
+
+  # SimGear and FlightGear
+  if _elementIn "SIMGEAR" "${WHATTOBUILD[@]}" || \
+     _elementIn "FGFS" "${WHATTOBUILD[@]}"; then
+    PKG+=(zlib1g-dev freeglut3-dev libglew-dev libboost-dev)
+    _mandatory_pkg_alternative libopenscenegraph-3.4-dev libopenscenegraph-dev \
+                               'libopenscenegraph-[0-9]+\.[0-9]+-dev'
+  fi
+
+  # FlightGear
+  if _elementIn "FGFS" "${WHATTOBUILD[@]}"; then
+    PKG+=(libopenal-dev libudev-dev libdbus-1-dev libplib-dev)
+    _mandatory_pkg_alternative libpng-dev libpng12-dev libpng16-dev
+    # CppUnit is shipped with the FG sources, but if installed via the distro
+    # package manager, 1) the FG build will be quicker and 2) libcppunit-dev
+    # will be updated like other distro packages (e.g., security updates).
+    _optional_pkg_alternative libcppunit-dev
+    # The following packages are needed for the built-in launcher
+    _optional_pkg_alternative qt5-default
+    _optional_pkg_alternative qtdeclarative5-dev
+    _optional_pkg_alternative qttools5-dev
+    _optional_pkg_alternative qtbase5-dev-tools            # for rcc
+    _optional_pkg_alternative qttools5-dev-tools           # for lrelease
+    _optional_pkg_alternative qml-module-qtquick2
+    _optional_pkg_alternative qml-module-qtquick-window2
+    _optional_pkg_alternative qml-module-qtquick-dialogs
+    _optional_pkg_alternative libqt5opengl5-dev
+    _optional_pkg_alternative libqt5svg5-dev
+    _optional_pkg_alternative libqt5websockets5-dev
+    # The following packages are only needed for the Qt-based remote Canvas
+    # (comment written at the time of FG 2018.2).
+    _optional_pkg_alternative qtbase5-private-dev
+    _optional_pkg_alternative qtdeclarative5-private-dev
+    # FGPanel
+    PKG+=(fluid libbz2-dev libfltk1.3-dev libxi-dev libxmu-dev)
+    # FGAdmin
+    PKG+=(libxinerama-dev libjpeg-dev libxft-dev)
+  fi
+
+  # ATC-pie
+  if _elementIn "ATCPIE" "${WHATTOBUILD[@]}"; then
+    PKG+=(python3-pyqt5 python3-pyqt5.qtmultimedia libqt5multimedia5-plugins)
+  fi
+
+  # FGo!
+  if _elementIn "FGO" "${WHATTOBUILD[@]}"; then
+    PKG+=(python-tk)
+  fi
+
+  # if _elementIn "FGX" "${WHATTOBUILD[@]}"; then
+  #   FGx (FGx is not compatible with Qt5, however we have installed Qt5 by
+  #   default)
+  #   PKG+=(libqt5xmlpatterns5-dev libqt5webkit5-dev)
+  # fi
 
   _aptInstall "${PKG[@]}"
 else
