@@ -635,10 +635,6 @@ if [[ "$DOWNLOAD_PACKAGES" = "y" ]]; then
   if _elementIn "FGFS" "${WHATTOBUILD[@]}"; then
     PKG+=(libopenal-dev libudev-dev libdbus-1-dev libplib-dev)
     _mandatory_pkg_alternative libpng-dev libpng12-dev libpng16-dev
-    # CppUnit is shipped with the FG sources, but if installed via the distro
-    # package manager, 1) the FG build will be quicker and 2) libcppunit-dev
-    # will be updated like other distro packages (e.g., security updates).
-    _optional_pkg_alternative libcppunit-dev
     # The following packages are needed for the built-in launcher
     _optional_pkg_alternative qt5-default
     _optional_pkg_alternative qtdeclarative5-dev
