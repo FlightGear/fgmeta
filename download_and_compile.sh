@@ -118,18 +118,18 @@ function _gitUpdate(){
   if [ "$DOWNLOAD" != "y" ]; then
     return
   fi
-  branch=$1
+  branch="$1"
   set +e
   git diff --exit-code 2>&1 > /dev/null
   if [ $? != 1 ]; then
     set -e
     git pull -r
-    git checkout -f $branch
+    git checkout -f "$branch"
   else
     set -e
     git stash save -u -q
     git pull -r
-    git checkout -f $branch
+    git checkout -f "$branch"
     git stash pop -q
   fi
 }
@@ -186,8 +186,8 @@ function _gitDownload(){
 
 function _make(){
   if [ "$COMPILE" = "y" ]; then
-    pkg=$1
-    cd "$CBD"/build/$pkg
+    pkg="$1"
+    cd "$CBD/build/$pkg"
     _printLog "MAKE $pkg"
     make $JOPTION $OOPTION 2>&1 | _logOutput
     _printLog "INSTALL $pkg"
@@ -720,7 +720,7 @@ _printLog
 # cmake
 #######################################################
 CMAKE_INSTALL_DIR=cmake
-INSTALL_DIR_CMAKE=$INSTALL_DIR/$CMAKE_INSTALL_DIR
+INSTALL_DIR_CMAKE="$INSTALL_DIR/$CMAKE_INSTALL_DIR"
 cd "$CBD"
 if _elementIn "CMAKE" "${WHATTOBUILD[@]}"; then
   _printLog "****************************************"
@@ -755,7 +755,7 @@ fi
 # PLIB
 #######################################################
 PLIB_INSTALL_DIR=plib
-INSTALL_DIR_PLIB=$INSTALL_DIR/$PLIB_INSTALL_DIR
+INSTALL_DIR_PLIB="$INSTALL_DIR/$PLIB_INSTALL_DIR"
 cd "$CBD"
 if _elementIn "PLIB" "${WHATTOBUILD[@]}"; then
   _printLog "****************************************"
@@ -784,7 +784,7 @@ fi
 # OPENRTI
 #######################################################
 OPENRTI_INSTALL_DIR=openrti
-INSTALL_DIR_OPENRTI=$INSTALL_DIR/$OPENRTI_INSTALL_DIR
+INSTALL_DIR_OPENRTI="$INSTALL_DIR/$OPENRTI_INSTALL_DIR"
 cd "$CBD"
 if _elementIn "OPENRTI" "${WHATTOBUILD[@]}"; then
   _printLog "****************************************"
@@ -818,7 +818,7 @@ fi
 # OpenSceneGraph
 #######################################################
 OSG_INSTALL_DIR=openscenegraph
-INSTALL_DIR_OSG=$INSTALL_DIR/$OSG_INSTALL_DIR
+INSTALL_DIR_OSG="$INSTALL_DIR/$OSG_INSTALL_DIR"
 cd "$CBD"
 if _elementIn "OSG" "${WHATTOBUILD[@]}"; then
   _printLog "****************************************"
@@ -860,7 +860,7 @@ fi
 # SIMGEAR
 #######################################################
 SIMGEAR_INSTALL_DIR=simgear
-INSTALL_DIR_SIMGEAR=$INSTALL_DIR/$SIMGEAR_INSTALL_DIR
+INSTALL_DIR_SIMGEAR="$INSTALL_DIR/$SIMGEAR_INSTALL_DIR"
 cd "$CBD"
 if _elementIn "SIMGEAR" "${WHATTOBUILD[@]}"; then
   _printLog "****************************************"
@@ -870,7 +870,7 @@ if _elementIn "SIMGEAR" "${WHATTOBUILD[@]}"; then
   mkdir -p "simgear"
   cd "$CBD"/simgear
   _gitDownload SIMGEAR
-  _gitUpdate $FGVERSION
+  _gitUpdate "$FGVERSION"
 
   if [ "$RECONFIGURE" = "y" ]; then
     cd "$CBD"
@@ -891,7 +891,7 @@ fi
 # FGFS
 #######################################################
 FGFS_INSTALL_DIR=flightgear
-INSTALL_DIR_FGFS=$INSTALL_DIR/$FGFS_INSTALL_DIR
+INSTALL_DIR_FGFS="$INSTALL_DIR/$FGFS_INSTALL_DIR"
 cd "$CBD"
 if _elementIn "FGFS" "${WHATTOBUILD[@]}" || \
    _elementIn "DATA" "${WHATTOBUILD[@]}"; then
@@ -904,7 +904,7 @@ if _elementIn "FGFS" "${WHATTOBUILD[@]}" || \
     _printLog "****************************************"
 
     _gitDownload DATA
-    _gitUpdate $FGVERSION
+    _gitUpdate "$FGVERSION"
   fi
 
   mkdir -p "$CBD"/flightgear
@@ -916,7 +916,7 @@ if _elementIn "FGFS" "${WHATTOBUILD[@]}" || \
     _printLog "****************************************"
 
     _gitDownload FGFS
-    _gitUpdate $FGVERSION
+    _gitUpdate "$FGVERSION"
 
     if [ "$RECONFIGURE" = "y" ]; then
       cd "$CBD"
@@ -966,7 +966,7 @@ fi
 # FGRUN
 #######################################################
 FGRUN_INSTALL_DIR=fgrun
-INSTALL_DIR_FGRUN=$INSTALL_DIR/$FGRUN_INSTALL_DIR
+INSTALL_DIR_FGRUN="$INSTALL_DIR/$FGRUN_INSTALL_DIR"
 cd "$CBD"
 if _elementIn "FGRUN" "${WHATTOBUILD[@]}"; then
   _printLog "****************************************"
@@ -976,7 +976,7 @@ if _elementIn "FGRUN" "${WHATTOBUILD[@]}"; then
   mkdir -p "fgrun"
   cd "$CBD"/fgrun
   _gitDownload FGRUN
-  _gitUpdate $FGVERSION
+  _gitUpdate "$FGVERSION"
 
   if [ "$RECONFIGURE" = "y" ]; then
     cd "$CBD"
@@ -1007,7 +1007,7 @@ fi
 # FGO!
 #######################################################
 FGO_INSTALL_DIR=fgo
-INSTALL_DIR_FGO=$INSTALL_DIR/$FGO_INSTALL_DIR
+INSTALL_DIR_FGO="$INSTALL_DIR/$FGO_INSTALL_DIR"
 cd "$CBD"
 if _elementIn "FGO" "${WHATTOBUILD[@]}"; then
   _printLog "****************************************"
@@ -1038,7 +1038,7 @@ fi
 # FGx
 #######################################################
 FGX_INSTALL_DIR=fgx
-INSTALL_DIR_FGX=$INSTALL_DIR/$FGX_INSTALL_DIR
+INSTALL_DIR_FGX="$INSTALL_DIR/$FGX_INSTALL_DIR"
 cd "$CBD"
 if _elementIn "FGX" "${WHATTOBUILD[@]}"; then
   _printLog "****************************************"
@@ -1066,13 +1066,13 @@ if _elementIn "FGX" "${WHATTOBUILD[@]}"; then
 
   cd ..
   if [ "$RECONFIGURE" = "y" ]; then
-    mkdir -p $INSTALL_DIR_FGX
-    cd $INSTALL_DIR_FGX
+    mkdir -p "$INSTALL_DIR_FGX"
+    cd "$INSTALL_DIR_FGX"
     qmake ../../fgx/src
   fi
 
   if [ "$COMPILE" = "y" ]; then
-    cd $INSTALL_DIR_FGX
+    cd "$INSTALL_DIR_FGX"
     _printLog "MAKE AND INSTALL FGX"
     _printLog "make $JOPTION $OOPTION"
     make $JOPTION $OOPTION 2>&1 | _logOutput
@@ -1095,7 +1095,7 @@ fi
 # ATC-PIE
 #######################################################
 ATCPIE_INSTALL_DIR=atc-pie
-INSTALL_DIR_ATCPIE=$INSTALL_DIR/$ATCPIE_INSTALL_DIR
+INSTALL_DIR_ATCPIE="$INSTALL_DIR/$ATCPIE_INSTALL_DIR"
 cd "$CBD"
 if _elementIn "ATCPIE" "${WHATTOBUILD[@]}"; then
   _printLog "****************************************"
@@ -1103,7 +1103,7 @@ if _elementIn "ATCPIE" "${WHATTOBUILD[@]}"; then
   _printLog "****************************************"
 
   mkdir -p "$INSTALL_DIR_ATCPIE"
-  cd $INSTALL_DIR_ATCPIE
+  cd "$INSTALL_DIR_ATCPIE"
   _gitDownload ATCPIE
   _gitUpdate master
 
@@ -1121,7 +1121,7 @@ fi
 # OPENRADAR
 #######################################################
 OR_INSTALL_DIR=openradar
-INSTALL_DIR_OR=$INSTALL_DIR/$OR_INSTALL_DIR
+INSTALL_DIR_OR="$INSTALL_DIR/$OR_INSTALL_DIR"
 cd "$CBD"
 if _elementIn "OPENRADAR" "${WHATTOBUILD[@]}"; then
   _printLog "****************************************"
@@ -1148,7 +1148,7 @@ fi
 #######################################################
 
 TG_INSTALL_DIR=terragear
-INSTALL_DIR_TG=$INSTALL_DIR/$TG_INSTALL_DIR
+INSTALL_DIR_TG="$INSTALL_DIR/$TG_INSTALL_DIR"
 cd "$CBD"
 if _elementIn "TERRAGEAR" "${WHATTOBUILD[@]}"; then
   _printLog "****************************************"
@@ -1202,7 +1202,7 @@ _logSep
 #######################################################
 
 TGGUI_INSTALL_DIR=terrageargui
-INSTALL_DIR_TGGUI=$INSTALL_DIR/$TGGUI_INSTALL_DIR
+INSTALL_DIR_TGGUI="$INSTALL_DIR/$TGGUI_INSTALL_DIR"
 cd "$CBD"
 if _elementIn "TERRAGEARGUI" "${WHATTOBUILD[@]}"; then
   _printLog "****************************************"
