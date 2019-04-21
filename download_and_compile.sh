@@ -927,7 +927,8 @@ if _elementIn "FGFS" "${WHATTOBUILD[@]}" || \
             -DENABLE_FLITE=ON \
             -DCMAKE_INSTALL_PREFIX:PATH="$INSTALL_DIR_FGFS" \
             -DCMAKE_PREFIX_PATH="$INSTALL_DIR_SIMGEAR;$INSTALL_DIR_OSG;$INSTALL_DIR_OPENRTI;$INSTALL_DIR_PLIB" \
-            -DFG_DATA_DIR="$INSTALL_DIR_FGFS/fgdata" \
+            -DFG_DATA_DIR:PATH="$INSTALL_DIR_FGFS/fgdata" \
+            -DTRANSLATIONS_SRC_DIR:PATH="$INSTALL_DIR_FGFS/fgdata/Translations" \
             $FG_CMAKEARGS \
             ../../flightgear 2>&1 | _logOutput
     fi
