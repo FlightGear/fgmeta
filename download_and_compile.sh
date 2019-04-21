@@ -939,27 +939,27 @@ if _elementIn "FGFS" "${WHATTOBUILD[@]}" || \
 
   SCRIPT=run_fgfs.sh
   echo "#!/bin/sh" > $SCRIPT
-  echo "cd \$(dirname \$0)" >> $SCRIPT
-  echo "cd $SUB_INSTALL_DIR/$FGFS_INSTALL_DIR/bin" >> $SCRIPT
-  echo "export LD_LIBRARY_PATH=../../$SIMGEAR_INSTALL_DIR/lib:../../$OSG_INSTALL_DIR/lib:../../$OPENRTI_INSTALL_DIR/lib:../../$PLIB_INSTALL_DIR/lib\${LD_LIBRARY_PATH:+:}\${LD_LIBRARY_PATH}" \
+  echo "cd \"\$(dirname \"\$0\")\"" >> $SCRIPT
+  echo "cd '$SUB_INSTALL_DIR/$FGFS_INSTALL_DIR/bin'" >> $SCRIPT
+  echo "export LD_LIBRARY_PATH='../../$SIMGEAR_INSTALL_DIR/lib:../../$OSG_INSTALL_DIR/lib:../../$OPENRTI_INSTALL_DIR/lib:../../$PLIB_INSTALL_DIR/lib'\"\${LD_LIBRARY_PATH:+:}\${LD_LIBRARY_PATH}\"" \
        >> $SCRIPT
-  echo "./fgfs --fg-root=\$PWD/../fgdata/ \$@" >> $SCRIPT
+  echo "./fgfs --fg-root=\"\$PWD/../fgdata\" \"\$@\"" >> $SCRIPT
   chmod 755 $SCRIPT
 
   SCRIPT=run_fgfs_debug.sh
   echo "#!/bin/sh" > $SCRIPT
-  echo "cd \$(dirname \$0)" >> $SCRIPT
-  echo "cd $SUB_INSTALL_DIR/$FGFS_INSTALL_DIR/bin" >> $SCRIPT
-  echo "export LD_LIBRARY_PATH=../../$SIMGEAR_INSTALL_DIR/lib:../../$OSG_INSTALL_DIR/lib:../../$OPENRTI_INSTALL_DIR/lib:../../$PLIB_INSTALL_DIR/lib\${LD_LIBRARY_PATH:+:}\${LD_LIBRARY_PATH}" \
+  echo "cd \"\$(dirname \"\$0\")\"" >> $SCRIPT
+  echo "cd '$SUB_INSTALL_DIR/$FGFS_INSTALL_DIR/bin'" >> $SCRIPT
+  echo "export LD_LIBRARY_PATH='../../$SIMGEAR_INSTALL_DIR/lib:../../$OSG_INSTALL_DIR/lib:../../$OPENRTI_INSTALL_DIR/lib:../../$PLIB_INSTALL_DIR/lib'\"\${LD_LIBRARY_PATH:+:}\${LD_LIBRARY_PATH}\"" \
        >> $SCRIPT
-  echo "gdb  --directory=$CBD/flightgear/src --args fgfs --fg-root=\$PWD/../fgdata/ \$@" >> $SCRIPT
+  echo "gdb --directory='$CBD/flightgear/src' --args ./fgfs --fg-root=\"\$PWD/../fgdata\" \"\$@\"" >> $SCRIPT
   chmod 755 $SCRIPT
 
   SCRIPT=run_fgcom.sh
   echo "#!/bin/sh" > $SCRIPT
-  echo "cd \$(dirname \$0)" >> $SCRIPT
-  echo "cd $SUB_INSTALL_DIR/$FGFS_INSTALL_DIR/bin" >> $SCRIPT
-  echo "./fgcom \$@" >> $SCRIPT
+  echo "cd \"\$(dirname \"\$0\")\"" >> $SCRIPT
+  echo "cd '$SUB_INSTALL_DIR/$FGFS_INSTALL_DIR/bin'" >> $SCRIPT
+  echo "./fgcom \"\$@\"" >> $SCRIPT
   chmod 755 $SCRIPT
 fi
 
@@ -996,11 +996,11 @@ if _elementIn "FGRUN" "${WHATTOBUILD[@]}"; then
 
   SCRIPT=run_fgrun.sh
   echo "#!/bin/sh" > $SCRIPT
-  echo "cd \$(dirname \$0)" >> $SCRIPT
-  echo "cd $SUB_INSTALL_DIR/$FGRUN_INSTALL_DIR/bin" >> $SCRIPT
-  echo "export LD_LIBRARY_PATH=../../$SIMGEAR_INSTALL_DIR/lib:../../$OSG_INSTALL_DIR/lib:../../$OPENRTI_INSTALL_DIR/lib:../../$PLIB_INSTALL_DIR/lib\${LD_LIBRARY_PATH:+:}\${LD_LIBRARY_PATH}" \
+  echo "cd \"\$(dirname \"\$0\")\"" >> $SCRIPT
+  echo "cd '$SUB_INSTALL_DIR/$FGRUN_INSTALL_DIR/bin'" >> $SCRIPT
+  echo "export LD_LIBRARY_PATH='../../$SIMGEAR_INSTALL_DIR/lib:../../$OSG_INSTALL_DIR/lib:../../$OPENRTI_INSTALL_DIR/lib:../../$PLIB_INSTALL_DIR/lib'\"\${LD_LIBRARY_PATH:+:}\${LD_LIBRARY_PATH}\"" \
        >> $SCRIPT
-  echo "./fgrun --fg-exe=\$PWD/../../$FGFS_INSTALL_DIR/bin/fgfs --fg-root=\$PWD/../../$FGFS_INSTALL_DIR/fgdata   \$@" >> $SCRIPT
+  echo "./fgrun --fg-exe=\"\$PWD\"/../../'$FGFS_INSTALL_DIR/bin/fgfs' --fg-root=\"\$PWD\"/../../'$FGFS_INSTALL_DIR/fgdata' \"\$@\"" >> $SCRIPT
   chmod 755 $SCRIPT
 fi
 
@@ -1027,11 +1027,10 @@ if _elementIn "FGO" "${WHATTOBUILD[@]}"; then
 
   SCRIPT=run_fgo.sh
   echo "#!/bin/sh" > $SCRIPT
-  echo "cd \$(dirname \$0)" >> $SCRIPT
-  echo "cd $SUB_INSTALL_DIR" >> $SCRIPT
-  echo "p=\$(pwd)" >> $SCRIPT
-  echo "cd $FGO_INSTALL_DIR" >> $SCRIPT
-  echo "python fgo" >> $SCRIPT
+  echo "cd \"\$(dirname \"\$0\")\"" >> $SCRIPT
+  echo "cd '$SUB_INSTALL_DIR'" >> $SCRIPT
+  echo "cd '$FGO_INSTALL_DIR'" >> $SCRIPT
+  echo "python ./fgo" >> $SCRIPT
   chmod 755 $SCRIPT
 fi
 
@@ -1084,11 +1083,9 @@ if _elementIn "FGX" "${WHATTOBUILD[@]}"; then
 
   SCRIPT=run_fgx.sh
   echo "#!/bin/sh" > $SCRIPT
-  echo "cd \$(dirname \$0)" >> $SCRIPT
-  echo "cd $ " >> $SCRIPT
-  echo "p=\$(pwd)" >> $SCRIPT
-  echo "cd $FGX_INSTALL_DIR" >> $SCRIPT
-  echo "./fgx" >> $SCRIPT
+  echo "cd \"\$(dirname \"\$0\")\"" >> $SCRIPT
+  echo "cd '$FGX_INSTALL_DIR'" >> $SCRIPT
+  echo "./fgx \"\$@\"" >> $SCRIPT
   chmod 755 $SCRIPT
 fi
 
@@ -1112,9 +1109,9 @@ if _elementIn "ATCPIE" "${WHATTOBUILD[@]}"; then
 
   SCRIPT=run_atcpie.sh
   echo "#!/bin/sh" > $SCRIPT
-  echo "cd \$(dirname \$0)" >> $SCRIPT
-  echo "cd $SUB_INSTALL_DIR/$ATCPIE_INSTALL_DIR" >> $SCRIPT
-  echo "./ATC-pie.py \$@" >> $SCRIPT
+  echo "cd \"\$(dirname \"\$0\")\"" >> $SCRIPT
+  echo "cd '$SUB_INSTALL_DIR/$ATCPIE_INSTALL_DIR'" >> $SCRIPT
+  echo "./ATC-pie.py \"\$@\"" >> $SCRIPT
   chmod 755 $SCRIPT
 fi
 
@@ -1138,7 +1135,7 @@ if _elementIn "OPENRADAR" "${WHATTOBUILD[@]}"; then
 
   SCRIPT=run_openradar.sh
   echo "#!/bin/sh" > $SCRIPT
-  echo "cd \$(dirname \$0)" >> $SCRIPT
+  echo "cd \"\$(dirname \"\$0\")\"" >> $SCRIPT
   echo "cd install/OpenRadar" >> $SCRIPT
   echo "java -jar OpenRadar.jar" >> $SCRIPT
   chmod 755 $SCRIPT
@@ -1176,25 +1173,25 @@ if _elementIn "TERRAGEAR" "${WHATTOBUILD[@]}"; then
 
   cd "$CBD"
   echo "#!/bin/sh" > run_tg-construct.sh
-  echo "cd $(dirname $0)" >> run_tg-construct.sh
+  echo "cd \"\$(dirname \"\$0\")\"" >> run_tg-construct.sh
   echo "cd install/terragear/bin" >> run_tg-construct.sh
-  echo "export LD_LIBRARY_PATH=$INSTALL_DIR_SIMGEAR/lib\${LD_LIBRARY_PATH:+:}\${LD_LIBRARY_PATH}" \
+  echo "export LD_LIBRARY_PATH='$INSTALL_DIR_SIMGEAR/lib'\"\${LD_LIBRARY_PATH:+:}\${LD_LIBRARY_PATH}\"" \
        >> run_tg-construct.sh
-  echo "./tg-construct \$@" >> run_tg-construct.sh
+  echo "./tg-construct \"\$@\"" >> run_tg-construct.sh
 
   echo "#!/bin/sh" > run_ogr-decode.sh
-  echo "cd $(dirname $0)" >> run_ogr-decode.sh
+  echo "cd \"\$(dirname \"\$0\")\"" >> run_ogr-decode.sh
   echo "cd install/terragear/bin" >> run_ogr-decode.sh
-  echo "export LD_LIBRARY_PATH=$INSTALL_DIR_SIMGEAR/lib\${LD_LIBRARY_PATH:+:}\${LD_LIBRARY_PATH}" \
+  echo "export LD_LIBRARY_PATH='$INSTALL_DIR_SIMGEAR/lib'\"\${LD_LIBRARY_PATH:+:}\${LD_LIBRARY_PATH}\"" \
        >> run_ogr-decode.sh
-  echo "./ogr-decode \$@" >> run_ogr-decode.sh
+  echo "./ogr-decode \"\$@\"" >> run_ogr-decode.sh
 
   echo "#!/bin/sh" > run_genapts850.sh
-  echo "cd $(dirname $0)" >> run_genapts850.sh
+  echo "cd \"\$(dirname \"\$0\")\"" >> run_genapts850.sh
   echo "cd install/terragear/bin" >> run_genapts850.sh
-  echo "export LD_LIBRARY_PATH=$INSTALL_DIR_SIMGEAR/lib\${LD_LIBRARY_PATH:+:}\${LD_LIBRARY_PATH}" \
+  echo "export LD_LIBRARY_PATH='$INSTALL_DIR_SIMGEAR/lib'\"\${LD_LIBRARY_PATH:+:}\${LD_LIBRARY_PATH}\"" \
        >> run_genapts850.sh
-  echo "./genapts850 \$@" >> run_genapts850.sh
+  echo "./genapts850 \"\$@\"" >> run_genapts850.sh
 fi
 _logSep
 
@@ -1240,11 +1237,11 @@ if _elementIn "TERRAGEARGUI" "${WHATTOBUILD[@]}"; then
 
   _log "Create run_terrageargui.sh"
   echo "#!/bin/sh" > run_terrageargui.sh
-  echo "cd \$(dirname \$0)" >> run_terrageargui.sh
+  echo "cd \"\$(dirname \"\$0\")\"" >> run_terrageargui.sh
   echo "cd install/terrageargui/bin" >> run_terrageargui.sh
-  echo "export LD_LIBRARY_PATH=$INSTALL_DIR_SIMGEAR/lib\${LD_LIBRARY_PATH:+:}\${LD_LIBRARY_PATH}" \
+  echo "export LD_LIBRARY_PATH='$INSTALL_DIR_SIMGEAR/lib'\"\${LD_LIBRARY_PATH:+:}\${LD_LIBRARY_PATH}\"" \
        >> run_terrageargui.sh
-  echo "./TerraGUI \$@" >> run_terrageargui.sh
+  echo "./TerraGUI \"\$@\"" >> run_terrageargui.sh
 fi
 
 # Print optional package alternatives that didn't match (this helps with
