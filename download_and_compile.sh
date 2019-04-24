@@ -371,7 +371,7 @@ PKG_MGR="apt-get"
 #
 # - 'https' used to be fine, but is currently unreliable at SourceForge (esp.
 #   for FGData, see
-#   <https://forum.flightgear.org/viewtopic.php?f=20&t=33620&start=90&sid=afb8b688a02c01ea4ea9306c35487bd0>);
+#   <https://forum.flightgear.org/viewtopic.php?f=20&t=33620&start=90>);
 # - 'git' is insecure (no way to guarantee you are downloading what you expect
 #   to be downloading);
 # - 'ssh' is secure, but requires an account at SourceForge (may be created at
