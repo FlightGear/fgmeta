@@ -557,16 +557,17 @@ unset -v site
 #######################################################
 # Warning about compilation time and size
 # Idea from Jester
-echo "**************************************"
-echo "*                                    *"
-echo "* Warning, the compilation process   *"
-echo "* is going to use 12 or more Gbytes  *"
-echo "* of space and at least a couple of  *"
-echo "* hours to download and build FG.    *"
-echo "*                                    *"
-echo "* Please, be patient ......          *"
-echo "*                                    *"
-echo "**************************************"
+echo '**********************************************************************'
+echo '*                                                                    *'
+echo '* Warning: a typical SimGear + FlightGear + FGData build requires    *'
+echo '* about 12 GiB of disk space. The compilation part may last from a   *'
+echo '* few minutes to hours, depending on your computer.                  *'
+echo '*                                                                    *'
+echo '* Hint: use the -j option if your CPU has several cores, as in:      *'
+echo '*                                                                    *'
+echo '*         download_and_compile.sh -j$(nproc)                         *'
+echo '*                                                                    *'
+echo '**********************************************************************'
 
 #######################################################
 #######################################################
