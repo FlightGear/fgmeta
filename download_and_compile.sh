@@ -956,6 +956,32 @@ if _elementIn "FGFS" "${WHATTOBUILD[@]}" || \
   echo "gdb --directory='$CBD/flightgear/src' --args ./fgfs --fg-root=\"\$PWD/../fgdata\" \"\$@\"" >> $SCRIPT
   chmod 755 $SCRIPT
 
+  # Useful for debugging library problems.
+  SCRIPT=run_ldd.sh
+  cat >"$SCRIPT" <<EndOfScriptText
+#!/bin/sh
+
+usage() {
+  echo "Usage: \$0 LDD_ARGUMENT..."
+  echo "Run 'ldd' with the same LD_LIBRARY_PATH setup as done inside run_fgfs.sh."
+  echo
+  echo "Examples: 'run_ldd.sh fgfs', 'run_ldd.sh fgcom', etc. (this can be used"
+  echo "for any binary in '$SUB_INSTALL_DIR/$FGFS_INSTALL_DIR/bin')."
+}
+
+if [ \$# -eq 0 ] || [ "\$1" = "--help" ]; then
+  usage
+  exit 1
+fi
+
+cd "\$(dirname "\$0")"
+cd '$SUB_INSTALL_DIR/$FGFS_INSTALL_DIR/bin'
+export LD_LIBRARY_PATH='../../$SIMGEAR_INSTALL_DIR/lib:../../$OSG_INSTALL_DIR/lib:../../$OPENRTI_INSTALL_DIR/lib:../../$PLIB_INSTALL_DIR/lib'"\${LD_LIBRARY_PATH:+:}\${LD_LIBRARY_PATH}"
+
+ldd "\$@"
+EndOfScriptText
+  chmod 755 "$SCRIPT"
+
   SCRIPT=run_fgcom.sh
   echo "#!/bin/sh" > $SCRIPT
   echo "cd \"\$(dirname \"\$0\")\"" >> $SCRIPT
