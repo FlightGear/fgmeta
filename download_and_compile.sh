@@ -1265,7 +1265,7 @@ if _elementIn "TERRAGEAR" "${WHATTOBUILD[@]}"; then
     mkdir -p build/terragear
     cd "$CBD"/build/terragear
     rm -f CMakeCache.txt
-    "$CMAKE" -DCMAKE_BUILD_TYPE="Debug" \
+    "$CMAKE" -DCMAKE_BUILD_TYPE="$BUILD_TYPE" \
           -DCMAKE_INSTALL_PREFIX:PATH="$INSTALL_DIR_TG" \
           -DCMAKE_PREFIX_PATH="$INSTALL_DIR_SIMGEAR;$INSTALL_DIR_CGAL" \
           ../../terragear/ 2>&1 | _logOutput
