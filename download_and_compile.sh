@@ -278,6 +278,23 @@ function _find_package_alternative(){
   fi
 }
 
+# If component $1 is in WHATTOBUILD, add components $2, $3, etc., to
+# WHATTOBUILD unless they are already there.
+function _depends(){
+  local component="$1"
+  shift
+
+  if _elementIn "$component" "${WHATTOBUILD[@]}"; then
+    for dependency in "$@"; do
+       if ! _elementIn "$dependency" "${WHATTOBUILD[@]}"; then
+         _printLog "$component: adding depended-on component $dependency"
+         WHATTOBUILD+=("$dependency")
+         nb_added_intercomponent_deps=$((nb_added_intercomponent_deps + 1))
+       fi
+    done
+  fi
+}
+
 function _printVersion(){
   echo "$PROGNAME version $VERSION"
   echo
@@ -391,6 +408,10 @@ REPO_DEFAULT_USERNAME=''
 JOPTION=""
 OOPTION=""
 BUILD_TYPE="RelWithDebInfo"
+
+# Non user-exposed variable used to decide whether to print a “helpful”
+# message
+declare -i nb_added_intercomponent_deps=0
 
 declare -a UNMATCHED_OPTIONAL_PKG_ALTERNATIVES
 
@@ -576,6 +597,7 @@ echo '*                                                                    *'
 echo '*         download_and_compile.sh -j$(nproc)                         *'
 echo '*                                                                    *'
 echo '**********************************************************************'
+echo
 
 #######################################################
 #######################################################
@@ -584,6 +606,7 @@ echo "$0 $*" > "$LOGFILE"
 _log "VERSION=$VERSION"
 _log "APT_GET_UPDATE=$APT_GET_UPDATE"
 _log "DOWNLOAD_PACKAGES=$DOWNLOAD_PACKAGES"
+_log "IGNORE_INTERCOMPONENT_DEPS=$IGNORE_INTERCOMPONENT_DEPS"
 _log "COMPILE=$COMPILE"
 _log "RECONFIGURE=$RECONFIGURE"
 _log "DOWNLOAD=$DOWNLOAD"
@@ -610,10 +633,25 @@ _logSep
 # ****************************************************************************
 
 if [ "$IGNORE_INTERCOMPONENT_DEPS" = "n" ]; then
+  # FlightGear requires SimGear
+  _depends FGFS SIMGEAR
   # TerraGear requires SimGear
-  if _elementIn "TERRAGEAR" "${WHATTOBUILD[@]}" && \
-     ! _elementIn "SIMGEAR" "${WHATTOBUILD[@]}"; then
-      WHATTOBUILD+=(SIMGEAR)
+  _depends TERRAGEAR SIMGEAR
+
+  # Print a helpful message if some components were automatically added
+  if (( nb_added_intercomponent_deps > 0 )); then
+    if (( nb_added_intercomponent_deps > 1 )); then
+      comp_word='components'
+    else
+      comp_word='component'
+    fi
+    _printLog "$PROGNAME: automatically added $nb_added_intercomponent_deps" \
+              "$comp_word based on"
+    _printLog "intercomponent dependencies. Use option" \
+              "--ignore-intercomponent-deps if you"
+    _printLog "want to disable this behavior."
+    _printLog
+    unset -v comp_word
   fi
 fi
 
@@ -707,7 +745,6 @@ if [[ "$DOWNLOAD_PACKAGES" = "y" ]]; then
 
   _aptInstall "${PKG[@]}"
 else
-  _printLog
   _printLog "Note: option -p of $PROGNAME set to 'n' (no), therefore no"
   _printLog "      package will be installed via ${PKG_MGR}. Compilation of" \
                   "some components"
