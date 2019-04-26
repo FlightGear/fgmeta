@@ -585,6 +585,13 @@ _log "BUILD_TYPE=$BUILD_TYPE"
 _log "SG_CMAKEARGS=$SG_CMAKEARGS"
 _log "FG_CMAKEARGS=$FG_CMAKEARGS"
 _log "DIRECTORY=$CBD"
+
+if [ "$STABLE" = "STABLE" ]; then
+  _log "Stable build: yes"
+else
+  _log "Stable build: no"
+fi
+
 _logSep
 
 #######################################################
