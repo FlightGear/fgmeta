@@ -49,7 +49,7 @@ _elementIn(){
 
   shift
   for e; do
-    if [[ "$e" == "$valueToCheck" ]]; then
+    if [ "$e" = "$valueToCheck" ]; then
       return 0
     fi
   done
