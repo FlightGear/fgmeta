@@ -340,6 +340,12 @@ function _usage() {
   echo "  -j X          pass -jX to the Make program"
   echo "  -O X          pass -OX to the Make program"
   echo "  -r y|n        y=reconfigure programs before compiling them, n=don't reconfigure     default=y"
+  echo "      --ignore-intercomponent-deps"
+  echo "                Ignore dependencies between components (default: don't)."
+  echo "                Example: TERRAGEAR depends on SIMGEAR. Passing the option can be"
+  echo "                useful if you want to update, rebuild, etc. TERRAGEAR without"
+  echo "                doing the same for SIMGEAR (e.g., if doing repeated TERRAGEAR"
+  echo "                builds and you know your SIMGEAR is already fine and up-to-date)."
   echo "  -s            compile only the last known stable versions"
 }
 
@@ -363,6 +369,7 @@ DOWNLOAD_PACKAGES="y"
 COMPILE="y"
 RECONFIGURE="y"
 DOWNLOAD="y"
+IGNORE_INTERCOMPONENT_DEPS="n"
 
 SUDO="sudo"
 PKG_MGR="apt-get"
@@ -431,7 +438,7 @@ REPO_SITE[TERRAGEARGUI]="SourceForge"
 # built-in function, it allows one to define long options.
 TEMP=$(getopt -o '+shc:p:a:d:r:j:O:ib:' \
   --longoptions git-clone-default-proto:,git-clone-site-params:,help \
-  --longoptions package-manager:,sudo:,version \
+  --longoptions package-manager:,sudo:,ignore-intercomponent-deps,version \
   -n "$PROGNAME" -- "$@")
 
 case $? in
@@ -502,6 +509,7 @@ while true; do
       ;;
     --package-manager) PKG_MGR="$2"; shift 2 ;;
     --sudo) SUDO="$2"; shift 2 ;;
+    --ignore-intercomponent-deps) IGNORE_INTERCOMPONENT_DEPS="y"; shift ;;
     -r) RECONFIGURE="$2"; shift 2 ;;
     -j) JOPTION=" -j$2"; shift 2 ;;
     -O) OOPTION=" -O$2"; shift 2 ;;
@@ -601,10 +609,12 @@ _logSep
 # *                       Inter-component Dependencies                       *
 # ****************************************************************************
 
-# TerraGear requires SimGear
-if _elementIn "TERRAGEAR" "${WHATTOBUILD[@]}" && \
-   ! _elementIn "SIMGEAR" "${WHATTOBUILD[@]}"; then
-    WHATTOBUILD+=(SIMGEAR)
+if [ "$IGNORE_INTERCOMPONENT_DEPS" = "n" ]; then
+  # TerraGear requires SimGear
+  if _elementIn "TERRAGEAR" "${WHATTOBUILD[@]}" && \
+     ! _elementIn "SIMGEAR" "${WHATTOBUILD[@]}"; then
+      WHATTOBUILD+=(SIMGEAR)
+  fi
 fi
 
 # ****************************************************************************
