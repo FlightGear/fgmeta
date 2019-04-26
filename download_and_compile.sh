@@ -590,6 +590,20 @@ _logSep
 #######################################################
 #######################################################
 
+# ****************************************************************************
+# *                       Inter-component Dependencies                       *
+# ****************************************************************************
+
+# TerraGear requires SimGear
+if _elementIn "TERRAGEAR" "${WHATTOBUILD[@]}" && \
+   ! _elementIn "SIMGEAR" "${WHATTOBUILD[@]}"; then
+    WHATTOBUILD+=(SIMGEAR)
+fi
+
+# ****************************************************************************
+# *             Component dependencies on distribution packages              *
+# ****************************************************************************
+
 if [[ "$DOWNLOAD_PACKAGES" = "y" ]]; then
   if [[ "$APT_GET_UPDATE" = "y" ]]; then
     _aptUpdate
@@ -615,10 +629,6 @@ if [[ "$DOWNLOAD_PACKAGES" = "y" ]]; then
 
   # TerraGear
   if _elementIn "TERRAGEAR" "${WHATTOBUILD[@]}"; then
-    # Require SimGear
-    if ! _elementIn "SIMGEAR" "${WHATTOBUILD[@]}"; then
-      WHATTOBUILD+=(SIMGEAR)
-    fi
     PKG+=(libboost-dev libcgal-dev libgdal-dev libtiff5-dev zlib1g-dev)
   fi
 
