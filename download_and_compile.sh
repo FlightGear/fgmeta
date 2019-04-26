@@ -615,7 +615,11 @@ if [[ "$DOWNLOAD_PACKAGES" = "y" ]]; then
 
   # TerraGear
   if _elementIn "TERRAGEAR" "${WHATTOBUILD[@]}"; then
-    PKG+=(libcgal-dev libgdal-dev libtiff5-dev)
+    # Require SimGear
+    if ! _elementIn "SIMGEAR" "${WHATTOBUILD[@]}"; then
+      WHATTOBUILD+=(SIMGEAR)
+    fi
+    PKG+=(libboost-dev libcgal-dev libgdal-dev libtiff5-dev zlib1g-dev)
   fi
 
   # TerraGear GUI and OpenRTI
@@ -1183,7 +1187,14 @@ if _elementIn "TERRAGEAR" "${WHATTOBUILD[@]}"; then
   mkdir -p "terragear"
   cd "$CBD"/terragear
   _gitDownload TERRAGEAR
-  _gitUpdate scenery/ws2.0
+
+  if [ "$STABLE" = "STABLE" ]; then
+    branch='scenery/ws2.0'
+  else
+    branch='next'
+  fi
+
+  _gitUpdate "$branch"
 
   if [ "$RECONFIGURE" = "y" ]; then
     cd "$CBD"
