@@ -1294,6 +1294,8 @@ if _elementIn "TERRAGEAR" "${WHATTOBUILD[@]}"; then
   echo "export LD_LIBRARY_PATH='$INSTALL_DIR_SIMGEAR/lib'\"\${LD_LIBRARY_PATH:+:}\${LD_LIBRARY_PATH}\"" \
        >> run_genapts850.sh
   echo "./genapts850 \"\$@\"" >> run_genapts850.sh
+
+  chmod 755 run_tg-construct.sh run_ogr-decode.sh run_genapts850.sh
 fi
 _logSep
 
@@ -1328,22 +1330,26 @@ if _elementIn "TERRAGEARGUI" "${WHATTOBUILD[@]}"; then
   _make terrageargui
 
   cd "$CBD"
-  # Fill TerraGear Root field
-  if [ ! -f ~/.config/TerraGear/TerraGearGUI.conf ]; then
-    _log "Fill TerraGear Root field"
-    echo "[paths]" > TerraGearGUI.conf
-    echo "terragear=$INSTALL_DIR_TG/bin" >> TerraGearGUI.conf
+
+  cfgFile="$HOME/.config/TerraGear/TerraGearGUI.conf"
+  if [ ! -f "$cfgFile" ]; then
+    _log "Writing a default config file for TerraGear GUI: $cfgFile"
     mkdir -p ~/.config/TerraGear
-    mv TerraGearGUI.conf ~/.config/TerraGear
+    echo "[paths]" > "$cfgFile"
+    echo "terragear=$INSTALL_DIR_TG" >> "$cfgFile"
+    echo "flightgear=$INSTALL_DIR_FGFS" >> "$cfgFile"
   fi
 
-  _log "Create run_terrageargui.sh"
-  echo "#!/bin/sh" > run_terrageargui.sh
-  echo "cd \"\$(dirname \"\$0\")\"" >> run_terrageargui.sh
-  echo "cd install/terrageargui/bin" >> run_terrageargui.sh
-  echo "export LD_LIBRARY_PATH='$INSTALL_DIR_SIMGEAR/lib'\"\${LD_LIBRARY_PATH:+:}\${LD_LIBRARY_PATH}\"" \
-       >> run_terrageargui.sh
-  echo "./TerraGUI \"\$@\"" >> run_terrageargui.sh
+  SCRIPT=run_terrageargui.sh
+  _log "Creating $SCRIPT"
+  cat >"$SCRIPT" <<EndOfScriptText
+#! /bin/sh
+cd "\$(dirname "\$0")"
+cd '$SUB_INSTALL_DIR/$TGGUI_INSTALL_DIR/bin'
+export LD_LIBRARY_PATH='$INSTALL_DIR_SIMGEAR/lib'"\${LD_LIBRARY_PATH:+:}\${LD_LIBRARY_PATH}"
+./TerraGUI "\$@"
+EndOfScriptText
+  chmod 755 "$SCRIPT"
 fi
 
 # Print optional package alternatives that didn't match (this helps with
