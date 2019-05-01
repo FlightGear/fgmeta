@@ -1337,7 +1337,7 @@ if _elementIn "TERRAGEARGUI" "${WHATTOBUILD[@]}"; then
     mkdir -p ~/.config/TerraGear
     echo "[paths]" > "$cfgFile"
     echo "terragear=$INSTALL_DIR_TG" >> "$cfgFile"
-    echo "flightgear=$INSTALL_DIR_FGFS" >> "$cfgFile"
+    echo "flightgear=$INSTALL_DIR_FGFS/fgdata" >> "$cfgFile"
   fi
 
   SCRIPT=run_terrageargui.sh
