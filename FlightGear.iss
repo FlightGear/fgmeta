@@ -85,6 +85,8 @@ Source: "{#ThirdPartyDir}\3rdParty\bin\libintl-8.dll"; DestDir: "{app}\bin"; Che
 Source: "{#ThirdPartyDir}\3rdParty\bin\CrashRpt1403.dll"; DestDir: "{app}\bin"; Check: not Is64BitInstallMode
 Source: "{#ThirdPartyDir}\3rdParty\bin\crashrpt_lang.ini"; DestDir: "{app}\bin"; Check: not Is64BitInstallMode
 Source: "{#ThirdPartyDir}\3rdParty\bin\CrashSender1403.exe"; DestDir: "{app}\bin"; Check: not Is64BitInstallMode
+Source: "{#ThirdPartyDir}\3rdParty\bin\dbus-1-3.dll"; DestDir: "{app}\bin"; Check: not Is64BitInstallMode
+Source: "{#ThirdPartyDir}\3rdParty\bin\event_core.dll"; DestDir: "{app}\bin"; Check: not Is64BitInstallMode
 
 ; 64 bits install
 Source: "{#InstallDir64}\bin\*.*"; DestDir: "{app}\bin"; Excludes: "{#ExcludedBinaries}"; Flags: ignoreversion recursesubdirs; Check: Is64BitInstallMode
@@ -99,6 +101,8 @@ Source: "{#ThirdPartyDir}\3rdParty.x64\bin\libintl-8.dll"; DestDir: "{app}\bin";
 Source: "{#ThirdPartyDir}\3rdParty.x64\bin\CrashRpt1403.dll"; DestDir: "{app}\bin"; Check: Is64BitInstallMode
 Source: "{#ThirdPartyDir}\3rdParty.x64\bin\crashrpt_lang.ini"; DestDir: "{app}\bin"; Check: Is64BitInstallMode
 Source: "{#ThirdPartyDir}\3rdParty.x64\bin\CrashSender1403.exe"; DestDir: "{app}\bin"; Check: Is64BitInstallMode
+Source: "{#ThirdPartyDir}\3rdParty.x64\bin\dbus-1-3"; DestDir: "{app}\bin"; Check: Is64BitInstallMode
+Source: "{#ThirdPartyDir}\3rdParty.x64\bin\event_core.dll"; DestDir: "{app}\bin"; Check: Is64BitInstallMode
 
 ; Include the base package
 #if IncludeData == "TRUE"
