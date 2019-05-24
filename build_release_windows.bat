@@ -38,7 +38,6 @@ cmake ..\flightgear -G "Visual Studio 14" ^
                     -DOSG_FSTREAM_EXPORT_FIXED=1 ^
                     -DCMAKE_PREFIX_PATH=%QT5SDK32%;%OSG32% ^
                     -DFG_BUILD_TYPE=%FGBUILDTYPE% ^
-                    -DENABLE_COMPOSITOR:BOOL=ON ^
                     -DENABLE_SWIFT:BOOL=ON
 cmake --build . --config RelWithDebInfo --target INSTALL
 
@@ -65,7 +64,6 @@ cmake ..\flightgear -G "Visual Studio 14 Win64" ^
                     -DCMAKE_PREFIX_PATH=%QT5SDK64%;%OSG64% ^
                     -DOSG_FSTREAM_EXPORT_FIXED=1 ^
                     -DFG_BUILD_TYPE=%FGBUILDTYPE% ^
-                    -DENABLE_COMPOSITOR:BOOL=ON ^
                     -DENABLE_SWIFT:BOOL=ON
 cmake --build . --config RelWithDebInfo --target INSTALL
 
