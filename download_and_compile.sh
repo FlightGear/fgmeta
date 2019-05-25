@@ -725,6 +725,8 @@ if [[ "$DOWNLOAD_PACKAGES" = "y" ]]; then
     PKG+=(fluid libbz2-dev libfltk1.3-dev libxi-dev libxmu-dev)
     # FGAdmin
     PKG+=(libxinerama-dev libjpeg-dev libxft-dev)
+    # swift
+    _optional_pkg_alternative libevent-dev
   fi
 
   # ATC-pie
