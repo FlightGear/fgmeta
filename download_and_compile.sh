@@ -696,14 +696,14 @@ if [[ "$DOWNLOAD_PACKAGES" = "y" ]]; then
   # SimGear and FlightGear
   if _elementIn "SIMGEAR" "${WHATTOBUILD[@]}" || \
      _elementIn "FGFS" "${WHATTOBUILD[@]}"; then
-    PKG+=(zlib1g-dev freeglut3-dev libglew-dev libboost-dev)
+    PKG+=(zlib1g-dev freeglut3-dev libglew-dev libopenal-dev libboost-dev)
     _mandatory_pkg_alternative libopenscenegraph-3.4-dev libopenscenegraph-dev \
                                'libopenscenegraph-[0-9]+\.[0-9]+-dev'
   fi
 
   # FlightGear
   if _elementIn "FGFS" "${WHATTOBUILD[@]}"; then
-    PKG+=(libopenal-dev libudev-dev libdbus-1-dev libplib-dev)
+    PKG+=(libudev-dev libdbus-1-dev libplib-dev)
     _mandatory_pkg_alternative libpng-dev libpng12-dev libpng16-dev
     # The following packages are needed for the built-in launcher
     _optional_pkg_alternative qt5-default
