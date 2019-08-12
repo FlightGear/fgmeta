@@ -376,7 +376,7 @@ LOGFILE="$CBD/compilation_log.txt"
 # Available values for WHATTOBUILD and WHATTOBUILDALL:
 declare -a WHATTOBUILD_AVAIL=(
   'CMAKE' 'PLIB' 'OPENRTI' 'OSG' 'SIMGEAR' 'FGFS' 'DATA' 'FGRUN' 'FGO' 'FGX'
-  'OPENRADAR' 'ATCPIE' 'TERRAGEAR' 'TERRAGEARGUI'
+  'OPENRADAR' 'ATCPIE' 'TERRAGEAR' 'TERRAGEARGUI' 'ZLIB'
 )
 WHATTOBUILDALL=(SIMGEAR FGFS DATA)
 
@@ -390,6 +390,11 @@ IGNORE_INTERCOMPONENT_DEPS="n"
 
 SUDO="sudo"
 PKG_MGR="apt-get"
+
+if [[ `uname` == 'OpenBSD' ]]; then
+    APT_GET_UPDATE="n"
+    DOWNLOAD_PACKAGES="n"
+fi
 
 # How to download Git repositories:
 #
@@ -432,6 +437,8 @@ declare -A REPO_SITE
 
 REPO_ADDRESS[CMAKE]="cmake.org/cmake.git"
 REPO_SITE[CMAKE]="cmake.org"
+REPO_ADDRESS[ZLIB]="github.com/madler/zlib.git"
+REPO_SITE[ZLIB]="GitHub"
 REPO_ADDRESS[PLIB]="git.code.sf.net/p/libplib/code"
 REPO_SITE[PLIB]="SourceForge"
 REPO_ADDRESS[OPENRTI]="git.code.sf.net/p/openrti/OpenRTI"
@@ -457,7 +464,11 @@ REPO_SITE[TERRAGEARGUI]="SourceForge"
 
 # getopt is from the util-linux package (in Debian). Contrary to bash's getopts
 # built-in function, it allows one to define long options.
-TEMP=$(getopt -o '+shc:p:a:d:r:j:O:ib:' \
+getopt=getopt
+if [[ `uname` == 'OpenBSD' ]]; then
+    getopt=gnugetopt
+fi
+TEMP=$($getopt -o '+shc:p:a:d:r:j:O:ib:' \
   --longoptions git-clone-default-proto:,git-clone-site-params:,help \
   --longoptions package-manager:,sudo:,ignore-intercomponent-deps,version \
   -n "$PROGNAME" -- "$@")
@@ -823,6 +834,35 @@ else
 fi
 
 #######################################################
+# ZLIB
+#######################################################
+ZLIB_INSTALL_DIR=zlib
+INSTALL_DIR_ZLIB="$INSTALL_DIR/$ZLIB_INSTALL_DIR"
+cd "$CBD"
+if _elementIn "ZLIB" "${WHATTOBUILD[@]}"; then
+  _printLog "****************************************"
+  _printLog "**************** ZLIB ******************"
+  _printLog "****************************************"
+
+  mkdir -p "zlib"
+  cd "$CBD"/zlib
+  _gitDownload ZLIB
+  _gitUpdate master
+
+  if [ "$RECONFIGURE" = "y" ]; then
+    cd "$CBD"
+    mkdir -p build/zlib
+    _log "CONFIGURING zlib"
+    cd "$CBD"/build/zlib
+    "$CMAKE" -DCMAKE_BUILD_TYPE="$BUILD_TYPE" \
+          -DCMAKE_INSTALL_PREFIX:PATH="$INSTALL_DIR_ZLIB" \
+          ../../zlib 2>&1 | _logOutput
+  fi
+
+  _make zlib
+fi
+
+#######################################################
 # PLIB
 #######################################################
 PLIB_INSTALL_DIR=plib
@@ -948,9 +988,14 @@ if _elementIn "SIMGEAR" "${WHATTOBUILD[@]}"; then
     mkdir -p build/simgear
     cd "$CBD"/build/simgear
     rm -f CMakeCache.txt
+    extra=''
+    if [[ `uname` == 'OpenBSD' ]]; then
+        extra=-DZLIB_ROOT=$INSTALL_DIR_ZLIB
+    fi
     "$CMAKE" -DCMAKE_BUILD_TYPE="$BUILD_TYPE" \
           -DCMAKE_INSTALL_PREFIX:PATH="$INSTALL_DIR_SIMGEAR" \
           -DCMAKE_PREFIX_PATH="$INSTALL_DIR_OSG;$INSTALL_DIR_OPENRTI" \
+          $extra \
 	  $SG_CMAKEARGS \
           ../../simgear 2>&1 | _logOutput
   fi
@@ -994,26 +1039,50 @@ if _elementIn "FGFS" "${WHATTOBUILD[@]}" || \
       mkdir -p build/flightgear
       cd "$CBD"/build/flightgear
       rm -f CMakeCache.txt
+      extra=
+      if [[ `uname` == 'OpenBSD' ]]; then
+        extra="-DZLIB_ROOT=$INSTALL_DIR_ZLIB \
+            -DENABLE_QT=OFF \
+            -DENABLE_FGCOM=OFF \
+            -DVERBOSE=1"
+      fi
       "$CMAKE" -DCMAKE_BUILD_TYPE="$BUILD_TYPE" \
             -DENABLE_FLITE=ON \
             -DCMAKE_INSTALL_PREFIX:PATH="$INSTALL_DIR_FGFS" \
             -DCMAKE_PREFIX_PATH="$INSTALL_DIR_SIMGEAR;$INSTALL_DIR_OSG;$INSTALL_DIR_OPENRTI;$INSTALL_DIR_PLIB" \
             -DFG_DATA_DIR:PATH="$INSTALL_DIR_FGFS/fgdata" \
             -DTRANSLATIONS_SRC_DIR:PATH="$INSTALL_DIR_FGFS/fgdata/Translations" \
+            $extra \
             $FG_CMAKEARGS \
             ../../flightgear 2>&1 | _logOutput
     fi
 
-    _make flightgear
+    if [[ `uname` == 'OpenBSD' ]]; then
+      # _make will end up running fgrcc, which was built with our zlib, so we
+      # need to set LD_LIBRARY_PATH, otherwise things will fail because the
+      # system zlib is too old.
+      LD_LIBRARY_PATH=$INSTALL_DIR_ZLIB/lib _make flightgear
+    else
+      _make flightgear
+    fi
   fi
   cd "$CBD"
-
+  
+  paths="../../$SIMGEAR_INSTALL_DIR/lib:../../$OSG_INSTALL_DIR/lib:../../$OPENRTI_INSTALL_DIR/lib:../../$PLIB_INSTALL_DIR/lib"
+  gdb="gdb"
+  if [[ `uname` == 'OpenBSD' ]]; then
+    # Force use of our zlib.
+    paths="$paths:../../$ZLIB_INSTALL_DIR/lib"
+    # OpenBSD's base gdb is too old; `pkg_add egdb` gives one that we can use.
+    gdb="egdb"
+  fi
+  set_ld_library_path="export LD_LIBRARY_PATH='$paths'\"\${LD_LIBRARY_PATH:+:}\${LD_LIBRARY_PATH}\""
+  
   SCRIPT=run_fgfs.sh
   echo "#!/bin/sh" > $SCRIPT
   echo "cd \"\$(dirname \"\$0\")\"" >> $SCRIPT
   echo "cd '$SUB_INSTALL_DIR/$FGFS_INSTALL_DIR/bin'" >> $SCRIPT
-  echo "export LD_LIBRARY_PATH='../../$SIMGEAR_INSTALL_DIR/lib:../../$OSG_INSTALL_DIR/lib:../../$OPENRTI_INSTALL_DIR/lib:../../$PLIB_INSTALL_DIR/lib'\"\${LD_LIBRARY_PATH:+:}\${LD_LIBRARY_PATH}\"" \
-       >> $SCRIPT
+  echo "$set_ld_library_path" >> $SCRIPT
   echo "./fgfs --fg-root=\"\$PWD/../fgdata\" \"\$@\"" >> $SCRIPT
   chmod 755 $SCRIPT
 
@@ -1021,9 +1090,8 @@ if _elementIn "FGFS" "${WHATTOBUILD[@]}" || \
   echo "#!/bin/sh" > $SCRIPT
   echo "cd \"\$(dirname \"\$0\")\"" >> $SCRIPT
   echo "cd '$SUB_INSTALL_DIR/$FGFS_INSTALL_DIR/bin'" >> $SCRIPT
-  echo "export LD_LIBRARY_PATH='../../$SIMGEAR_INSTALL_DIR/lib:../../$OSG_INSTALL_DIR/lib:../../$OPENRTI_INSTALL_DIR/lib:../../$PLIB_INSTALL_DIR/lib'\"\${LD_LIBRARY_PATH:+:}\${LD_LIBRARY_PATH}\"" \
-       >> $SCRIPT
-  echo "gdb --directory='$CBD/flightgear/src' --args ./fgfs --fg-root=\"\$PWD/../fgdata\" \"\$@\"" >> $SCRIPT
+  echo "$set_ld_library_path" >> $SCRIPT
+  echo "$gdb --directory='$CBD/flightgear/src' --args ./fgfs --fg-root=\"\$PWD/../fgdata\" \"\$@\"" >> $SCRIPT
   chmod 755 $SCRIPT
 
   # Useful for debugging library problems.
