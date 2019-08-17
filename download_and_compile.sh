@@ -1070,27 +1070,30 @@ if _elementIn "FGFS" "${WHATTOBUILD[@]}" || \
   
   paths="../../$SIMGEAR_INSTALL_DIR/lib:../../$OSG_INSTALL_DIR/lib:../../$OPENRTI_INSTALL_DIR/lib:../../$PLIB_INSTALL_DIR/lib"
   gdb="gdb"
+  set_ld_library_path="export LD_LIBRARY_PATH='$paths'\"\${LD_LIBRARY_PATH:+:}\${LD_LIBRARY_PATH}\""
+  
+  common=""
+  common="${common}#!/bin/sh\n"
+  common="${common}cd \"\$(dirname \"\$0\")\"\n"
+  common="${common}cd '$SUB_INSTALL_DIR/$FGFS_INSTALL_DIR/bin'\n"
+
   if [[ `uname` == 'OpenBSD' ]]; then
     # Force use of our zlib.
     paths="$paths:../../$ZLIB_INSTALL_DIR/lib"
     # OpenBSD's base gdb is too old; `pkg_add egdb` gives one that we can use.
     gdb="egdb"
+    common="${common}ulimit -d 4194304\n"
   fi
-  set_ld_library_path="export LD_LIBRARY_PATH='$paths'\"\${LD_LIBRARY_PATH:+:}\${LD_LIBRARY_PATH}\""
-  
+
+  common="${common}export LD_LIBRARY_PATH='$paths'\"\${LD_LIBRARY_PATH:+:}\${LD_LIBRARY_PATH}\"\n"
+
   SCRIPT=run_fgfs.sh
-  echo "#!/bin/sh" > $SCRIPT
-  echo "cd \"\$(dirname \"\$0\")\"" >> $SCRIPT
-  echo "cd '$SUB_INSTALL_DIR/$FGFS_INSTALL_DIR/bin'" >> $SCRIPT
-  echo "$set_ld_library_path" >> $SCRIPT
+  echo -en "$common" > $SCRIPT
   echo "./fgfs --fg-root=\"\$PWD/../fgdata\" \"\$@\"" >> $SCRIPT
   chmod 755 $SCRIPT
 
   SCRIPT=run_fgfs_debug.sh
-  echo "#!/bin/sh" > $SCRIPT
-  echo "cd \"\$(dirname \"\$0\")\"" >> $SCRIPT
-  echo "cd '$SUB_INSTALL_DIR/$FGFS_INSTALL_DIR/bin'" >> $SCRIPT
-  echo "$set_ld_library_path" >> $SCRIPT
+  echo -en "$common" > $SCRIPT
   echo "$gdb --directory='$CBD/flightgear/src' --args ./fgfs --fg-root=\"\$PWD/../fgdata\" \"\$@\"" >> $SCRIPT
   chmod 755 $SCRIPT
 
