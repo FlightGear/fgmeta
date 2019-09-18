@@ -30,7 +30,7 @@ echo QT Folder: %QT5x64%
 REM Determine CMake toolchain
 set CMAKE_TOOLCHAIN=Visual Studio 14 2015 Win64
 for /f %%v in ('"C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere" -latest -property catalog_productlineversion') do set VSx64=%%v
-if %VSx64%==2019 (set CMAKE_TOOLCHAIN="Visual Studio 16 2019" -A x64)
+if %VSx64%==2019 (set CMAKE_TOOLCHAIN="Visual Studio 16 2019")
 if %VSx64%==2017 (set CMAKE_TOOLCHAIN="Visual Studio 15 2017 Win64")
 if %VSx64%==2015 (set CMAKE_TOOLCHAIN="Visual Studio 14 2015 Win64")
 echo CMake Toolchain: %CMAKE_TOOLCHAIN%
@@ -49,7 +49,7 @@ if not exist vcpkg-git/NUL (
 	echo Updating vcpkg . . .
 	cd vcpkg-git
 	git pull
-	
+
 REM	for /f "delims=" %%G in ('"git pull"') do if not %%G == "Already up to date." (
 		echo Compiling vcpkg
 		call .\bootstrap-vcpkg
