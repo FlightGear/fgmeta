@@ -18,7 +18,7 @@ REM along with this program; if not, write to the Free Software
 REM Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 set ROOT_DIR=%CD%
-set PATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/bin;%PATH%
+set PATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/bin;%ROOT_DIR%/vcpkg-git/installed/x64-windows/include;%ROOT_DIR%/vcpkg-git/installed/x64-windows/lib;%PATH%
 
 REM Determine location of Qt5
 set QT_SELECT=qt5
@@ -127,51 +127,51 @@ if not exist scratch-source/terragear-git/NUL (
 )
 cd %ROOT_DIR%
 
+REM -DQt5Core_DIR=%QT5x64_CMAKE%/Qt5Core ^
+REM -DQt5Gui_DIR=%QT5x64_CMAKE%/Qt5Gui ^
+REM -DQt5OpenGL_DIR=%QT5x64_CMAKE%/Qt5OpenGL ^
+REM -DQt5Widgets_DIR=%QT5x64_CMAKE%/Qt5Widgets ^
+
 echo Compiling OpenSceneGraph . . .
 cd scratch-build\openscenegraph-3.6
 cmake ..\..\scratch-source\openscenegraph-3.6-git -G %CMAKE_TOOLCHAIN% ^
-	-DCMAKE_CONFIGURATION_TYPES=Debug;Release ^
-	-DCMAKE_BUILD_TYPE=Release ^
+	-DCMAKE_CONFIGURATION_TYPES:STRING=Debug;Release ^
+	-DCMAKE_BUILD_TYPE:STRING=Release ^
 	-DCMAKE_INSTALL_PREFIX:PATH=%ROOT_DIR%/scratch-install ^
-	-DCMAKE_PREFIX_PATH:PATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/lib;%ROOT_DIR%/vcpkg-git/installed/x64-windows/debug/lib ^
+	-DCMAKE_PREFIX_PATH:STRING=%ROOT_DIR%/vcpkg-git/installed/x64-windows/lib;%ROOT_DIR%/vcpkg-git/installed/x64-windows/debug/lib ^
 	-DACTUAL_3RDPARTY_DIR:PATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows ^
 	-DOSG_USE_UTF8_FILENAME:BOOL=1 ^
 	-DWIN32_USE_MP:BOOL=1 ^
-	-DQt5Core_DIR=%QT5x64_CMAKE%/Qt5Core ^
-	-DQt5Gui_DIR=%QT5x64_CMAKE%/Qt5Gui ^
-	-DQt5OpenGL_DIR=%QT5x64_CMAKE%/Qt5OpenGL ^
-	-DQt5Widgets_DIR=%QT5x64_CMAKE%/Qt5Widgets ^
-	-DCURL_INCLUDE_DIR=%ROOT_DIR%/vcpkg-git/installed/x64-windows/include ^
-	-DCURL_LIBRARY=%ROOT_DIR%/vcpkg-git/installed/x64-windows/lib/libcurl.lib ^
-	-DCURL_LIBRARY_DEBUG=%ROOT_DIR%/vcpkg-git/installed/x64-windows/debug/lib/libcurl.lib ^
-	-DFREETYPE_INCLUDE_DIR_ft2build=%ROOT_DIR%/vcpkg-git/packages/freetype_x64-windows/include ^
-	-DFREETYPE_INCLUDE_DIR=%ROOT_DIR%/vcpkg-git/installed/x64-windows/include ^
-	-DFREETPE_LIBRARY=%ROOT_DIR%/vcpkg-git/installed/x64-windows/lib/freetype.lib ^
-	-DFREETPE_LIBRARY_DEBUG=%ROOT_DIR%/vcpkg-git/installed/x64-windows/debug/lib/freetyped.lib ^
-	-DGDAL_INCLUDE_DIR=%ROOT_DIR%/vcpkg-git/installed/x64-windows/include ^
-	-DGDAL_LIBRARY=%ROOT_DIR%/vcpkg-git/installed/x64-windows/lib/gdal.lib ^
-	-DGDAL_LIBRARY_DEBUG=%ROOT_DIR%/vcpkg-git/installed/x64-windows/debug/lib/gdald.lib ^
-	-DGLUT_INCLUDE_DIR=%ROOT_DIR%/vcpkg-git/installed/x64-windows/include ^
-	-DGLUT_LIBRARY=%ROOT_DIR%/vcpkg-git/installed/x64-windows/lib/freeglut.lib ^
-	-DGLUT_LIBRARY_DEBUG=%ROOT_DIR%/vcpkg-git/installed/x64-windows/debug/lib/freeglut.lib ^
-	-DJPEG_INCLUDE_DIR=%ROOT_DIR%/vcpkg-git/installed/x64-windows/include ^
-	-DJPEG_LIBRARY=%ROOT_DIR%/vcpkg-git/installed/x64-windows/lib/jpeg.lib ^
-	-DJPEG_LIBRARY_DEBUG=%ROOT_DIR%/vcpkg-git/installed/x64-windows/debug/lib/jpeg.lib ^
-	-DLIBXML2_INCLUDE_DIR=%ROOT_DIR%/vcpkg-git/installed/x64-windows/include ^
-	-DLIBXML2_LIBRARY=%ROOT_DIR%/vcpkg-git/installed/x64-windows/lib/libxml2.lib ^
-	-DLIBXML2_LIBRARY_DEBUG=%ROOT_DIR%/vcpkg-git/installed/x64-windows/debug/lib/libxml2.lib ^
-	-DPNG_PNG_INCLUDE_DIR=%ROOT_DIR%/vcpkg-git/installed/x64-windows/include ^
-	-DPNG_LIBRARY=%ROOT_DIR%/vcpkg-git/installed/x64-windows/lib/libpng16.lib ^
-	-DPNG_LIBRARY_DEBUG=%ROOT_DIR%/vcpkg-git/installed/x64-windows/debug/lib/libpng16d.lib ^
-	-DSDL2_INCLUDE_DIR=%ROOT_DIR%/vcpkg-git/installed/x64-windows/include ^
-	-DSDL2_LIBRARY=%ROOT_DIR%/vcpkg-git/installed/x64-windows/lib/SDL2.lib ^
-	-DSDL2MAIN_LIBRARY=%ROOT_DIR%/vcpkg-git/installed/x64-windows/lib/manual-link/SDL2main.lib ^
-	-DTIFF_INCLUDE_DIR=%ROOT_DIR%/vcpkg-git/installed/x64-windows/include ^
-	-DTIFF_LIBRARY=%ROOT_DIR%/vcpkg-git/installed/x64-windows/lib/tiff.lib ^
-	-DTIFF_LIBRARY_DEBUG=%ROOT_DIR%/vcpkg-git/installed/x64-windows/debug/lib/tiffd.lib ^
-	-DZLIB_INCLUDE_DIR=%ROOT_DIR%/vcpkg-git/installed/x64-windows/include ^
-	-DZLIB_LIBRARY=%ROOT_DIR%/vcpkg-git/installed/x64-windows/lib/zlib.lib ^
-	-DZLIB_LIBRARY_DEBUG=%ROOT_DIR%/vcpkg-git/installed/x64-windows/debug/lib/zlibd.lib
+	-DCURL_INCLUDE_DIR:PATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/include ^
+	-DCURL_LIBRARY_RELEASE:FILEPATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/lib/libcurl.lib ^
+	-DCURL_LIBRARY_DEBUG:FILEPATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/debug/lib/libcurl.lib ^
+	-DFREETYPE_INCLUDE_DIR_ft2build:PATH=%ROOT_DIR%/vcpkg-git/packages/freetype_x64-windows/include ^
+	-DFREETYPE_LIBRARY_RELEASE:FILEPATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/lib/freetype.lib ^
+	-DFREETYPE_LIBRARY_DEBUG:FILEPATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/debug/lib/freetyped.lib ^
+	-DGDAL_INCLUDE_DIR:PATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/include ^
+	-DGDAL_LIBRARY:FILEPATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/lib/gdal.lib ^
+	-DGDAL_LIBRARY_DEBUG:FILEPATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/debug/lib/gdald.lib ^
+	-DGLUT_INCLUDE_DIR:PATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/include ^
+	-DGLUT_LIBRARY:FILEPATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/lib/freeglut.lib ^
+	-DGLUT_LIBRARY_DEBUG:FILEPATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/debug/lib/freeglut.lib ^
+	-DJPEG_INCLUDE_DIR:PATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/include ^
+	-DJPEG_LIBRARY_RELEASE:FILEPATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/lib/jpeg.lib ^
+	-DJPEG_LIBRARY_DEBUG:FILEPATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/debug/lib/jpeg.lib ^
+	-DLIBXML2_INCLUDE_DIR:PATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/include ^
+	-DLIBXML2_LIBRARY:FILEPATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/lib/libxml2.lib ^
+	-DLIBXML2_LIBRARY_DEBUG:FILEPATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/debug/lib/libxml2.lib ^
+	-DPNG_INCLUDE_DIR:PATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/include ^
+	-DPNG_LIBRARY:FILEPATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/lib/libpng16.lib ^
+	-DPNG_LIBRARY_DEBUG:FILEPATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/debug/lib/libpng16d.lib ^
+	-DSDL2_INCLUDE_DIR:PATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/include ^
+	-DSDL2_LIBRARY:FILEPATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/lib/SDL2.lib ^
+	-DSDL2MAIN_LIBRARY:FILEPATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/lib/manual-link/SDL2main.lib ^
+	-DTIFF_INCLUDE_DIR:PATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/include ^
+	-DTIFF_LIBRARY_RELEASE:FILEPATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/lib/tiff.lib ^
+	-DTIFF_LIBRARY_DEBUG:FILEPATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/debug/lib/tiffd.lib ^
+	-DZLIB_INCLUDE_DIR:PATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/include ^
+	-DZLIB_LIBRARY_RELEASE:FILEPATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/lib/zlib.lib ^
+	-DZLIB_LIBRARY_DEBUG:FILEPATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/debug/lib/zlibd.lib
 cmake --build . --config Release --target INSTALL
 cd %ROOT_DIR%
 
