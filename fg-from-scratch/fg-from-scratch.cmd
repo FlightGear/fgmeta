@@ -178,25 +178,26 @@ cd %ROOT_DIR%
 echo Compiling SimGear . . .
 cd scratch-build\simgear
 cmake ..\..\scratch-source\simgear-git -G  %CMAKE_TOOLCHAIN% ^
-	-DCMAKE_BUILD_TYPE=Release ^
-	-DMSVC_3RDPARTY_ROOT=%ROOT_DIR%/vcpkg-git/installed/x64-windows ^
+	-DCMAKE_CONFIGURATION_TYPES:STRING=Debug;Release ^
+	-DCMAKE_BUILD_TYPE:STRING=Release ^
+	-DMSVC_3RDPARTY_ROOT:PATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows ^
 	-DCMAKE_PREFIX_PATH:PATH=%ROOT_DIR%/scratch-install/lib;%ROOT_DIR%/vcpkg-git/installed/x64-windows/lib ^
-	-DCMAKE_CONFIGURATION_TYPES=Debug;Release ^
+	-DCMAKE_INCLUDE_PATH:PATH=%ROOT_DIR%/scratch-install/include;%ROOT_DIR%/vcpkg-git/installed/x64-windows/include ^
 	-DCMAKE_INSTALL_PREFIX:PATH=%ROOT_DIR%/scratch-install ^
 	-DOSG_FSTREAM_EXPORT_FIXED:BOOL=1 ^
 	-DENABLE_GDAL:BOOL=1 ^
 	-DENABLE_OPENMP:BOOL=1 ^
 	-DUSE_AEONWAVE:BOOL=0 ^
-	-DBOOST_INCLUDE_DIR=%ROOT_DIR%/vcpkg-git/installed/x64-windows/include ^
-	-DBOOST_DIR=%ROOT_DIR%/vcpkg-git/installed/x64-windows ^
-	-DCURL_INCLUDE_DIR=%ROOT_DIR%/vcpkg-git/installed/x64-windows/include ^
-	-DCURL_LIBRARY=%ROOT_DIR%/vcpkg-git/installed/x64-windows/lib/libcurl.lib ^
-	-DGDAL_INCLUDE_DIR=%ROOT_DIR%/vcpkg-git/installed/x64-windows/include ^
-	-DGDAL_LIBRARY=%ROOT_DIR%/vcpkg-git/installed/x64-windows/lib/gdal.lib ^
-	-DOPENAL_INCLUDE_DIR=%ROOT_DIR%/vcpkg-git/installed/x64-windows/include ^
-	-DOPENAL_LIBRARY=%ROOT_DIR%/vcpkg-git/installed/x64-windows/lib/OpenAL32.lib ^
-	-DZLIB_INCLUDE_DIR=%ROOT_DIR%/vcpkg-git/installed/x64-windows/include ^
-	-DZLIB_LIBRARY=%ROOT_DIR%/vcpkg-git/installed/x64-windows/lib/zlib.lib
+	-DBoost_INCLUDE_DIR:PATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/include ^
+	-DBoost_DIR:PATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows ^
+	-DCURL_INCLUDE_DIR:PATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/include ^
+	-DCURL_LIBRARY_RELEASE:FILEPATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/lib/libcurl.lib ^
+	-DGDAL_INCLUDE_DIR:PATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/include ^
+	-DGDAL_LIBRARY:FILEPATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/lib/gdal.lib ^
+	-DOPENAL_INCLUDE_DIR:PATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/include ^
+	-DOPENAL_LIBRARY:FILEPATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/lib/OpenAL32.lib ^
+	-DZLIB_INCLUDE_DIR:PATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/include ^
+	-DZLIB_LIBRARY_RELEASE:FILEPATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/lib/zlib.lib
 cmake --build . --config Release --target INSTALL
 cd %ROOT_DIR%
 
