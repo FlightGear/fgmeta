@@ -191,7 +191,7 @@ cmake ..\..\scratch-source\simgear-git -G  %CMAKE_TOOLCHAIN% ^
 	-DBoost_INCLUDE_DIR:PATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/include ^
 	-DBoost_DIR:PATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows ^
 	-DCURL_INCLUDE_DIR:PATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/include ^
-	-DCURL_LIBRARY_DEBUG:FILEPATH= ^
+	-DCURL_LIBRARY_DEBUG:FILEPATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/debug/lib/libcurl.lib ^
 	-DCURL_LIBRARY_RELEASE:FILEPATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/lib/libcurl.lib ^
 	-DGDAL_INCLUDE_DIR:PATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/include ^
 	-DGDAL_LIBRARY:FILEPATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/lib/gdal.lib ^
