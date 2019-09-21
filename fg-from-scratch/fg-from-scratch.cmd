@@ -225,7 +225,7 @@ cmake ..\..\scratch-source\simgear-git -G  %CMAKE_TOOLCHAIN% ^
 	-DOSG_LIBRARY_DEBUG:FILEPATH= ^
 	-DOSG_LIBRARY_RELEASE:FILEPATH=%ROOT_DIR%/scratch-install/lib/osg.lib ^
 	-DZLIB_INCLUDE_DIR:PATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/include ^
-	-DZLIB_LIBRARY_DEBUG:FILEPATH= ^
+	-DZLIB_LIBRARY_DEBUG:FILEPATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/debug/lib/zlibd.lib ^
 	-DZLIB_LIBRARY_RELEASE:FILEPATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/lib/zlib.lib
 cmake --build . --config Release --target INSTALL
 cd %ROOT_DIR%
@@ -292,9 +292,20 @@ cmake ..\..\scratch-source\flightgear-git -G  %CMAKE_TOOLCHAIN% ^
 	-DOSG_LIBRARY_DEBUG:FILEPATH= ^
 	-DOSG_LIBRARY_RELEASE:FILEPATH=%ROOT_DIR%/scratch-install/lib/osg.lib ^
 	-DPLIB_INCLUDE_DIR:PATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/include ^
+	-DPLIB_FNT_LIBRARY_DEBUG:FILEPATH= ^
+	-DPLIB_FNT_LIBRARY_RELEASE:FILEPATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/lib/plib_fnt.lib ^
+	-DPLIB_PUAUX_LIBRARY_DEBUG:FILEPATH= ^
+	-DPLIB_PUAUX_LIBRARY_RELEASE:FILEPATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/lib/plib_puAux.lib ^
+	-DPLIB_PUI_LIBRARY_DEBUG:FILEPATH= ^
+	-DPLIB_PUI_LIBRARY_RELEASE:FILEPATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/lib/plib_pui.lib ^
+	-DPLIB_SG_LIBRARY_DEBUG:FILEPATH= ^
+	-DPLIB_SG_LIBRARY_RELEASE:FILEPATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/lib/plib_sg.lib ^
+	-DPLIB_UL_LIBRARY_DEBUG:FILEPATH= ^
+	-DPLIB_UL_LIBRARY_RELEASE:FILEPATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/lib/plib_ul.lib ^
 	-DPNG_PNG_INCLUDE_DIR:PATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/include ^
 	-DPNG_LIBRARY_RELEASE:FILEPATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/lib/libpng16.lib ^
 	-DZLIB_INCLUDE_DIR:PATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/include ^
+	-DZLIB_LIBRARY_DEBUG:FILEPATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/debug/lib/zlibd.lib ^
 	-DZLIB_LIBRARY_RELEASE:FILEPATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/lib/zlib.lib
 cmake --build . --config Release --target INSTALL
 cd %ROOT_DIR%
@@ -316,12 +327,15 @@ cmake ..\..\scratch-source\terragear-git -G  %CMAKE_TOOLCHAIN% ^
 	-DGMP_INCLUDE_DIR:PATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/include ^
 	-DGMP_LIBRARIES_DIR:FILEPATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/lib ^
 	-DJPEG_INCLUDE_DIR:PATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/include ^
+	-DJPEG_LIBRARY_DEBUG:FILEPATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/debug/lib/jpeg.lib ^
 	-DJPEG_LIBRARY_RELEASE:FILEPATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/lib/jpeg.lib ^
 	-DMPFR_INCLUDE_DIR:PATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/include ^
 	-DMPFR_LIBRARIES_DIR:FILEPATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/lib ^
 	-DTIFF_INCLUDE_DIR:PATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/include ^
+	-DTIFF_LIBRARY_DEBUG:FILEPATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/debug/lib/tiffd.lib ^
 	-DTIFF_LIBRARY_RELEASE:FILEPATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/lib/tiff.lib ^
 	-DZLIB_INCLUDE_DIR:PATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/include ^
+	-DZLIB_LIBRARY_DEBUG:FILEPATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/debug/lib/zlibd.lib ^
 	-DZLIB_LIBRARY_RELEASE:FILEPATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/lib/zlib.lib ^
 	-DSIMGEAR_INCLUDE_DIR:PATH=%ROOT_DIR%/scratch-install/include ^
 	-DSIMGEAR_CORE_LIBRARY_RELEASE=%ROOT_DIR%/scratch-install/lib/SimGearCore.lib ^
