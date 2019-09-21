@@ -181,8 +181,8 @@ cmake ..\..\scratch-source\simgear-git -G  %CMAKE_TOOLCHAIN% ^
 	-DCMAKE_CONFIGURATION_TYPES:STRING=Debug;Release ^
 	-DCMAKE_BUILD_TYPE:STRING=Release ^
 	-DMSVC_3RDPARTY_ROOT:PATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows ^
-	-DCMAKE_PREFIX_PATH:PATH=%ROOT_DIR%/scratch-install/lib;%ROOT_DIR%/vcpkg-git/installed/x64-windows/lib ^
-	-DCMAKE_INCLUDE_PATH:PATH=%ROOT_DIR%/scratch-install/include;%ROOT_DIR%/vcpkg-git/installed/x64-windows/include ^
+	-DCMAKE_PREFIX_PATH:STRING=%ROOT_DIR%/scratch-install/lib;%ROOT_DIR%/vcpkg-git/installed/x64-windows/lib ^
+	-DCMAKE_INCLUDE_PATH:STRING=%ROOT_DIR%/scratch-install/include;%ROOT_DIR%/vcpkg-git/installed/x64-windows/include ^
 	-DCMAKE_INSTALL_PREFIX:PATH=%ROOT_DIR%/scratch-install ^
 	-DOSG_FSTREAM_EXPORT_FIXED:BOOL=1 ^
 	-DENABLE_GDAL:BOOL=1 ^
@@ -191,12 +191,41 @@ cmake ..\..\scratch-source\simgear-git -G  %CMAKE_TOOLCHAIN% ^
 	-DBoost_INCLUDE_DIR:PATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/include ^
 	-DBoost_DIR:PATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows ^
 	-DCURL_INCLUDE_DIR:PATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/include ^
+	-DCURL_LIBRARY_DEBUG:FILEPATH= ^
 	-DCURL_LIBRARY_RELEASE:FILEPATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/lib/libcurl.lib ^
 	-DGDAL_INCLUDE_DIR:PATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/include ^
 	-DGDAL_LIBRARY:FILEPATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/lib/gdal.lib ^
 	-DOPENAL_INCLUDE_DIR:PATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/include ^
 	-DOPENAL_LIBRARY:FILEPATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/lib/OpenAL32.lib ^
+	-DOPENTHREADS_INCLUDE_DIR:PATH=%ROOT_DIR%/scratch-install/include ^
+	-DOPENTHREADS_LIBRARY_RELEASE:FILEPATH=%ROOT_DIR%/scratch-install/lib/OpenThreads.lib ^
+	-DOPENTHREADS_LIBRARY_DEBUG:FILEPATH= ^
+	-DOSGDB_INCLUDE_DIR:PATH=%ROOT_DIR%/scratch-install/include ^
+	-DOSGDB_LIBRARY_DEBUG:FILEPATH= ^
+	-DOSGDB_LIBRARY_RELEASE:FILEPATH=%ROOT_DIR%/scratch-install/lib/osgDB.lib ^
+	-DOSGGA_INCLUDE_DIR:PATH=%ROOT_DIR%/scratch-install/include ^
+	-DOSGGA_LIBRARY_DEBUG:FILEPATH= ^
+	-DOSGGA_LIBRARY_RELEASE:FILEPATH=%ROOT_DIR%/scratch-install/lib/osgGA.lib ^
+	-DOSGPARTICLE_INCLUDE_DIR:PATH=%ROOT_DIR%/scratch-install/include ^
+	-DOSGPARTICLE_LIBRARY_DEBUG:FILEPATH= ^
+	-DOSGPARTICLE_LIBRARY_RELEASE:FILEPATH=%ROOT_DIR%/scratch-install/lib/osgParticle.lib ^
+	-DOSGSIM_INCLUDE_DIR:PATH=%ROOT_DIR%/scratch-install/include ^
+	-DOSGSIM_LIBRARY_DEBUG:FILEPATH= ^
+	-DOSGSIM_LIBRARY_RELEASE:FILEPATH=%ROOT_DIR%/scratch-install/lib/osgSim.lib ^
+	-DOSGTEXT_INCLUDE_DIR:PATH=%ROOT_DIR%/scratch-install/include ^
+	-DOSGTEXT_LIBRARY_DEBUG:FILEPATH= ^
+	-DOSGTEXT_LIBRARY_RELEASE:FILEPATH=%ROOT_DIR%/scratch-install/lib/osgText.lib ^
+	-DOSGUTIL_INCLUDE_DIR:PATH=%ROOT_DIR%/scratch-install/include ^
+	-DOSGUTIL_LIBRARY_DEBUG:FILEPATH= ^
+	-DOSGUTIL_LIBRARY_RELEASE:FILEPATH=%ROOT_DIR%/scratch-install/lib/osgUtil.lib ^
+	-DOSGVIEWER_INCLUDE_DIR:PATH=%ROOT_DIR%/scratch-install/include ^
+	-DOSGVIEWER_LIBRARY_DEBUG:FILEPATH= ^
+	-DOSGVIEWER_LIBRARY_RELEASE:FILEPATH=%ROOT_DIR%/scratch-install/lib/osgViewer.lib ^
+	-DOSG_INCLUDE_DIR:PATH=%ROOT_DIR%/scratch-install/include ^
+	-DOSG_LIBRARY_DEBUG:FILEPATH= ^
+	-DOSG_LIBRARY_RELEASE:FILEPATH=%ROOT_DIR%/scratch-install/lib/osg.lib ^
 	-DZLIB_INCLUDE_DIR:PATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/include ^
+	-DZLIB_LIBRARY_DEBUG:FILEPATH= ^
 	-DZLIB_LIBRARY_RELEASE:FILEPATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/lib/zlib.lib
 cmake --build . --config Release --target INSTALL
 cd %ROOT_DIR%
@@ -211,8 +240,8 @@ cmake ..\..\scratch-source\flightgear-git -G  %CMAKE_TOOLCHAIN% ^
 	-DCMAKE_CONFIGURATION_TYPES:STRING=Debug;Release ^
 	-DCMAKE_BUILD_TYPE:STRING=Release ^
 	-DMSVC_3RDPARTY_ROOT:PATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows ^
-	-DCMAKE_PREFIX_PATH:PATH=%ROOT_DIR%/scratch-install/lib;%ROOT_DIR%/vcpkg-git/installed/x64-windows/lib;%QT5x64_LIB% ^
-	-DCMAKE_INCLUDE_PATH:PATH=%ROOT_DIR%/scratch-install/include;%ROOT_DIR%/vcpkg-git/installed/x64-windows/include ^
+	-DCMAKE_PREFIX_PATH:STRING=%ROOT_DIR%/scratch-install/lib;%ROOT_DIR%/vcpkg-git/installed/x64-windows/lib;%QT5x64_LIB% ^
+	-DCMAKE_INCLUDE_PATH:STRING=%ROOT_DIR%/scratch-install/include;%ROOT_DIR%/vcpkg-git/installed/x64-windows/include ^
 	-DCMAKE_INSTALL_PREFIX:PATH=%ROOT_DIR%/scratch-install ^
 	-DSimGear_DIR:PATH=%ROOT_DIR%/scratch-install/lib/cmake/SimGear ^
 	-DOSG_FSTREAM_EXPORT_FIXED:BOOL=1 ^
@@ -275,8 +304,8 @@ cd scratch-build\terragear
 cmake ..\..\scratch-source\terragear-git -G  %CMAKE_TOOLCHAIN% ^
 	-DCMAKE_CONFIGURATION_TYPES:STRING=Debug;Release ^
 	-DCMAKE_BUILD_TYPE:STRING=Release ^
-	-DCMAKE_PREFIX_PATH:PATH=%ROOT_DIR%/scratch-install/lib;%ROOT_DIR%/vcpkg-git/installed/x64-windows/lib;%QT5x64_LIB% ^
-	-DCMAKE_INCLUDE_PATH:PATH=%ROOT_DIR%/scratch-install/include;%ROOT_DIR%/vcpkg-git/installed/x64-windows/include ^
+	-DCMAKE_PREFIX_PATH:STRING=%ROOT_DIR%/scratch-install/lib;%ROOT_DIR%/vcpkg-git/installed/x64-windows/lib;%QT5x64_LIB% ^
+	-DCMAKE_INCLUDE_PATH:STRING=%ROOT_DIR%/scratch-install/include;%ROOT_DIR%/vcpkg-git/installed/x64-windows/include ^
 	-DCMAKE_INSTALL_PREFIX:PATH=%ROOT_DIR%/scratch-install ^
 	-DMSVC_3RDPARTY_ROOT:PATH= ^
 	-DBoost_INCLUDE_DIR:PATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/include ^
