@@ -17,6 +17,28 @@ REM You should have received a copy of the GNU General Public License
 REM along with this program; if not, write to the Free Software
 REM Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
+REM Defaults
+set WHITE_TEXT_FIX=0
+set OSG_SOURCE_PATH=scratch-source/openscenegraph-3.6-git
+set OSG_BUILD_PATH=scratch-build/openscenegraph-3.6
+
+REM Process arguments
+:parse
+if "%~1"=="" goto endparse
+if "%~1"=="-wt"(
+    set WHITE_TEXT_FIX=1
+    set OSG_SOURCE_PATH=scratch-source/openscenegraph-fix-git
+    set OSG_BUILD_PATH=scratch-build/openscenegraph-fix
+)
+if "%~1"=="--whitetext"(
+    set WHITE_TEXT_FIX=1
+    set OSG_SOURCE_PATH=scratch-source/openscenegraph-fix-git
+    set OSG_BUILD_PATH=scratch-build/openscenegraph-fix
+)
+SHIFT
+goto parse
+:endparse
+
 set ROOT_DIR=%CD%
 set PATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/bin;%ROOT_DIR%/vcpkg-git/installed/x64-windows/include;%ROOT_DIR%/vcpkg-git/installed/x64-windows/lib;%PATH%
 
@@ -75,16 +97,30 @@ if not exist scratch-install/NUL (
 	mkdir scratch-install
 )
 
-if not exist scratch-build/openscenegraph-3.6/NUL (
-	mkdir scratch-build\openscenegraph-3.6
-)
-if not exist scratch-source/openscenegraph-3.6-git/NUL (
-	echo Downloading OpenSceneGraph . . .
-	git clone -b OpenSceneGraph-3.6 https://github.com/openscenegraph/OpenSceneGraph.git scratch-source/openscenegraph-3.6-git
+if %WHITE_TEXT_FIX%==1 (
+    if not exist scratch-build/openscenegraph-fix/NUL (
+	    mkdir scratch-build\openscenegraph-fix
+    )
+    if not exist scratch-source/openscenegraph-fix-git/NUL (
+	    echo Downloading OpenSceneGraph (white text fix) . . .
+	    git clone -b fgfs-342-1 https://github.com/zakalawe/osg.git scratch-source/openscenegraph-fix-git
+    ) else (
+	    echo Updating OpenSceneGraph (white text fix) . . .
+	    cd scratch-source/openscenegraph-fix-git
+	    git pull
+    )
 ) else (
-	echo Updating OpenSceneGraph . . .
-	cd scratch-source/openscenegraph-3.6-git
-	git pull
+    if not exist scratch-build/openscenegraph-3.6/NUL (
+	    mkdir scratch-build\openscenegraph-3.6
+    )
+    if not exist scratch-source/openscenegraph-3.6-git/NUL (
+	    echo Downloading OpenSceneGraph . . .
+	    git clone -b OpenSceneGraph-3.6 https://github.com/openscenegraph/OpenSceneGraph.git scratch-source/openscenegraph-3.6-git
+    ) else (
+	    echo Updating OpenSceneGraph . . .
+	    cd scratch-source/openscenegraph-3.6-git
+	    git pull
+    )
 )
 cd %ROOT_DIR%
 
@@ -133,8 +169,8 @@ REM -DQt5OpenGL_DIR=%QT5x64_CMAKE%/Qt5OpenGL ^
 REM -DQt5Widgets_DIR=%QT5x64_CMAKE%/Qt5Widgets ^
 
 echo Compiling OpenSceneGraph . . .
-cd scratch-build\openscenegraph-3.6
-cmake ..\..\scratch-source\openscenegraph-3.6-git -G %CMAKE_TOOLCHAIN% ^
+cd %OSG_BUILD_PATH%
+cmake ..\..\%OSG_SOURCE_PATH% -G %CMAKE_TOOLCHAIN% ^
 	-DCMAKE_CONFIGURATION_TYPES:STRING=Debug;Release ^
 	-DCMAKE_BUILD_TYPE:STRING=Release ^
 	-DCMAKE_INSTALL_PREFIX:PATH=%ROOT_DIR%/scratch-install ^
