@@ -18,28 +18,41 @@ REM along with this program; if not, write to the Free Software
 REM Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 REM Defaults
+set ROOT_DIR=%CD%
 set WHITE_TEXT_FIX=0
 set OSG_SOURCE_PATH=scratch-source/openscenegraph-3.6-git
 set OSG_BUILD_PATH=scratch-build/openscenegraph-3.6
+set WT_GDAL_INCLUDE_DIR=%ROOT_DIR%/vcpkg-git/installed/x64-windows/include
+set WT_GDAL_LIBRARY=%ROOT_DIR%/vcpkg-git/installed/x64-windows/lib/gdal.lib
+set WT_GDAL_LIBRARY_DEBUG=%ROOT_DIR%/vcpkg-git/installed/x64-windows/debug/lib/gdald.lib
 
 REM Process arguments
 :parse
 if "%~1"=="" goto endparse
-if "%~1"=="-wt"(
+if "%~1"=="-wt" (
     set WHITE_TEXT_FIX=1
     set OSG_SOURCE_PATH=scratch-source/openscenegraph-fix-git
     set OSG_BUILD_PATH=scratch-build/openscenegraph-fix
+	set WT_GDAL_INCLUDE_DIR=
+	set WT_GDAL_LIBRARY=
+	set WT_GDAL_LIBRARY_DEBUG=
 )
-if "%~1"=="--whitetext"(
+if "%~1"=="--whitetext" (
     set WHITE_TEXT_FIX=1
     set OSG_SOURCE_PATH=scratch-source/openscenegraph-fix-git
     set OSG_BUILD_PATH=scratch-build/openscenegraph-fix
+	set WT_GDAL_INCLUDE_DIR=
+	set WT_GDAL_LIBRARY=
+	set WT_GDAL_LIBRARY_DEBUG=
 )
 SHIFT
 goto parse
 :endparse
 
-set ROOT_DIR=%CD%
+echo White Text Fix: %WHITE_TEXT_FIX%
+echo %OSG_SOURCE_PATH%
+echo %OSG_BUILD_PATH%
+
 set PATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/bin;%ROOT_DIR%/vcpkg-git/installed/x64-windows/include;%ROOT_DIR%/vcpkg-git/installed/x64-windows/lib;%PATH%
 
 REM Determine location of Qt5
@@ -102,10 +115,10 @@ if %WHITE_TEXT_FIX%==1 (
 	    mkdir scratch-build\openscenegraph-fix
     )
     if not exist scratch-source/openscenegraph-fix-git/NUL (
-	    echo Downloading OpenSceneGraph (white text fix) . . .
+	    echo Downloading OpenSceneGraph . . .
 	    git clone -b fgfs-342-1 https://github.com/zakalawe/osg.git scratch-source/openscenegraph-fix-git
     ) else (
-	    echo Updating OpenSceneGraph (white text fix) . . .
+	    echo Updating OpenSceneGraph . . .
 	    cd scratch-source/openscenegraph-fix-git
 	    git pull
     )
@@ -184,9 +197,9 @@ cmake ..\..\%OSG_SOURCE_PATH% -G %CMAKE_TOOLCHAIN% ^
 	-DFREETYPE_INCLUDE_DIR_ft2build:PATH=%ROOT_DIR%/vcpkg-git/packages/freetype_x64-windows/include ^
 	-DFREETYPE_LIBRARY_RELEASE:FILEPATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/lib/freetype.lib ^
 	-DFREETYPE_LIBRARY_DEBUG:FILEPATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/debug/lib/freetyped.lib ^
-	-DGDAL_INCLUDE_DIR:PATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/include ^
-	-DGDAL_LIBRARY:FILEPATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/lib/gdal.lib ^
-	-DGDAL_LIBRARY_DEBUG:FILEPATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/debug/lib/gdald.lib ^
+	-DGDAL_INCLUDE_DIR:PATH=%WT_GDAL_INCLUDE_DIR% ^
+	-DGDAL_LIBRARY:FILEPATH=%WT_GDAL_LIBRARY% ^
+	-DGDAL_LIBRARY_DEBUG:FILEPATH=%WT_GDAL_LIBRARY_DEBUG% ^
 	-DGLUT_INCLUDE_DIR:PATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/include ^
 	-DGLUT_LIBRARY:FILEPATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/lib/freeglut.lib ^
 	-DGLUT_LIBRARY_DEBUG:FILEPATH=%ROOT_DIR%/vcpkg-git/installed/x64-windows/debug/lib/freeglut.lib ^
