@@ -4,7 +4,7 @@ import unittest
 import sgprops
 import os
 import catalog
-import xml.etree.cElementTree as ET
+import lxml.etree as ET
 
 catalog.quiet = True
 
@@ -93,7 +93,7 @@ class UpdateCatalogTests(unittest.TestCase):
         catalog_node = ET.Element('PropertyList')
         catalog_root = ET.ElementTree(catalog_node)
 
-        pkgNode = catalog.make_aircraft_node('f16', pkg, variants, "http://foo.com/testOutput/")
+        pkgNode = catalog.make_aircraft_node('f16', pkg, variants, "http://foo.com/testOutput/", [])
         catalog_node.append(pkgNode)
 
         # write out so we can parse using sgprops
@@ -172,7 +172,7 @@ class UpdateCatalogTests(unittest.TestCase):
         catalog_node = ET.Element('PropertyList')
         catalog_root = ET.ElementTree(catalog_node)
 
-        pkgNode = catalog.make_aircraft_node('dc3', pkg, variants, "http://foo.com/testOutput/")
+        pkgNode = catalog.make_aircraft_node('dc3', pkg, variants, "http://foo.com/testOutput/", [])
         catalog_node.append(pkgNode)
 
         if not os.path.isdir("testOutput"):
@@ -210,7 +210,7 @@ class UpdateCatalogTests(unittest.TestCase):
         catalog_node = ET.Element('PropertyList')
         catalog_root = ET.ElementTree(catalog_node)
 
-        pkgNode = catalog.make_aircraft_node('c150', pkg, variants, "http://foo.com/testOutput/")
+        pkgNode = catalog.make_aircraft_node('c150', pkg, variants, "http://foo.com/testOutput/", [])
         catalog_node.append(pkgNode)
 
         if not os.path.isdir("testOutput2"):
