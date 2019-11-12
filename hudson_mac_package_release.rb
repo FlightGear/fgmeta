@@ -54,11 +54,10 @@ bundle=dmgDir + "/FlightGear.app"
 puts "Running macdeployqt on the bundle to copy Qt libraries"
 `macdeployqt #{$prefixDir}/fgfs.app -qmldir=#{qmlDir}`
 
-puts "Moving & renaming app bundle"
+puts "Copying & renaming app bundle"
 `mkdir -p #{dmgDir}`
-`mv #{$prefixDir}/fgfs.app #{bundle}`
+`rsync  --archive --quiet #{$prefixDir}/fgfs.app/ #{bundle}`
 
-bundle=dmgDir + "/FlightGear.app"
 contents=bundle + "/Contents"
 macosDir=contents + "/MacOS"
 $frameworksDir=contents +"/Frameworks"
@@ -142,20 +141,37 @@ if !$isRelease
   # code sign the entire bundle once complete - v2 code-signing
   puts "Signing #{bundle}"
   `codesign --deep -s "#{$codeSignIdentity}" #{bundle}`
-  puts "Creating DMG"
+  puts "Creating DMG without base-files"
 
   `rm -f #{dmgPath}`
   `hdiutil create -srcfolder #{dmgDir} #{createArgs} #{dmgPath}`
+
+  puts "Notarizing DMG #{dmgPath}"
+  `xcrun altool --notarize-app \
+              --primary-bundle-id "org.flightgear.mac"  \
+              --username "zakalawe@mac.com" \
+              --password "@keychain:FlightGearAppStoreConnectUserName" \
+              --file #{dmgPath}`
 end
 
 puts "Creating full image with data"
 
-puts "Copying base package files into the image"
 `rsync -a fgdata/ #{resourcesDir}/data`
 
 # re-sign the entire bundle
-puts "Re-signing full #{bundle}"
+puts "Re-signing full app: #{bundle}"
 `codesign --force --deep -s "#{$codeSignIdentity}" #{bundle}`
 
 `rm -f #{dmgFullPath}`
 `hdiutil create -srcfolder #{dmgDir} #{createArgs} #{dmgFullPath}`
+
+puts "Notarizing DMG #{dmgFullPath}"
+
+`xcrun altool --notarize-app  \
+  --primary-bundle-id "org.flightgear.mac" \
+  --username "zakalawe@mac.com" \
+  --password "@keychain:FlightGearAppStoreConnectUserName" \
+  --file #{dmgFullPath}`
+
+puts "Packaging complete"
+
