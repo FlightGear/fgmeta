@@ -317,12 +317,23 @@ for scm in scm_list:
     skip_list = []
     for s in skip_nodes:
         skip_list.append(get_xml_text(s))
-    print 'skip list:', skip_list
+
+    # Selective list of craft to include, overriding the skip list.
+    include_nodes = scm.findall('include')
+    include_list = []
+    for node in include_nodes:
+        include_list.append(get_xml_text(node))
+    if len(include_list):
+        skip_list = []
+
+    print("Skip list: %s" % skip_list)
+    print("Include list: %s" % include_list)
+
     names = os.listdir(repo_path)
     for name in sorted(names, key=lambda s: s.lower()):
-        if name in skip_list:
+        if name in skip_list or (len(include_list) and name not in include_list):
             if not args.quiet:
-                print "skipping:", name
+                print("Skipping: %s" % name)
             continue
 
         # process each aircraft in turn
