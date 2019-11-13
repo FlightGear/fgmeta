@@ -406,3 +406,17 @@ def parse_config_file(parser=None, file_name=None):
     # Parse the XML and return the root node.
     config = ET.parse(file_name, parser)
     return config.getroot()
+
+
+def parse_template_file(parser=None, file_name=None):
+    """Test and parse the catalog configuration file."""
+
+    # Check for the file.
+    if not access(file_name, F_OK):
+        print("CatalogError: The catalog template file '%s' cannot be found." % file_name)
+        sys.exit(1)
+
+    # Parse the XML and return the template node.
+    template = ET.parse(file_name, parser)
+    template_root = template.getroot()
+    return template_root.find('template')

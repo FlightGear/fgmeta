@@ -13,7 +13,7 @@ import sgprops
 import sys
 import catalogTags
 import catalog
-from catalog import make_aircraft_node, make_aircraft_zip, parse_config_file
+from catalog import make_aircraft_node, make_aircraft_zip, parse_config_file, parse_template_file
 
 
 CATALOG_VERSION = 4
@@ -215,11 +215,7 @@ if not os.path.isdir(args.dir):
 
 parser = ET.XMLParser(remove_blank_text=True)
 config_node = parse_config_file(parser=parser, file_name=os.path.join(args.dir, 'catalog.config.xml'))
-
-template_file = os.path.join(args.dir, 'template.xml')
-template = ET.parse(template_file, parser)
-template_root = template.getroot()
-template_node = template_root.find('template')
+template_node = parse_template_file(parser=parser, file_name=os.path.join(args.dir, 'template.xml'))
 
 md5sum_file = os.path.join(args.dir, 'md5sum.xml')
 if os.path.exists(md5sum_file):
