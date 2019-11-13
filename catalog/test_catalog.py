@@ -3,8 +3,13 @@
 import unittest
 import sgprops
 import os
+from os.path import join
 import catalog
 import lxml.etree as ET
+from shutil import rmtree
+from tempfile import mkdtemp
+import zipfile
+
 
 catalog.quiet = True
 
@@ -233,6 +238,86 @@ class UpdateCatalogTests(unittest.TestCase):
         self.assertFalse(parsedPkgNode.hasChild('author'));
         self.assertFalse(parsedPkgNode.hasChild('minimum-fg-version'));
         self.assertFalse(parsedPkgNode.hasChild('variant'));
+
+
+class ZipTests(unittest.TestCase):
+    """Specific craft zip file creation tests."""
+
+    def check_zip(self, file_name, expected_content=None):
+        """General checks for the zip file."""
+
+        # Check for file existence.
+        self.assert_(os.access(file_name, os.F_OK))
+
+        # Check the contents.
+        file = zipfile.ZipFile(file_name)
+        zip_contents = file.namelist()
+        if len(zip_contents) != len(expected_content):
+            print("Zip contents:\n    %s" % zip_contents)
+            print("Expected contents:\n    %s" % expected_content)
+            self.assertEqual(len(zip_contents), len(expected_content))
+        for i in range(len(zip_contents)):
+            self.assertEqual(zip_contents[i], expected_content[i])
+
+
+    def setUp(self):
+        """Common set up for these system tests."""
+
+        # Store the current directory.
+        self._cwd = os.getcwd()
+
+        # Create a temporary directory for dumping files.
+        self.tmpdir = mkdtemp()
+
+
+    def tearDown(self):
+        """Delete temp files."""
+
+        # Force return to the correct directory.
+        os.chdir(self._cwd)
+
+        # Remove temporary file (if there is a deletion failure, continue to allow the test suite to survive).
+        try:
+            rmtree(self.tmpdir)
+        except:
+            pass
+
+        # Remove the variable.
+        del self.tmpdir
+
+
+    def test_zip_creation(self):
+        """Test the creation of a basic craft zip archive."""
+
+        # Create a basic zip file.
+        name = "c172"
+        catalog.make_aircraft_zip(join(os.getcwd(), "testData/Aircraft"), name, join(self.tmpdir, name+'.zip'), join(os.getcwd(), 'fgaddon-catalog/zip-excludes.lst'), verbose=False)
+
+        # Checks.
+        self.check_zip(join(self.tmpdir, name+'.zip'), expected_content=['c172/c172-set.xml'])
+
+
+    def test_zip_exclusion_global(self):
+        """Test file exclusion in a craft zip archive using the global catalog exclusion list."""
+
+        # Create a basic zip file.
+        name = "dc3"
+        catalog.make_aircraft_zip(join(os.getcwd(), "testData/Aircraft"), name, join(self.tmpdir, name+'.zip'), join(os.getcwd(), 'fgaddon-catalog/zip-excludes.lst'), verbose=False)
+
+        # Checks.
+        self.check_zip(join(self.tmpdir, name+'.zip'), expected_content=['dc3/dc3-set.xml'])
+
+
+    def test_zip_exclusion_local(self):
+        """Test file exclusion in a craft zip archive using a local catalog exclusion list."""
+
+        # Create a basic zip file.
+        name = "c150"
+        catalog.make_aircraft_zip(join(os.getcwd(), "testData/Aircraft"), name, join(self.tmpdir, name+'.zip'), join(os.getcwd(), 'testData/Aircraft/c150/zip-excludes.lst'), verbose=False)
+
+        # Checks.
+        self.check_zip(join(self.tmpdir, name+'.zip'), expected_content=['c150/c150-set.xml', 'c150/Resources/crazy_20Gb_file'])
+
 
 if __name__ == '__main__':
     unittest.main()

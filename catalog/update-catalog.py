@@ -13,6 +13,8 @@ import sgprops
 import sys
 import catalogTags
 import catalog
+from catalog import make_aircraft_node, make_aircraft_zip
+
 
 CATALOG_VERSION = 4
 
@@ -66,21 +68,6 @@ def scan_dir_for_change_date_mtime(path):
                 maxsec = mtime
     return maxsec
 
-def make_aircraft_zip(repo_path, name, zip_file):
-    if (not args.quiet):
-        print "Updating:", name + '.zip'
-    savedir = os.getcwd()
-    os.chdir(repo_path)
-    if os.path.exists(zip_file):
-        os.remove(zip_file)
-    command = ['zip', '-rq', '-9']
-    if os.path.exists(zip_excludes):
-        command += ['-x@' + zip_excludes]
-    else:
-        print "warning: no zip-excludes.lst file provided", zip_excludes
-    command += [zip_file, name]
-    subprocess.call(command)
-    os.chdir(savedir)
 
 def get_md5sum(file):
     f = open(file, 'r')
@@ -148,7 +135,7 @@ def process_aircraft_dir(name, repo_path):
     if not args.quiet:
         print "%s:" % name,
 
-    package_node = catalog.make_aircraft_node(name, package, variants, download_base, mirrors)
+    package_node = make_aircraft_node(name, package, variants, download_base, mirrors)
 
     download_url = download_base + name + '.zip'
     if 'thumbnail' in package:
@@ -177,7 +164,7 @@ def process_aircraft_dir(name, repo_path):
         # rebuild zip file
         if not args.quiet:
             print "updating:", zipfile
-        make_aircraft_zip(repo_path, name, zipfile)
+        make_aircraft_zip(repo_path, name, zipfile, zip_excludes, verbose=not args.quiet)
         md5sum = get_md5sum(zipfile)
     else:
         if not args.quiet:

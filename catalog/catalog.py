@@ -2,13 +2,16 @@
 
 import argparse
 import datetime
-#import xml.etree.cElementTree as ET
+from fnmatch import fnmatch, translate
 import lxml.etree as ET
 import os
+from os.path import exists, join, relpath
+from os import walk
 import re
 import sgprops
 import sys
 import catalogTags
+import zipfile
 
 CATALOG_VERSION = 4
 quiet = False
@@ -286,3 +289,107 @@ def make_aircraft_node(aircraftDirName, package, variants, downloadBase, mirrors
         package_node.append(package['urls']._createXMLElement())
 
     return package_node
+
+
+def make_aircraft_zip(repo_path, craft_name, zip_file, global_zip_excludes, verbose=True):
+    """Create a zip archive of the given aircraft."""
+
+    # Printout.
+    if verbose:
+        print("Zip file creation: %s.zip" % craft_name)
+
+    # Go to the directory of crafts to catalog.
+    savedir = os.getcwd()
+    os.chdir(repo_path)
+
+    # Clear out the old file.
+    if exists(zip_file):
+        os.remove(zip_file)
+
+    # Use the Python zipfile module to create the zip file.
+    zip_handle = zipfile.ZipFile(zip_file, 'w', zipfile.ZIP_DEFLATED)
+
+    # Find a per-craft exclude list.
+    craft_path = join(repo_path, craft_name)
+    exclude_file = join(craft_path, 'zip-excludes.lst')
+    if exists(exclude_file):
+        if verbose:
+            print("Found the craft specific exclusion list '%s'" % exclude_file)
+
+    # Otherwise use the catalog default exclusion list.
+    else:
+        exclude_file = global_zip_excludes
+
+    # Process the exclusion list and find all matching file names.
+    blacklist = fetch_zip_exclude_list(craft_name, craft_path, exclude_file)
+
+    # Walk over all craft files.
+    print_format = "  %-30s '%s'"
+    for root, dirs, files in walk(craft_path):
+        # Loop over the files.
+        for file in files:
+            # The directory and relative and absolute paths.
+            dir = relpath(root, start=repo_path)
+            full_path = join(root, file)
+            rel_path = relpath(full_path, start=repo_path)
+
+            # Skip blacklist files or directories.
+            skip = False
+            if file == 'zip-excludes.lst':
+                if verbose:
+                    print(print_format % ("Skipping the file:", join(dir, 'zip-excludes.lst')))
+                skip = True
+            if dir in blacklist:
+                if verbose:
+                    print(print_format % ("Skipping the file:", join(dir, file)))
+                skip = True
+            for name in blacklist:
+                if fnmatch(rel_path, name):
+                    if verbose:
+                        print(print_format % ("Skipping the file:", rel_path))
+                    skip = True
+                    break
+            if skip:
+                continue
+
+            # Otherwise add the file.
+            zip_handle.write(rel_path)
+
+    # Clean up.
+    os.chdir(savedir)
+    zip_handle.close()
+
+
+def fetch_zip_exclude_list(name, path, exclude_path):
+    """Use Unix style path regular expression to find all files to exclude."""
+
+    # Init.
+    blacklist = []
+    file = open(exclude_path)
+    exclude_list = file.readlines()
+    file.close()
+    old_path = os.getcwd()
+    os.chdir(path)
+
+    # Process each exclusion path or regular expression, converting to Python RE objects.
+    reobj_list = []
+    for i in range(len(exclude_list)):
+        reobj_list.append(re.compile(translate(exclude_list[i].strip())))
+
+    # Recursively loop over all files, finding the ones to exclude.
+    for root, dirs, files in walk(path):
+        for file in files:
+            full_path = join(root, file)
+            rel_path = join(name, relpath(full_path, start=path))
+
+            # Skip Unix shell-style wildcard matches
+            for i in range(len(reobj_list)):
+                if reobj_list[i].match(rel_path):
+                    blacklist.append(rel_path)
+                    break
+
+    # Return to the original path.
+    os.chdir(old_path)
+
+    # Return the list.
+    return blacklist
