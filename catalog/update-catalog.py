@@ -13,7 +13,7 @@ import sgprops
 import sys
 import catalogTags
 import catalog
-from catalog import make_aircraft_node, make_aircraft_zip
+from catalog import make_aircraft_node, make_aircraft_zip, parse_config_file
 
 
 CATALOG_VERSION = 4
@@ -214,10 +214,7 @@ if not os.path.isdir(args.dir):
     exit(0)
 
 parser = ET.XMLParser(remove_blank_text=True)
-
-config_file = os.path.join(args.dir, 'catalog.config.xml')
-config = ET.parse(config_file, parser)
-config_node = config.getroot()
+config_node = parse_config_file(parser=parser, file_name=os.path.join(args.dir, 'catalog.config.xml'))
 
 template_file = os.path.join(args.dir, 'template.xml')
 template = ET.parse(template_file, parser)
