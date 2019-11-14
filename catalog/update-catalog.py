@@ -281,6 +281,12 @@ if args.no_update:
 else:
     cwd = os.getcwd()
     for scm in scm_list:
+        # XML mandated skip, with command line override.
+        if not args.update:
+            skip = get_xml_text(scm.find('update'))
+            if skip == 'false':
+                continue
+
         repo_type = get_xml_text(scm.find('type'))
         repo_path = get_xml_text(scm.find('path'))
         includes.append(repo_path)
