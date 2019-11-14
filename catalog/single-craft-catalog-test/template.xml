@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--Template catalog - copy and modify for your site as required-->
+<PropertyList>
+  <template>
+    <version n="0">HEAD</version>
+    <id>localhost</id>
+    <license>GPL</license>
+    <url>/data/fgaddon-catalog_p51d/ftp/Aircraft/catalog.xml</url>
+    <name>p51d FGAddon aircraft test</name>
+    <description>This is a test of the catalog updating script to allow aircraft authors to see what will be present in the zip archive of their aircraft.</description>
+  </template>
+</PropertyList>

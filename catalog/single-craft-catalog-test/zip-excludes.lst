@@ -1,0 +1,11 @@
+*/.svn/*
+*.xcf*
+*.XCF*
+*.blend*
+*.psd
+*~
+*/dev/*
+*/Dev/*
+*/development/*
+*/src/*
+*/Resources/*

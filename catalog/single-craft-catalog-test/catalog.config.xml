@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--Template catalog - copy and modify for your site as required-->
+<PropertyList>
+  <local-output>/data/fgaddon-catalog_p51d/ftp</local-output>
+  <download-url n="0">/data/fgaddon-catalog_p51d/ftp/Aircraft/</download-url>
+  <scm>
+    <type>svn</type>
+    <update type="bool">false</update>
+    <path>/flightgear/flightgear-fgaddon/Aircraft</path>
+    <include>p51d</include>
+  </scm>
+</PropertyList>

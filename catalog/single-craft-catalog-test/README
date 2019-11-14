@@ -1,0 +1,6 @@
+Configuration files for testing the catalog updating script on a single aircraft.  This is useful for seeing what will be packed into the zip archive.  To use these:
+
+* Copy all *.xml and *.lst files into a local testing directory X.
+* Modify the *.xml files:
+    * Replace all instances of '/data/fgaddon_catalog_p51d/' with the directory X.
+    * Update any other tags as necessary.
