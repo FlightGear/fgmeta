@@ -17,6 +17,14 @@ CATALOG_VERSION = 4
 quiet = False
 verbose = False
 
+# The Python version.
+PY_VERSION = sys.version_info[0]
+
+# Python 2 and 3 compatibility.
+if PY_VERSION == 3:
+    long = int
+
+
 def warning(msg):
     if not quiet:
         print(msg)
