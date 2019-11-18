@@ -18,6 +18,9 @@ from catalog import make_aircraft_node, make_aircraft_zip, parse_config_file, pa
 
 CATALOG_VERSION = 4
 
+# The Python version.
+PY_VERSION = sys.version_info[0]
+
 parser = argparse.ArgumentParser()
 parser.add_argument("--update", help="Update/pull SCM source",
                     action="store_true")
@@ -45,6 +48,11 @@ def get_xml_text(e):
 def last_change_date_svn(dir):
     command = [ 'svn', 'info', dir ]
     result = subprocess.check_output( command )
+
+    # Python 3 compatibility.
+    if PY_VERSION == 3:
+        result = result.decode('utf8')
+
     match = re.search('Last Changed Date: (\d+)\-(\d+)\-(\d+)', result)
     if match:
         rev_str = match.group(1) + match.group(2) + match.group(3)
@@ -70,7 +78,7 @@ def scan_dir_for_change_date_mtime(path):
 
 
 def get_md5sum(file):
-    f = open(file, 'r')
+    f = open(file, 'rb')
     md5sum = hashlib.md5(f.read()).hexdigest()
     f.close()
     return md5sum
