@@ -82,7 +82,7 @@ def copy_previews_for_variant(variant, package_name, package_dir, previews_dir):
     for preview in variant['previews']:
         preview_src = os.path.join(package_dir, preview['path'])
         preview_dst = os.path.join(previews_dir, package_name + '_' + preview['path'])
-        #print preview_src, preview_dst, preview['path']
+        #print(preview_src, preview_dst, preview['path'])
         dir = os.path.dirname(preview_dst)
         if not os.path.isdir(dir):
             os.makedirs(dir)
@@ -129,11 +129,11 @@ def process_aircraft_dir(name, repo_path):
     (package, variants) = catalog.scan_aircraft_dir(aircraft_dir, includes)
     if package == None:
         if not args.quiet:
-            print "skipping:", name, "(no -set.xml files)"
+            print("skipping: %s (no -set.xml files)" % name)
         return
 
     if not args.quiet:
-        print "%s:" % name,
+        print("%s:" % name)
 
     package_node = make_aircraft_node(name, package, variants, download_base, mirrors)
 
@@ -154,8 +154,8 @@ def process_aircraft_dir(name, repo_path):
         d = datetime.datetime.utcfromtimestamp(dir_mtime)
         rev = d.strftime("%Y%m%d")
     package_node.append( catalog.make_xml_leaf('revision', rev) )
-    #print "rev:", rev
-    #print "dir mtime:", dir_mtime
+    #print("rev: %s" % rev)
+    #print("dir mtime: %s" % dir_mtime)
     zipfile = os.path.join( output_dir, name + '.zip' )
     valid_zips.append(name + '.zip')
     if not os.path.exists(zipfile) \
@@ -163,12 +163,12 @@ def process_aircraft_dir(name, repo_path):
        or args.clean:
         # rebuild zip file
         if not args.quiet:
-            print "updating:", zipfile
+            print("updating: %s" % zipfile)
         make_aircraft_zip(repo_path, name, zipfile, zip_excludes, verbose=not args.quiet)
         md5sum = get_md5sum(zipfile)
     else:
         if not args.quiet:
-            print "(no change)"
+            print("(no change)")
         if md5sum == "":
             md5sum = get_md5sum(zipfile)
     filesize = os.path.getsize(zipfile)
@@ -189,7 +189,7 @@ def process_aircraft_dir(name, repo_path):
             shared_md5 = get_xml_text(sharedNode)
             if shared_md5 == md5sum:
                 if not args.quiet:
-                    print "Sharing zip with share catalog for:",name
+                    print("Sharing zip with share catalog for: %s" % name)
                 os.remove(zipfile)
                 os.symlink(os.path.join( share_output_dir, name + '.zip' ), zipfile)
 
@@ -210,7 +210,7 @@ def process_aircraft_dir(name, repo_path):
 #    return (md5, file_size)
 
 if not os.path.isdir(args.dir):
-    print "A valid catalog directory must be provided"
+    print("A valid catalog directory must be provided")
     exit(0)
 
 parser = ET.XMLParser(remove_blank_text=True)
@@ -229,7 +229,7 @@ else:
 share_output_dir = get_xml_text(config_node.find('share-output'))
 share_md5_file = get_xml_text(config_node.find('share-md5-sums'))
 if share_output_dir != '' and share_md5_file != '':
-    print 'Output shared with:', share_output_dir
+    print("Output shared with: %s" % share_output_dir)
     share_md5sum_tree = ET.parse(share_md5_file, parser)
     share_md5sum_root = share_md5sum_tree.getroot()
 else:
@@ -271,13 +271,13 @@ zip_excludes = os.path.realpath(tmp)
 for i in config_node.findall("include-dir"):
     path = get_xml_text(i)
     if not os.path.exists(path):
-        print "Skipping missing include path:", path
+        print("Skipping missing include path: %s" % path)
         continue
     includes.append(path)
 
 # freshen repositories
 if args.no_update:
-    print 'Skipping repository updates.'
+    print('Skipping repository updates.')
 else:
     cwd = os.getcwd()
     for scm in scm_list:
@@ -292,16 +292,16 @@ else:
         includes.append(repo_path)
 
         if repo_type == 'svn':
-            print 'SVN update:', repo_path
+            print("SVN update: %s" % repo_path)
             subprocess.call(['svn', 'update', repo_path])
         elif repo_type == 'git':
-            print 'GIT pull:', repo_path
+            print("GIT pull: %s" % repo_path)
             os.chdir(repo_path)
             subprocess.call(['git','pull'])
         elif repo_type == 'no-scm':
-            print "No update of unmannaged files:", repo_path
+            print("No update of unmannaged files: %s" % repo_path)
         else:
-            print "Unknown scm type:", scm, repo_path
+            print("Unknown scm type: %s %s" % (scm, repo_path))
     os.chdir(cwd)
 
 # names of zip files we want (so we can identify/remove orphans)
@@ -343,7 +343,7 @@ for scm in scm_list:
             continue
 
         # process each aircraft in turn
-        # print name, repo_path
+        # print("%s %s" % (name, repo_path))
         process_aircraft_dir(name, repo_path)
 
 # write out the master catalog file
@@ -351,11 +351,11 @@ cat_file = os.path.join(output_dir, 'catalog.xml')
 catalog_root.write(cat_file, encoding='utf-8', xml_declaration=True, pretty_print=True)
 
 # write out the md5sum cache file
-print md5sum_file
+print(md5sum_file)
 md5sum_tree.write(md5sum_file, encoding='utf-8', xml_declaration=True, pretty_print=True)
 
 # look for orphaned zip files
 files = os.listdir(output_dir)
 for file in files:
     if file.endswith('.zip')and not file in valid_zips:
-        print "orphaned zip:", file
+        print("orphaned zip: %s" % file)

@@ -133,9 +133,9 @@ class Node(object):
                     elif isinstance(self._value, bool):
                         n.set('type', "bool")
         except UnicodeEncodeError:
-            print "Encoding error with", self._value, type(self._value)
+            print("Encoding error with %s %s" % (self._value, type(self._value)))
         except:
-            print "Some other exceptiong in sgprops._createXMLElement()"
+            print("Some other exceptiong in sgprops._createXMLElement()")
 
         # index in parent
         if (self.index != 0):
@@ -194,7 +194,7 @@ class PropsHandler(handler.ContentHandler):
             try:
                 index = int(attrs['n'])
             except:
-                print "Invalid index at line:", self._locator.getLineNumber(), "of", self._path
+                print("Invalid index at line: %s of %s" % (self._locator.getLineNumber(), self._path))
                 raise IndexError("Invalid index at line:", self._locator.getLineNumber(), "of", self._path)
 
             currentState.recordExplicitIndex(name, index)
@@ -251,7 +251,7 @@ class PropsHandler(handler.ContentHandler):
                         self._content = self._content[:-1]
                     self._current.value = float(self._content)
         except:
-            print "Parse error for value:", self._content, "at line:", self._locator.getLineNumber(), "of:", self._path
+            print("Parse error for value: %s at line: %s of: %s" % (self._content, self._locator.getLineNumber(), self._path))
 
         self._current = self._current.parent
         self._content = None

@@ -104,7 +104,7 @@ def scan_set_file(aircraft_dir, set_file, includes):
     if sim_node.hasChild('minimum-fg-version'):
         variant['minimum-fg-version'] = sim_node.getValue('minimum-fg-version', None)
 
-    #print '    ', variant
+    #print("    %s" % variant)
     return variant
 
 def extract_previews(previews_node, aircraft_dir):
@@ -143,13 +143,13 @@ def scan_aircraft_dir(aircraft_dir, includes):
     files = os.listdir(aircraft_dir)
     for file in sorted(files, key=lambda s: s.lower()):
         if file.endswith('-set.xml'):
-            # print 'trying:', file
+            # print('trying: %s' % file)
             try:
                 d = scan_set_file(aircraft_dir, file, includes)
                 if d == None:
                     continue
             except:
-                print "Skipping set file since couldn't be parsed:", os.path.join(aircraft_dir, file), sys.exc_info()[0]
+                print("Skipping set file since couldn't be parsed: %s %s" % os.path.join(aircraft_dir, file), sys.exc_info()[0])
                 continue
 
             setDicts.append(d)
@@ -159,13 +159,13 @@ def scan_aircraft_dir(aircraft_dir, includes):
             elif d['variant-of'] == None:
                 primaryAircraft.append(d)
 
-    # print setDicts
+    # print(setDicts)
     if len(setDicts) == 0:
         return None, None
 
     # use the first one
     if len(primaryAircraft) == 0:
-        print "Aircraft has no primary aircraft at all:", aircraft_dir
+        print("Aircraft has no primary aircraft at all: %s" % aircraft_dir)
         primaryAircraft = [setDicts[0]]
 
     package = primaryAircraft[0]
@@ -217,8 +217,8 @@ def append_author_nodes(node, info):
         node.append( make_xml_leaf('author', info['author']) )
 
 def make_aircraft_node(aircraftDirName, package, variants, downloadBase, mirrors):
-    #print "package:", package
-    #print "variants:", variants
+    #print("package: %s" % package)
+    #print("variants: %s" % variants)
     package_node = ET.Element('package')
     package_node.append( make_xml_leaf('name', package['name']) )
     package_node.append( make_xml_leaf('status', package['status']) )
