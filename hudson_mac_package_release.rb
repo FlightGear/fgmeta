@@ -31,6 +31,8 @@ $osgSoVersion=runOsgVersion('so-number')
 $openThreadsSoVersion=runOsgVersion('openthreads-soversion-number')
 
 $codeSignIdentity = ENV['FG_CODESIGN_IDENTITY']
+$keychain = ENV['FG_KEYCHAIN']
+
 puts "Code signing identity is #{$codeSignIdentity}"
 puts "osgVersion=#{osgVersion}, so-number=#{$osgSoVersion}"
 
@@ -134,13 +136,16 @@ File.open("#{contents}/Info.plist", 'w') { |f|
 
 createArgs = "-format UDBZ -imagekey bzip2-level=9 -quiet -volname #{volName}"
 
+# enable the hardened runtime and timestamp options, so notarization works
+codeSignArgs = "--deep --options=runtime --timestamp"
 
 if !$isRelease
   # create the 'lite' DMG without the base files
 
+
   # code sign the entire bundle once complete - v2 code-signing
   puts "Signing #{bundle}"
-  `codesign --deep -s "#{$codeSignIdentity}" #{bundle}`
+  `codesign #{codeSignArgs} --keychain #{$keychain} -s "#{$codeSignIdentity}" #{bundle}`
   puts "Creating DMG without base-files"
 
   `rm -f #{dmgPath}`
@@ -160,7 +165,7 @@ puts "Creating full image with data"
 
 # re-sign the entire bundle
 puts "Re-signing full app: #{bundle}"
-`codesign --force --deep -s "#{$codeSignIdentity}" #{bundle}`
+`codesign --force #{codeSignArgs} --keychain #{$keychain} -s "#{$codeSignIdentity}" #{bundle}`
 
 `rm -f #{dmgFullPath}`
 `hdiutil create -srcfolder #{dmgDir} #{createArgs} #{dmgFullPath}`
