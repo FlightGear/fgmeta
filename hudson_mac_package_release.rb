@@ -145,7 +145,7 @@ if !$isRelease
 
   # code sign the entire bundle once complete - v2 code-signing
   puts "Signing #{bundle}"
-  `codesign #{codeSignArgs} --keychain #{keychain} -s "#{$codeSignIdentity}" #{bundle}`
+  `codesign #{codeSignArgs} --keychain #{$keychain} -s "#{$codeSignIdentity}" #{bundle}`
   puts "Creating DMG without base-files"
 
   `rm -f #{dmgPath}`
@@ -165,7 +165,7 @@ puts "Creating full image with data"
 
 # re-sign the entire bundle
 puts "Re-signing full app: #{bundle}"
-`codesign --force #{codeSignArgs} --keychain #{keychain} -s "#{$codeSignIdentity}" #{bundle}`
+`codesign --force #{codeSignArgs} --keychain #{$keychain} -s "#{$codeSignIdentity}" #{bundle}`
 
 `rm -f #{dmgFullPath}`
 `hdiutil create -srcfolder #{dmgDir} #{createArgs} #{dmgFullPath}`
