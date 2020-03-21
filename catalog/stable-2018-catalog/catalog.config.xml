@@ -4,9 +4,11 @@
 	<local-output>/home/fgaddon/output/Aircraft-2018</local-output>
   <download-url n="0">http://mirrors.ibiblio.org/flightgear/ftp/Aircraft-2018/</download-url>
   <download-url n="1">http://ukmirror.flightgear.org/fgaddon/Aircraft-2018/</download-url>
+  <download-url n="2">https://cdn.merspieler.tk/fgaddon/Aircraft-2018/</download-url>
 
   <thumbnail-url n="0">http://mirrors.ibiblio.org/flightgear/ftp/Aircraft-2018/thumbnails</thumbnail-url>
   <thumbnail-url n="1">http://ukmirror.flightgear.org/official/Aircraft-2018/thumbnails</thumbnail-url>
+  <thumbnail-url n="2">https://cdn.merspieler.tk/fgaddon/Aircraft-2018/thumbnails</thumbnail-url>
 
 
   <!-- share zips with the trunk catalog where possible -->
