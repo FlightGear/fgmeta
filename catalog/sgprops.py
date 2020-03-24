@@ -119,7 +119,7 @@ class Node(object):
         # value and type specification
         try:
             if self._value is not None:
-                if isinstance(self._value, basestring):
+                if isinstance(self._value, str):
                     # don't call str() on strings, breaks the
                     # encoding
                     n.text = self._value
@@ -135,7 +135,7 @@ class Node(object):
         except UnicodeEncodeError:
             print("Encoding error with %s %s" % (self._value, type(self._value)))
         except:
-            print("Some other exceptiong in sgprops._createXMLElement()")
+            print("Unexpected exception in sgprops._createXMLElement():", sys.exc_info()[0])
 
         # index in parent
         if (self.index != 0):
