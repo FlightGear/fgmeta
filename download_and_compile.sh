@@ -364,6 +364,7 @@ function _usage() {
   echo "                doing the same for SIMGEAR (e.g., if doing repeated TERRAGEAR"
   echo "                builds and you know your SIMGEAR is already fine and up-to-date)."
   echo "  -s            compile only the last known stable versions"
+  echo "  --compositor  buld fgfs with compositor enabled."
 }
 
 #######################################################
@@ -470,7 +471,7 @@ if [[ `uname` == 'OpenBSD' ]]; then
 fi
 TEMP=$($getopt -o '+shc:p:a:d:r:j:O:ib:' \
   --longoptions git-clone-default-proto:,git-clone-site-params:,help \
-  --longoptions package-manager:,sudo:,ignore-intercomponent-deps,version \
+  --longoptions package-manager:,sudo:,ignore-intercomponent-deps,compositor,version \
   -n "$PROGNAME" -- "$@")
 
 case $? in
@@ -547,6 +548,7 @@ while true; do
     -O) OOPTION=" -O$2"; shift 2 ;;
     -i) OPENRTI="OPENRTI"; shift ;;
     -b) BUILD_TYPE="$2"; shift 2 ;;
+    --compositor) COMPOSITOR="-DENABLE_COMPOSITOR=ON"; shift ;;
     -h|--help) _usage; exit 0 ;;
     --version) _printVersion; exit 0 ;;
     --) shift; break ;;
@@ -626,6 +628,7 @@ _log "OOPTION=$OOPTION"
 _log "BUILD_TYPE=$BUILD_TYPE"
 _log "SG_CMAKEARGS=$SG_CMAKEARGS"
 _log "FG_CMAKEARGS=$FG_CMAKEARGS"
+_log "COMPOSITOR=$COMPOSITOR"
 _log "DIRECTORY=$CBD"
 
 if [ "$STABLE" = "STABLE" ]; then
@@ -1047,6 +1050,7 @@ if _elementIn "FGFS" "${WHATTOBUILD[@]}" || \
             -DVERBOSE=1"
       fi
       "$CMAKE" -DCMAKE_BUILD_TYPE="$BUILD_TYPE" \
+            $COMPOSITOR \
             -DENABLE_FLITE=ON \
             -DCMAKE_INSTALL_PREFIX:PATH="$INSTALL_DIR_FGFS" \
             -DCMAKE_PREFIX_PATH="$INSTALL_DIR_SIMGEAR;$INSTALL_DIR_OSG;$INSTALL_DIR_OPENRTI;$INSTALL_DIR_PLIB" \
