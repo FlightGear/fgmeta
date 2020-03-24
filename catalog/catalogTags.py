@@ -11,12 +11,16 @@ aircraftTypeTags = [
     "glider",
     "groundvehicle",
     "helicopter",
+    "interceptor",
+    "passenger",
     "racer",
     "spaceship",
     "tanker",
     "trainer",
     "transport",
     "ultralight",
+    "unpowered",
+    "uav",
     "reconnaissance",
     "seacraft",
     "crop-duster",
@@ -26,8 +30,10 @@ aircraftTypeTags = [
 manufacturerTags = [
     "airbus",
     "antonov",
+    "arado",
     "atr",
     "avro",
+    "bae",
     "bell",
     "bleriot",
     "boeing",
@@ -53,6 +59,7 @@ manufacturerTags = [
     "heinkel",
     "ilyushin",
     "junkers",
+    "kawasaki",
     "lockheed",
     "mc-donnell-douglas",
     "messerschmitt",
@@ -64,6 +71,7 @@ manufacturerTags = [
     "piper",
     "republic",
     "robin",
+    "rockwell",
     "saab",
     "short",
     "sopwith",
@@ -73,6 +81,7 @@ manufacturerTags = [
     "tupolev",
     "vickers",
     "vought",
+    "wright",
     "yakovlev"
 ]
 
@@ -105,6 +114,7 @@ featureTags = [
     "biplane",
     "canard",
     "castering-wheel",
+    "combat",
     "delta",
     "etops",
     "experimental",
@@ -112,10 +122,14 @@ featureTags = [
     "fixed-gear",
     "floats",
     "glass-cockpit",
+    "low-wing",
+    "mid-wing",
     "high-wing",
     "h-tail",
     "hud",
     "ifr",
+    "lifting-body",
+    "pressurised",
     "prototype",
     "refuel",
     "retractable-gear",
@@ -123,15 +137,18 @@ featureTags = [
     "skis",
     "stol",
     "supersonic",
+    "supercharger",
     "t-tail",
     "tail-dragger",
     "tricycle",
     "tail-hook",
     "triplane",
+    "twin-boom",
     "v-tail",
     "variable-geometry",
     "vtol",
     "wing-fold"
+    "water-drop"
 ]
 
 propulsionTags = [
@@ -147,6 +164,7 @@ propulsionTags = [
     "supercharged",
     "turboprop",
     "twin-engine",
+    "four-engine",
     "variable-pitch",
     "fixed-pitch"
 ]
