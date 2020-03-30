@@ -99,7 +99,7 @@ bins.each do |b|
   `cp #{$prefixDir}/bin/#{b} #{outPath}`
 end
 
-puts "copying libraries"
+puts "Copying OSG libraries"
 $osgLibs.each do |l|
   libFile = "lib#{l}.#{$osgSoVersion}.dylib"
   `cp #{$prefixDir}/lib/#{libFile} #{$frameworksDir}`
@@ -108,6 +108,12 @@ end
 # and not forgetting OpenThreads
 libFile = "libOpenThreads.#{$openThreadsSoVersion}.dylib"
 `cp #{$prefixDir}/lib/#{libFile} #{$frameworksDir}`
+
+# needed for SWIFT integration
+otherLibs = ['dbus-1.3', 'event_core-2.2.1']
+otherLibs.each do |l|
+  `cp #{$prefixDir}/lib/lib#{l}.dylib #{$frameworksDir}`
+end
 
 $osgPlugins.each do |p|
   pluginFile = "osgdb_#{p}.dylib"
