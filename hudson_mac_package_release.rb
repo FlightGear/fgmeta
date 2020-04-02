@@ -43,7 +43,6 @@ $prefixDir=Dir.pwd + "/dist"
 dmgDir=Dir.pwd + "/image"
 srcDir=Dir.pwd + "/flightgear"
 qmlDir=srcDir + "/src/GUI/qml"
-
 puts "Erasing previous image dir"
 `rm -rf #{dmgDir}`
 
@@ -69,6 +68,7 @@ osgPluginsDir=contents+"/PlugIns/osgPlugins"
 # for writing copyright year to Info.plist
 t = Time.new
 fgCurrentYear = t.year
+fgBundleIdentifier = "org.flightgear.mac"
 
 fgVersion = File.read("#{srcDir}/version").strip
 volName="\"FlightGear #{fgVersion}\""
@@ -79,6 +79,7 @@ if $isRelease
 else
   dmgPath = Dir.pwd + "/output/FlightGear-#{fgVersion}-nightly.dmg"
   dmgFullPath = Dir.pwd + "/output/FlightGear-#{fgVersion}-nightly-full.dmg"
+  fgBundleIdentifier = "org.flightgear.mac-nightly"
 end
 
 puts "Creating directory structure"
@@ -159,18 +160,19 @@ if !$isRelease
 
   puts "Notarizing DMG #{dmgPath}"
   `xcrun altool --notarize-app \
-              --primary-bundle-id "org.flightgear.mac"  \
+              --primary-bundle-id "#{fgBundleIdentifier}"  \
               --username "zakalawe@mac.com" \
               --password "@keychain:FlightGearAppStoreConnectUserName" \
               --file #{dmgPath}`
-end
 
-puts "Creating full image with data"
+
+else
+  puts "Creating full image with data"
 
 `rsync -a fgdata/ #{resourcesDir}/data`
 
-# re-sign the entire bundle
-puts "Re-signing full app: #{bundle}"
+# sign the entire bundle
+puts "Signing full app: #{bundle}"
 `codesign --force #{codeSignArgs} --keychain #{$keychain} -s "#{$codeSignIdentity}" #{bundle}`
 
 `rm -f #{dmgFullPath}`
@@ -179,10 +181,13 @@ puts "Re-signing full app: #{bundle}"
 puts "Notarizing DMG #{dmgFullPath}"
 
 `xcrun altool --notarize-app  \
-  --primary-bundle-id "org.flightgear.mac" \
+  --primary-bundle-id "#{fgBundleIdentifier}"  \
   --username "zakalawe@mac.com" \
   --password "@keychain:FlightGearAppStoreConnectUserName" \
   --file #{dmgFullPath}`
+end
+
+
 
 puts "Packaging complete"
 
