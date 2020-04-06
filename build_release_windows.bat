@@ -20,6 +20,8 @@ SET OSG64=%WORKSPACE%\install\msvc140-64\OpenSceneGraph
 REM 32bits
 md build-sg32
 md build-fg32
+md build-fg32-compositor
+
 cd build-sg32
 cmake ..\simgear -G "Visual Studio 14" ^
                  -DMSVC_3RDPARTY_ROOT=%WORKSPACE%/windows-3rd-party/msvc140 ^
@@ -33,12 +35,28 @@ cd ..\build-fg32
 cmake ..\flightgear -G "Visual Studio 14" ^
                     -DMSVC_3RDPARTY_ROOT=%WORKSPACE%/windows-3rd-party/msvc140 ^
                     -DCMAKE_INSTALL_PREFIX:PATH=%WORKSPACE%/install/msvc140 ^
-                    -DCMAKE_PREFIX_PATH:PATH=%WORKSPACE%/install/msvc140/OpenSceneGraph ^
+                    -DCMAKE_PREFIX_PATH:PATH=%OSG32% ^
                     -DBOOST_ROOT=%WORKSPACE%/windows-3rd-party ^
                     -DOSG_FSTREAM_EXPORT_FIXED=1 ^
                     -DCMAKE_PREFIX_PATH=%QT5SDK32%;%OSG32% ^
                     -DFG_BUILD_TYPE=%FGBUILDTYPE% ^
-                    -DENABLE_SWIFT:BOOL=ON
+                    -DENABLE_SWIFT:BOOL=ON ^
+                    -DENABLE_COMPOSITOR:BOOL=OFF
+cmake --build . --config RelWithDebInfo --target INSTALL
+
+md %WORKSPACE%/install/msvc140/compositor
+
+cd ..\build-fg32-compositor
+cmake ..\flightgear -G "Visual Studio 14" ^
+                    -DMSVC_3RDPARTY_ROOT=%WORKSPACE%/windows-3rd-party/msvc140 ^
+                    -DCMAKE_INSTALL_PREFIX:PATH=%WORKSPACE%/install/msvc140/compositor ^
+                    -DCMAKE_PREFIX_PATH:PATH=%OSG32%; %WORKSPACE%/install/msvc140/ ^
+                    -DBOOST_ROOT=%WORKSPACE%/windows-3rd-party ^
+                    -DOSG_FSTREAM_EXPORT_FIXED=1 ^
+                    -DCMAKE_PREFIX_PATH=%QT5SDK32%;%OSG32% ^
+                    -DFG_BUILD_TYPE=%FGBUILDTYPE% ^
+                    -DENABLE_SWIFT:BOOL=ON ^
+                    -DENABLE_COMPOSITOR:BOOL=ON
 cmake --build . --config RelWithDebInfo --target INSTALL
 
 cd ..
@@ -46,6 +64,7 @@ cd ..
 REM 64 bits
 md build-sg64
 md build-fg64
+md build-fg64-compositor
 
 cd build-sg64
 cmake ..\SimGear -G "Visual Studio 14 Win64" ^
@@ -64,15 +83,32 @@ cmake ..\flightgear -G "Visual Studio 14 Win64" ^
                     -DCMAKE_PREFIX_PATH=%QT5SDK64%;%OSG64% ^
                     -DOSG_FSTREAM_EXPORT_FIXED=1 ^
                     -DFG_BUILD_TYPE=%FGBUILDTYPE% ^
-                    -DENABLE_SWIFT:BOOL=ON
+                    -DENABLE_SWIFT:BOOL=ON ^
+                    -DENABLE_COMPOSITOR:BOOL=OFF
 cmake --build . --config RelWithDebInfo --target INSTALL
 
+md %WORKSPACE%/install/msvc140-64/compositor
+
+
+cd ..\build-fg64-compositor
+cmake ..\flightgear -G "Visual Studio 14 Win64" ^
+                    -DMSVC_3RDPARTY_ROOT=%WORKSPACE%/windows-3rd-party/msvc140 ^
+                    -DBOOST_ROOT=%WORKSPACE%/windows-3rd-party ^
+                    -DCMAKE_INSTALL_PREFIX:PATH=%WORKSPACE%/install/msvc140-64/compositor ^
+                    -DCMAKE_PREFIX_PATH=%QT5SDK64%;%OSG64%;%WORKSPACE%/install/msvc140-64/ ^
+                    -DOSG_FSTREAM_EXPORT_FIXED=1 ^
+                    -DFG_BUILD_TYPE=%FGBUILDTYPE% ^
+                    -DENABLE_SWIFT:BOOL=ON ^
+                    -DENABLE_COMPOSITOR:BOOL=ON
+cmake --build . --config RelWithDebInfo --target INSTALL
 cd ..
 
 REM Qt5 deployment
 SET QMLDIR=%WORKSPACE%/flightgear/src/GUI/qml
 %QT5SDK32%\bin\windeployqt --release --list target --qmldir %QMLDIR% %WORKSPACE%/install/msvc140/bin/fgfs.exe
+%QT5SDK32%\bin\windeployqt --release --list target --qmldir %QMLDIR% %WORKSPACE%/install/msvc140/compositor/bin/fgfs.exe
 %QT5SDK64%\bin\windeployqt --release --list target --qmldir %QMLDIR% %WORKSPACE%/install/msvc140-64/bin/fgfs.exe
+%QT5SDK64%\bin\windeployqt --release --list target --qmldir %QMLDIR% %WORKSPACE%/install/msvc140-64/compositor/bin/fgfs.exe
 
 REM build setup
 ECHO Packaging root is %WORKSPACE%
@@ -84,12 +120,15 @@ REM ensure output dir is clean since we upload the entirety of it
 rmdir /S /Q output
 
 SET FGFS_PDB=src\Main\RelWithDebInfo\fgfs.pdb
+
 SET SENTRY_ORG=flightgear
 SET SENTRY_PROJECT=flightgear
 REM ensure SENTRY_AUTH_TOKEN is set in the environment
 
 sentry-cli upload-dif %WORKSPACE%\build-fg32\%FGFS_PDB%
 sentry-cli upload-dif %WORKSPACE%\build-fg64\%FGFS_PDB%
+sentry-cli upload-dif %WORKSPACE%\build-fg32-compositor\%FGFS_PDB%
+sentry-cli upload-dif %WORKSPACE%\build-fg64-compositor\%FGFS_PDB%
 
 REM indirect way to get command output into an environment variable
 set PATH=%OSG32%\bin;%PATH%
