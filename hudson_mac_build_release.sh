@@ -18,21 +18,25 @@ rm -rf $WORKSPACE/dist/include/simgear $WORKSPACE/dist/libSim* $WORKSPACE/dist/l
 PATH=$PATH:$QTPATH
 echo "Build path is: $PATH"
 
+# this shoudl not be needed, since this is inside CMAKE_INSTALL_PREFIX, but seemed
+# to be necessary all the same
+#export PKG_CONFIG_PATH=$WORKSPACE/dist/lib/pkgconfig
+
+cmakeCommonArgs="-G Ninja -DCMAKE_INSTALL_PREFIX:PATH=$WORKSPACE/dist -DCMAKE_BUILD_TYPE=RelWithDebInfo"
+
 ###############################################################################
 echo "Starting on SimGear"
 pushd sgBuild
-cmake -DCMAKE_INSTALL_PREFIX:PATH=$WORKSPACE/dist -DCMAKE_BUILD_TYPE=RelWithDebInfo ../simgear
+cmake ${cmakeCommonArgs} ../simgear
 
 # compile
-make
+cmake --build . --target debug_symbols
+cmake --build . --target install
 
 if [ $? -ne '0' ]; then
     echo "make simgear failed"
     exit 1
 fi
-
-make install
-
 
 popd
 
@@ -46,21 +50,22 @@ else
   FGBUILDTYPE=Nightly
 fi
 
-cmake -DFG_BUILD_TYPE=$FGBUILDTYPE -DCMAKE_INSTALL_PREFIX:PATH=$WORKSPACE/dist -DENABLE_SWIFT:BOOL=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo ../flightgear
+cmake -DFG_BUILD_TYPE=$FGBUILDTYPE -DENABLE_SWIFT:BOOL=ON ${cmakeCommonArgs} ../flightgear
 
-make
+cmake --build . --target debug_symbols
+cmake --build . --target install
 
 if [ $? -ne '0' ]; then
     echo "make flightgear failed"
     exit 1
 fi
 
-make install
-
 popd
 
 chmod +x $WORKSPACE/dist/bin/osgversion
 
+echo "Running symbol upload script"
+./sentry-dSYM-upload-mac.sh
 
 ################################################################################
 
