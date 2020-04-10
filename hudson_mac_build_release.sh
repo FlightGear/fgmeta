@@ -22,7 +22,7 @@ echo "Build path is: $PATH"
 # to be necessary all the same
 #export PKG_CONFIG_PATH=$WORKSPACE/dist/lib/pkgconfig
 
-cmakeCommonArgs="-G Ninja -DCMAKE_INSTALL_PREFIX:PATH=$WORKSPACE/dist -DCMAKE_BUILD_TYPE=RelWithDebInfo"
+cmakeCommonArgs="-DCMAKE_INSTALL_PREFIX:PATH=$WORKSPACE/dist -DCMAKE_BUILD_TYPE=RelWithDebInfo"
 
 ###############################################################################
 echo "Starting on SimGear"
