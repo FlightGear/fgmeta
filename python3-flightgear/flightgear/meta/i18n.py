@@ -83,6 +83,7 @@ FORMAT_HANDLERS_NAMES = []
 # qttools/src/linguist/shared/numerus.cpp).
 PLURAL_FORMS = {
     None: ["<master>"],         # for the default (= master) translation
+    "ca": ["singular", "plural"],
     "de": ["singular", "plural"],
     "en": ["singular", "plural"],
     "es": ["singular", "plural"],
@@ -92,6 +93,7 @@ PLURAL_FORMS = {
     "pl": ["singular", "paucal", "plural"],
     "pt": ["singular", "plural"],
     "ru": ["singular", "plural"],
+    "sk": ["singular", "paucal", "plural"],
     "zh": ["universal"]         # universal form
 }
 
