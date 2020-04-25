@@ -364,7 +364,7 @@ function _usage() {
   echo "                doing the same for SIMGEAR (e.g., if doing repeated TERRAGEAR"
   echo "                builds and you know your SIMGEAR is already fine and up-to-date)."
   echo "  -s            compile only the last known stable versions"
-  echo "  --compositor  buld fgfs with compositor enabled."
+  echo "  --compositor  build FlightGear with compositor enabled."
 }
 
 #######################################################
