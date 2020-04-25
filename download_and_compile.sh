@@ -436,8 +436,8 @@ declare -A USERNAME_AT_SITE
 declare -A REPO_ADDRESS
 declare -A REPO_SITE
 
-REPO_ADDRESS[CMAKE]="cmake.org/cmake.git"
-REPO_SITE[CMAKE]="cmake.org"
+REPO_ADDRESS[CMAKE]="gitlab.kitware.com/cmake/cmake.git"
+REPO_SITE[CMAKE]="gitlab.kitware.com"
 REPO_ADDRESS[ZLIB]="github.com/madler/zlib.git"
 REPO_SITE[ZLIB]="GitHub"
 REPO_ADDRESS[PLIB]="git.code.sf.net/p/libplib/code"
@@ -815,7 +815,7 @@ if _elementIn "CMAKE" "${WHATTOBUILD[@]}"; then
   mkdir -p "cmake"
   cd "$CBD"/cmake
   _gitDownload CMAKE
-  _gitUpdate master
+  _gitUpdate release
 
   if [ "$RECONFIGURE" = "y" ]; then
     cd "$CBD"
