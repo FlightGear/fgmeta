@@ -1,7 +1,7 @@
 #!/bin/bash
 
-THIS_RELEASE="2019.1"
-NEXT_RELEASE="2019.2"
+THIS_RELEASE="2020.1"
+NEXT_RELEASE="2020.2"
 SUBMODULES="simgear flightgear fgdata getstart"
 
 #:<< 'COMMENT_END'
@@ -39,6 +39,6 @@ done
 #        IdentitiesOnly yes
 #        User user_sf_username
 
-svn copy svn+ssh://svn.code.sf.net/p/flightgear/fgaddon/trunk \
-         svn+ssh://svn.code.sf.net/p/flightgear/fgaddon/branches/release-${THIS_RELEASE} \
-         -m "branching for release ${THIS_RELEASE}"
+#svn copy svn+ssh://svn.code.sf.net/p/flightgear/fgaddon/trunk \
+#         svn+ssh://svn.code.sf.net/p/flightgear/fgaddon/branches/release-${THIS_RELEASE} \
+#         -m "branching for release ${THIS_RELEASE}"
