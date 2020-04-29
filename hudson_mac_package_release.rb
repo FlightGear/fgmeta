@@ -110,8 +110,9 @@ end
 libFile = "libOpenThreads.#{$openThreadsSoVersion}.dylib"
 `cp #{$prefixDir}/lib/#{libFile} #{$frameworksDir}`
 
-# needed for SWIFT integration
-otherLibs = ['dbus-1.3', 'event_core-2.2.1']
+# DBus and libEvent needed for SWIFT
+# Sentry is crash reporting
+otherLibs = ['dbus-1.3', 'event_core-2.2.1', 'sentry']
 otherLibs.each do |l|
   `cp #{$prefixDir}/lib/lib#{l}.dylib #{$frameworksDir}`
 end
