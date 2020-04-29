@@ -3,6 +3,8 @@
   <template>
 	  <version n="0">2019.*</version>
 	  <version n="1">2018.*</version>
+	  <version n="2">2020.1.*</version>
+	  <version n="3">2020.2.*</version>
 
     <id>org.flightgear.fgaddon.trunk</id>
     <license>GPL</license>
