@@ -167,8 +167,9 @@ if !$isRelease
               --file #{dmgPath}`
 
 
-else
-  puts "Creating full image with data"
+end
+
+puts "Creating full image with data"
 
 `rsync -a fgdata/ #{resourcesDir}/data`
 
@@ -186,8 +187,6 @@ puts "Notarizing DMG #{dmgFullPath}"
   --username "zakalawe@mac.com" \
   --password "@keychain:FlightGearAppStoreConnectUserName" \
   --file #{dmgFullPath}`
-end
-
 
 
 puts "Packaging complete"
