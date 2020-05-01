@@ -691,7 +691,7 @@ if [[ "$DOWNLOAD_PACKAGES" = "y" ]]; then
   # CMake
   if _elementIn "CMAKE" "${WHATTOBUILD[@]}"; then
     PKG+=(libarchive-dev libbz2-dev libexpat1-dev libjsoncpp-dev liblzma-dev
-          libncurses5-dev procps zlib1g-dev)
+          libncurses5-dev libssl-dev procps zlib1g-dev)
   else
     PKG+=(cmake)
   fi
