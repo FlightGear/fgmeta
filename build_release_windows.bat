@@ -35,7 +35,6 @@ cd ..\build-fg32
 cmake ..\flightgear -G "Visual Studio 14" ^
                     -DMSVC_3RDPARTY_ROOT=%WORKSPACE%/windows-3rd-party/msvc140 ^
                     -DCMAKE_INSTALL_PREFIX:PATH=%WORKSPACE%/install/msvc140 ^
-                    -DCMAKE_PREFIX_PATH:PATH=%OSG32% ^
                     -DBOOST_ROOT=%WORKSPACE%/windows-3rd-party ^
                     -DOSG_FSTREAM_EXPORT_FIXED=1 ^
                     -DCMAKE_PREFIX_PATH=%QT5SDK32%;%OSG32% ^
@@ -44,16 +43,13 @@ cmake ..\flightgear -G "Visual Studio 14" ^
                     -DENABLE_COMPOSITOR:BOOL=OFF
 cmake --build . --config RelWithDebInfo --target INSTALL
 
-md %WORKSPACE%/install/msvc140/compositor
-
 cd ..\build-fg32-compositor
 cmake ..\flightgear -G "Visual Studio 14" ^
                     -DMSVC_3RDPARTY_ROOT=%WORKSPACE%/windows-3rd-party/msvc140 ^
                     -DCMAKE_INSTALL_PREFIX:PATH=%WORKSPACE%/install/msvc140/compositor ^
-                    -DCMAKE_PREFIX_PATH:PATH=%OSG32%;%WORKSPACE%/install/msvc140/ ^
+                    -DCMAKE_PREFIX_PATH:PATH=%QT5SDK32%;%OSG32%;%WORKSPACE%/install/msvc140/ ^
                     -DBOOST_ROOT=%WORKSPACE%/windows-3rd-party ^
                     -DOSG_FSTREAM_EXPORT_FIXED=1 ^
-                    -DCMAKE_PREFIX_PATH=%QT5SDK32%;%OSG32% ^
                     -DFG_BUILD_TYPE=%FGBUILDTYPE% ^
                     -DENABLE_SWIFT:BOOL=ON ^
                     -DENABLE_COMPOSITOR:BOOL=ON
@@ -86,9 +82,6 @@ cmake ..\flightgear -G "Visual Studio 14 Win64" ^
                     -DENABLE_SWIFT:BOOL=ON ^
                     -DENABLE_COMPOSITOR:BOOL=OFF
 cmake --build . --config RelWithDebInfo --target INSTALL
-
-md %WORKSPACE%/install/msvc140-64/compositor
-
 
 cd ..\build-fg64-compositor
 cmake ..\flightgear -G "Visual Studio 14 Win64" ^
