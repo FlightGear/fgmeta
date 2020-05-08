@@ -36,6 +36,10 @@ localization files in $FG_ROOT/Translations/<language_code>):
   fg-update-translation-files --transl-dir="$FG_ROOT/Translations" \
                               merge-new-master $languages
 
+Note: you may omit $languages in the fg-update-translation-files command if
+      you want to autodetect the FlightGear-nonQt.xlf files present in
+      $FG_ROOT/Translations.
+
 Updating XLIFF files to reflect changes in the default translation
 ------------------------------------------------------------------
 
@@ -45,6 +49,9 @@ modified or removed, or categories added or removed[3]):
   fg-update-translation-files --transl-dir="$FG_ROOT/Translations" \
                               merge-new-master $languages
 
+Note: you may omit $languages in this command if you want to autodetect the
+      FlightGear-nonQt.xlf files present in $FG_ROOT/Translations.
+
 Updating XLIFF files to mark or remove obsolete translated strings
 ------------------------------------------------------------------
 
@@ -53,9 +60,14 @@ To remove unused translated strings (not to be done too often in my opinion):
   fg-update-translation-files --transl-dir="$FG_ROOT/Translations" \
                               remove-unused $languages
 
-(you may replace 'remove-unused' with 'mark-unused' to just mark the strings
-as not-to-be-translated, however 'merge-new-master' presented above already
-does that)
+Notes:
+
+ - You may omit $languages in this command if you want to autodetect the
+   FlightGear-nonQt.xlf files present in $FG_ROOT/Translations.
+
+ - It is possible to replace 'remove-unused' with 'mark-unused' to just mark
+   the strings as not-to-be-translated; however, 'merge-new-master' presented
+   above already does that.
 
 Merging contents from an XLIFF file into another one
 ----------------------------------------------------

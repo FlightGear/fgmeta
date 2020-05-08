@@ -27,6 +27,7 @@ import sys
 
 import flightgear.meta.logging
 import flightgear.meta.i18n as fg_i18n
+from flightgear.meta.i18n import XliffFormatHandler
 
 
 PROGNAME = os.path.basename(sys.argv[0])
@@ -45,7 +46,7 @@ def processCommandLine():
 
     parser = argparse.ArgumentParser(
         usage="""\
-%(prog)s [OPTION ...] ACTION LANGUAGE_CODE...
+%(prog)s [OPTION ...] ACTION [LANGUAGE_CODE]...
 Update FlightGear XLIFF localization files.""",
         description="""\
 This program performs the following operations (actions) on FlightGear XLIFF
@@ -67,6 +68,13 @@ translation files (*.xlf):
   - [remove-unused]
     In the XLIFF localization files corresponding to the specified
     language(s), remove all translated strings that are marked as unused.
+
+If no LANGUAGE_CODE is provided as an argument, then assuming $transl_dir
+represents the value passed to --transl-dir, all directories $d such that a
+file named FlightGear-nonQt.xlf is found in $transl_dir/$d will be acted on as
+if they had been passed as LANGUAGE_CODE arguments (actually, the directory
+$transl_dir/default is not considered as a candidate; it is simply skipped).
+Typically, $transl_dir is /path/to/FGData/Translations.
 
 A translated string that is marked as unused is still present in the XLIFF
 localization file; it is just presented in a way that tells translators they
@@ -105,7 +113,7 @@ general on the short or mid-term: they only take some space.
                         remove those already marked as unused from the XLIFF
                         files corresponding to each given LANGUAGE_CODE (i.e.,
                         those that are not in the default translation)""")
-    parser.add_argument("lang_code", metavar="LANGUAGE_CODE", nargs="+",
+    parser.add_argument("lang_code", metavar="LANGUAGE_CODE", nargs="*",
                         help="""\
                         codes of languages to operate on (e.g., fr, en_GB, it,
                         es_ES...)""")
@@ -125,11 +133,19 @@ class MarkOrRemoveUnusedAction(enum.Enum):
     mark, remove = range(2)
 
 
+def langCodesToActOn():
+    """Return an iterable of all language codes we were told to work on."""
+    if params.lang_code:
+        return params.lang_code
+    else:
+        return XliffFormatHandler.availableTranslations(params.transl_dir)
+
+
 def markOrRemoveUnused(l10nResPoolMgr, action):
     formatHandler = fg_i18n.XliffFormatHandler()
     masterTransl = l10nResPoolMgr.readFgMasterTranslation().transl
 
-    for langCode in params.lang_code:
+    for langCode in langCodesToActOn():
         xliffPath = formatHandler.defaultFilePath(params.transl_dir, langCode)
         transl = formatHandler.readTranslation(xliffPath)
 
@@ -148,7 +164,7 @@ def mergeNewMaster(l10nResPoolMgr):
     formatHandler = fg_i18n.XliffFormatHandler()
     masterTransl = l10nResPoolMgr.readFgMasterTranslation().transl
 
-    for langCode in params.lang_code:
+    for langCode in langCodesToActOn():
         xliffPath = formatHandler.defaultFilePath(params.transl_dir, langCode)
         transl = formatHandler.readTranslation(xliffPath)
         transl.mergeMasterTranslation(masterTransl, logger=logger)

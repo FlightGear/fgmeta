@@ -1001,6 +1001,33 @@ class AbstractFormatHandler(metaclass=abc.ABCMeta):
         baseName = cls.defaultFileBaseName(targetLanguage)
         return os.path.join(translationsDir, targetLanguage, baseName)
 
+    @classmethod
+    def availableTranslations(cls, translationsDir):
+        """Return a list of all available translations in translationsDir.
+
+        This method expects a particular layout for translation files:
+        the one used in $FG_ROOT/Translations. More precisely, it looks
+        for all files named LANG_CODE/NAME in translationsDir, where
+        NAME is cls.defaultFileBaseName(LANG_CODE). The special
+        directory translationsDir/DEFAULT_LANG_DIR is not explored;
+        thus, the result cannot contain DEFAULT_LANG_DIR.
+
+        Return a list of language codes, sorted with list.sort().
+
+        """
+        res = []
+        with os.scandir(translationsDir) as it:
+            for entry in it:
+                if (entry.name != DEFAULT_LANG_DIR and entry.is_dir() and
+                    os.path.isfile(
+                        os.path.join(
+                            translationsDir, entry.name,
+                            cls.defaultFileBaseName(entry.name)))):
+                    res.append(entry.name)
+
+        res.sort()
+        return res
+
     @abc.abstractmethod
     def writeTranslation(self, transl, filePath):
         """Write a Translation instance to a file."""
