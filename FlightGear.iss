@@ -34,7 +34,7 @@
 
 ; we copy everything in install/<arch>/bin except these, which aren't
 ; useful to the end-user to ship
-#define ExcludedBinaries "*smooth.exe,metar.exe,js_demo.exe"
+#define ExcludedBinaries "*smooth.exe,metar.exe"
 
 [Setup]
 AppId=FlightGear
