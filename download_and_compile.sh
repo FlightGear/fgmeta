@@ -252,9 +252,9 @@ subsequent\nupdates are fetched from SourceForge. This should be quite safe, \
 because\n<https://gitlab.com/flightgear/fgdata> is an official mirror of \
 FGData (it is\nmaintained by FlightGear developers). Answer 'y' to proceed \
 this way. If you\nanswer 'n', we'll *try* to clone FGData from SourceForge \
-using https. Answer 'q'\nif you want to quit."
+using https. Answer 'q'\nif you want to quit. "
     fi
-    _yes_no_quit_prompt "" y; prompt_res=$?
+    _yes_no_quit_prompt "What is your choice?" y; prompt_res=$?
     set -e
     case $prompt_res in
         0) retcode=0 ;;
