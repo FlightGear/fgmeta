@@ -125,7 +125,7 @@ function _yes_no_quit_prompt(){
       answer="$default"
     fi
 
-    case $answer in
+    case "$answer" in
       [yY]) res=0; break ;;
       [nN]) res=1; break ;;
       [qQ]) res=2; break ;;
@@ -1196,11 +1196,11 @@ if _elementIn "FGFS" "${WHATTOBUILD[@]}" || \
     fi
   fi
   cd "$CBD"
-  
+
   paths="../../$SIMGEAR_INSTALL_DIR/lib:../../$OSG_INSTALL_DIR/lib:../../$OPENRTI_INSTALL_DIR/lib:../../$PLIB_INSTALL_DIR/lib"
   gdb="gdb"
   set_ld_library_path="export LD_LIBRARY_PATH='$paths'\"\${LD_LIBRARY_PATH:+:}\${LD_LIBRARY_PATH}\""
-  
+
   common=""
   common="${common}#!/bin/sh\n"
   common="${common}cd \"\$(dirname \"\$0\")\"\n"
