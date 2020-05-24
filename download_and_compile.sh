@@ -88,6 +88,54 @@ function _logOutput(){
   esac
 }
 
+function _yes_no_quit_prompt(){
+  local prompt="$1"
+  local default="$2"
+  local choices res answer
+
+  case "$default" in
+    [yY]) choices='Y/n/q' ;;
+    [nN]) choices='y/N/q' ;;
+    [qQ]) choices='y/n/Q' ;;
+    "")
+      if [[ "$INTERACTIVE_MODE" -eq 0 ]]; then
+        _printLog "Non-interactive mode requested, but found a question with" \
+                  "no default answer;"
+        _printLog "this can't work, aborting."
+        exit 1
+      fi
+      choices='y/n/q'
+      ;;
+    *)
+      _printLog \
+        "Invalid default choice for _yes_no_quit_prompt(): this is a bug in the"
+        "script, aborting."
+      exit 1
+      ;;
+  esac
+
+  while true; do
+    if [[ "$INTERACTIVE_MODE" -eq 0 ]]; then
+      answer="$default"
+    else
+      read -r -p "$prompt [$choices] " answer
+    fi
+
+    if [[ -z "$answer" ]]; then
+      answer="$default"
+    fi
+
+    case $answer in
+      [yY]) res=0; break ;;
+      [nN]) res=1; break ;;
+      [qQ]) res=2; break ;;
+      *) ;;
+    esac
+  done
+
+  return $res
+}
+
 function _aptUpdate(){
   local cmd=()
 
@@ -171,7 +219,6 @@ function _gitDownload(){
     return
   fi
 
-
   if [ -f "README" -o -f "README.txt" -o -f "README.rst" ]; then
     _printLog "$component: the repository already exists"
   else
@@ -179,9 +226,71 @@ function _gitDownload(){
                                "${REPO_USERNAME[$component]}" \
                                "$component")
     clone_arg="${proto_spec}${REPO_ADDRESS[$component]}"
-    _printLog "Fetching $component with 'git clone $clone_arg'"
-    git clone "$clone_arg" .
+
+    # Test whether $clone_arg is 'https://git.code.sf.net/p/flightgear/fgdata'
+    if _check_clone_url_and_maybe_ask "$clone_arg"; then
+      _clone_fgdata             # Work around a problem at SourceForge
+    else
+      _printLog "Fetching $component with 'git clone $clone_arg'"
+      git clone "$clone_arg" .
+    fi
   fi
+}
+
+# Return 0 if _clone_fgdata() should be used, otherwise 1.
+function _check_clone_url_and_maybe_ask(){
+  local -i retcode=1
+
+  if [[ "$1" = "https://git.code.sf.net/p/flightgear/fgdata" ]]; then
+    local prompt_res=-1
+    set +e
+    if [[ "$INTERACTIVE_MODE" -eq 1 ]]; then
+      printf "From experience, cloning FGData from SourceForge using https does \
+not work\n(probably a problem at SourceForge), but updates do work. Thus, we \
+propose to\nclone FGData from GitLab and change the repository setup so that \
+subsequent\nupdates are fetched from SourceForge. This should be quite safe, \
+because\n<https://gitlab.com/flightgear/fgdata> is an official mirror of \
+FGData (it is\nmaintained by FlightGear developers). Answer 'y' to proceed \
+this way. If you\nanswer 'n', we'll *try* to clone FGData from SourceForge \
+using https. Answer 'q'\nif you want to quit."
+    fi
+    _yes_no_quit_prompt "" y; prompt_res=$?
+    set -e
+    case $prompt_res in
+        0) retcode=0 ;;
+        1) retcode=1 ;;
+        2) exit 0 ;;
+        *) _printLog "Unexpected return code from _yes_no_quit_prompt() in" \
+                     "_check_clone_url_and_maybe_ask(); aborting."
+           exit 1 ;;
+    esac
+
+    if [[ $retcode -eq 1 ]]; then
+      _printLog "Okay, will try to clone FGData from SourceForge using" \
+        "https, but be aware that"
+      _printLog "this is likely to fail."
+    fi
+  fi
+
+  return $retcode
+}
+
+# Special function for cloning FGData with https. This is needed because there
+# seems to be a problem at SourceForge that doesn't allow the clone operation
+# to succeed for FGData using https---presumably because of its large size.
+function _clone_fgdata(){
+  local url="https://${REPO_ADDRESS[DATA_ALT]}"
+  _printLog "Starting special initialization routine for the DATA component..."
+  _printLog "Fetching FGData with 'git clone $url'"
+  git clone "$url" .
+  _printLog "Creating the 'next' local branch"
+  git checkout -b next origin/next
+  url="https://${REPO_ADDRESS[DATA]}"
+  _printLog "Setting FGData's 'origin' remote to $url"
+  git remote set-url origin "$url"
+  _printLog "Updating FGData from $url"
+  git pull --ff-only
+  _printLog "Special initialization routine for the DATA component: done."
 }
 
 function _make(){
@@ -364,7 +473,17 @@ function _usage() {
   echo "                doing the same for SIMGEAR (e.g., if doing repeated TERRAGEAR"
   echo "                builds and you know your SIMGEAR is already fine and up-to-date)."
   echo "  -s            compile only the last known stable versions"
-  echo "  --compositor  build FlightGear with compositor enabled."
+  echo "  --compositor  build FlightGear with compositor enabled"
+  echo "  --non-interactive"
+  echo "                don't ask any question; always assume the default answer in"
+  echo "                situations where a question would normally be asked."
+  echo
+  echo "More detailed information can be found on the FlightGear wiki:"
+  echo ""
+  echo "  http://wiki.flightgear.org/Scripted_Compilation_on_Linux_Debian/Ubuntu"
+  echo ""
+  echo "The wiki may sometimes be a bit outdated; if in doubt, consider this help text"
+  echo "as the reference."
 }
 
 #######################################################
@@ -373,6 +492,7 @@ set -e
 
 CBD="$PWD"
 LOGFILE="$CBD/compilation_log.txt"
+INTERACTIVE_MODE=1
 
 # Available values for WHATTOBUILD and WHATTOBUILDALL:
 declare -a WHATTOBUILD_AVAIL=(
@@ -450,6 +570,9 @@ REPO_ADDRESS[SIMGEAR]="git.code.sf.net/p/flightgear/simgear"
 REPO_SITE[SIMGEAR]="SourceForge"
 REPO_ADDRESS[DATA]="git.code.sf.net/p/flightgear/fgdata"
 REPO_SITE[DATA]="SourceForge"
+# This is an official mirror of FGData
+REPO_ADDRESS[DATA_ALT]="gitlab.com/flightgear/fgdata.git"
+REPO_SITE[DATA_ALT]="GitLab"
 REPO_ADDRESS[FGFS]="git.code.sf.net/p/flightgear/flightgear"
 REPO_SITE[FGFS]="SourceForge"
 REPO_ADDRESS[FGRUN]="git.code.sf.net/p/flightgear/fgrun"
@@ -471,7 +594,8 @@ if [[ `uname` == 'OpenBSD' ]]; then
 fi
 TEMP=$($getopt -o '+shc:p:a:d:r:j:O:ib:' \
   --longoptions git-clone-default-proto:,git-clone-site-params:,help \
-  --longoptions package-manager:,sudo:,ignore-intercomponent-deps,compositor,version \
+  --longoptions package-manager:,sudo:,ignore-intercomponent-deps,compositor \
+  --longoptions non-interactive,version \
   -n "$PROGNAME" -- "$@")
 
 case $? in
@@ -549,6 +673,7 @@ while true; do
     -i) OPENRTI="OPENRTI"; shift ;;
     -b) BUILD_TYPE="$2"; shift 2 ;;
     --compositor) COMPOSITOR="-DENABLE_COMPOSITOR=ON"; shift ;;
+    --non-interactive) INTERACTIVE_MODE=0; shift ;;
     -h|--help) _usage; exit 0 ;;
     --version) _printVersion; exit 0 ;;
     --) shift; break ;;
