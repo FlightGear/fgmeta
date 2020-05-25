@@ -22,7 +22,7 @@ echo "Build path is: $PATH"
 # to be necessary all the same
 #export PKG_CONFIG_PATH=$WORKSPACE/dist/lib/pkgconfig
 
-cmakeCommonArgs="-G Ninja -DCMAKE_INSTALL_PREFIX:PATH=$WORKSPACE/dist -DCMAKE_BUILD_TYPE=RelWithDebInfo"
+cmakeCommonArgs="-G Ninja -DCMAKE_INSTALL_PREFIX:PATH=$WORKSPACE/dist -DCMAKE_BUILD_TYPE=Debug"
 
 ###############################################################################
 echo "Starting on SimGear"
@@ -30,7 +30,6 @@ pushd sgBuild
 cmake ${cmakeCommonArgs} ../simgear
 
 # compile
-cmake --build . --target debug_symbols
 cmake --build . --target install
 
 if [ $? -ne '0' ]; then
@@ -52,7 +51,6 @@ fi
 
 cmake -DFG_BUILD_TYPE=$FGBUILDTYPE -DENABLE_SWIFT:BOOL=ON ${cmakeCommonArgs} ../flightgear
 
-cmake --build . --target debug_symbols
 cmake --build . --target install
 
 if [ $? -ne '0' ]; then
@@ -63,9 +61,6 @@ fi
 popd
 
 chmod +x $WORKSPACE/dist/bin/osgversion
-
-echo "Running symbol upload script"
-./sentry-dSYM-upload-mac.sh
 
 ################################################################################
 
