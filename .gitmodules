@@ -17,7 +17,7 @@
 [submodule "windows-3rd-party"]
 	path = windows-3rd-party
 	url = ../windows-3rd-party
-	branch = master
+	branch = release/2020.2
 [submodule "getstart"]
 	path = getstart
 	url = ../getstart
