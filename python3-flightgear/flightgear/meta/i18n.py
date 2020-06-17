@@ -65,7 +65,7 @@ from .exceptions import FGPyException
 dummyLogger = DummyLogger()
 
 # Not including "atc", because it has no translation. Please keep this sorted.
-CATEGORIES = ("menu", "options", "sys", "tips")
+CATEGORIES = ("menu", "options", "sys", "tips", "weather-scenarios")
 # BASIC_CATEGORIES lists all categories handled by BasicL10NResourceManager.
 # The corresponding master files must have a flat structure where each
 # translatable string is found in a direct child of the <PropertyList> element.
