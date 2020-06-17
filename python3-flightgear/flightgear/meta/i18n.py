@@ -461,7 +461,7 @@ class TranslationUnit:
 
     def _stringsKey(self):
         """Key used to compare the strings of two TranslationUnit instances."""
-        return (self.self.sourceText, self.targetTexts, self.developerComments,
+        return (self.sourceText, self.targetTexts, self.developerComments,
                 self.translatorComments)
 
     def sameStrings(self, other):
