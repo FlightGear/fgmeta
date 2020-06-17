@@ -66,6 +66,10 @@ dummyLogger = DummyLogger()
 
 # Not including "atc", because it has no translation. Please keep this sorted.
 CATEGORIES = ("menu", "options", "sys", "tips")
+# BASIC_CATEGORIES lists all categories handled by BasicL10NResourceManager.
+# The corresponding master files must have a flat structure where each
+# translatable string is found in a direct child of the <PropertyList> element.
+BASIC_CATEGORIES = CATEGORIES
 # Directory name for the default (master) translation
 DEFAULT_LANG_DIR = "default"
 # Root of the base name for the default output files (XLIFF...)
@@ -1699,7 +1703,7 @@ registerFormatHandler("xliff", XliffFormatHandler)
 # Could also be a dict
 def L10nResMgrForCat(category):
     """Map from category/resource name to L10NResourceManager class."""
-    if category in ("menu", "options", "sys", "tips"):
+    if category in BASIC_CATEGORIES:
         return BasicL10NResourceManager
     else:
         assert False, "unexpected category: {!r}".format(category)
