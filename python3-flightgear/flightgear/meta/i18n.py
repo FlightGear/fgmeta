@@ -1745,8 +1745,8 @@ class L10NResourcePoolManager:
 
         """
         resMgr = L10nResMgrForCat(cat)
-        return resMgr._readFgResourceFile(xmlFilePath, None, targetTransl, cat,
-                                          None, logger=self.logger)
+        return resMgr.readFgResourceFile(xmlFilePath, None, targetTransl, cat,
+                                         None, logger=self.logger)
 
     def readFgTranslationFile(self, xmlFilePath, masterTransl, targetTransl,
                               cat, langCode):
@@ -1760,9 +1760,9 @@ class L10NResourcePoolManager:
 
         """
         resMgr = L10nResMgrForCat(cat)
-        return resMgr._readFgResourceFile(xmlFilePath, masterTransl,
-                                          targetTransl, cat, langCode,
-                                          logger=self.logger)
+        return resMgr.readFgResourceFile(xmlFilePath, masterTransl,
+                                         targetTransl, cat, langCode,
+                                         logger=self.logger)
 
     def readFgMasterTranslation(self):
         """Read the FlightGear default translation.
@@ -1912,8 +1912,8 @@ class BasicL10NResourceManager(L10NResourceManagerBase):
         return rootNode
 
     @classmethod
-    def _readFgResourceFile(cls, xmlFilePath, masterTransl, targetTransl, cat,
-                            langCode, logger=dummyLogger):
+    def readFgResourceFile(cls, xmlFilePath, masterTransl, targetTransl, cat,
+                           langCode, logger=dummyLogger):
         """Read a FlightGear XML localization file.
 
         If 'masterTransl' and 'langCode' are None, read the default
