@@ -21,6 +21,7 @@ import argparse
 import locale
 import os
 import sys
+import re
 import lxml.etree as ET
 
 from catalog import sgprops
@@ -52,30 +53,28 @@ Copy weather scenario descriptions to the default translation XML""",
 # create an xml node with text content
 def make_xml_leaf(name, text):
     leaf = ET.Element(name)
-    if text != None:
-        if isinstance(text, (int)):
-            leaf.text = str(text)
-        else:
-            leaf.text = text
-    else:
-        leaf.text = ''
+    leaf.text = '' if text is None else str(text)
     return leaf
 
+simplify_cre = re.compile(r"\s+")
+def simplifyString(input):
+    return simplify_cre.sub(" ", input.strip())
+
 def copyWeatherScenarios(fgdata):
-    environment_node = sgprops.readProps(fgdata + "/Environment/environment.xml")
+    environment_node = sgprops.readProps(os.path.join(fgdata, "Environment", "environment.xml"))
     scenarios = environment_node.getChild('weather-scenarios')
     
     result = ET.Element("PropertyList")
 
     for s in scenarios.getChildren("scenario"):
         scenarioId = s.getValue("id", None)
-        name = s.getValue("name", None)
-        desc = s.getValue("description", None)
+        name = simplifyString(s.getValue("name", None))
+        desc = simplifyString(s.getValue("description", None))
 
         result.append(make_xml_leaf(scenarioId + "-name", name))
         result.append(make_xml_leaf(scenarioId + "-desc", desc))
 
-    default_trans_file = fgdata + "/Translations/default/weather-scenarios.xml"
+    default_trans_file = os.path.join(fgdata, "Translations", "default", "weather-scenarios.xml")
 
     doc = ET.ElementTree(result)
     doc.write(default_trans_file, encoding='utf-8', xml_declaration=True, pretty_print=True)
