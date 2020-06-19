@@ -1,4 +1,4 @@
-#!/usr/bin/python
+# -*- coding: utf-8 -*-
 
 import argparse
 import datetime
@@ -8,10 +8,11 @@ import os
 from os.path import exists, join, relpath
 from os import F_OK, access, walk
 import re
-import sgprops
 import sys
-import catalogTags
 import zipfile
+
+from flightgear.meta import sgprops
+from . import catalogTags
 
 CATALOG_VERSION = 4
 quiet = False

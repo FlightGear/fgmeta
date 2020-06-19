@@ -8,12 +8,14 @@ import os
 import re
 import shutil
 import subprocess
-import time
-import sgprops
 import sys
-import catalogTags
-import catalog
-from catalog import make_aircraft_node, make_aircraft_zip, parse_config_file, parse_template_file
+import time
+
+from flightgear.meta import sgprops
+from flightgear.meta.aircraft_catalogs import catalogTags
+from flightgear.meta.aircraft_catalogs import catalog
+from flightgear.meta.aircraft_catalogs.catalog import make_aircraft_node, \
+    make_aircraft_zip, parse_config_file, parse_template_file
 
 
 CATALOG_VERSION = 4

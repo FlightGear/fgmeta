@@ -22,6 +22,9 @@ The script can be run directly from this directory, or the script and its
 modules can be copied together and run from any location.  The steps to use
 these are:
 
+* Have something like `export PYTHONPATH="/path/to/fgmeta/python3-flightgear"`
+  in your shell setup or use a .pth file (see `python3-flightgear/README.md`
+  for more details).
 * Create an output directory where the catalog and zip files will be located.
 * Copy the configuration files `catalog.config.xml`, `template.xml`, and
   `zip-excludes.lst` from one of the `*catalog*` example directories into the

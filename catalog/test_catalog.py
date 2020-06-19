@@ -1,14 +1,15 @@
-#!/usr/bin/python
+#! /usr/bin/env python3
 
 import unittest
-import sgprops
 import os
 from os.path import join
-import catalog
 import lxml.etree as ET
 from shutil import rmtree
 from tempfile import mkdtemp
 import zipfile
+
+from flightgear.meta import sgprops
+from flightgear.meta.aircraft_catalogs import catalog
 
 
 catalog.quiet = True
@@ -247,7 +248,7 @@ class ZipTests(unittest.TestCase):
         """General checks for the zip file."""
 
         # Check for file existence.
-        self.assert_(os.access(file_name, os.F_OK))
+        self.assertTrue(os.access(file_name, os.F_OK))
 
         # Check the contents.
         file = zipfile.ZipFile(file_name)

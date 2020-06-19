@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 aircraftTypeTags = [
     "aerobatic",
     "airship",
@@ -176,7 +178,8 @@ simFeatureTags = [
     "wildfire"
 ]
 
-tags = aircraftTypeTags + manufacturerTags + eraTags + simFeatureTags + propulsionTags + featureTags
+tags = (aircraftTypeTags + manufacturerTags + eraTags + simFeatureTags +
+        propulsionTags + featureTags)
 
 def isValidTag(maybeTag):
     return maybeTag in tags

@@ -1,7 +1,9 @@
+#! /usr/bin/env python3
+
 import unittest
 
-import types
-import sgprops
+from flightgear.meta import sgprops
+
 
 class SGProps(unittest.TestCase):
 
@@ -9,14 +11,14 @@ class SGProps(unittest.TestCase):
         parsed = sgprops.readProps("testData/props1.xml")
 
         self.assertEqual(parsed.getValue("value"), 42)
-        self.assertEqual(type(parsed.getValue("value")), types.IntType)
+        self.assertEqual(type(parsed.getValue("value")), int)
 
         valNode = parsed.getChild("value")
         self.assertEqual(valNode.parent, parsed)
         self.assertEqual(valNode.name, "value")
 
         self.assertEqual(valNode.value, 42)
-        self.assertEqual(type(valNode.value), types.IntType)
+        self.assertEqual(type(valNode.value), int)
 
         with self.assertRaises(IndexError):
             missingNode = parsed.getChild("missing")
