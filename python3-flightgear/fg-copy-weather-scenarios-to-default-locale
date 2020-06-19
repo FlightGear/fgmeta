@@ -26,7 +26,7 @@ import textwrap
 import lxml.etree as ET
 
 import flightgear.meta.strutils as strutils
-from catalog import sgprops
+from flightgear.meta import sgprops
 
 PROGNAME = os.path.basename(sys.argv[0])
 
