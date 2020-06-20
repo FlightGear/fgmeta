@@ -1,14 +1,21 @@
 #! /usr/bin/env python3
 
+import os
 import unittest
 
 from flightgear.meta import sgprops
 
 
+baseDir = os.path.dirname(__file__)
+
+def testData(*args):
+    return os.path.join(baseDir, "testData", *args)
+
+
 class SGProps(unittest.TestCase):
 
     def test_parse(self):
-        parsed = sgprops.readProps("testData/props1.xml")
+        parsed = sgprops.readProps(testData("props1.xml"))
 
         self.assertEqual(parsed.getValue("value"), 42)
         self.assertEqual(type(parsed.getValue("value")), int)
@@ -40,10 +47,10 @@ class SGProps(unittest.TestCase):
 
     def test_invalidIndex(self):
         with self.assertRaises(IndexError):
-            parsed = sgprops.readProps("testData/bad-index.xml")
+            parsed = sgprops.readProps(testData("bad-index.xml"))
 
     def test_include(self):
-        parsed = sgprops.readProps("testData/props2.xml")
+        parsed = sgprops.readProps(testData("props2.xml"))
 
         # test that value in main file over-rides the one in the include
         self.assertEqual(parsed.getValue("value"), 33)

@@ -12,11 +12,21 @@ from flightgear.meta import sgprops
 from flightgear.meta.aircraft_catalogs import catalog
 
 
+baseDir = os.path.dirname(__file__)
+
+def testData(*args):
+    return join(baseDir, "testData", *args)
+
+# This is the file from this directory (tests)
+fgaddon_catalog_zip_excludes = join(baseDir, "fgaddon-catalog",
+                                    "zip-excludes.lst")
+
 catalog.quiet = True
 
 class UpdateCatalogTests(unittest.TestCase):
     def test_scan_set(self):
-        info = catalog.scan_set_file("testData/Aircraft/f16", "f16a-set.xml", ["testData/OtherDir"])
+        info = catalog.scan_set_file(testData("Aircraft", "f16"),
+                                     "f16a-set.xml", [testData("OtherDir")])
         self.assertEqual(info['id'], 'f16a')
         self.assertEqual(info['name'], 'F16-A')
         self.assertEqual(info['primary-set'], True)
@@ -45,7 +55,8 @@ class UpdateCatalogTests(unittest.TestCase):
 
 
     def test_scan_dir(self):
-        (pkg, variants) = catalog.scan_aircraft_dir("testData/Aircraft/f16", ["testData/OtherDir"])
+        (pkg, variants) = catalog.scan_aircraft_dir(
+            testData("Aircraft", "f16"), [testData("OtherDir")])
 
         self.assertEqual(pkg['id'], 'f16a')
         f16trainer = next(v for v in variants if v['id'] == 'f16-trainer')
@@ -82,13 +93,15 @@ class UpdateCatalogTests(unittest.TestCase):
 
     # test some older constructs for compat
     def test_scan_dir_legacy(self):
-        (pkg, variants) = catalog.scan_aircraft_dir("testData/Aircraft/c172", [])
+        (pkg, variants) = catalog.scan_aircraft_dir(
+            testData("Aircraft", "c172"), [])
 
         self.assertEqual(pkg['id'], 'c172')
         self.assertEqual(pkg['author'], 'Wilbur Wright')
 
     def test_extract_previews(self):
-        info = catalog.scan_set_file("testData/Aircraft/f16", "f16a-set.xml", ["testData/OtherDir"])
+        info = catalog.scan_set_file(testData("Aircraft", "f16"),
+                                     "f16a-set.xml", [testData("OtherDir")])
         previews = info['previews']
         self.assertEqual(len(previews), 3)
         self.assertEqual(2, len([p for p in previews if p['type'] == 'exterior']))
@@ -96,11 +109,13 @@ class UpdateCatalogTests(unittest.TestCase):
         self.assertEqual(1, len([p for p in previews if p['path'] == 'Previews/exterior-1.png']))
 
     def test_extract_tags(self):
-        info = catalog.scan_set_file("testData/Aircraft/f16", "f16a-set.xml", ["testData/OtherDir"])
+        info = catalog.scan_set_file(testData("Aircraft", "f16"),
+                                     "f16a-set.xml", [testData("OtherDir")])
         tags = info['tags']
 
     def test_node_creation(self):
-        (pkg, variants) = catalog.scan_aircraft_dir("testData/Aircraft/f16", ["testData/OtherDir"])
+        (pkg, variants) = catalog.scan_aircraft_dir(testData("Aircraft", "f16"),
+                                                    [testData("OtherDir")])
 
         catalog_node = ET.Element('PropertyList')
         catalog_root = ET.ElementTree(catalog_node)
@@ -114,7 +129,7 @@ class UpdateCatalogTests(unittest.TestCase):
         if not os.path.isdir("testOutput"):
             os.mkdir("testOutput")
 
-        cat_file = os.path.join("testOutput", 'catalog_fragment.xml')
+        cat_file = join("testOutput", "catalog_fragment.xml")
         catalog_root.write(cat_file, encoding='utf-8', xml_declaration=True)
 
         parsed = sgprops.readProps(cat_file)
@@ -183,7 +198,8 @@ class UpdateCatalogTests(unittest.TestCase):
 
 
     def test_node_creation2(self):
-        (pkg, variants) = catalog.scan_aircraft_dir("testData/Aircraft/dc3", ["testData/OtherDir"])
+        (pkg, variants) = catalog.scan_aircraft_dir(testData("Aircraft", "dc3"),
+                                                    [testData("OtherDir")])
 
         catalog_node = ET.Element('PropertyList')
         catalog_root = ET.ElementTree(catalog_node)
@@ -194,7 +210,7 @@ class UpdateCatalogTests(unittest.TestCase):
         if not os.path.isdir("testOutput"):
             os.mkdir("testOutput")
 
-        cat_file = os.path.join("testOutput", 'catalog_fragment2.xml')
+        cat_file = join("testOutput", "catalog_fragment2.xml")
         catalog_root.write(cat_file, encoding='utf-8', xml_declaration=True)
 
         parsed = sgprops.readProps(cat_file)
@@ -205,7 +221,7 @@ class UpdateCatalogTests(unittest.TestCase):
         self.assertEqual(parsedPkgNode.getValue('id'), pkg['id']);
         self.assertEqual(parsedPkgNode.getValue('dir'), 'dc3');
         self.assertEqual(parsedPkgNode.getValue('url'), 'http://foo.com/testOutput/dc3.zip');
-      
+
         self.assertEqual(parsedPkgNode.getValue('author'), 'Donald Douglas');
 
         parsedAuthors = parsedPkgNode.getChild("authors").getChildren('author')
@@ -221,7 +237,8 @@ class UpdateCatalogTests(unittest.TestCase):
     def test_minimalAircraft(self):
         # test an aircraft with a deliberately spartan -set.xml file with
         # most interesting data missing
-        (pkg, variants) = catalog.scan_aircraft_dir("testData/Aircraft/c150", ["testData/OtherDir"])
+        (pkg, variants) = catalog.scan_aircraft_dir(
+            testData("Aircraft", "c150"), [testData("OtherDir")])
 
         catalog_node = ET.Element('PropertyList')
         catalog_root = ET.ElementTree(catalog_node)
@@ -232,7 +249,7 @@ class UpdateCatalogTests(unittest.TestCase):
         if not os.path.isdir("testOutput2"):
             os.mkdir("testOutput2")
 
-        cat_file = os.path.join("testOutput2", 'catalog_fragment.xml')
+        cat_file = join("testOutput2", "catalog_fragment.xml")
         catalog_root.write(cat_file, encoding='utf-8', xml_declaration=True)
 
         parsed = sgprops.readProps(cat_file)
@@ -302,7 +319,9 @@ class ZipTests(unittest.TestCase):
 
         # Create a basic zip file.
         name = "c172"
-        catalog.make_aircraft_zip(join(os.getcwd(), "testData/Aircraft"), name, join(self.tmpdir, name+'.zip'), join(os.getcwd(), 'fgaddon-catalog/zip-excludes.lst'), verbose=False)
+        catalog.make_aircraft_zip(testData("Aircraft"), name,
+                                  join(self.tmpdir, name + '.zip'),
+                                  fgaddon_catalog_zip_excludes, verbose=False)
 
         # Checks.
         self.check_zip(join(self.tmpdir, name+'.zip'), expected_content=['c172/c172-set.xml'])
@@ -313,8 +332,9 @@ class ZipTests(unittest.TestCase):
 
         # Create a basic zip file.
         name = "dc3"
-        catalog.make_aircraft_zip(join(os.getcwd(), "testData/Aircraft"), name, join(self.tmpdir, name+'.zip'), join(os.getcwd(), 'fgaddon-catalog/zip-excludes.lst'), verbose=False)
-
+        catalog.make_aircraft_zip(testData("Aircraft"), name,
+                                  join(self.tmpdir, name + '.zip'),
+                                  fgaddon_catalog_zip_excludes, verbose=False)
         # Checks.
         self.check_zip(join(self.tmpdir, name+'.zip'), expected_content=['dc3/dc3-set.xml'])
 
@@ -324,7 +344,11 @@ class ZipTests(unittest.TestCase):
 
         # Create a basic zip file.
         name = "c150"
-        catalog.make_aircraft_zip(join(os.getcwd(), "testData/Aircraft"), name, join(self.tmpdir, name+'.zip'), join(os.getcwd(), 'testData/Aircraft/c150/zip-excludes.lst'), verbose=False)
+        catalog.make_aircraft_zip(testData("Aircraft"), name,
+                                  join(self.tmpdir, name + '.zip'),
+                                  testData("Aircraft", "c150",
+                                           "zip-excludes.lst"),
+                                  verbose=False)
 
         # Checks.
         self.check_zip(join(self.tmpdir, name+'.zip'), expected_content=['c150/c150-set.xml', 'c150/Resources/crazy_20Gb_file'])
