@@ -40,6 +40,9 @@ class UpdateCatalogTests(unittest.TestCase):
         self.assertEqual(authors.getValue('author[0]/email'), 'ww@wright.com')
         self.assertEqual(authors.getValue('author[1]/name'), 'Orville Wright')
 
+        locDe = info['localized']['de']
+        self.assertEqual(locDe["long-description"], "Describe the F16-A in German")
+
 
     def test_scan_dir(self):
         (pkg, variants) = catalog.scan_aircraft_dir("testData/Aircraft/f16", ["testData/OtherDir"])
@@ -59,6 +62,9 @@ class UpdateCatalogTests(unittest.TestCase):
         f16b = next(v for v in variants if v['id'] == 'f16b')
         self.assertEqual(f16b['variant-of'], 'f16a')
         self.assertEqual(f16b['primary-set'], False)
+
+        locFr = f16b['localized']['fr']
+        self.assertEqual(locFr["long-description"], "Describe the F16-B in French")
 
         authorsArray = f16b['authors']
         self.assertNotIn('author', f16b)
@@ -135,8 +141,9 @@ class UpdateCatalogTests(unittest.TestCase):
         self.assertEqual(parsedPkgNode.getValue('rating/cockpit'), 2)
         self.assertEqual(parsedPkgNode.getValue('rating/model'), 5)
 
+        self.assertEqual(parsedPkgNode.getValue('localized/de/long-description'), "Describe the F16-A in German")
 
-# author data verification
+        # author data verification
         self.assertFalse(parsedPkgNode.hasChild('author'));
         parsedAuthors = parsedPkgNode.getChild("authors").getChildren('author')
 
@@ -171,6 +178,9 @@ class UpdateCatalogTests(unittest.TestCase):
                 self.assertEqual(author1.getValue("nick"), "starlover")
                 self.assertEqual(author1.getValue("email"), "shatner@enterprise.com")
                 self.assertEqual(author1.getValue("description"), "Everything")
+
+                self.assertEqual(pv.getValue('localized/de/long-description'), "Describe the F16-B in German")
+
 
     def test_node_creation2(self):
         (pkg, variants) = catalog.scan_aircraft_dir("testData/Aircraft/dc3", ["testData/OtherDir"])

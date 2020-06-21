@@ -7,6 +7,17 @@
 
     <primary-set type="bool">true</primary-set>
     
+
+    <localized>
+      <de>
+        <long-description>Describe the F16-A in German</long-description>
+      </de>
+      
+      <fr>
+              <long-description>Describe the F16-A in French</long-description>
+      </fr>
+    </localized>
+
     <rating>
       <FDM type="int">3</FDM>
       <systems type="int">1</systems>

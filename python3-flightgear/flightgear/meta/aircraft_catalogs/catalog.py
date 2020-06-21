@@ -11,7 +11,7 @@ import re
 import sys
 import zipfile
 
-from flightgear.meta import sgprops
+from flightgear.meta import sgprops, strutils
 from . import catalogTags
 
 CATALOG_VERSION = 4
@@ -113,8 +113,12 @@ def scan_set_file(aircraft_dir, set_file, includes):
     if sim_node.hasChild('minimum-fg-version'):
         variant['minimum-fg-version'] = sim_node.getValue('minimum-fg-version', None)
 
+    if sim_node.hasChild('localized'):
+        variant['localized'] = extract_localized_strings(sim_node.getChild('localized'))
+
     #print("    %s" % variant)
     return variant
+
 
 def extract_previews(previews_node, aircraft_dir):
     result = []
@@ -131,6 +135,7 @@ def extract_previews(previews_node, aircraft_dir):
 
     return result
 
+
 def extract_tags(tags_node, set_path):
     result = []
     for node in tags_node.getChildren("tag"):
@@ -139,6 +144,22 @@ def extract_tags(tags_node, set_path):
         if not catalogTags.isValidTag(tag):
             warning("Unknown tag value:" + tag + " in " + set_path)
         result.append(tag)
+
+    return result
+
+
+def extract_localized_strings(localized_node):
+    result = {}
+    # iterate langauges below <localized>
+    for lang in localized_node.getChildren():
+        strings = {}
+
+        # iterate strings below <de> etc
+        for s in lang.getChildren():
+            strings[s.name] = strutils.simplify(s.value)
+
+        if strings:
+            result[lang.name] = strings
 
     return result
 
@@ -199,6 +220,7 @@ def make_xml_leaf(name, text):
         leaf.text = ''
     return leaf
 
+
 def append_preview_nodes(node, variant, download_base, package_name):
     if not 'previews' in variant:
         return
@@ -211,6 +233,7 @@ def append_preview_nodes(node, variant, download_base, package_name):
         preview_node.append( make_xml_leaf('path', preview['path']) )
         node.append(preview_node)
 
+
 def append_tag_nodes(node, variant):
     if not 'tags' in variant:
         return
@@ -218,12 +241,29 @@ def append_tag_nodes(node, variant):
     for tag in variant['tags']:
         node.append(make_xml_leaf('tag', tag))
 
+
 def append_author_nodes(node, info):
     if 'authors' in info:
         node.append(info['authors']._createXMLElement())
     if 'author' in info:
         # traditional single author string
         node.append( make_xml_leaf('author', info['author']) )
+
+
+def append_localized_strings(node, variant):
+    if not 'localized' in variant:
+        return
+
+    localized_node = ET.Element('localized')
+    for lang, v in variant['localized'].items():
+        lang_node = ET.Element(lang)
+        for skey, s in v.items():
+            lang_node.append(make_xml_leaf(skey, s))
+
+        localized_node.append(lang_node) 
+
+    node.append(localized_node)
+
 
 def make_aircraft_node(aircraftDirName, package, variants, downloadBase, mirrors):
     #print("package: %s" % package)
@@ -271,6 +311,7 @@ def make_aircraft_node(aircraftDirName, package, variants, downloadBase, mirrors
         append_preview_nodes(variant_node, variant, downloadBase, aircraftDirName)
         append_tag_nodes(variant_node, variant)
         append_author_nodes(variant_node, variant)
+        append_localized_strings(variant_node, variant)
 
     package_node.append( make_xml_leaf('dir', aircraftDirName) )
 
@@ -290,6 +331,7 @@ def make_aircraft_node(aircraftDirName, package, variants, downloadBase, mirrors
 
     append_preview_nodes(package_node, package, downloadBase, aircraftDirName)
     append_tag_nodes(package_node, package)
+    append_localized_strings(package_node, package)
 
     if 'maintainers' in package:
         package_node.append(package['maintainers']._createXMLElement())
