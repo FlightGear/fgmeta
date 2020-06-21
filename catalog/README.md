@@ -8,11 +8,11 @@ md5sums, thumbnails, and previews of these.  It consists of the script:
 
 * update-catalog.py
 
-And its Python modules:
+It uses Python modules located under `python3-flightgear/flightgear/meta/`:
 
-* catalog.py
-* catalogTags.py
-* sgprogs.py
+* aircraft_catalogs/catalog.py
+* aircraft_catalogs/catalogTags.py
+* sgprops.py
 
 
 Usage
