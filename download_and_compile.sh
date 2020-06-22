@@ -17,6 +17,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+CURRENT_LTS_BRANCH="release/2018.3"
+
 script_blob_id='$Id$'
 # Slightly tricky substitution to avoid our regexp being wildly replaced with
 # the blob name (id) when the script is checked out:
@@ -27,7 +29,6 @@ VERSION="$(echo "$script_blob_id" | sed 's@\$Id: *\([0-9a-f]\+\) *@\1@')"
 VERSION="${VERSION%\$}"
 
 PROGNAME=$(basename "$0")
-FGVERSION="release/$(git ls-remote --heads https://git.code.sf.net/p/flightgear/flightgear|grep '\/release\/'|cut -f4 -d'/'|sort -t . -k 1,1n -k2,2n -k3,3n|tail -1)"
 
 #######################################################
 # THANKS TO
@@ -55,6 +56,14 @@ _elementIn(){
   done
 
   return 1
+}
+
+# Print $2, $3, ... using $1 as separator.
+# From <https://stackoverflow.com/questions/1527049/how-can-i-join-elements-of-an-array-in-bash>
+function _joinBy(){
+  local d="$1"; shift
+  echo -n "$1"; shift
+  printf "%s" "${@/#/$d}"
 }
 
 function _log(){
@@ -431,8 +440,7 @@ function _usage() {
   echo "components listed in the WHATTOBUILDALL variable. Each COMPONENT may"
   echo "be one of the following words:"
   echo
-  echo "  ALL, CMAKE, OSG, PLIB, OPENRTI, SIMGEAR, FGFS, DATA, FGRUN, FGO, FGX,"
-  echo "  OPENRADAR, ATCPIE, TERRAGEAR, TERRAGEARGUI"
+  echo "  ALL, $(_joinBy ', ' "${WHATTOBUILD_AVAIL[@]}")."
   echo
   echo "Available options:"
   echo "  -h, --help    show this help message and exit"
@@ -472,7 +480,14 @@ function _usage() {
   echo "                useful if you want to update, rebuild, etc. TERRAGEAR without"
   echo "                doing the same for SIMGEAR (e.g., if doing repeated TERRAGEAR"
   echo "                builds and you know your SIMGEAR is already fine and up-to-date)."
-  echo "  -s            compile only the last known stable versions"
+  echo "      --lts     compile the latest Long Term Support release of FlightGear (and"
+  echo "                select “stable” versions for other components)"
+  echo "  -s            compile the latest release of FlightGear (and select “stable”"
+  echo "                versions for other components)"
+  echo "      --component-branch=COMPONENT=BRANCH"
+  echo "                Override the default branch for COMPONENT. For the specified"
+  echo "                component, this overrides the effect of options -s and --lts."
+  echo "                This option may be given several times."
   echo "  --compositor  build FlightGear with compositor enabled"
   echo "  --non-interactive"
   echo "                don't ask any question; always assume the default answer in"
@@ -501,7 +516,7 @@ declare -a WHATTOBUILD_AVAIL=(
 )
 WHATTOBUILDALL=(SIMGEAR FGFS DATA)
 
-STABLE=
+SELECTED_SUITE=next
 APT_GET_UPDATE="y"
 DOWNLOAD_PACKAGES="y"
 COMPILE="y"
@@ -586,6 +601,10 @@ REPO_SITE[TERRAGEAR]="SourceForge"
 REPO_ADDRESS[TERRAGEARGUI]="git.code.sf.net/p/flightgear/fgscenery/terrageargui"
 REPO_SITE[TERRAGEARGUI]="SourceForge"
 
+# Allows one to choose the branch for each component instead of relying on the
+# defaults.
+declare -A COMPONENT_BRANCH_OVERRIDES
+
 # getopt is from the util-linux package (in Debian). Contrary to bash's getopts
 # built-in function, it allows one to define long options.
 getopt=getopt
@@ -593,9 +612,9 @@ if [[ `uname` == 'OpenBSD' ]]; then
     getopt=gnugetopt
 fi
 TEMP=$($getopt -o '+shc:p:a:d:r:j:O:ib:' \
-  --longoptions git-clone-default-proto:,git-clone-site-params:,help \
+  --longoptions git-clone-default-proto:,git-clone-site-params:,help,lts \
   --longoptions package-manager:,sudo:,ignore-intercomponent-deps,compositor \
-  --longoptions non-interactive,version \
+  --longoptions component-branch:,non-interactive,version \
   -n "$PROGNAME" -- "$@")
 
 case $? in
@@ -609,7 +628,34 @@ eval set -- "$TEMP"
 
 while true; do
   case "$1" in
-    -s) STABLE="STABLE"; shift ;;
+    -s) SELECTED_SUITE=latest-release; shift ;;
+    --lts) SELECTED_SUITE=latest-lts; shift ;;
+    --component-branch)
+      if [[ "$2" =~ ^([-_a-zA-Z0-9]+)=(.+)$ ]]; then
+        verbatim_component="${BASH_REMATCH[1]}"
+        component="${BASH_REMATCH[1]^^}" # convert the component to uppercase
+        branch="${BASH_REMATCH[2]}"
+
+        if ! _elementIn "$component" "${WHATTOBUILD_AVAIL[@]}"; then
+          echo "Invalid component passed to option --component-branch:" \
+               "'$verbatim_component'. Allowed" >&2
+          printf "components are:\n\n" >&2
+          echo "  $(_joinBy ', ' "${WHATTOBUILD_AVAIL[@]}")." >&2
+          exit 1
+        fi
+
+        COMPONENT_BRANCH_OVERRIDES["$component"]="$branch"
+        unset -v verbatim_component component branch
+      else
+        echo "Invalid value passed to option --component-branch: '$2'." >&2
+        echo "The correct syntax is" \
+             "--component-branch COMPONENT=BRANCH" >&2
+        echo "(or equivalently, --component-branch=COMPONENT=BRANCH)." >&2
+        exit 1
+      fi
+
+      shift 2
+      ;;
     -a) APT_GET_UPDATE="$2"; shift 2 ;;
     -c) COMPILE="$2"; shift 2 ;;
     -p) DOWNLOAD_PACKAGES="$2"; shift 2 ;;
@@ -659,7 +705,7 @@ while true; do
         echo "Invalid value passed to option --git-clone-site-params: '$2'." >&2
         echo "The correct syntax is" \
              "--git-clone-site-params SITE=PROTOCOL[:USERNAME]" >&2
-        echo "(or --git-clone-site-params=SITE=PROTOCOL[:USERNAME])." >&2
+        echo "(or equivalently, --git-clone-site-params=SITE=PROTOCOL[:USERNAME])." >&2
         exit 1
       fi
       shift 2
@@ -690,9 +736,68 @@ else
   WHATTOBUILD=( "$@" )
 fi
 
-if [[ "$STABLE" != "STABLE" ]]; then
-  FGVERSION="next"
-fi
+# Name of the branch to check out for each component, depending on whether any
+# of the options -s and --lts has been provided (for some projects which don't
+# use a VCS, we may abuse this variable and store something else than a branch
+# name).
+declare -A COMPONENT_BRANCH
+
+case "$SELECTED_SUITE" in
+  next)
+    FG_BRANCH=next
+    COMPONENT_BRANCH[OPENRTI]=master
+    COMPONENT_BRANCH[OSG]=OpenSceneGraph-3.6
+    COMPONENT_BRANCH[TERRAGEAR]=next
+    SUITE_DESCRIPTION="\
+!! You have selected the 'next' suite, which contains the development version
+   of FlightGear. The corresponding FlightGear code is very recent but may well
+   be unstable. Other possibilities are '--lts' for the 'LTS' suite (Long Term
+   Support) and '-s' for the latest release. '--lts' should provide the most
+   stable setup. !!"
+    ;;
+  latest-release)
+    FG_BRANCH="release/$(git ls-remote --heads https://git.code.sf.net/p/flightgear/flightgear | grep '\/release\/' | cut -f4 -d'/' | sort -t . -k 1,1n -k2,2n -k3,3n | tail -1)"
+    COMPONENT_BRANCH[OPENRTI]=release-0.7
+    COMPONENT_BRANCH[OSG]=OpenSceneGraph-3.4
+    COMPONENT_BRANCH[TERRAGEAR]=scenery/ws2.0
+    SUITE_DESCRIPTION="\
+You have selected the latest release of FlightGear. This is supposedly less
+stable than '--lts' (Long Term Support) but more stable than the development
+version (which would be obtained with neither '-s' nor '--lts')."
+    ;;
+  latest-lts)
+    FG_BRANCH="$CURRENT_LTS_BRANCH"
+    COMPONENT_BRANCH[OPENRTI]=release-0.7
+    COMPONENT_BRANCH[OSG]=OpenSceneGraph-3.4
+    COMPONENT_BRANCH[TERRAGEAR]=scenery/ws2.0
+    SUITE_DESCRIPTION="\
+You have selected the LTS suite (Long Term Support). This is in principle the
+most stable setup. Other possibilities are '-s' for the latest release and
+nothing (neither '-s' nor '--lts' passed) for bleeding-edge development
+versions."
+    ;;
+  *) _printLog "Unexpected value '$SELECTED_SUITE' for SELECTED_SUITE; " \
+               "please report a bug."
+    exit 1
+    ;;
+esac
+
+COMPONENT_BRANCH[PLIB]=master
+COMPONENT_BRANCH[CMAKE]=release
+COMPONENT_BRANCH[SIMGEAR]="$FG_BRANCH"
+COMPONENT_BRANCH[FGFS]="$FG_BRANCH"
+COMPONENT_BRANCH[DATA]="$FG_BRANCH"
+COMPONENT_BRANCH[FGRUN]=next
+COMPONENT_BRANCH[FGO]=1.5.5
+COMPONENT_BRANCH[FGX]=master
+COMPONENT_BRANCH[OPENRADAR]=OpenRadar.zip
+COMPONENT_BRANCH[ATCPIE]=master
+COMPONENT_BRANCH[TERRAGEARGUI]=master
+COMPONENT_BRANCH[ZLIB]=master
+
+for component in "${!COMPONENT_BRANCH_OVERRIDES[@]}"; do
+  COMPONENT_BRANCH[$component]="${COMPONENT_BRANCH_OVERRIDES[$component]}"
+done
 
 if [ "$OPENRTI" = "OPENRTI" ]; then
   SG_CMAKEARGS="$SG_CMAKEARGS -DENABLE_RTI=ON;"
@@ -755,13 +860,24 @@ _log "SG_CMAKEARGS=$SG_CMAKEARGS"
 _log "FG_CMAKEARGS=$FG_CMAKEARGS"
 _log "COMPOSITOR=$COMPOSITOR"
 _log "DIRECTORY=$CBD"
+_log
 
-if [ "$STABLE" = "STABLE" ]; then
-  _log "Stable build: yes"
-else
-  _log "Stable build: no"
-fi
+_printLog "$SUITE_DESCRIPTION"
+_printLog
+_printLog "\
+Note that options '-s' and '--lts' apply in particular to the SIMGEAR, FGFS
+and DATA components, but other components may be affected as well. Use
+'--component-branch COMPONENT=BRANCH' (without the quotes) if you want to
+override the defaults (i.e., manually choose the branches for particular
+components)."
+_printLog
+_printLog "Branch used for each component:"
+_printLog
+for component in "${WHATTOBUILD_AVAIL[@]}"; do
+  _printLog "  COMPONENT_BRANCH[$component]=${COMPONENT_BRANCH[$component]}"
+done
 
+_log
 _logSep
 
 #######################################################
@@ -886,6 +1002,7 @@ if [[ "$DOWNLOAD_PACKAGES" = "y" ]]; then
 
   _aptInstall "${PKG[@]}"
 else
+  _printLog
   _printLog "Note: option -p of $PROGNAME set to 'n' (no), therefore no"
   _printLog "      package will be installed via ${PKG_MGR}. Compilation of" \
                   "some components"
@@ -940,7 +1057,7 @@ if _elementIn "CMAKE" "${WHATTOBUILD[@]}"; then
   mkdir -p "cmake"
   cd "$CBD"/cmake
   _gitDownload CMAKE
-  _gitUpdate release
+  _gitUpdate "${COMPONENT_BRANCH[CMAKE]}"
 
   if [ "$RECONFIGURE" = "y" ]; then
     cd "$CBD"
@@ -975,7 +1092,7 @@ if _elementIn "ZLIB" "${WHATTOBUILD[@]}"; then
   mkdir -p "zlib"
   cd "$CBD"/zlib
   _gitDownload ZLIB
-  _gitUpdate master
+  _gitUpdate "${COMPONENT_BRANCH[ZLIB]}"
 
   if [ "$RECONFIGURE" = "y" ]; then
     cd "$CBD"
@@ -1004,7 +1121,7 @@ if _elementIn "PLIB" "${WHATTOBUILD[@]}"; then
   mkdir -p "plib"
   cd "$CBD"/plib
   _gitDownload PLIB
-  _gitUpdate master
+  _gitUpdate "${COMPONENT_BRANCH[PLIB]}"
 
   if [ "$RECONFIGURE" = "y" ]; then
     cd "$CBD"
@@ -1033,12 +1150,7 @@ if _elementIn "OPENRTI" "${WHATTOBUILD[@]}"; then
   mkdir -p "openrti"
   cd "$CBD"/openrti
   _gitDownload OPENRTI
-
-  if [ "$STABLE" = "STABLE" ]; then
-    _gitUpdate release-0.7
-  else
-    _gitUpdate master
-  fi
+  _gitUpdate "${COMPONENT_BRANCH[OPENRTI]}"
 
   if [ "$RECONFIGURE" = "y" ]; then
     cd "$CBD"
@@ -1067,7 +1179,7 @@ if _elementIn "OSG" "${WHATTOBUILD[@]}"; then
   mkdir -p "openscenegraph"
   cd "openscenegraph"
   _gitDownload OSG
-  _gitUpdate OpenSceneGraph-3.4
+  _gitUpdate "${COMPONENT_BRANCH[OSG]}"
 
   if [ "$RECONFIGURE" = "y" ]; then
     cd "$CBD"
@@ -1109,7 +1221,7 @@ if _elementIn "SIMGEAR" "${WHATTOBUILD[@]}"; then
   mkdir -p "simgear"
   cd "$CBD"/simgear
   _gitDownload SIMGEAR
-  _gitUpdate "$FGVERSION"
+  _gitUpdate "${COMPONENT_BRANCH[SIMGEAR]}"
 
   if [ "$RECONFIGURE" = "y" ]; then
     cd "$CBD"
@@ -1148,7 +1260,7 @@ if _elementIn "FGFS" "${WHATTOBUILD[@]}" || \
     _printLog "****************************************"
 
     _gitDownload DATA
-    _gitUpdate "$FGVERSION"
+    _gitUpdate "${COMPONENT_BRANCH[DATA]}"
   fi
 
   mkdir -p "$CBD"/flightgear
@@ -1160,7 +1272,7 @@ if _elementIn "FGFS" "${WHATTOBUILD[@]}" || \
     _printLog "****************************************"
 
     _gitDownload FGFS
-    _gitUpdate "$FGVERSION"
+    _gitUpdate "${COMPONENT_BRANCH[FGFS]}"
 
     if [ "$RECONFIGURE" = "y" ]; then
       cd "$CBD"
@@ -1274,7 +1386,7 @@ if _elementIn "FGRUN" "${WHATTOBUILD[@]}"; then
   mkdir -p "fgrun"
   cd "$CBD"/fgrun
   _gitDownload FGRUN
-  _gitUpdate "$FGVERSION"
+  _gitUpdate "${COMPONENT_BRANCH[FGRUN]}"
 
   if [ "$RECONFIGURE" = "y" ]; then
     cd "$CBD"
@@ -1314,7 +1426,7 @@ if _elementIn "FGO" "${WHATTOBUILD[@]}"; then
 
   if [ "$DOWNLOAD" = "y" ]; then
     rm -rf fgo*.tar.gz
-    wget https://sites.google.com/site/erobosprojects/flightgear/add-ons/fgo/download/fgo-1.5.5.tar.gz -O fgo.tar.gz
+    wget "https://sites.google.com/site/erobosprojects/flightgear/add-ons/fgo/download/fgo-${COMPONENT_BRANCH[FGO]}.tar.gz" -O fgo.tar.gz
     cd install
     tar -zxvf ../fgo.tar.gz
     cd ..
@@ -1345,7 +1457,7 @@ if _elementIn "FGX" "${WHATTOBUILD[@]}"; then
   mkdir -p "fgx"
   cd "$CBD"/fgx
   _gitDownload FGX
-  _gitUpdate master
+  _gitUpdate "${COMPONENT_BRANCH[FGX]}"
 
   cd "$CBD"/fgx/src/
   #Patch in order to pre-setting paths
@@ -1400,7 +1512,7 @@ if _elementIn "ATCPIE" "${WHATTOBUILD[@]}"; then
   mkdir -p "$INSTALL_DIR_ATCPIE"
   cd "$INSTALL_DIR_ATCPIE"
   _gitDownload ATCPIE
-  _gitUpdate master
+  _gitUpdate "${COMPONENT_BRANCH[ATCPIE]}"
 
   cd "$CBD"
 
@@ -1424,7 +1536,7 @@ if _elementIn "OPENRADAR" "${WHATTOBUILD[@]}"; then
   _printLog "****************************************"
 
   if [ "$DOWNLOAD" = "y" ]; then
-    wget http://wagnerw.de/OpenRadar.zip -O OpenRadar.zip
+    wget http://wagnerw.de/"${COMPONENT_BRANCH[OPENRADAR]}" -O OpenRadar.zip
     cd install
     unzip -o ../OpenRadar.zip
     cd ..
@@ -1453,14 +1565,7 @@ if _elementIn "TERRAGEAR" "${WHATTOBUILD[@]}"; then
   mkdir -p "terragear"
   cd "$CBD"/terragear
   _gitDownload TERRAGEAR
-
-  if [ "$STABLE" = "STABLE" ]; then
-    branch='scenery/ws2.0'
-  else
-    branch='next'
-  fi
-
-  _gitUpdate "$branch"
+  _gitUpdate "${COMPONENT_BRANCH[TERRAGEAR]}"
 
   if [ "$RECONFIGURE" = "y" ]; then
     cd "$CBD"
@@ -1516,8 +1621,7 @@ if _elementIn "TERRAGEARGUI" "${WHATTOBUILD[@]}"; then
   mkdir -p "terrageargui"
   cd "$CBD"/terrageargui
   _gitDownload TERRAGEARGUI
-  _gitUpdate master
-
+  _gitUpdate "${COMPONENT_BRANCH[TERRAGEARGUI]}"
 
   if [ "$RECONFIGURE" = "y" ]; then
     cd "$CBD"
