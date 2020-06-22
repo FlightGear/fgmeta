@@ -156,7 +156,13 @@ def extract_localized_strings(localized_node):
 
         # iterate strings below <de> etc
         for s in lang.getChildren():
-            strings[s.name] = strutils.simplify(s.value)
+            # fix up the name/description confusion here
+            if s.name == 'description':
+                strings['name'] = strutils.simplify(s.value)
+            elif s.name == 'long-description':
+                strings['description'] = strutils.simplify(s.value)
+            else:
+                strings[s.name] = strutils.simplify(s.value)
 
         if strings:
             result[lang.name] = strings

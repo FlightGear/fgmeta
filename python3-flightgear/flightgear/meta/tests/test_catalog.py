@@ -51,7 +51,7 @@ class UpdateCatalogTests(unittest.TestCase):
         self.assertEqual(authors.getValue('author[1]/name'), 'Orville Wright')
 
         locDe = info['localized']['de']
-        self.assertEqual(locDe["long-description"], "Describe the F16-A in German")
+        self.assertEqual(locDe["description"], "Describe the F16-A in German")
 
 
     def test_scan_dir(self):
@@ -75,7 +75,7 @@ class UpdateCatalogTests(unittest.TestCase):
         self.assertEqual(f16b['primary-set'], False)
 
         locFr = f16b['localized']['fr']
-        self.assertEqual(locFr["long-description"], "Describe the F16-B in French")
+        self.assertEqual(locFr["description"], "Describe the F16-B in French")
 
         authorsArray = f16b['authors']
         self.assertNotIn('author', f16b)
@@ -156,7 +156,7 @@ class UpdateCatalogTests(unittest.TestCase):
         self.assertEqual(parsedPkgNode.getValue('rating/cockpit'), 2)
         self.assertEqual(parsedPkgNode.getValue('rating/model'), 5)
 
-        self.assertEqual(parsedPkgNode.getValue('localized/de/long-description'), "Describe the F16-A in German")
+        self.assertEqual(parsedPkgNode.getValue('localized/de/description'), "Describe the F16-A in German")
 
         # author data verification
         self.assertFalse(parsedPkgNode.hasChild('author'));
@@ -194,7 +194,7 @@ class UpdateCatalogTests(unittest.TestCase):
                 self.assertEqual(author1.getValue("email"), "shatner@enterprise.com")
                 self.assertEqual(author1.getValue("description"), "Everything")
 
-                self.assertEqual(pv.getValue('localized/de/long-description'), "Describe the F16-B in German")
+                self.assertEqual(pv.getValue('localized/de/description'), "Describe the F16-B in German")
 
 
     def test_node_creation2(self):
