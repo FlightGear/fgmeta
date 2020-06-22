@@ -413,6 +413,34 @@ function _depends(){
   fi
 }
 
+function _maybe_add_intercomponent_deps(){
+  local comp_word
+
+  if [[ "$IGNORE_INTERCOMPONENT_DEPS" = "y" ]]; then
+    return 0
+  fi
+
+  # FlightGear requires SimGear
+  _depends FGFS SIMGEAR
+  # TerraGear requires SimGear
+  _depends TERRAGEAR SIMGEAR
+
+  # Print a helpful message if some components were automatically added
+  if (( nb_added_intercomponent_deps > 0 )); then
+    if (( nb_added_intercomponent_deps > 1 )); then
+      comp_word='components'
+    else
+      comp_word='component'
+    fi
+    _printLog "$PROGNAME: automatically added $nb_added_intercomponent_deps" \
+              "$comp_word based on"
+    _printLog "intercomponent dependencies. Use option" \
+              "--ignore-intercomponent-deps if you"
+    _printLog "want to disable this behavior."
+    _printLog
+  fi
+}
+
 function _printVersion(){
   echo "$PROGNAME version $VERSION"
   echo
@@ -862,6 +890,8 @@ _log "COMPOSITOR=$COMPOSITOR"
 _log "DIRECTORY=$CBD"
 _log
 
+_maybe_add_intercomponent_deps  # this may add elements to WHATTOBUILD
+
 _printLog "$SUITE_DESCRIPTION"
 _printLog
 _printLog "\
@@ -873,42 +903,15 @@ components)."
 _printLog
 _printLog "Branch used for each component:"
 _printLog
+# This method guarantees a stable order for the output
 for component in "${WHATTOBUILD_AVAIL[@]}"; do
-  _printLog "  COMPONENT_BRANCH[$component]=${COMPONENT_BRANCH[$component]}"
+  if _elementIn "$component" "${WHATTOBUILD[@]}"; then
+    _printLog "  COMPONENT_BRANCH[$component]=${COMPONENT_BRANCH[$component]}"
+  fi
 done
 
 _log
 _logSep
-
-#######################################################
-#######################################################
-
-# ****************************************************************************
-# *                       Inter-component Dependencies                       *
-# ****************************************************************************
-
-if [ "$IGNORE_INTERCOMPONENT_DEPS" = "n" ]; then
-  # FlightGear requires SimGear
-  _depends FGFS SIMGEAR
-  # TerraGear requires SimGear
-  _depends TERRAGEAR SIMGEAR
-
-  # Print a helpful message if some components were automatically added
-  if (( nb_added_intercomponent_deps > 0 )); then
-    if (( nb_added_intercomponent_deps > 1 )); then
-      comp_word='components'
-    else
-      comp_word='component'
-    fi
-    _printLog "$PROGNAME: automatically added $nb_added_intercomponent_deps" \
-              "$comp_word based on"
-    _printLog "intercomponent dependencies. Use option" \
-              "--ignore-intercomponent-deps if you"
-    _printLog "want to disable this behavior."
-    _printLog
-    unset -v comp_word
-  fi
-fi
 
 # ****************************************************************************
 # *             Component dependencies on distribution packages              *
