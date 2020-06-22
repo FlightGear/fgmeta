@@ -784,7 +784,7 @@ case "$SELECTED_SUITE" in
    stable setup. !!"
     ;;
   latest-release)
-    FG_BRANCH="release/$(git ls-remote --heads https://git.code.sf.net/p/flightgear/flightgear | grep '\/release\/' | cut -f4 -d'/' | sort -t . -k 1,1n -k2,2n -k3,3n | tail -1)"
+    FG_BRANCH="release/$(git ls-remote --heads "https://${REPO_ADDRESS[FGFS]}" | grep '\/release\/' | cut -f4 -d'/' | sort -t . -k 1,1n -k2,2n -k3,3n | tail -1)"
     COMPONENT_BRANCH[OPENRTI]=release-0.7
     COMPONENT_BRANCH[OSG]=OpenSceneGraph-3.4
     COMPONENT_BRANCH[TERRAGEAR]=scenery/ws2.0
