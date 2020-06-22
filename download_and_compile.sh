@@ -516,8 +516,9 @@ function _usage() {
   echo "                Override the default branch for COMPONENT. For the specified"
   echo "                component, this overrides the effect of options -s and --lts."
   echo "                This option may be given several times."
-  echo "  --compositor  build FlightGear with compositor enabled"
-  echo "  --non-interactive"
+  echo "      --compositor"
+  echo "                build FlightGear with compositor enabled"
+  echo "      --non-interactive"
   echo "                don't ask any question; always assume the default answer in"
   echo "                situations where a question would normally be asked."
   echo
