@@ -97,6 +97,54 @@ function _logOutput(){
   esac
 }
 
+# Return code is 0 for 'yes' and 1 for 'no'.
+function _yes_no_prompt(){
+  local prompt="$1"
+  local default="$2"
+  local choices res answer
+
+  case "$default" in
+    [yY]) choices='Y/n' ;;
+    [nN]) choices='y/N' ;;
+    "")
+      if [[ "$INTERACTIVE_MODE" -eq 0 ]]; then
+        _printLog "Non-interactive mode requested, but found a question with" \
+                  "no default answer;"
+        _printLog "this can't work, aborting."
+        exit 1
+      fi
+      choices='y/n'
+      ;;
+    *)
+      _printLog \
+        "Invalid default choice for _yes_no_prompt(): this is a bug in the"
+        "script, aborting."
+      exit 1
+      ;;
+  esac
+
+  while true; do
+    if [[ "$INTERACTIVE_MODE" -eq 0 ]]; then
+      answer="$default"
+    else
+      read -r -p "$prompt [$choices] " answer
+    fi
+
+    if [[ -z "$answer" ]]; then
+      answer="$default"
+    fi
+
+    case "$answer" in
+      [yY]) res=0; break ;;
+      [nN]) res=1; break ;;
+      *) ;;
+    esac
+  done
+
+  return $res
+}
+
+# Return code is 0 for 'yes', 1 for 'no' and 2 for 'quit'.
 function _yes_no_quit_prompt(){
   local prompt="$1"
   local default="$2"
@@ -538,6 +586,11 @@ CBD="$PWD"
 LOGFILE="$CBD/compilation_log.txt"
 INTERACTIVE_MODE=1
 
+declare -i logfile_was_already_present_when_starting=0
+if [[ -f "$LOGFILE" ]]; then
+  logfile_was_already_present_when_starting=1
+fi
+
 # Available values for WHATTOBUILD and WHATTOBUILDALL:
 declare -a WHATTOBUILD_AVAIL=(
   'CMAKE' 'PLIB' 'OPENRTI' 'OSG' 'SIMGEAR' 'FGFS' 'DATA' 'FGRUN' 'FGO' 'FGX'
@@ -901,6 +954,21 @@ and DATA components, but other components may be affected as well. Use
 '--component-branch COMPONENT=BRANCH' (without the quotes) if you want to
 override the defaults (i.e., manually choose the branches for particular
 components)."
+
+# Make sure users building 'next' are aware of the possible consequences. :-)
+if [[ "$SELECTED_SUITE" = "next" && \
+      $logfile_was_already_present_when_starting -eq 0 ]]; then
+  set +e
+  _printLog
+  _yes_no_prompt "Are you sure you want to continue?" y; prompt_res=$?
+  set -e
+  if [[ $prompt_res -eq 1 ]]; then
+    _printLog "Aborting as requested."
+    exit 0
+  fi
+  unset -v prompt_res
+fi
+
 _printLog
 _printLog "Branch used for each component:"
 _printLog
