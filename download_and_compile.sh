@@ -1383,7 +1383,6 @@ if _elementIn "FGFS" "${WHATTOBUILD[@]}" || \
 
   paths="../../$SIMGEAR_INSTALL_DIR/lib:../../$OSG_INSTALL_DIR/lib:../../$OPENRTI_INSTALL_DIR/lib:../../$PLIB_INSTALL_DIR/lib"
   gdb="gdb"
-  set_ld_library_path="export LD_LIBRARY_PATH='$paths'\"\${LD_LIBRARY_PATH:+:}\${LD_LIBRARY_PATH}\""
 
   common=""
   common="${common}#!/bin/sh\n"
@@ -1398,7 +1397,8 @@ if _elementIn "FGFS" "${WHATTOBUILD[@]}" || \
     common="${common}ulimit -d 4194304\n"
   fi
 
-  common="${common}export LD_LIBRARY_PATH='$paths'\"\${LD_LIBRARY_PATH:+:}\${LD_LIBRARY_PATH}\"\n"
+  set_ld_library_path="export LD_LIBRARY_PATH='$paths'\"\${LD_LIBRARY_PATH:+:}\${LD_LIBRARY_PATH}\""
+  common="${common}${set_ld_library_path}\n"
 
   SCRIPT=run_fgfs.sh
   echo -en "$common" > $SCRIPT
