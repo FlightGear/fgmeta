@@ -6,10 +6,6 @@
 	path = flightgear
 	url = ../flightgear
 	branch = release/2020.2
-[submodule "fgrun"]
-	path = fgrun
-	url = ../fgrun
-	branch = next
 [submodule "fgdata"]
 	path = fgdata
 	url = ../fgdata
