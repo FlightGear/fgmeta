@@ -193,6 +193,43 @@ function _yes_no_quit_prompt(){
   return $res
 }
 
+# Recursively delete build and install directories, but preserve FGData if
+# present.
+function _cleanup(){
+  if [[ -z "$CBD" || -z "$INSTALL_DIR" || -z "$INSTALL_DIR_FGFS" ]]; then
+    _printLog "${PROGNAME}:" '_cleanup() called while $CBD or $INSTALL_DIR or'
+    _printLog '$INSTALL_DIR_FGFS is empty.'
+    _printLog "\$CBD='$CBD'"
+    _printLog "\$INSTALL_DIR='$INSTALL_DIR'"
+    _printLog "\$INSTALL_DIR_FGFS='$INSTALL_DIR_FGFS'"
+    _printLog 'This is unexpected; please report.'
+    exit 1
+  fi
+
+  local fgdata_backup="$CBD/fgdata.tmp.download_and_compile-cleanup"
+  local -i fgdata_moved=0
+
+  _printLog "Deleting build directories ($CBD/build)..."
+  rm -rf "$CBD/build"
+
+  if [[ -d "$INSTALL_DIR_FGFS/fgdata" ]]; then
+    _printLog "Moving FGData to $fgdata_backup..."
+    mv "$INSTALL_DIR_FGFS/fgdata" "$fgdata_backup"
+    fgdata_moved=1
+  fi
+
+  _printLog "Deleting install directories ($INSTALL_DIR)..."
+  rm -rf "$INSTALL_DIR"
+
+  if [[ $fgdata_moved -eq 1 ]]; then
+    mkdir -p "$INSTALL_DIR_FGFS"
+    _printLog "Moving FGData back to $INSTALL_DIR_FGFS/fgdata..."
+    mv "$fgdata_backup" "$INSTALL_DIR_FGFS/fgdata"
+  fi
+
+  _printLog
+}
+
 function _aptUpdate(){
   local cmd=()
 
@@ -530,6 +567,9 @@ function _usage() {
   echo "  -p y|n        y=install packages using PACKAGE_MANAGER, n=don't                     default=y"
   echo "  -c y|n        y=compile programs, n=don't                                           default=y"
   echo "  -d y|n        y=fetch programs from the Internet (Git, svn, etc.), n=don't          default=y"
+  echo "      --cleanup Remove all build and installation directories. Try this if a"
+  echo '                compilation fails and the "base directory" was not "fresh" when'
+  echo "                you started ${PROGNAME}."
   echo "      --git-clone-default-proto=PROTO                                                 default=https"
   echo "                default protocol to use for 'git clone' (https, git or ssh)"
   echo "      --git-clone-site-params=SITE=PROTOCOL[:USERNAME]"
@@ -599,6 +639,7 @@ declare -a WHATTOBUILD_AVAIL=(
 WHATTOBUILDALL=(SIMGEAR FGFS DATA)
 
 SELECTED_SUITE=next
+CLEANUP="n"
 APT_GET_UPDATE="y"
 DOWNLOAD_PACKAGES="y"
 COMPILE="y"
@@ -694,9 +735,9 @@ if [[ `uname` == 'OpenBSD' ]]; then
     getopt=gnugetopt
 fi
 TEMP=$($getopt -o '+shc:p:a:d:r:j:O:ib:' \
-  --longoptions git-clone-default-proto:,git-clone-site-params:,help,lts \
+  --longoptions cleanup,git-clone-default-proto:,git-clone-site-params:,lts \
   --longoptions package-manager:,sudo:,ignore-intercomponent-deps,compositor \
-  --longoptions component-branch:,non-interactive,version \
+  --longoptions component-branch:,non-interactive,help,version \
   -n "$PROGNAME" -- "$@")
 
 case $? in
@@ -742,6 +783,7 @@ while true; do
     -c) COMPILE="$2"; shift 2 ;;
     -p) DOWNLOAD_PACKAGES="$2"; shift 2 ;;
     -d) DOWNLOAD="$2"; shift 2 ;;
+    --cleanup) CLEANUP="y"; shift ;;
     --git-clone-default-proto)
       proto="${2,,}"            # convert to lowercase
 
@@ -1085,7 +1127,9 @@ fi
 #######################################################
 
 SUB_INSTALL_DIR=install
+FGFS_INSTALL_DIR=flightgear
 INSTALL_DIR="$CBD/$SUB_INSTALL_DIR"
+INSTALL_DIR_FGFS="$INSTALL_DIR/$FGFS_INSTALL_DIR"
 cd "$CBD"
 mkdir -p build install
 
@@ -1114,6 +1158,10 @@ if [ -d "$CBD"/fgfs/flightgear ]; then
 fi
 
 _printLog
+
+if [[ "$CLEANUP" = "y" ]]; then
+  _cleanup
+fi
 
 #######################################################
 # cmake
@@ -1318,8 +1366,6 @@ fi
 #######################################################
 # FGFS
 #######################################################
-FGFS_INSTALL_DIR=flightgear
-INSTALL_DIR_FGFS="$INSTALL_DIR/$FGFS_INSTALL_DIR"
 cd "$CBD"
 if _elementIn "FGFS" "${WHATTOBUILD[@]}" || \
    _elementIn "DATA" "${WHATTOBUILD[@]}"; then
