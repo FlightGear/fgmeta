@@ -218,8 +218,14 @@ function _cleanup(){
     fgdata_moved=1
   fi
 
-  _printLog "Deleting install directories ($INSTALL_DIR)..."
-  rm -rf "$INSTALL_DIR"
+  if [[ "$(basename "$INSTALL_DIR")" -eq "install" ]]; then
+    _printLog "Deleting install directories ($INSTALL_DIR)..."
+    rm -rf "$INSTALL_DIR"
+  else
+    _printLog "${PROGNAME}: unexpected value for \$INSTALL_DIR: '$INSTALL_DIR'."
+    _printLog "Refusing to recursively delete it. Aborting; please report."
+    exit 1
+  fi
 
   if [[ $fgdata_moved -eq 1 ]]; then
     mkdir -p "$INSTALL_DIR_FGFS"
