@@ -260,19 +260,22 @@ function _gitUpdate(){
   if [ "$DOWNLOAD" != "y" ]; then
     return
   fi
-  branch="$1"
+
+  local branch="$1"
   set +e
   git diff --exit-code 2>&1 > /dev/null
-  if [ $? != 1 ]; then
+  if [[ $? != 1 ]]; then
     set -e
-    git pull -r
-    git checkout -f "$branch"
+    git fetch origin
+    git checkout --force "$branch"
+    git pull --rebase
   else
     set -e
-    git stash save -u -q
-    git pull -r
-    git checkout -f "$branch"
-    git stash pop -q
+    git fetch origin
+    git stash save --include-untracked --quiet
+    git checkout --force "$branch"
+    git pull --rebase
+    git stash pop --quiet
   fi
 }
 
