@@ -838,7 +838,9 @@ function _usage() {
   echo "  -d y|n        y=fetch programs from the Internet (Git, svn, etc.), n=don't          default=y"
   echo "      --cleanup Remove all build and installation directories. Try this if a"
   echo '                compilation fails and the "base directory" was not "fresh" when'
-  echo "                you started ${PROGNAME}."
+  echo "                you started ${PROGNAME}. If this option is given and no"
+  echo "                component has been specified on the command line, then only the"
+  echo "                cleanup routine is run."
   echo "      --git-clone-default-proto=PROTO                                                 default=https"
   echo "                default protocol to use for 'git clone' (https, git or ssh)"
   echo "      --git-clone-site-params=SITE=PROTOCOL[:USERNAME]"
@@ -1123,7 +1125,7 @@ done
 
 declare -a WHATTOBUILD=()
 
-if [[ $# == 0 ]] || _elementIn ALL "$@"; then
+if [[ $# == 0 && "$CLEANUP" == "n" ]] || _elementIn ALL "$@"; then
   WHATTOBUILD=( "${WHATTOBUILDALL[@]}" )
 else
   WHATTOBUILD=( "$@" )
@@ -1142,19 +1144,23 @@ if [ "$OPENRTI" = "OPENRTI" ]; then
   WHATTOBUILD+=( "OPENRTI" )
 fi
 
-_determineProtocolAndUsernameForEachComponentRepository
-# Warn about compilation time and size (idea from Jester); give a hint about
-# the -j option.
-_displayGeneralAdvice
 _startLog "$0 $*"
-_maybe_add_intercomponent_deps  # this may add elements to WHATTOBUILD
-# Among others, this asks "Are you sure you want to continue?" if the user
-# chose 'next' and compilation_log.txt wasn't present when the script was
-# started.
-_describeSelectedSuite
-_showBranchForEachComponent
-_logSep
-_installOrUpdateDistroPackages
+
+# The following is skipped when only running the “cleanup” routine.
+if [[ ${#WHATTOBUILD[@]} -gt 0 ]]; then
+  # Warn about compilation time and size (idea from Jester); give a hint about
+  # the -j option.
+  _displayGeneralAdvice
+  _determineProtocolAndUsernameForEachComponentRepository
+  _maybe_add_intercomponent_deps  # this may add elements to WHATTOBUILD
+  # Among other things, this asks “Are you sure you want to continue?” if the
+  # user chose 'next', $LOGFILE wasn't present when the script was started and
+  # the --non-interactive option wasn't specified.
+  _describeSelectedSuite
+  _showBranchForEachComponent
+  _logSep
+  _installOrUpdateDistroPackages
+fi
 
 #######################################################
 #######################################################
@@ -1824,9 +1830,12 @@ if [[ ${#UNMATCHED_OPTIONAL_PKG_ALTERNATIVES[@]} -gt 0 ]]; then
   _printLog "This could explain missing optional features in FlightGear" \
             "or other software"
   _printLog "installed by $PROGNAME."
-else
+elif [[ ${#WHATTOBUILD[@]} -gt 0 ]]; then
   _printLog "All optional package alternatives have found a matching package."
+# else we were only running the “cleanup” routine
 fi
 
-_printLog
+if [[ ${#WHATTOBUILD[@]} -gt 0 ]]; then
+  _printLog
+fi
 _printLog "$PROGNAME has finished to work."
