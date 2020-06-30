@@ -71,7 +71,8 @@ function _log(){
 }
 
 function _logSep(){
-  _log "***********************************"
+  _log \
+ "******************************************************************************"
 }
 
 function _printLog(){
@@ -535,6 +536,265 @@ function _maybe_add_intercomponent_deps(){
   fi
 }
 
+# Component dependencies on distribution packages
+function _installOrUpdateDistroPackages(){
+  if [[ "$DOWNLOAD_PACKAGES" = "n" ]]; then
+    _printLog
+    _printLog "Note: option -p of $PROGNAME set to 'n' (no), therefore no"
+    _printLog "      package will be installed via ${PKG_MGR}. Compilation of" \
+                    "some components"
+    _printLog "      may fail if mandatory dependencies are missing."
+    return 0
+  fi
+
+  if [[ "$APT_GET_UPDATE" = "y" ]]; then
+    _aptUpdate
+  fi
+
+  # Ensure 'dctrl-tools' is installed
+  if [[ "$(dpkg-query --showformat='${Status}\n' --show dctrl-tools \
+                      2>/dev/null | awk '{print $3}')" != "installed" ]]; then
+    _aptInstall dctrl-tools
+  fi
+
+  # Minimum
+  PKG=(build-essential git)
+  _mandatory_pkg_alternative libcurl4-openssl-dev libcurl4-gnutls-dev
+
+  # CMake
+  if _elementIn "CMAKE" "${WHATTOBUILD[@]}"; then
+    PKG+=(libarchive-dev libbz2-dev libexpat1-dev libjsoncpp-dev liblzma-dev
+          libncurses5-dev libssl-dev procps zlib1g-dev)
+  else
+    PKG+=(cmake)
+  fi
+
+  # TerraGear
+  if _elementIn "TERRAGEAR" "${WHATTOBUILD[@]}"; then
+    PKG+=(libboost-dev libcgal-dev libgdal-dev libtiff5-dev zlib1g-dev)
+  fi
+
+  # TerraGear GUI and OpenRTI
+  if _elementIn "TERRAGEARGUI" "${WHATTOBUILD[@]}" || \
+     _elementIn "OPENRTI" "${WHATTOBUILD[@]}"; then
+    PKG+=(libqt4-dev)
+  fi
+
+  # SimGear and FlightGear
+  if _elementIn "SIMGEAR" "${WHATTOBUILD[@]}" || \
+     _elementIn "FGFS" "${WHATTOBUILD[@]}"; then
+    PKG+=(zlib1g-dev freeglut3-dev libglew-dev libopenal-dev libboost-dev)
+    _mandatory_pkg_alternative libopenscenegraph-3.4-dev libopenscenegraph-dev \
+                               'libopenscenegraph-[0-9]+\.[0-9]+-dev'
+  fi
+
+  # FlightGear
+  if _elementIn "FGFS" "${WHATTOBUILD[@]}"; then
+    PKG+=(libudev-dev libdbus-1-dev libplib-dev)
+    _mandatory_pkg_alternative libpng-dev libpng12-dev libpng16-dev
+    # The following packages are needed for the built-in launcher
+    _optional_pkg_alternative qt5-default
+    _optional_pkg_alternative qtdeclarative5-dev
+    _optional_pkg_alternative qttools5-dev
+    _optional_pkg_alternative qtbase5-dev-tools            # for rcc
+    _optional_pkg_alternative qttools5-dev-tools           # for lrelease
+    _optional_pkg_alternative qml-module-qtquick2
+    _optional_pkg_alternative qml-module-qtquick-window2
+    _optional_pkg_alternative qml-module-qtquick-dialogs
+    _optional_pkg_alternative libqt5opengl5-dev
+    _optional_pkg_alternative libqt5svg5-dev
+    _optional_pkg_alternative libqt5websockets5-dev
+    # The following packages are only needed for the Qt-based remote Canvas
+    # (comment written at the time of FG 2018.2).
+    _optional_pkg_alternative qtbase5-private-dev
+    _optional_pkg_alternative qtdeclarative5-private-dev
+    # FGPanel
+    PKG+=(fluid libbz2-dev libfltk1.3-dev libxi-dev libxmu-dev)
+    # FGAdmin
+    PKG+=(libxinerama-dev libjpeg-dev libxft-dev)
+    # swift
+    _optional_pkg_alternative libevent-dev
+  fi
+
+  # ATC-pie
+  if _elementIn "ATCPIE" "${WHATTOBUILD[@]}"; then
+    PKG+=(python3-pyqt5 python3-pyqt5.qtmultimedia libqt5multimedia5-plugins)
+  fi
+
+  # FGo!
+  if _elementIn "FGO" "${WHATTOBUILD[@]}"; then
+    PKG+=(python-tk)
+  fi
+
+  # if _elementIn "FGX" "${WHATTOBUILD[@]}"; then
+  #   FGx (FGx is not compatible with Qt5, however we have installed Qt5 by
+  #   default)
+  #   PKG+=(libqt5xmlpatterns5-dev libqt5webkit5-dev)
+  # fi
+
+  _aptInstall "${PKG[@]}"
+}
+
+function _describeSelectedSuite(){
+  local prompt_res
+
+  _printLog "$SUITE_DESCRIPTION"
+  _printLog
+  _printLog "\
+Note that options '-s' and '--lts' apply in particular to the SIMGEAR, FGFS
+and DATA components, but other components may be affected as well. Use
+'--component-branch COMPONENT=BRANCH' (without the quotes) if you want to
+override the defaults (i.e., manually choose the branches for particular
+components)."
+
+  # Make sure users building 'next' are aware of the possible consequences. :-)
+  if [[ "$SELECTED_SUITE" = "next" && \
+        $logfile_was_already_present_when_starting -eq 0 ]]; then
+    set +e
+    _printLog
+    _yes_no_prompt "Are you sure you want to continue?" y; prompt_res=$?
+    set -e
+    if [[ $prompt_res -eq 1 ]]; then
+      _printLog "Aborting as requested."
+      exit 0
+    fi
+  fi
+}
+
+function _determineSuiteDescriptionAndBranchForEachComponent(){
+  local FG_BRANCH
+
+  case "$SELECTED_SUITE" in
+    next)
+      FG_BRANCH=next
+      COMPONENT_BRANCH[OPENRTI]=master
+      COMPONENT_BRANCH[OSG]=OpenSceneGraph-3.6
+      COMPONENT_BRANCH[TERRAGEAR]=next
+      SUITE_DESCRIPTION="\
+!! You have selected the 'next' suite, which contains the development version
+   of FlightGear. The corresponding FlightGear code is very recent but may well
+   be unstable. Other possibilities are '--lts' for the 'LTS' suite (Long Term
+   Support) and '-s' for the latest release. '--lts' should provide the most
+   stable setup. !!"
+      ;;
+    latest-release)
+      FG_BRANCH="release/$(git ls-remote --heads "https://${REPO_ADDRESS[FGFS]}" | grep '\/release\/' | cut -f4 -d'/' | sort -t . -k 1,1n -k2,2n -k3,3n | tail -1)"
+      COMPONENT_BRANCH[OPENRTI]=release-0.7
+      COMPONENT_BRANCH[OSG]=OpenSceneGraph-3.4
+      COMPONENT_BRANCH[TERRAGEAR]=scenery/ws2.0
+      SUITE_DESCRIPTION="\
+You have selected the latest release of FlightGear. This is supposedly less
+stable than '--lts' (Long Term Support) but more stable than the development
+version (which would be obtained with neither '-s' nor '--lts')."
+      ;;
+    latest-lts)
+      FG_BRANCH="$CURRENT_LTS_BRANCH"
+      COMPONENT_BRANCH[OPENRTI]=release-0.7
+      COMPONENT_BRANCH[OSG]=OpenSceneGraph-3.4
+      COMPONENT_BRANCH[TERRAGEAR]=scenery/ws2.0
+      SUITE_DESCRIPTION="\
+You have selected the LTS suite (Long Term Support). This is in principle the
+most stable setup. Other possibilities are '-s' for the latest release and
+nothing (neither '-s' nor '--lts' passed) for bleeding-edge development
+versions."
+      ;;
+    *) _printLog "Unexpected value '$SELECTED_SUITE' for SELECTED_SUITE; " \
+                 "please report a bug."
+      exit 1
+      ;;
+  esac
+
+  COMPONENT_BRANCH[PLIB]=master
+  COMPONENT_BRANCH[CMAKE]=release
+  COMPONENT_BRANCH[SIMGEAR]="$FG_BRANCH"
+  COMPONENT_BRANCH[FGFS]="$FG_BRANCH"
+  COMPONENT_BRANCH[DATA]="$FG_BRANCH"
+  COMPONENT_BRANCH[FGRUN]=next
+  COMPONENT_BRANCH[FGO]=1.5.5
+  COMPONENT_BRANCH[FGX]=master
+  COMPONENT_BRANCH[OPENRADAR]=OpenRadar.zip
+  COMPONENT_BRANCH[ATCPIE]=master
+  COMPONENT_BRANCH[TERRAGEARGUI]=master
+  COMPONENT_BRANCH[ZLIB]=master
+
+  for component in "${!COMPONENT_BRANCH_OVERRIDES[@]}"; do
+    COMPONENT_BRANCH[$component]="${COMPONENT_BRANCH_OVERRIDES[$component]}"
+  done
+}
+
+function _determineProtocolAndUsernameForEachComponentRepository(){
+  local site
+
+  for component in "${WHATTOBUILD_AVAIL[@]}"; do
+    # First use the default download settings for each repository
+    REPO_PROTO[$component]="$REPO_DEFAULT_PROTO"
+    REPO_USERNAME[$component]="$REPO_DEFAULT_USERNAME"
+
+    site="${REPO_SITE[$component]}"
+    site="${site,,}"              # convert to lowercase
+
+    # Is there a specific protocol for this repo's hosting site?
+    if [[ -n "$site" && -n "${PROTO_AT_SITE[$site]}" ]]; then
+      REPO_PROTO[$component]="${PROTO_AT_SITE[$site]}"
+    fi
+
+    # Is there a specific username for this repo's hosting site?
+    if [[ -n "$site" && -n "${USERNAME_AT_SITE[$site]}" ]]; then
+      REPO_USERNAME[$component]="${USERNAME_AT_SITE[$site]}"
+    fi
+  done
+}
+
+function _displayGeneralAdvice(){
+  echo '**********************************************************************'
+  echo '*                                                                    *'
+  echo '* Warning: a typical SimGear + FlightGear + FGData build requires    *'
+  echo '* about 12 GiB of disk space. The compilation part may last from a   *'
+  echo '* few minutes to hours, depending on your computer.                  *'
+  echo '*                                                                    *'
+  echo '* Hint: use the -j option if your CPU has several cores, as in:      *'
+  echo '*                                                                    *'
+  echo '*         download_and_compile.sh -j$(nproc)                         *'
+  echo '*                                                                    *'
+  echo '**********************************************************************'
+  echo
+}
+
+# $1: command line used to start the script
+function _startLog(){
+  echo "$1" > "$LOGFILE"
+  _log "VERSION=$VERSION"
+  _log "SELECTED_SUITE=$SELECTED_SUITE"
+  _log "APT_GET_UPDATE=$APT_GET_UPDATE"
+  _log "DOWNLOAD_PACKAGES=$DOWNLOAD_PACKAGES"
+  _log "IGNORE_INTERCOMPONENT_DEPS=$IGNORE_INTERCOMPONENT_DEPS"
+  _log "COMPILE=$COMPILE"
+  _log "RECONFIGURE=$RECONFIGURE"
+  _log "DOWNLOAD=$DOWNLOAD"
+  _log "JOPTION=$JOPTION"
+  _log "OOPTION=$OOPTION"
+  _log "BUILD_TYPE=$BUILD_TYPE"
+  _log "SG_CMAKEARGS=$SG_CMAKEARGS"
+  _log "FG_CMAKEARGS=$FG_CMAKEARGS"
+  _log "COMPOSITOR=$COMPOSITOR"
+  _log "DIRECTORY=$CBD"
+  _log
+}
+
+function _showBranchForEachComponent(){
+  _printLog
+  _printLog "Branch used for each component:"
+  _printLog
+  # This method guarantees a stable order for the output
+  for component in "${WHATTOBUILD_AVAIL[@]}"; do
+    if _elementIn "$component" "${WHATTOBUILD[@]}"; then
+      _printLog "  COMPONENT_BRANCH[$component]=${COMPONENT_BRANCH[$component]}"
+    fi
+  done
+
+  _log
+}
+
 function _printVersion(){
   echo "$PROGNAME version $VERSION"
   echo
@@ -874,63 +1134,7 @@ fi
 # use a VCS, we may abuse this variable and store something else than a branch
 # name).
 declare -A COMPONENT_BRANCH
-
-case "$SELECTED_SUITE" in
-  next)
-    FG_BRANCH=next
-    COMPONENT_BRANCH[OPENRTI]=master
-    COMPONENT_BRANCH[OSG]=OpenSceneGraph-3.6
-    COMPONENT_BRANCH[TERRAGEAR]=next
-    SUITE_DESCRIPTION="\
-!! You have selected the 'next' suite, which contains the development version
-   of FlightGear. The corresponding FlightGear code is very recent but may well
-   be unstable. Other possibilities are '--lts' for the 'LTS' suite (Long Term
-   Support) and '-s' for the latest release. '--lts' should provide the most
-   stable setup. !!"
-    ;;
-  latest-release)
-    FG_BRANCH="release/$(git ls-remote --heads "https://${REPO_ADDRESS[FGFS]}" | grep '\/release\/' | cut -f4 -d'/' | sort -t . -k 1,1n -k2,2n -k3,3n | tail -1)"
-    COMPONENT_BRANCH[OPENRTI]=release-0.7
-    COMPONENT_BRANCH[OSG]=OpenSceneGraph-3.4
-    COMPONENT_BRANCH[TERRAGEAR]=scenery/ws2.0
-    SUITE_DESCRIPTION="\
-You have selected the latest release of FlightGear. This is supposedly less
-stable than '--lts' (Long Term Support) but more stable than the development
-version (which would be obtained with neither '-s' nor '--lts')."
-    ;;
-  latest-lts)
-    FG_BRANCH="$CURRENT_LTS_BRANCH"
-    COMPONENT_BRANCH[OPENRTI]=release-0.7
-    COMPONENT_BRANCH[OSG]=OpenSceneGraph-3.4
-    COMPONENT_BRANCH[TERRAGEAR]=scenery/ws2.0
-    SUITE_DESCRIPTION="\
-You have selected the LTS suite (Long Term Support). This is in principle the
-most stable setup. Other possibilities are '-s' for the latest release and
-nothing (neither '-s' nor '--lts' passed) for bleeding-edge development
-versions."
-    ;;
-  *) _printLog "Unexpected value '$SELECTED_SUITE' for SELECTED_SUITE; " \
-               "please report a bug."
-    exit 1
-    ;;
-esac
-
-COMPONENT_BRANCH[PLIB]=master
-COMPONENT_BRANCH[CMAKE]=release
-COMPONENT_BRANCH[SIMGEAR]="$FG_BRANCH"
-COMPONENT_BRANCH[FGFS]="$FG_BRANCH"
-COMPONENT_BRANCH[DATA]="$FG_BRANCH"
-COMPONENT_BRANCH[FGRUN]=next
-COMPONENT_BRANCH[FGO]=1.5.5
-COMPONENT_BRANCH[FGX]=master
-COMPONENT_BRANCH[OPENRADAR]=OpenRadar.zip
-COMPONENT_BRANCH[ATCPIE]=master
-COMPONENT_BRANCH[TERRAGEARGUI]=master
-COMPONENT_BRANCH[ZLIB]=master
-
-for component in "${!COMPONENT_BRANCH_OVERRIDES[@]}"; do
-  COMPONENT_BRANCH[$component]="${COMPONENT_BRANCH_OVERRIDES[$component]}"
-done
+_determineSuiteDescriptionAndBranchForEachComponent
 
 if [ "$OPENRTI" = "OPENRTI" ]; then
   SG_CMAKEARGS="$SG_CMAKEARGS -DENABLE_RTI=ON;"
@@ -938,199 +1142,19 @@ if [ "$OPENRTI" = "OPENRTI" ]; then
   WHATTOBUILD+=( "OPENRTI" )
 fi
 
-# Set the default download settings for each repository
-for component in "${WHATTOBUILD_AVAIL[@]}"; do
-  REPO_PROTO[$component]="$REPO_DEFAULT_PROTO"
-  REPO_USERNAME[$component]="$REPO_DEFAULT_USERNAME"
-
-  site="${REPO_SITE[$component]}"
-  site="${site,,}"              # convert to lowercase
-
-  # Is there a specific protocol for this repo's hosting site?
-  if [[ -n "$site" && -n "${PROTO_AT_SITE[$site]}" ]]; then
-    REPO_PROTO[$component]="${PROTO_AT_SITE[$site]}"
-  fi
-
-  # Is there a specific username for this repo's hosting site?
-  if [[ -n "$site" && -n "${USERNAME_AT_SITE[$site]}" ]]; then
-    REPO_USERNAME[$component]="${USERNAME_AT_SITE[$site]}"
-  fi
-done
-unset -v site
-
-#######################################################
-#######################################################
-# Warning about compilation time and size
-# Idea from Jester
-echo '**********************************************************************'
-echo '*                                                                    *'
-echo '* Warning: a typical SimGear + FlightGear + FGData build requires    *'
-echo '* about 12 GiB of disk space. The compilation part may last from a   *'
-echo '* few minutes to hours, depending on your computer.                  *'
-echo '*                                                                    *'
-echo '* Hint: use the -j option if your CPU has several cores, as in:      *'
-echo '*                                                                    *'
-echo '*         download_and_compile.sh -j$(nproc)                         *'
-echo '*                                                                    *'
-echo '**********************************************************************'
-echo
-
-#######################################################
-#######################################################
-
-echo "$0 $*" > "$LOGFILE"
-_log "VERSION=$VERSION"
-_log "APT_GET_UPDATE=$APT_GET_UPDATE"
-_log "DOWNLOAD_PACKAGES=$DOWNLOAD_PACKAGES"
-_log "IGNORE_INTERCOMPONENT_DEPS=$IGNORE_INTERCOMPONENT_DEPS"
-_log "COMPILE=$COMPILE"
-_log "RECONFIGURE=$RECONFIGURE"
-_log "DOWNLOAD=$DOWNLOAD"
-_log "JOPTION=$JOPTION"
-_log "OOPTION=$OOPTION"
-_log "BUILD_TYPE=$BUILD_TYPE"
-_log "SG_CMAKEARGS=$SG_CMAKEARGS"
-_log "FG_CMAKEARGS=$FG_CMAKEARGS"
-_log "COMPOSITOR=$COMPOSITOR"
-_log "DIRECTORY=$CBD"
-_log
-
+_determineProtocolAndUsernameForEachComponentRepository
+# Warn about compilation time and size (idea from Jester); give a hint about
+# the -j option.
+_displayGeneralAdvice
+_startLog "$0 $*"
 _maybe_add_intercomponent_deps  # this may add elements to WHATTOBUILD
-
-_printLog "$SUITE_DESCRIPTION"
-_printLog
-_printLog "\
-Note that options '-s' and '--lts' apply in particular to the SIMGEAR, FGFS
-and DATA components, but other components may be affected as well. Use
-'--component-branch COMPONENT=BRANCH' (without the quotes) if you want to
-override the defaults (i.e., manually choose the branches for particular
-components)."
-
-# Make sure users building 'next' are aware of the possible consequences. :-)
-if [[ "$SELECTED_SUITE" = "next" && \
-      $logfile_was_already_present_when_starting -eq 0 ]]; then
-  set +e
-  _printLog
-  _yes_no_prompt "Are you sure you want to continue?" y; prompt_res=$?
-  set -e
-  if [[ $prompt_res -eq 1 ]]; then
-    _printLog "Aborting as requested."
-    exit 0
-  fi
-  unset -v prompt_res
-fi
-
-_printLog
-_printLog "Branch used for each component:"
-_printLog
-# This method guarantees a stable order for the output
-for component in "${WHATTOBUILD_AVAIL[@]}"; do
-  if _elementIn "$component" "${WHATTOBUILD[@]}"; then
-    _printLog "  COMPONENT_BRANCH[$component]=${COMPONENT_BRANCH[$component]}"
-  fi
-done
-
-_log
+# Among others, this asks "Are you sure you want to continue?" if the user
+# chose 'next' and compilation_log.txt wasn't present when the script was
+# started.
+_describeSelectedSuite
+_showBranchForEachComponent
 _logSep
-
-# ****************************************************************************
-# *             Component dependencies on distribution packages              *
-# ****************************************************************************
-
-if [[ "$DOWNLOAD_PACKAGES" = "y" ]]; then
-  if [[ "$APT_GET_UPDATE" = "y" ]]; then
-    _aptUpdate
-  fi
-
-  # Ensure 'dctrl-tools' is installed
-  if [[ "$(dpkg-query --showformat='${Status}\n' --show dctrl-tools \
-                      2>/dev/null | awk '{print $3}')" != "installed" ]]; then
-    _aptInstall dctrl-tools
-  fi
-
-  # Minimum
-  PKG=(build-essential git)
-  _mandatory_pkg_alternative libcurl4-openssl-dev libcurl4-gnutls-dev
-
-  # CMake
-  if _elementIn "CMAKE" "${WHATTOBUILD[@]}"; then
-    PKG+=(libarchive-dev libbz2-dev libexpat1-dev libjsoncpp-dev liblzma-dev
-          libncurses5-dev libssl-dev procps zlib1g-dev)
-  else
-    PKG+=(cmake)
-  fi
-
-  # TerraGear
-  if _elementIn "TERRAGEAR" "${WHATTOBUILD[@]}"; then
-    PKG+=(libboost-dev libcgal-dev libgdal-dev libtiff5-dev zlib1g-dev)
-  fi
-
-  # TerraGear GUI and OpenRTI
-  if _elementIn "TERRAGEARGUI" "${WHATTOBUILD[@]}" || \
-     _elementIn "OPENRTI" "${WHATTOBUILD[@]}"; then
-    PKG+=(libqt4-dev)
-  fi
-
-  # SimGear and FlightGear
-  if _elementIn "SIMGEAR" "${WHATTOBUILD[@]}" || \
-     _elementIn "FGFS" "${WHATTOBUILD[@]}"; then
-    PKG+=(zlib1g-dev freeglut3-dev libglew-dev libopenal-dev libboost-dev)
-    _mandatory_pkg_alternative libopenscenegraph-3.4-dev libopenscenegraph-dev \
-                               'libopenscenegraph-[0-9]+\.[0-9]+-dev'
-  fi
-
-  # FlightGear
-  if _elementIn "FGFS" "${WHATTOBUILD[@]}"; then
-    PKG+=(libudev-dev libdbus-1-dev libplib-dev)
-    _mandatory_pkg_alternative libpng-dev libpng12-dev libpng16-dev
-    # The following packages are needed for the built-in launcher
-    _optional_pkg_alternative qt5-default
-    _optional_pkg_alternative qtdeclarative5-dev
-    _optional_pkg_alternative qttools5-dev
-    _optional_pkg_alternative qtbase5-dev-tools            # for rcc
-    _optional_pkg_alternative qttools5-dev-tools           # for lrelease
-    _optional_pkg_alternative qml-module-qtquick2
-    _optional_pkg_alternative qml-module-qtquick-window2
-    _optional_pkg_alternative qml-module-qtquick-dialogs
-    _optional_pkg_alternative libqt5opengl5-dev
-    _optional_pkg_alternative libqt5svg5-dev
-    _optional_pkg_alternative libqt5websockets5-dev
-    # The following packages are only needed for the Qt-based remote Canvas
-    # (comment written at the time of FG 2018.2).
-    _optional_pkg_alternative qtbase5-private-dev
-    _optional_pkg_alternative qtdeclarative5-private-dev
-    # FGPanel
-    PKG+=(fluid libbz2-dev libfltk1.3-dev libxi-dev libxmu-dev)
-    # FGAdmin
-    PKG+=(libxinerama-dev libjpeg-dev libxft-dev)
-    # swift
-    _optional_pkg_alternative libevent-dev
-  fi
-
-  # ATC-pie
-  if _elementIn "ATCPIE" "${WHATTOBUILD[@]}"; then
-    PKG+=(python3-pyqt5 python3-pyqt5.qtmultimedia libqt5multimedia5-plugins)
-  fi
-
-  # FGo!
-  if _elementIn "FGO" "${WHATTOBUILD[@]}"; then
-    PKG+=(python-tk)
-  fi
-
-  # if _elementIn "FGX" "${WHATTOBUILD[@]}"; then
-  #   FGx (FGx is not compatible with Qt5, however we have installed Qt5 by
-  #   default)
-  #   PKG+=(libqt5xmlpatterns5-dev libqt5webkit5-dev)
-  # fi
-
-  _aptInstall "${PKG[@]}"
-else
-  _printLog
-  _printLog "Note: option -p of $PROGNAME set to 'n' (no), therefore no"
-  _printLog "      package will be installed via ${PKG_MGR}. Compilation of" \
-                  "some components"
-  _printLog "      may fail if mandatory dependencies are missing."
-fi
+_installOrUpdateDistroPackages
 
 #######################################################
 #######################################################
