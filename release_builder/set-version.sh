@@ -34,8 +34,8 @@ MICRO_VERSION=${VERSION_A[2]}
 setVersionTo() {
   local V="$1"
   echo "setting version to $V"
-  echo "$V" > version
-  git add version
+  echo "$V" > flightgear-version
+  git add flightgear-version
   echo "new version: $V" | git commit --file=-
   git tag "version/$V"
 }

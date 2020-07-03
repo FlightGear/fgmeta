@@ -70,7 +70,7 @@ t = Time.new
 fgCurrentYear = t.year
 fgBundleIdentifier = "org.flightgear.mac"
 
-fgVersion = File.read("#{srcDir}/version").strip
+fgVersion = File.read("#{srcDir}/flightgear-version").strip
 volName="\"FlightGear #{fgVersion}\""
 
 if $isRelease

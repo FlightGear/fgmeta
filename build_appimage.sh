@@ -70,6 +70,6 @@ wget -c https://github.com/probonopd/linuxdeployqt/releases/download/continuous/
 chmod +x linuxdeployqt-continuous-x86_64.AppImage
 
 #set VERSION for AppImage creation
-export VERSION=`cat flightgear/version`
+export VERSION=`cat flightgear/flightgear-version`
 
 ./linuxdeployqt-continuous-x86_64.AppImage appdir/usr/share/applications/org.flightgear.FlightGear.desktop -appimage
