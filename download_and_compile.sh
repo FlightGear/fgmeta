@@ -319,11 +319,11 @@ function _gitDownload(){
   local component="$1"
   local clone_arg
 
-  if [ "$DOWNLOAD" != "y" ]; then
+  if [[ "$DOWNLOAD" != "y" ]]; then
     return
   fi
 
-  if [ -f "README" -o -f "README.txt" -o -f "README.rst" ]; then
+  if [[ -d ".git" ]]; then
     _printLog "$component: the repository already exists"
   else
     proto_spec=$(_gitProtoSpec "${REPO_PROTO[$component]}" \
