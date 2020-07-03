@@ -42,8 +42,8 @@ NEXT_MINOR_VERSION=${VERSION_A[1]}
 setVersionTo() {
   local V="$1"
   echo "setting version to $V"
-  echo "$V" > version
-  git add version
+  echo "$V" > flightgear-version
+  git add flightgear-version
   echo "new version: $V" | git commit --file=-
 #  git tag "version/$V"
 }

@@ -5,7 +5,7 @@ if [ "$WORKSPACE" == "" ]; then
     exit 1
 fi
 
-VERSION=`cat flightgear/version`
+VERSION=`cat flightgear/flightgear-version`
 
 #####################################################################################
 # ensure fgrcc can run when linked against libSimGearCore, for example

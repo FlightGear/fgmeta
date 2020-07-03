@@ -129,7 +129,7 @@ osgversion --so-number > %TEMP%\osg-so-number.txt
 osgversion --version-number > %TEMP%\osg-version.txt
 osgversion --openthreads-soversion-number > %TEMP%\openthreads-so-number.txt
 
-SET /P FLIGHTGEAR_VERSION=<flightgear\version
+SET /P FLIGHTGEAR_VERSION=<flightgear\flightgear-version
 SET /P OSG_VERSION=<%TEMP%\osg-version.txt
 SET /P OSG_SO_NUMBER=<%TEMP%\osg-so-number.txt
 SET /P OT_SO_NUMBER=<%TEMP%\openthreads-so-number.txt
