@@ -601,6 +601,11 @@ function _installOrUpdateDistroPackages(){
     _optional_pkg_alternative qml-module-qtquick2
     _optional_pkg_alternative qml-module-qtquick-window2
     _optional_pkg_alternative qml-module-qtquick-dialogs
+
+    if [[ "$SELECTED_SUITE" = "next" ]]; then
+        _optional_pkg_alternative qml-module-qtquick-controls2
+    fi
+
     _optional_pkg_alternative libqt5opengl5-dev
     _optional_pkg_alternative libqt5svg5-dev
     _optional_pkg_alternative libqt5websockets5-dev
