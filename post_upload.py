@@ -22,9 +22,15 @@ if len(sys.argv) > 2 and sys.argv[2] == 'release':
 if len(sys.argv) > 3:
     release_version = sys.argv[3]
 
+print "Post-upload running: suffix=" +  suffix
+print "are we doing an RC:" + str(isReleaseCandidate)
+
 allSuffix = '*' + suffix
 
 print "Wildcard pattern is:" + allSuffix
+
+sys.stdout.flush()
+
 pattern = r'\w+-(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)([\w-]*)' + suffix
 sourceForgeUserHost = "jmturner@frs.sourceforge.net"
 sftpCommandFile = "sftp-commands"
@@ -122,7 +128,12 @@ for file in incomingFiles:
 # upload to SourceForge
 for file in newFiles:
     print "Uploading " + file + " to SourceForge"
-    call(["scp", file, sourceForgeUserHost + ":" + sourceForgePath + file])
+    print "Skipped until SF FRS is fixed"
+#    sys.stdout.flush()
+#    call(["scp", "-v", file, sourceForgeUserHost + ":" + sourceForgePath + file])
+#    call(["rsync", "-e", "ssh", file, sourceForgeUserHost + ":" + sourceForgePath + file])
+#    print "...Done"
+    sys.stdout.flush()
 
 if sys.argv[1] == 'windows':
     print "Archiving PDB files"
