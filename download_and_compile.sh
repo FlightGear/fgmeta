@@ -1075,7 +1075,7 @@ while true; do
       shift 2
       ;;
     --git-clone-site-params)
-      if [[ "$2" =~ ^([[:alnum:]]+)=([[:alpha:]]+)(:([[:alnum:]]+))?$ ]]; then
+      if [[ "$2" =~ ^([[:alnum:]]+)=([[:alpha:]]+)(:([-_.[:alnum:]]+))?$ ]]; then
         site="${BASH_REMATCH[1],,}"         # convert the site to lowercase
         verbatim_proto="${BASH_REMATCH[2]}"
         proto="${verbatim_proto,,}"         # ditto for the protocol
