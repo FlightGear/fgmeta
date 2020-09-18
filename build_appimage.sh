@@ -1,4 +1,4 @@
-#!/bin/bash -v
+#!/bin/bash
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -40,9 +40,12 @@ mkdir -p appdir/usr/ssl
 
 cp dist/bin/* appdir/usr/bin
 cp -d dist/lib64/* appdir/usr/lib
-cp -r dist/lib64/osgPlugins-3.4.2 appdir/usr/lib
+cp -a dist/lib64/osgPlugins-3.4.2 appdir/usr/lib
 cp -r dist/share appdir/usr
+
+# FIXME : only copy the QML plugins we actually need
 cp -a /usr/lib64/qt5/qml/QtQuick* appdir/usr/qml
+
 cp /usr/lib64/libsoftokn3.* appdir/usr/lib
 cp /usr/lib64/libnsspem.so appdir/usr/lib
 cp /etc/pki/tls/certs/ca-bundle.crt appdir/usr/ssl/cacert.pem
