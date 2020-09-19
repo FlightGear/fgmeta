@@ -17,14 +17,14 @@
 
   <scm>
     <type>svn</type>
-    <path>/home/fgaddon/fgaddon-release-2020.2/Aircraft</path>
+    <path>/home/fgaddon/fgaddon-release-2020.3/Aircraft</path>
     <skip>NTPS</skip>
     <skip>c172</skip>
     <skip>tu134</skip>
   </scm>
 
     <include-dir>/home/fgaddon/fgdata-release_2020.2</include-dir>
-    <include-dir>/home/fgaddon/fgaddon-release-2020.2</include-dir>
+    <include-dir>/home/fgaddon/fgaddon-release-2020.3</include-dir>
     
   <upload n="0">
     <enabled type="bool">true</enabled>
