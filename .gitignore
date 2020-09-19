@@ -22,3 +22,5 @@ CMakeCache.txt
 *.pyc
 build-*
 testOutput*
+md5sum.xml
+
