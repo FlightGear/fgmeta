@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--Template catalog - copy and modify for your site as required-->
+<PropertyList>
+	<local-output>/home/fgaddon/output/Aircraft-20202</local-output>
+  <download-url n="0">http://mirrors.ibiblio.org/flightgear/ftp/Aircraft-2020/</download-url>
+  <download-url n="1">http://ukmirror.flightgear.org/fgaddon/Aircraft-2020/</download-url>
+  <download-url n="2">https://cdn.merspieler.tk/fgaddon/Aircraft-2020/</download-url>
+
+  <thumbnail-url n="0">http://mirrors.ibiblio.org/flightgear/ftp/Aircraft-2020/thumbnails</thumbnail-url>
+  <thumbnail-url n="1">http://ukmirror.flightgear.org/official/Aircraft-2020/thumbnails</thumbnail-url>
+  <thumbnail-url n="2">https://cdn.merspieler.tk/fgaddon/Aircraft-2020/thumbnails</thumbnail-url>
+
+
+  <!-- share zips with the trunk catalog where possible -->
+  <share-output>/home/fgaddon/output/Aircraft</share-output>
+  <share-md5-sums>/home/fgaddon/fgmeta/catalog/fgaddon-catalog-ukmirror/md5sum.xml</share-md5-sums>
+
+  <scm>
+    <type>svn</type>
+    <path>/home/fgaddon/fgaddon-release-2020.2/Aircraft</path>
+    <skip>NTPS</skip>
+    <skip>c172</skip>
+    <skip>tu134</skip>
+  </scm>
+
+    <include-dir>/home/fgaddon/fgdata-release_2020.2</include-dir>
+    <include-dir>/home/fgaddon/fgaddon-release-2020.2</include-dir>
+    
+  <upload n="0">
+    <enabled type="bool">true</enabled>
+    <type>rsync-ssh</type>
+    <remote>ibiblio:/public/mirrors/flightgear/ftp/Aircraft-2020</remote>
+  </upload>
+</PropertyList>

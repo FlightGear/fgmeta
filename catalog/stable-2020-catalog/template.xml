@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PropertyList>
+  <template>
+	  <version n="0">2020.*</version>
+    <id>org.flightgear.fgaddon.stable_2020</id>
+    <license>GPL</license>
+    <url>http://mirrors.ibiblio.org/flightgear/ftp/Aircraft-2020/catalog.xml</url>
+    <name>FlightGear aircraft distribution for 2020.x versions</name>
+    <description>This hangar provides aircraft officially supported and maintained 
+    by the FlightGear project, under a free-software license. These aircraft
+    are compatible with FlightGear versions from 2020.</description>
+   </template>
+</PropertyList>
