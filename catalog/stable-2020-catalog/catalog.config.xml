@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--Template catalog - copy and modify for your site as required-->
 <PropertyList>
-	<local-output>/home/fgaddon/output/Aircraft-20202</local-output>
+	<local-output>/home/fgaddon/output/Aircraft-2020</local-output>
   <download-url n="0">http://mirrors.ibiblio.org/flightgear/ftp/Aircraft-2020/</download-url>
   <download-url n="1">http://ukmirror.flightgear.org/fgaddon/Aircraft-2020/</download-url>
   <download-url n="2">https://cdn.merspieler.tk/fgaddon/Aircraft-2020/</download-url>
