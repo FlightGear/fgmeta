@@ -118,10 +118,10 @@ SET SENTRY_ORG=flightgear
 SET SENTRY_PROJECT=flightgear
 REM ensure SENTRY_AUTH_TOKEN is set in the environment
 
-sentry-cli upload-dif %WORKSPACE%\build-fg32\%FGFS_PDB%
-sentry-cli upload-dif %WORKSPACE%\build-fg64\%FGFS_PDB%
-sentry-cli upload-dif %WORKSPACE%\build-fg32-compositor\%FGFS_PDB%
-sentry-cli upload-dif %WORKSPACE%\build-fg64-compositor\%FGFS_PDB%
+sentry-cli upload-dif --include-sources %WORKSPACE%\build-fg32\%FGFS_PDB%
+sentry-cli upload-dif --include-sources %WORKSPACE%\build-fg64\%FGFS_PDB%
+sentry-cli upload-dif --include-sources %WORKSPACE%\build-fg32-compositor\%FGFS_PDB%
+sentry-cli upload-dif --include-sources %WORKSPACE%\build-fg64-compositor\%FGFS_PDB%
 
 REM indirect way to get command output into an environment variable
 set PATH=%OSG32%\bin;%PATH%

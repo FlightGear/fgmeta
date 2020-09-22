@@ -61,6 +61,28 @@ cp flightgear-*.tar.bz2 ../output/.
 
 #####################################################################################
 
+if which sentry-cli >/dev/null; then
+    echo "Uploading symbols"
+
+    export SENTRY_ORG=flightgear
+    export SENTRY_PROJECT=flightgear
+    
+    # set in the Jenkins environment for the builder
+  #  export SENTRY_AUTH_TOKEN=YOUR_AUTH_TOKEN
+
+    ERROR=$(sentry-cli upload-dif --include-sources "$WORKSPACE/dist/bin/fgfs" 2>&1 >/dev/null)
+    if [ ! $? -eq 0 ]; then
+        echo "warning: sentry-cli - $ERROR"
+    fi
+else
+    echo "warning: sentry-cli not installed, download from https://github.com/getsentry/sentry-cli/releases"
+fi
+
+# now we uploaded symnbols, strip the binary
+strip $WORKSPACE/dist/bin/fgfs
+
+#####################################################################################
+
 echo "Assembling base package"
 cd $WORKSPACE
 
