@@ -62,8 +62,13 @@ fi
 
 popd
 
-chmod +x $WORKSPACE/dist/bin/osgversion
 
+crashpad_bin_path=$WORKSPACE/dist/fgfs.app/Contents/MacOS/crashpad_handler
+if [ -f $crashpad_bin_path ]; then
+  chmod +x $crashpad_bin_path
+fi
+
+chmod +x $WORKSPACE/dist/bin/osgversion
 echo "Running symbol upload script"
 ./sentry-dSYM-upload-mac.sh
 
