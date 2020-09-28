@@ -39,12 +39,17 @@ mkdir -p appdir/usr/ssl
 #copy everything we need in
 
 cp dist/bin/* appdir/usr/bin
-cp -d dist/lib64/* appdir/usr/lib
+
+cp -a dist/lib64/* appdir/usr/lib
+
+# remove SimGearCore,Scene and any other static libs which leaked
+rm appdir/usr/lib/lib*.a 
+
 cp -a dist/lib64/osgPlugins-3.4.2 appdir/usr/lib
+
 cp -r dist/share appdir/usr
 
-# FIXME : only copy the QML plugins we actually need
-cp -a /usr/lib64/qt5/qml/QtQuick* appdir/usr/qml
+cp -a /usr/lib64/qt5/qml/QtQuick.2 appdir/usr/qml
 
 cp /usr/lib64/libsoftokn3.* appdir/usr/lib
 cp /usr/lib64/libnsspem.so appdir/usr/lib
@@ -60,7 +65,8 @@ cat << 'EOF' > appdir/AppRun
 HERE="$(dirname "$(readlink -f "${0}")")"
 export SIMGEAR_TLS_CERT_PATH=$HERE/usr/ssl/cacert.pem
 echo SIMGEAR_TLS_CERT_PATH=$SIMGEAR_TLS_CERT_PATH
-export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${HERE}/usr/lib
+export LD_LIBRARY_PATH=${HERE}/usr/lib:${LD_LIBRARY_PATH}
+export OSG_LIBARARY_PATH=${HERE}/usr/lib
 echo LD_LIBRARY_PATH=$LD_LIBRARY_PATH
 exec "${HERE}/usr/bin/fgfs" "$@"
 EOF

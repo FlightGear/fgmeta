@@ -78,8 +78,11 @@ else
     echo "warning: sentry-cli not installed, download from https://github.com/getsentry/sentry-cli/releases"
 fi
 
-# now we uploaded symnbols, strip the binary
-strip $WORKSPACE/dist/bin/fgfs
+# now we uploaded symnbols, strip the binaries
+
+strip --strip-debug $WORKSPACE/dist/bin/fgfs
+strip --strip-debug $WORKSPACE/dist/bin/fgviewer
+strip --strip-debug $WORKSPACE/dist/bin/fgjs
 
 #####################################################################################
 
