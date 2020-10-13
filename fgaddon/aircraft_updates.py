@@ -13,7 +13,9 @@ import subprocess
 import math
 import shlex
 
-extensions = ["*", "ac", "xml", "png", "jpg"]
+extensions = ["*", "xml", "nas", "ac", "png", "jpg"]
+new_aircraft_list = []
+updated_aircraft_list = []
 
 if (len(sys.argv) != 4):
     print("Summarize fgaddon/Aircraft changes in a given branch between two dates.")
@@ -52,10 +54,13 @@ def check_aircraft(aircraft):
     new_aircraft = ""
     if (re.findall(regexp, stdout, flags=re.MULTILINE)):
         new_aircraft = "NEW"
+        new_aircraft_list.append(aircraft)
+    elif (count[0] > 100) :
+        updated_aircraft_list.append(aircraft)
 
     # Only output if we have more than 100 changes or it's a new aircraft
     if ((count[0] > 100) or (new_aircraft == "NEW")):
-        print(tableformat.format(aircraft, new_aircraft, count[0], count[1], count[2], count[3], count[4]))
+        print(tableformat.format(aircraft, new_aircraft, count[0], count[1], count[2], count[3], count[4], count[5]))
 
 
 
@@ -63,8 +68,14 @@ svn_list = "svn list https://svn.code.sf.net/p/flightgear/fgaddon/" + branch + "
 process = subprocess.Popen(shlex.split(svn_list), stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
 stdout, stderr = process.communicate()
 
-print(tableformat.format("Aircraft", "New?", extensions[0], extensions[1], extensions[2], extensions[3], extensions[4]))
+print(tableformat.format("Aircraft", "New?", extensions[0], extensions[1], extensions[2], extensions[3], extensions[4], extensions[5]))
 
 aircraft_list = re.split("/\n", stdout)
 for ac in aircraft_list:
     check_aircraft(ac)
+
+separator = ", "
+print("\nNew Aircraft " + separator.join(new_aircraft_list))
+print("Update Aircraft " + separator.join(updated_aircraft_list))
+
+print("Total: New aircraft: " + str(len(new_aircraft_list)) + " Updated Aircraft: " + str(len(updated_aircraft_list)));
