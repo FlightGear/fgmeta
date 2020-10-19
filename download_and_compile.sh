@@ -779,8 +779,8 @@ function _startLog(){
   _log "JOPTION=$JOPTION"
   _log "OOPTION=$OOPTION"
   _log "BUILD_TYPE=$BUILD_TYPE"
-  _log "SG_CMAKEARGS=$SG_CMAKEARGS"
-  _log "FG_CMAKEARGS=$FG_CMAKEARGS"
+  _log "SG_CMAKEARGS=${SG_CMAKE_ARGS[@]}"
+  _log "FG_CMAKEARGS=${FG_CMAKE_ARGS[@]}"
   _log "COMPOSITOR=$COMPOSITOR"
   _log "DIRECTORY=$CBD"
   _log
@@ -880,6 +880,12 @@ function _usage() {
   echo "                Override the default branch for COMPONENT. For the specified"
   echo "                component, this overrides the effect of options -s and --lts."
   echo "                This option may be given several times."
+  echo "      --sg-cmake-args=ARGUMENT"
+  echo "                Pass ARGUMENT to CMake when building SimGear."
+  echo "                This option may be given several times."
+  echo "      --fg-cmake-args=ARGUMENT"
+  echo "                Pass ARGUMENT to CMake when building FlightGear."
+  echo "                This option may be given several times."
   echo "      --compositor"
   echo "                build FlightGear with compositor enabled"
   echo "      --non-interactive"
@@ -913,7 +919,6 @@ declare -a WHATTOBUILD_AVAIL=(
   'OPENRADAR' 'ATCPIE' 'TERRAGEAR' 'TERRAGEARGUI' 'ZLIB'
 )
 WHATTOBUILDALL=(SIMGEAR FGFS DATA)
-
 SELECTED_SUITE=next
 CLEANUP="n"
 APT_GET_UPDATE="y"
@@ -925,6 +930,10 @@ IGNORE_INTERCOMPONENT_DEPS="n"
 
 SUDO="sudo"
 PKG_MGR="apt-get"
+
+# Initial values: preserve compatibility with the previous interface
+declare -a SG_CMAKE_ARGS=($SG_CMAKEARGS)
+declare -a FG_CMAKE_ARGS=($FG_CMAKEARGS)
 
 if [[ `uname` == 'OpenBSD' ]]; then
     APT_GET_UPDATE="n"
@@ -1013,7 +1022,8 @@ fi
 TEMP=$($getopt -o '+shc:p:a:d:r:j:O:ib:' \
   --longoptions cleanup,git-clone-default-proto:,git-clone-site-params:,lts \
   --longoptions package-manager:,sudo:,ignore-intercomponent-deps,compositor \
-  --longoptions component-branch:,non-interactive,help,version \
+  --longoptions component-branch:,sg-cmake-args:,fg-cmake-args:,non-interactive \
+  --longoptions help,version \
   -n "$PROGNAME" -- "$@")
 
 case $? in
@@ -1055,6 +1065,10 @@ while true; do
 
       shift 2
       ;;
+    --sg-cmake-args)
+      SG_CMAKE_ARGS+=("$2"); shift 2 ;;
+    --fg-cmake-args)
+      FG_CMAKE_ARGS+=("$2"); shift 2 ;;
     -a) APT_GET_UPDATE="$2"; shift 2 ;;
     -c) COMPILE="$2"; shift 2 ;;
     -p) DOWNLOAD_PACKAGES="$2"; shift 2 ;;
@@ -1143,10 +1157,10 @@ fi
 declare -A COMPONENT_BRANCH
 _determineSuiteDescriptionAndBranchForEachComponent
 
-if [ "$OPENRTI" = "OPENRTI" ]; then
-  SG_CMAKEARGS="$SG_CMAKEARGS -DENABLE_RTI=ON;"
-  FG_CMAKEARGS="$FG_CMAKEARGS -DENABLE_RTI=ON;"
-  WHATTOBUILD+=( "OPENRTI" )
+if [[ "$OPENRTI" = "OPENRTI" ]]; then
+  SG_CMAKE_ARGS+=("-DENABLE_RTI=ON")
+  FG_CMAKE_ARGS+=("-DENABLE_RTI=ON")
+  WHATTOBUILD+=("OPENRTI")
 fi
 
 _startLog "$0 $*"
@@ -1400,7 +1414,7 @@ if _elementIn "SIMGEAR" "${WHATTOBUILD[@]}"; then
           -DCMAKE_INSTALL_PREFIX:PATH="$INSTALL_DIR_SIMGEAR" \
           -DCMAKE_PREFIX_PATH="$INSTALL_DIR_OSG;$INSTALL_DIR_OPENRTI" \
           $extra \
-	  $SG_CMAKEARGS \
+	  "${SG_CMAKE_ARGS[@]}" \
           ../../simgear 2>&1 | _logOutput
   fi
 
@@ -1456,7 +1470,7 @@ if _elementIn "FGFS" "${WHATTOBUILD[@]}" || \
             -DFG_DATA_DIR:PATH="$INSTALL_DIR_FGFS/fgdata" \
             -DTRANSLATIONS_SRC_DIR:PATH="$INSTALL_DIR_FGFS/fgdata/Translations" \
             $extra \
-            $FG_CMAKEARGS \
+            "${FG_CMAKE_ARGS[@]}" \
             ../../flightgear 2>&1 | _logOutput
     fi
 
