@@ -880,10 +880,10 @@ function _usage() {
   echo "                Override the default branch for COMPONENT. For the specified"
   echo "                component, this overrides the effect of options -s and --lts."
   echo "                This option may be given several times."
-  echo "      --sg-cmake-args=ARGUMENT"
+  echo "      --sg-cmake-arg=ARGUMENT"
   echo "                Pass ARGUMENT to CMake when building SimGear."
   echo "                This option may be given several times."
-  echo "      --fg-cmake-args=ARGUMENT"
+  echo "      --fg-cmake-arg=ARGUMENT"
   echo "                Pass ARGUMENT to CMake when building FlightGear."
   echo "                This option may be given several times."
   echo "      --compositor"
@@ -1022,7 +1022,7 @@ fi
 TEMP=$($getopt -o '+shc:p:a:d:r:j:O:ib:' \
   --longoptions cleanup,git-clone-default-proto:,git-clone-site-params:,lts \
   --longoptions package-manager:,sudo:,ignore-intercomponent-deps,compositor \
-  --longoptions component-branch:,sg-cmake-args:,fg-cmake-args:,non-interactive \
+  --longoptions component-branch:,sg-cmake-arg:,fg-cmake-arg:,non-interactive \
   --longoptions help,version \
   -n "$PROGNAME" -- "$@")
 
@@ -1065,9 +1065,9 @@ while true; do
 
       shift 2
       ;;
-    --sg-cmake-args)
+    --sg-cmake-arg)
       SG_CMAKE_ARGS+=("$2"); shift 2 ;;
-    --fg-cmake-args)
+    --fg-cmake-arg)
       FG_CMAKE_ARGS+=("$2"); shift 2 ;;
     -a) APT_GET_UPDATE="$2"; shift 2 ;;
     -c) COMPILE="$2"; shift 2 ;;
