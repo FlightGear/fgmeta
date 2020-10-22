@@ -31,23 +31,19 @@ echo "Generating stable catalog 2020"
 
 update-catalog.py --quiet --update $catalog_dir/stable-2020-catalog
 
-#echo "Generating legacy catalog"
-#update-catalog.py --no-update $catalog_dir/legacy-catalog
 
 echo "Coping to WWW dir"
 
 rsync -avz $output_dir/Aircraft-trunk $local_www_dir/
 rsync -avz $output_dir/Aircraft-2018 $local_www_dir/
 rsync -avz $output_dir/Aircraft-2020 $local_www_dir/
-#rsync -avz $output_dir/Aircraft $local_www_dir/
 
 # temporarily disabled
-#echo "Syncing to Ibiblio"
+echo "Syncing to Ibiblio"
 
-#rsync $rsync_args $output_dir/Aircraft-trunk $ibiblio_prefix
-#rsync $rsync_args $output_dir/Aircraft-2018 $ibiblio_prefix
-#rsync $rsync_args $output_dir/Aircraft-2020 $ibiblio_prefix
-#rsync $rsync_args $output_dir/Aircraft $ibiblio_prefix
+rsync $rsync_args $output_dir/Aircraft-trunk $ibiblio_prefix
+rsync $rsync_args $output_dir/Aircraft-2018 $ibiblio_prefix
+rsync $rsync_args $output_dir/Aircraft-2020 $ibiblio_prefix
 
 echo "All done"
 
