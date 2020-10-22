@@ -2,12 +2,10 @@
 <PropertyList>
   <template>
     <!-- if we break trunk compat in a substantial way, consider removing these -->
-	  <version n="0">2019.*</version>
-	  <version n="1">2018.*</version>
 	  <version n="2">2020.1.*</version>
 	  <version n="3">2020.2.*</version>
-   	
-     <version n="4">2020.3.*</version>
+    <version n="4">2020.3.*</version>
+    <version n="4">2020.4.*</version>
 
     <id>org.flightgear.fgaddon.trunk</id>
     <license>GPL</license>
