@@ -10,5 +10,12 @@
     by the FlightGear project, under a free-software license. These aircraft
     are compatible with FlightGear versions from 2018.</description>
     
+    <!-- migration to new stable catalog for 2020.3 release -->
+    <alternate-version>
+      <version>2020.3.*</version>
+       <id>org.flightgear.fgaddon.stable_2020</id>
+      <url>http://mirrors.ibiblio.org/flightgear/ftp/Aircraft-2020/catalog.xml</url>
+    </alternate-version>
+    
    </template>
 </PropertyList>
