@@ -33,9 +33,9 @@ MICRO_VERSION=${VERSION_A[2]}
 
 setVersionTo() {
   local V="$1"
-  echo "setting version to $V"
-  echo "$V" > flightgear-version
-  git add flightgear-version
+  echo "setting version to $V in $2"
+  echo "$V" > $2
+  git add $2
   echo "new version: $V" | git commit --file=-
   git tag "version/$V"
 }
@@ -43,9 +43,22 @@ setVersionTo() {
 while [ $# -gt 0 ]; do
   echo "Processing $1"
   pushd $1 > /dev/null
+
+  case $1 in
+  flightgear)
+    versionFileName="flightgear-version"
+    ;;
+  simgear)
+    versionFileName="simgear-version"
+    ;;
+  *)
+    versionFileName="version"
+    ;;
+  esac
+
   git config user.name "Automatic Release Builder"
   git config user.email "build@flightgear.org"
-  setVersionTo "${MAJOR_VERSION}.${MINOR_VERSION}.${MICRO_VERSION}"
+  setVersionTo "${MAJOR_VERSION}.${MINOR_VERSION}.${MICRO_VERSION}" $versionFileName
   popd > /dev/null
   shift  
 done
