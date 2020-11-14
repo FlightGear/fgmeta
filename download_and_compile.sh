@@ -17,7 +17,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-CURRENT_LTS_BRANCH="release/2018.3"
+CURRENT_LTS_BRANCH="release/2020.3"
+OLD_LTS_BRANCH="release/2018.3"
 
 script_blob_id='$Id$'
 # Slightly tricky substitution to avoid our regexp being wildly replaced with
@@ -646,11 +647,11 @@ function _describeSelectedSuite(){
   _printLog "$SUITE_DESCRIPTION"
   _printLog
   _printLog "\
-Note that options '-s' and '--lts' apply in particular to the SIMGEAR, FGFS
-and DATA components, but other components may be affected as well. Use
-'--component-branch COMPONENT=BRANCH' (without the quotes) if you want to
-override the defaults (i.e., manually choose the branches for particular
-components)."
+Note that options '-s', '--lts' and '--old-lts' apply in particular to the
+SIMGEAR, FGFS and DATA components, but other components may be affected as
+well. Use '--component-branch COMPONENT=BRANCH' (without the quotes) if you
+want to override the defaults (i.e., manually choose the branches for
+particular components)."
 
   # Make sure users building 'next' are aware of the possible consequences. :-)
   if [[ "$SELECTED_SUITE" = "next" && \
@@ -677,10 +678,10 @@ function _determineSuiteDescriptionAndBranchForEachComponent(){
       COMPONENT_BRANCH[TERRAGEAR]=next
       SUITE_DESCRIPTION="\
 !! You have selected the 'next' suite, which contains the development version
-   of FlightGear. The corresponding FlightGear code is very recent but may well
-   be unstable. Other possibilities are '--lts' for the 'LTS' suite (Long Term
-   Support) and '-s' for the latest release. '--lts' should provide the most
-   stable setup. !!"
+   of FlightGear. The corresponding FlightGear code is very recent but may
+   well be unstable. Other possibilities are '--lts' for the 'LTS' suite (Long
+   Term Stable), '--old-lts' for the previous LTS suite and '-s' for the
+   latest release. '--lts' should provide the most stable setup. !!"
       ;;
     latest-release)
       FG_BRANCH="release/$(git ls-remote --heads "https://${REPO_ADDRESS[FGFS]}" | grep '\/release\/' | cut -f4 -d'/' | sort -t . -k 1,1n -k2,2n -k3,3n | tail -1)"
@@ -689,8 +690,8 @@ function _determineSuiteDescriptionAndBranchForEachComponent(){
       COMPONENT_BRANCH[TERRAGEAR]=scenery/ws2.0
       SUITE_DESCRIPTION="\
 You have selected the latest release of FlightGear. This is supposedly less
-stable than '--lts' (Long Term Support) but more stable than the development
-version (which would be obtained with neither '-s' nor '--lts')."
+stable than '--lts' (Long Term Stable) but more stable than the development
+version (which would be obtained with none of '-s', '--lts' and '--old-lts')."
       ;;
     latest-lts)
       FG_BRANCH="$CURRENT_LTS_BRANCH"
@@ -698,10 +699,23 @@ version (which would be obtained with neither '-s' nor '--lts')."
       COMPONENT_BRANCH[OSG]=OpenSceneGraph-3.4
       COMPONENT_BRANCH[TERRAGEAR]=scenery/ws2.0
       SUITE_DESCRIPTION="\
-You have selected the LTS suite (Long Term Support). This is in principle the
-most stable setup. Other possibilities are '-s' for the latest release and
-nothing (neither '-s' nor '--lts' passed) for bleeding-edge development
-versions."
+You have selected the LTS suite (Long Term Stable). This is in principle the
+most stable setup. Other possibilities are '--old-lts' for the previous LTS
+suite, '-s' for the latest release and nothing (none of '-s', '--lts' and
+'--old-lts' passed) for bleeding-edge development versions."
+      ;;
+    old-lts)
+      FG_BRANCH="$OLD_LTS_BRANCH"
+      COMPONENT_BRANCH[OPENRTI]=release-0.7
+      COMPONENT_BRANCH[OSG]=OpenSceneGraph-3.4
+      COMPONENT_BRANCH[TERRAGEAR]=scenery/ws2.0
+      SUITE_DESCRIPTION="\
+You have selected the old LTS suite (previous Long Term Stable). Other
+possibilities are '--lts' for the current LTS suite, '-s' for the latest
+release and nothing (none of '-s', '--lts' and '--old-lts' passed) for
+bleeding-edge development versions. If you are in doubt and just want
+something stable for flying or aircraft development, our suggestion is to use
+'--lts'."
       ;;
     *) _printLog "Unexpected value '$SELECTED_SUITE' for SELECTED_SUITE; " \
                  "please report a bug."
@@ -872,13 +886,15 @@ function _usage() {
   echo "                useful if you want to update, rebuild, etc. TERRAGEAR without"
   echo "                doing the same for SIMGEAR (e.g., if doing repeated TERRAGEAR"
   echo "                builds and you know your SIMGEAR is already fine and up-to-date)."
-  echo "      --lts     compile the latest Long Term Support release of FlightGear (and"
-  echo "                select “stable” versions for other components)"
-  echo "  -s            compile the latest release of FlightGear (and select “stable”"
+  echo "      --lts     compile the latest Long Term Stable release of FlightGear (and"
+  echo "                corresponding versions for other components)"
+  echo "      --old-lts compile the previous Long Term Stable release of FlightGear (and"
+  echo "                corresponding versions for other components)"
+  echo "  -s            compile the latest release of FlightGear (and corresponding"
   echo "                versions for other components)"
   echo "      --component-branch=COMPONENT=BRANCH"
   echo "                Override the default branch for COMPONENT. For the specified"
-  echo "                component, this overrides the effect of options -s and --lts."
+  echo "                component, this overrides the effect of options -s, --lts and --old-lts."
   echo "                This option may be given several times."
   echo "      --sg-cmake-arg=ARGUMENT"
   echo "                Pass ARGUMENT to CMake when building SimGear."
@@ -1020,10 +1036,10 @@ if [[ `uname` == 'OpenBSD' ]]; then
     getopt=gnugetopt
 fi
 TEMP=$($getopt -o '+shc:p:a:d:r:j:O:ib:' \
-  --longoptions cleanup,git-clone-default-proto:,git-clone-site-params:,lts \
+  --longoptions cleanup,git-clone-default-proto:,git-clone-site-params: \
   --longoptions package-manager:,sudo:,ignore-intercomponent-deps,compositor \
   --longoptions component-branch:,sg-cmake-arg:,fg-cmake-arg:,non-interactive \
-  --longoptions help,version \
+  --longoptions lts,old-lts,help,version \
   -n "$PROGNAME" -- "$@")
 
 case $? in
@@ -1039,6 +1055,7 @@ while true; do
   case "$1" in
     -s) SELECTED_SUITE=latest-release; shift ;;
     --lts) SELECTED_SUITE=latest-lts; shift ;;
+    --old-lts) SELECTED_SUITE=old-lts; shift ;;
     --component-branch)
       if [[ "$2" =~ ^([-_a-zA-Z0-9]+)=(.+)$ ]]; then
         verbatim_component="${BASH_REMATCH[1]}"
@@ -1151,9 +1168,9 @@ else
 fi
 
 # Name of the branch to check out for each component, depending on whether any
-# of the options -s and --lts has been provided (for some projects which don't
-# use a VCS, we may abuse this variable and store something else than a branch
-# name).
+# of the options -s, --lts and --old-lts has been provided (for some projects
+# which don't use a VCS, we may abuse this variable and store something else
+# than a branch name).
 declare -A COMPONENT_BRANCH
 _determineSuiteDescriptionAndBranchForEachComponent
 
