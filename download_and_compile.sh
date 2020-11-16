@@ -603,7 +603,7 @@ function _installOrUpdateDistroPackages(){
     _optional_pkg_alternative qml-module-qtquick-window2
     _optional_pkg_alternative qml-module-qtquick-dialogs
 
-    if [[ "$SELECTED_SUITE" = "next" ]]; then
+    if [[ "$SELECTED_SUITE" != "old-lts" ]]; then
         _optional_pkg_alternative qml-module-qtquick-controls2
     fi
 
