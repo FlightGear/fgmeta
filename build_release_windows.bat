@@ -21,7 +21,6 @@ SET VSGEN="Visual Studio 16 2019"
 
 md build-sg64
 md build-fg64
-md build-fg64-compositor
 
 cd build-sg64
 cmake ..\SimGear -G %VSGEN% -A x64 ^
@@ -41,27 +40,14 @@ cmake ..\flightgear -G %VSGEN%  -A x64 ^
                     -DOSG_FSTREAM_EXPORT_FIXED=1 ^
                     -DFG_BUILD_TYPE=%FGBUILDTYPE% ^
                     -DENABLE_SWIFT:BOOL=ON ^
-                    -DENABLE_COMPOSITOR:BOOL=OFF
 cmake --build . --config RelWithDebInfo --target INSTALL
 
-cd ..\build-fg64-compositor
-cmake ..\flightgear -G %VSGEN% -A x64 ^
-                    -DMSVC_3RDPARTY_ROOT=%WORKSPACE%/windows-3rd-party/msvc140 ^
-                    -DBOOST_ROOT=%WORKSPACE%/windows-3rd-party ^
-                    -DCMAKE_INSTALL_PREFIX:PATH=%WORKSPACE%/install/msvc140-64/compositor ^
-                    -DCMAKE_PREFIX_PATH=%QT5SDK64%;%OSG64%;%WORKSPACE%/install/msvc140-64/ ^
-                    -DOSG_FSTREAM_EXPORT_FIXED=1 ^
-                    -DFG_BUILD_TYPE=%FGBUILDTYPE% ^
-                    -DENABLE_SWIFT:BOOL=ON ^
-                    -DENABLE_COMPOSITOR:BOOL=ON
-cmake --build . --config RelWithDebInfo --target INSTALL
 cd ..
 
 REM Qt5 deployment
 SET QMLDIR=%WORKSPACE%/flightgear/src/GUI/qml
 
 %QT5SDK64%\bin\windeployqt --release --list target --qmldir %QMLDIR% %WORKSPACE%/install/msvc140-64/bin/fgfs.exe
-%QT5SDK64%\bin\windeployqt --release --list target --qmldir %QMLDIR% %WORKSPACE%/install/msvc140-64/compositor/bin/fgfs.exe
 
 REM build setup
 ECHO Packaging root is %WORKSPACE%
@@ -79,7 +65,6 @@ SET SENTRY_PROJECT=flightgear
 REM ensure SENTRY_AUTH_TOKEN is set in the environment
 
 sentry-cli upload-dif --include-sources %WORKSPACE%\build-fg64\%FGFS_PDB%
-sentry-cli upload-dif --include-sources %WORKSPACE%\build-fg64-compositor\%FGFS_PDB%
 
 REM indirect way to get command output into an environment variable
 set PATH=%OSG32%\bin;%PATH%

@@ -21,7 +21,6 @@
 #include "InstallConfig.iss"
 
 #define InstallDir64 "X:\install\msvc140-64"
-#define InstallCompositor64 "X:\install\msvc140-64\compositor"
 #define OSG64InstallDir InstallDir64 + "\OpenSceneGraph"
 #define OSG64PluginsDir OSG64InstallDir + "\bin\osgPlugins-" + OSGVersion
 
@@ -72,7 +71,6 @@ Name: "desktopicon"; Description: "Create a &desktop icon"; GroupDescription: "A
 
 ; 64 bits install
 Source: "{#InstallDir64}\bin\*.*"; DestDir: "{app}\bin"; Excludes: "{#ExcludedBinaries}"; Flags: ignoreversion recursesubdirs; Check: Is64BitInstallMode
-Source: "{#InstallCompositor64}\bin\fgfs.exe"; DestDir: "{app}\bin"; DestName: "fgfs-compositor.exe"; Excludes: "{#ExcludedBinaries}"; Flags: ignoreversion recursesubdirs; Check: Is64BitInstallMode
 ;locale only exists for fgrun - which has been disabled
 ;Source: "{#InstallDir64}\share\locale\*"; DestDir: "{app}\bin\locale"; Flags: ignoreversion recursesubdirs; Check: Is64BitInstallMode
 
@@ -139,7 +137,6 @@ Name: "{userdocs}\FlightGear\Custom Scenery"; Permissions: everyone-modify; Chec
 [Icons]
 Name: "{userdesktop}\FlightGear {#FGVersion}"; Filename: "{app}\bin\fgfs.exe"; Parameters: "--launcher"; WorkingDir: "{app}\bin"; Tasks: desktopicon;
 Name: "{group}\FlightGear"; Filename: "{app}\bin\fgfs.exe"; Parameters: "--launcher"; WorkingDir: "{app}\bin";
-Name: "{group}\FlightGear - Compositor"; Filename: "{app}\bin\fgfs-compositor.exe"; Parameters: "--launcher"; WorkingDir: "{app}\bin";
 Name: "{group}\FlightGear Manual"; Filename: "{app}\data\Docs\getstart.pdf"
 Name: "{group}\FlightGear Documentation"; Filename: "{app}\data\Docs\index.html"
 Name: "{group}\Flightgear Wiki"; Filename: "http://wiki.flightgear.org"
