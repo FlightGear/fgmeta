@@ -585,13 +585,19 @@ function _installOrUpdateDistroPackages(){
   if _elementIn "SIMGEAR" "${WHATTOBUILD[@]}" || \
      _elementIn "FGFS" "${WHATTOBUILD[@]}"; then
     PKG+=(zlib1g-dev freeglut3-dev libglew-dev libopenal-dev libboost-dev)
-    _mandatory_pkg_alternative libopenscenegraph-3.4-dev libopenscenegraph-dev \
-                               'libopenscenegraph-[0-9]+\.[0-9]+-dev'
+
+    if ! _elementIn "OSG" "${WHATTOBUILD[@]}"; then
+      _mandatory_pkg_alternative libopenscenegraph-3.4-dev \
+        libopenscenegraph-dev 'libopenscenegraph-[0-9]+\.[0-9]+-dev'
+    fi
   fi
 
   # FlightGear
   if _elementIn "FGFS" "${WHATTOBUILD[@]}"; then
-    PKG+=(libudev-dev libdbus-1-dev libplib-dev)
+    PKG+=(libudev-dev libdbus-1-dev)
+    if ! _elementIn "PLIB" "${WHATTOBUILD[@]}"; then
+      PKG+=(libplib-dev)
+    fi
     _mandatory_pkg_alternative libpng-dev libpng12-dev libpng16-dev
     # The following packages are needed for the built-in launcher
     _optional_pkg_alternative qt5-default
