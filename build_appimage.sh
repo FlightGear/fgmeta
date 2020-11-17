@@ -61,14 +61,16 @@ sed -i 's/^Categor.*/&;/ ; s/^Keyword.*/&;/ ; s/1\.1/1\.0/' appdir/usr/share/app
 
 #generate AppRun script
 
+# Note: don't set LD_LIBRARY_PATH here.
+# if you do, you need to add code to unset it *sinde* FlightGear (eg, bootstrap.cxx), 
+# so that fork-ed processes don't inherit the value. For an example see:
+# https://github.com/KDAB/hotspot/blob/master/src/main.cpp#L87
+
 cat << 'EOF' > appdir/AppRun
 #!/bin/bash
 HERE="$(dirname "$(readlink -f "${0}")")"
 export SIMGEAR_TLS_CERT_PATH=$HERE/usr/ssl/cacert.pem
-echo SIMGEAR_TLS_CERT_PATH=$SIMGEAR_TLS_CERT_PATH
-export LD_LIBRARY_PATH=${HERE}/usr/lib:${LD_LIBRARY_PATH}
-export OSG_LIBARARY_PATH=${HERE}/usr/lib
-echo LD_LIBRARY_PATH=$LD_LIBRARY_PATH
+export OSG_LIBRARY_PATH=${HERE}/usr/lib
 exec "${HERE}/usr/bin/fgfs" "$@"
 EOF
 
