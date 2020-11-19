@@ -45,6 +45,11 @@ cp -d dist/lib64/* appdir/usr/lib
 cp -d dist/lib/* appdir/usr/lib
 cp -a dist/lib/osgPlugins-3.6.5 appdir/usr/lib
 
+# adjust the rpath on the copied plugins, so they don't
+# require LD_LIBRARY_PATH to be set to load their dependencies
+# correctly
+patchelf --set-rpath \$ORIGIN/../ appdir/usr/lib/osgPlugins-3.6.5/*.so
+
 cp -r dist/share appdir/usr
 
 # FIXME : only copy the QML plugins we actually need
@@ -68,11 +73,16 @@ sed -i 's/^Categor.*/&;/ ; s/^Keyword.*/&;/ ; s/1\.1/1\.0/' appdir/usr/share/app
 cat << 'EOF' > appdir/AppRun
 #!/bin/bash
 HERE="$(dirname "$(readlink -f "${0}")")"
+
 export SIMGEAR_TLS_CERT_PATH=$HERE/usr/ssl/cacert.pem
-echo SIMGEAR_TLS_CERT_PATH=$SIMGEAR_TLS_CERT_PATH
-export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${HERE}/usr/lib
-echo LD_LIBRARY_PATH=$LD_LIBRARY_PATH
-exec "${HERE}/usr/bin/fgfs" "$@"
+export OSG_LIBRARY_PATH=${HERE}/usr/lib
+
+if [[ $# -eq 0 ]]; then
+ echo "Started with no arguments; assuming --launcher"
+ exec "${HERE}/usr/bin/fgfs" --launcher
+else
+ exec "${HERE}/usr/bin/fgfs" "$@"
+fi
 EOF
 
 
