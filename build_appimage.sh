@@ -47,6 +47,11 @@ rm appdir/usr/lib/lib*.a
 
 cp -a dist/lib64/osgPlugins-3.4.2 appdir/usr/lib
 
+# adjust the rpath on the copied plugins, so they don't
+# require LD_LIBRARY_PATH to be set to load their dependencies
+# correctly
+patchelf --set-rpath \$ORIGIN/../ appdir/usr/lib/osgPlugins-3.4.2/*.so
+
 cp -r dist/share appdir/usr
 
 cp -a /usr/lib64/qt5/qml/QtQuick.2 appdir/usr/qml
@@ -71,7 +76,13 @@ cat << 'EOF' > appdir/AppRun
 HERE="$(dirname "$(readlink -f "${0}")")"
 export SIMGEAR_TLS_CERT_PATH=$HERE/usr/ssl/cacert.pem
 export OSG_LIBRARY_PATH=${HERE}/usr/lib
-exec "${HERE}/usr/bin/fgfs" "$@"
+
+if [[ $# -eq 0 ]]; then
+ echo "Started with no arguments; assuming --launcher"
+ exec "${HERE}/usr/bin/fgfs" --launcher
+else
+ exec "${HERE}/usr/bin/fgfs" "$@"
+fi
 EOF
 
 
