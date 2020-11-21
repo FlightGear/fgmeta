@@ -29,6 +29,7 @@ cmake ..\SimGear -G %VSGEN% -A x64 ^
                  -DOSG_FSTREAM_EXPORT_FIXED=1 ^
                  -DCMAKE_PREFIX_PATH:PATH=%OSG64% ^
                  -DCMAKE_INSTALL_PREFIX:PATH=%WORKSPACE%/install/msvc140-64
+                 
 cmake --build . --config RelWithDebInfo --target INSTALL
 
 cd ..\build-fg64
@@ -39,7 +40,8 @@ cmake ..\flightgear -G %VSGEN%  -A x64 ^
                     -DCMAKE_PREFIX_PATH=%QT5SDK64%;%OSG64% ^
                     -DOSG_FSTREAM_EXPORT_FIXED=1 ^
                     -DFG_BUILD_TYPE=%FGBUILDTYPE% ^
-                    -DENABLE_SWIFT:BOOL=ON ^
+                    -DENABLE_SWIFT:BOOL=ON 
+
 cmake --build . --config RelWithDebInfo --target INSTALL
 
 cd ..
