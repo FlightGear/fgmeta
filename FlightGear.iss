@@ -7,7 +7,9 @@
 ;
 ;     http://www.jrsoftware.org/isinfo.php
 ;
-; Note: the files must appear in the X: drive.
+; Note: Files root path is defined in the FgHarnessPath (in InstallConfig.iss)
+;
+; For example if You want to use X: drive as a root path 
 ; You can do this with the command below:
 ;
 ;     subst X: path_to_files
@@ -17,40 +19,51 @@
 ;     C:\> subst X: F:\Path\to\FlightGear\root
 ;     C:\> subst X: F:\
 ;
+;
+; InstallConfig.iss example content:
+;
+;  #define FGHarnessPath "x:"
+;  #define FGVersion "2020.4.1"
+;  #define FGVersionGroup "2020.4"
+;  #define OSGVersion "3.0.0"
+;  #define OSGSoNumber "2"
+;  #define OTSoNumber "3"
+;  #define FGDetails "-nightly"
+;  #define IncludeData "FALSE"
 
 #include "InstallConfig.iss"
 
-#define InstallDir64 "X:\install\msvc140-64"
+#define FGSourcePath FgHarnessPath + "\flightgear"
+#define InstallDir64 FgHarnessPath + "\install\msvc140-64"
 #define OSG64InstallDir InstallDir64 + "\OpenSceneGraph"
 #define OSG64PluginsDir OSG64InstallDir + "\bin\osgPlugins-" + OSGVersion
-
-#define ThirdPartyDir "X:\windows-3rd-party\msvc140"
+#define ThirdPartyDir FgHarnessPath + "\windows-3rd-party\msvc140"
 
 ; we copy everything in install/<arch>/bin except these, which aren't
 ; useful to the end-user to ship
 #define ExcludedBinaries "*smooth.exe,metar.exe"
 
 [Setup]
-AppId=FlightGear
+AppId=FlightGear_{#FGVersionGroup}
 AppName=FlightGear
 AppPublisher=The FlightGear Team
 OutputBaseFilename=FlightGear-{#FGVersion}{#FGDetails}
 AppVerName=FlightGear v{#FGVersion}
+AppVersion={#FGVersion}
 AppPublisherURL=http://www.flightgear.org
 AppSupportURL=http://www.flightgear.org
 AppUpdatesURL=http://www.flightgear.org
-DefaultDirName={pf}\FlightGear {#FGVersion}
+DefaultDirName={pf}\FlightGear {#FGVersionGroup}
 UsePreviousAppDir=no
-DefaultGroupName=FlightGear {#FGVersion}
+DefaultGroupName=FlightGear {#FGVersionGroup}
 UsePreviousGroup=no
-LicenseFile=X:\flightgear\COPYING
+LicenseFile={#FGSourcePath}\COPYING
 Uninstallable=yes
-SetupIconFile=X:\flightgear\package\flightgear.ico
+SetupIconFile={#FGSourcePath}\package\flightgear.ico
 VersionInfoVersion={#FGVersion}.0
-InfoBeforeFile=X:\flightgear\package\windows\infobefore.txt
-WizardImageFile=X:\flightgear\package\windows\setupimg.bmp
+WizardImageFile={#FGSourcePath}\package\windows\setupimg.bmp
 WizardImageStretch=No
-WizardSmallImageFile=X:\flightgear\package\windows\setupsmall.bmp
+WizardSmallImageFile={#FGSourcePath}\package\windows\setupsmall.bmp
 VersionInfoCompany=The FlightGear Team
 UninstallDisplayIcon={app}\bin\fgfs.exe
 ArchitecturesInstallIn64BitMode=x64
@@ -61,13 +74,9 @@ ArchitecturesAllowed=x64
 ; SignTool=fg_code_sign1
 
 [Tasks]
-; NOTE: The following entry contains English phrases ("Create a desktop icon" and "Additional icons"). You are free to translate them into another language if required.
-Name: "desktopicon"; Description: "Create a &desktop icon"; GroupDescription: "Additional icons:"
+Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "Additional icons:"
 
 [Files]
-; NOTE: run subst X: F:\ (or whatever path the expanded tree resides at)
-;Source: "X:\*.txt"; DestDir: "{app}"; Flags: ignoreversion
-
 
 ; 64 bits install
 Source: "{#InstallDir64}\bin\*.*"; DestDir: "{app}\bin"; Excludes: "{#ExcludedBinaries}"; Flags: ignoreversion recursesubdirs; Check: Is64BitInstallMode
@@ -87,7 +96,7 @@ Source: "{#ThirdPartyDir}\3rdParty.x64\bin\event_core.dll"; DestDir: "{app}\bin"
 
 ; Include the base package
 #if IncludeData == "TRUE"
-Source: "X:\fgdata\*.*"; DestDir: "{app}\data"; Flags: ignoreversion recursesubdirs skipifsourcedoesntexist
+Source: "{#FgHarnessPath}\fgdata\*.*"; DestDir: "{app}\data"; Flags: ignoreversion recursesubdirs skipifsourcedoesntexist
 #endif
 
 ; 64 bits install
@@ -129,19 +138,41 @@ Source: "{#OSG64PluginsDir}\osgdb_freetype.dll"; DestDir: "{app}\bin\osgPlugins-
 ;Source: "{#OSG64PluginsDir}\osgdb_deprecated_osg.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode
 ;Source: "{#OSG64PluginsDir}\osgdb_deprecated_osgparticle.dll"; DestDir: "{app}\bin\osgPlugins-{#OSGVersion}"; Flags: skipifsourcedoesntexist; Check: Is64BitInstallMode
 
+
+[Languages]
+Name: "en"; MessagesFile: "compiler:Default.isl"; InfoBeforeFile: "{#FGSourcePath}\package\windows\infobefore-en.txt"
+Name: "pl"; MessagesFile: "compiler:Languages\Polish.isl"; InfoBeforeFile: "{#FGSourcePath}\package\windows\infobefore-pl.txt"
+
+[Messages]
+ConfirmUninstall=Are you sure you want to completely remove %1 {#FGVersion} and all of its components?
+pl.ConfirmUninstall=Czy na pewno chcesz ca³kowicie usun¹æ %1 {#FGVersion} i wszystkie jego komponenty?
+
+[CustomMessages]
+CreateDesktopIcon=Create a &desktop icon
+RemoveAllSettings=Remove all settings, downloaded scenery and aircraft
+RemoveAllSettingsDescription=FlightGear stores some settings in your user folder. In addition, scenery or aircraft data may have been downloaded to the download directory. To completely remove all these files, select this option.
+FirewallFgException=Allows FlightGear to send and receive data over the multiplayer network and to get METARs.
+FirewallFgcomException=Allows FGCom to establish a connection to FlightGear and the VoIP server for voice ATC communication.
+
+pl.CreateDesktopIcon=Utwórz ikony na pulpicie
+pl.RemoveAllSettings=Usuñ wszystkie ustawienia, pobran¹ sceneriê i samoloty
+pl.RemoveAllSettingsDescription=FlightGear zapisuje niektóre ustawienia w katalogach u¿ytkownika. Dodatkowo, sceneria lub dane statków powietrznych mog¹ byæ pobierane do katalogu pobrañ. Aby ca³kowicie usun¹æ te ustawienia, wybierz t¹ opcjê.
+pl.FirewallFgException=Pozwala aplikacji FlightGear na wysy³anie i pobieranie danych przez sieæ multiplayer oraz aby pobraæ dane pogodowe METAR.
+pl.FirewallFgcomException=Pozwala aplikacji FGCom na ustanowienie po³¹czenia do aplikacji FlightGear i do serwerów VoIP dla komunikacji g³osowej z ATC (kontrolerem lotów).
+
 [Dirs]
 ; Make the user installable scenery directory
-Name: "{userdocs}\FlightGear\Aircraft"; Permissions: everyone-modify; Check: not DirExists(ExpandConstant('{userdocs}\FlightGear\Aircraft'))
-Name: "{userdocs}\FlightGear\TerraSync"; Permissions: everyone-modify; Check: not DirExists(ExpandConstant('{userdocs}\FlightGear\TerraSync'))
-Name: "{userdocs}\FlightGear\Custom Scenery"; Permissions: everyone-modify; Check: not DirExists(ExpandConstant('{userdocs}\FlightGear\Custom Scenery'))
+Name: "{%USERPROFILE}\FlightGear\Downloads"; Permissions: creatorowner-modify; Check: not DirExists(ExpandConstant('{%USERPROFILE}\FlightGear\Downloads'))
+Name: "{%USERPROFILE}\FlightGear\Custom Aircraft"; Permissions: creatorowner-modify; Check: not DirExists(ExpandConstant('{%USERPROFILE}\FlightGear\Custom Aircraft'))
+Name: "{%USERPROFILE}\FlightGear\Custom Scenery"; Permissions: creatorowner-modify; Check: not DirExists(ExpandConstant('{%USERPROFILE}\FlightGear\Custom Scenery'))
 
 [Icons]
-Name: "{userdesktop}\FlightGear {#FGVersion}"; Filename: "{app}\bin\fgfs.exe"; Parameters: "--launcher"; WorkingDir: "{app}\bin"; Tasks: desktopicon;
-Name: "{group}\FlightGear"; Filename: "{app}\bin\fgfs.exe"; Parameters: "--launcher"; WorkingDir: "{app}\bin";
+Name: "{userdesktop}\FlightGear {#FGVersionGroup}"; Filename: "{app}\bin\fgfs.exe"; Parameters: "--launcher"; WorkingDir: "{app}\bin"; Tasks: desktopicon;
+Name: "{group}\FlightGear {#FGVersionGroup}"; Filename: "{app}\bin\fgfs.exe"; Parameters: "--launcher"; WorkingDir: "{app}\bin";
 Name: "{group}\FlightGear Manual"; Filename: "{app}\data\Docs\getstart.pdf"
 Name: "{group}\FlightGear Documentation"; Filename: "{app}\data\Docs\index.html"
 Name: "{group}\Flightgear Wiki"; Filename: "http://wiki.flightgear.org"
-Name: "{group}\Tools\Uninstall FlightGear"; Filename: "{uninstallexe}"
+Name: "{group}\Tools\Uninstall FlightGear {#FGVersion}"; Filename: "{uninstallexe}"
 Name: "{group}\Tools\fgjs"; Filename: "cmd"; Parameters: "/k fgjs.exe ""--fg-root={app}\data"""; WorkingDir: "{app}\bin"
 Name: "{group}\Tools\yasim"; Filename: "cmd"; Parameters: "/k ""{app}\bin\yasim.exe"" -h"; WorkingDir: "{app}\bin"
 Name: "{group}\Tools\fgpanel"; Filename: "cmd"; Parameters: "/k ""{app}\bin\fgpanel.exe"" -h"; WorkingDir: "{app}\bin"
@@ -276,8 +307,6 @@ var
 
 procedure InitializeUninstallProgressForm();
 begin
-  UninstallProgressForm
-
   UninstallCheckCleanPage := TNewNotebookPage.Create(UninstallProgressForm);
   UninstallCheckCleanPage.Notebook := UninstallProgressForm.InnerNotebook;
   UninstallCheckCleanPage.Parent := UninstallProgressForm.InnerNotebook;
@@ -285,7 +314,7 @@ begin
 
   DoCleanCheckbox := TNewCheckBox.Create(UninstallProgressForm);
   DoCleanCheckbox.Parent := UninstallCheckCleanPage;
-  DoCleanCheckbox.Caption := 'Remove all settings, downloaded scenery and aircraft';
+  DoCleanCheckbox.Caption := ExpandConstant('{cm:RemoveAllSettings}');
   DoCleanCheckbox.Left := ScaleX(10);
   DoCleanCheckbox.Top := ScaleY(10);
 
@@ -300,9 +329,7 @@ begin
   CleanHelp.Height := CleanHelp.AdjustHeight();
 
   CleanHelp.WordWrap := True;
-  CleanHelp.Caption := 'FlightGear stores some settings in your user folder. In addition, ' +
-       'scenery or aircraft data may have been downloaded to the download directory. ' +
-       'To completely remove all these files, select this option.';
+  CleanHelp.Caption := ExpandConstant('{cm:RemoveAllSettingsDescription}');
 
   UninstallProgressForm.InnerNotebook.ActivePage := UninstallCheckCleanPage;
 
@@ -337,10 +364,10 @@ begin
       if (Version.Major >= 6) then
         begin
           { IN and OUT rules must be specified separately, otherwise the firewall will create only the IN rule }
-          AddAdvancedFirewallException('FlightGear', 'Allows FlightGear to send and receive data over the multiplayer network and to get METARs.', ExpandConstant('{app}') + '\bin\fgfs.exe', NET_FW_IP_PROTOCOL_ALL, '', '', NET_FW_RULE_DIR_IN);
-          AddAdvancedFirewallException('FlightGear', 'Allows FlightGear to send and receive data over the multiplayer network and to get METARs.', ExpandConstant('{app}') + '\bin\fgfs.exe', NET_FW_IP_PROTOCOL_ALL, '', '', NET_FW_RULE_DIR_OUT);
-          AddAdvancedFirewallException('FlightGear FGCom', 'Allows FGCom to establish a connection to FlightGear and the VoIP server for voice ATC communication.', ExpandConstant('{app}') + '\bin\fgcom.exe', NET_FW_IP_PROTOCOL_ALL, '', '', NET_FW_RULE_DIR_IN);
-          AddAdvancedFirewallException('FlightGear FGCom', 'Allows FGCom to establish a connection to FlightGear and the VoIP server for voice ATC communication.', ExpandConstant('{app}') + '\bin\fgcom.exe', NET_FW_IP_PROTOCOL_ALL, '', '', NET_FW_RULE_DIR_OUT);
+          AddAdvancedFirewallException('FlightGear', ExpandConstant('{cm:FirewallFgException}'), ExpandConstant('{app}') + '\bin\fgfs.exe', NET_FW_IP_PROTOCOL_ALL, '', '', NET_FW_RULE_DIR_IN);
+          AddAdvancedFirewallException('FlightGear', ExpandConstant('{cm:FirewallFgException}'), ExpandConstant('{app}') + '\bin\fgfs.exe', NET_FW_IP_PROTOCOL_ALL, '', '', NET_FW_RULE_DIR_OUT);
+          AddAdvancedFirewallException('FlightGear FGCom', ExpandConstant('{cm:FirewallFgcomException}'), ExpandConstant('{app}') + '\bin\fgcom.exe', NET_FW_IP_PROTOCOL_ALL, '', '', NET_FW_RULE_DIR_IN);
+          AddAdvancedFirewallException('FlightGear FGCom', ExpandConstant('{cm:FirewallFgcomException}'), ExpandConstant('{app}') + '\bin\fgcom.exe', NET_FW_IP_PROTOCOL_ALL, '', '', NET_FW_RULE_DIR_OUT);
         end
       else if (Version.Major = 5) and (((Version.Minor = 1) and (Version.ServicePackMajor >= 2)) or ((Version.Minor = 2) and (Version.ServicePackMajor >= 1))) then
         begin

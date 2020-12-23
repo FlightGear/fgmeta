@@ -79,6 +79,12 @@ SET /P OSG_VERSION=<%TEMP%\osg-version.txt
 SET /P OSG_SO_NUMBER=<%TEMP%\osg-so-number.txt
 SET /P OT_SO_NUMBER=<%TEMP%\openthreads-so-number.txt
 
+for /F "tokens=1,2,3 delims=." %%a in ("%FLIGHTGEAR_VERSION%") do (
+   set FLIGHTGEAR_VERSION_MAJOR=%%a
+   set FLIGHTGEAR_VERSION_MINOR=%%b
+   set FLIGHTGEAR_VERSION_PATCH=%%c
+)
+
 IF %IS_NIGHTLY_BUILD% EQU 1 (
   REM FlightGear nightly: with fgdata, output filename would be "FlightGear-x.x.x-nightly-full.exe"
   CALL :writeBaseConfig
@@ -99,6 +105,7 @@ GOTO End
 
 :writeBaseConfig
 ECHO #define FGVersion "%FLIGHTGEAR_VERSION%" > InstallConfig.iss
+ECHO #define FGVersionGroup "%FLIGHTGEAR_VERSION_MAJOR%.%FLIGHTGEAR_VERSION_MINOR%" > InstallConfig.iss
 ECHO #define OSGVersion "%OSG_VERSION%" >> InstallConfig.iss
 ECHO #define OSGSoNumber "%OSG_SO_NUMBER%" >> InstallConfig.iss
 ECHO #define OTSoNumber "%OT_SO_NUMBER%" >> InstallConfig.iss
