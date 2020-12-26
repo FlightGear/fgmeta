@@ -30,6 +30,12 @@
 ;  #define OTSoNumber "3"
 ;  #define FGDetails "-nightly"
 ;  #define IncludeData "FALSE"
+;
+; Uninstall procedure with --uninstall flag:
+;  executed by fgfs.exe (fg_init.cxx):
+;  - removes all under the FG_HOME directory
+;  - removes all from Download dir/Terrasync
+;  - removes all from Download dir/Aircraft
 
 #include "InstallConfig.iss"
 
