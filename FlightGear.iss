@@ -150,12 +150,14 @@ Name: "en"; MessagesFile: "compiler:Default.isl"; InfoBeforeFile: "{#FGSourcePat
 Name: "pl"; MessagesFile: "compiler:Languages\Polish.isl"; InfoBeforeFile: "{#FGSourcePath}\package\windows\infobefore-pl.txt"
 Name: "es"; MessagesFile: "compiler:Languages\Spanish.isl"; InfoBeforeFile: "{#FGSourcePath}\package\windows\infobefore-es.txt"
 Name: "nl"; MessagesFile: "compiler:Languages\Dutch.isl"; InfoBeforeFile: "{#FGSourcePath}\package\windows\infobefore-nl.txt"
+Name: "de"; MessagesFile: "compiler:Languages\German.isl"; InfoBeforeFile: "{#FGSourcePath}\package\windows\infobefore-de.txt"
 
 [Messages]
 ConfirmUninstall=Are you sure you want to completely remove %1 {#FGVersion} and all of its components?
 pl.ConfirmUninstall=Czy na pewno chcesz całkowicie usunąć %1 {#FGVersion} i wszystkie jego komponenty?
 es.ConfirmUninstall=¿ Estás seguro de que quieres borrar completamente %1 {#FGVersion} y todos sus componentes ?
 nl.ConfirmUninstall=Weet u zeker dat u %1 {#FGVersion} en alle bijbehorende onderdelen wilt verwijderen?
+de.ConfirmUninstall=Bist Du sicher, dass Du %1 {#FGVersion} und alle Komponenten entfernen willst?
 
 [CustomMessages]
 CreateDesktopIcon=Create a &desktop icon
@@ -181,6 +183,12 @@ nl.RemoveAllSettings=Verwijder alle instellingen en gedownloade data
 nl.RemoveAllSettingsDescription=FlightGear bewaart een aantal instellingen in uw gebruikersmap. Mogelijk is er ook data in de downloadmap opgeslagen. Selecteer deze optie om die bestanden definitief te verwijderen.
 nl.FirewallFgException=Sta FlightGear toe om data te verzenden en ontvangen via het multiplayernetwerk en om live weergegevens te downloaden.
 nl.FirewallFgcomException=Sta FGCom toe om verbinding met FlightGear en de VoIP server te maken voor op stem gebaseerde ATC-communicatie.
+
+de.CreateDesktopIcon=Ein Desktop-Icon anlegen
+de.RemoveAllSettings=Alle Einstellungen und heruntergeladene Daten löschen
+de.RemoveAllSettingsDescription=FlightGear speichert seine Einstellungen in deinem User-Verzeichnis. Zusätzlich heruntergeladene Flugzeuge und Szenerie-Daten können sich im Download-Verzeichnis befinden. Wähle diese Option, um alle Daten zu löschen.
+de.FirewallFgException=Erlaubt FlightGear die Verbindung zum Multiplayer-Netzwerk und den Download von METAR-Daten.
+de.FirewallFgcomException=Erlaubt FGCom die Verbindung zu FlightGear- und VoIP-Servern für den ATC-Sprechfunk.
 
 [Dirs]
 ; Make the user installable scenery directory
