@@ -584,7 +584,8 @@ function _installOrUpdateDistroPackages(){
   # SimGear and FlightGear
   if _elementIn "SIMGEAR" "${WHATTOBUILD[@]}" || \
      _elementIn "FGFS" "${WHATTOBUILD[@]}"; then
-    PKG+=(zlib1g-dev freeglut3-dev libglew-dev libopenal-dev libboost-dev)
+    PKG+=(zlib1g-dev freeglut3-dev libglew-dev libopenal-dev libboost-dev \
+          liblzma-dev)
 
     if ! _elementIn "OSG" "${WHATTOBUILD[@]}"; then
       _mandatory_pkg_alternative libopenscenegraph-3.4-dev \
