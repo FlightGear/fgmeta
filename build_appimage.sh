@@ -59,6 +59,7 @@ cp -a /usr/lib64/qt5/qml/QtQuick.2 appdir/usr/qml
 cp /usr/lib64/libsoftokn3.* appdir/usr/lib
 cp /usr/lib64/libnsspem.so appdir/usr/lib
 cp /usr/lib64/libfreebl* appdir/usr/lib
+cp -a /usr/lib64/liblzma* appdir/usr/lib
 cp /etc/pki/tls/certs/ca-bundle.crt appdir/usr/ssl/cacert.pem
 
 #modify the desktop file so that linuxdeployqt doesn't barf (version to 1.0, add semicolon to end of certain line types)
