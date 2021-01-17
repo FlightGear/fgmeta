@@ -104,6 +104,7 @@ IF %IS_NIGHTLY_BUILD% EQU 1 (
 GOTO End
 
 :writeBaseConfig
+ECHO #define FGHarnessPath "x:" > InstallConfig.iss
 ECHO #define FGVersion "%FLIGHTGEAR_VERSION%" > InstallConfig.iss
 ECHO #define FGVersionGroup "%FLIGHTGEAR_VERSION_MAJOR%.%FLIGHTGEAR_VERSION_MINOR%" > InstallConfig.iss
 ECHO #define OSGVersion "%OSG_VERSION%" >> InstallConfig.iss
