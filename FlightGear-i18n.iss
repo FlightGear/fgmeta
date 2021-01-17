@@ -1,4 +1,4 @@
-[Messages]
+﻿[Messages]
 ConfirmUninstall=Are you sure you want to completely remove %1 {#FGVersion} and all of its components?
 pl.ConfirmUninstall=Czy na pewno chcesz całkowicie usunąć %1 {#FGVersion} i wszystkie jego komponenty?
 es.ConfirmUninstall=¿ Estás seguro de que quieres borrar completamente %1 {#FGVersion} y todos sus componentes ?
@@ -7,12 +7,14 @@ de.ConfirmUninstall=Bist Du sicher, dass Du %1 {#FGVersion} und alle Komponenten
 
 [CustomMessages]
 CreateDesktopIcon=Create a &desktop icon
+CreateDesktopIconGroup=Additional icons:
 RemoveAllSettings=Remove all settings, downloaded scenery and aircraft
 RemoveAllSettingsDescription=FlightGear stores some settings in your user folder. In addition, scenery or aircraft data may have been downloaded to the download directory. To completely remove all these files, select this option.
 FirewallFgException=Allows FlightGear to send and receive data over the multiplayer network and to get METARs.
 FirewallFgcomException=Allows FGCom to establish a connection to FlightGear and the VoIP server for voice ATC communication.
 
 pl.CreateDesktopIcon=Utwórz ikony na pulpicie
+pl.CreateDesktopIconGroup=Dodatkowe ikony:
 pl.RemoveAllSettings=Usuń wszystkie ustawienia, pobraną scenerię i samoloty
 pl.RemoveAllSettingsDescription=FlightGear zapisuje niektóre ustawienia w katalogach użytkownika. Dodatkowo, sceneria lub dane statków powietrznych mogą być pobierane do katalogu pobrań. Aby całkowicie usunąć te ustawienia, wybierz tą opcję.
 pl.FirewallFgException=Pozwala aplikacji FlightGear na wysyłanie i pobieranie danych przez sieć multiplayer oraz aby pobrać dane pogodowe METAR.

@@ -91,7 +91,7 @@ ArchitecturesAllowed=x86 x64
 ; SignTool=fg_code_sign1
 
 [Tasks]
-Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "Additional icons:"
+Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:CreateDesktopIconGroup}"
 
 [Languages]
 Name: "en"; MessagesFile: "compiler:Default.isl"; 
