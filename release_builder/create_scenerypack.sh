@@ -21,9 +21,10 @@ tar --format=gnu --create --owner=root --group=root --gzip --file=${SCENERY_PACK
     ${SCENERY_PACK}/Terrain/${TUTORIAL_TILES} \
     ${SCENERY_PACK}/Airports/B/I/K \
     ${SCENERY_PACK}/Airports/P/H \
+    ${SCENERY_PACK}/Airports_archive.tgz \
     ${SCENERY_PACK}/Models
 
 rm ${SCENERY_PACK}
 
-# upload to frs.sourceforge.net /home/frs/project/fquitfl/flightgear/scenery/ 
+# upload to frs.sourceforge.net /home/frs/project/fl/flightgear/scenery/ 
 
