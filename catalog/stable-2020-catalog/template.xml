@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <PropertyList>
   <template>
-	  <version n="0">2020.*</version>
+	  <version n="0">2020.3.*</version>
     <id>org.flightgear.fgaddon.stable_2020</id>
     <license>GPL</license>
     <url>http://mirrors.ibiblio.org/flightgear/ftp/Aircraft-2020/catalog.xml</url>
