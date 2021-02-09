@@ -19,6 +19,9 @@
 ;     C:\> subst X: F:\Path\to\FlightGear\root
 ;     C:\> subst X: F:\
 ;
+; TRANSLATION NOTE:
+;  - external i18n files HAVE to be UTF-8 with BOM encoded. Otherwise the installer can
+;    not detect correct file encoding
 ;
 ; InstallConfig.iss example content:
 ;
@@ -94,8 +97,8 @@ ArchitecturesAllowed=x86 x64
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:CreateDesktopIconGroup}"
 
 [Languages]
-Name: "en"; MessagesFile: "compiler:Default.isl"; 
-Name: "pl"; MessagesFile: "compiler:Languages\Polish.isl"; 
+Name: "en"; MessagesFile: "compiler:Default.isl"; InfoBeforeFile: "{#FgHarnessPath}\windows\info-before-en.txt"
+Name: "pl"; MessagesFile: "compiler:Languages\Polish.isl"; InfoBeforeFile: "{#FgHarnessPath}\windows\info-before-pl.txt"
 Name: "es"; MessagesFile: "compiler:Languages\Spanish.isl"; 
 Name: "nl"; MessagesFile: "compiler:Languages\Dutch.isl"; 
 Name: "de"; MessagesFile: "compiler:Languages\German.isl"; 

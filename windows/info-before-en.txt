@@ -1,0 +1,25 @@
+FlightGear LTS
+==============
+
+Contains FlightGear stable source code from source code repository ('release' branch). 
+This is the FlightGear installer for Long Term Support (LTS) version. It contains
+the most stable and well tested FlightGear source code. Have fun using it !
+
+Latest features ?
+-----------------
+
+Please take a look at the FlightGear unstable installer, but beware, it can contains
+new, not well tested code. If you want to have solid and stable flight experience
+stick with this FlightGear LTS version.
+
+
+I have found a bug !
+--------------------
+
+If you find serious bugs, instability, performance degradation:
+
+- look at the FlightGear Tickets page (on the SourceForge project page)
+- ask on the FlightGear forum (explicitly say that you're using LTS version)
+- look at the flightgear-devel mailing list
+
+There is a probability, that developers are working on the solution it right now !
