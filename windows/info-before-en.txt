@@ -1,0 +1,20 @@
+FlightGear Unstable
+===================
+
+Contains FlightGear from the source code repository ('next' branch). 
+Please note that this installer is using the latest development code. 
+There is no guarantee that the code does not contain serious bugs and other issues. 
+It contains in-development features which are not yet considered stable, but whichare ready for
+testing and feedback.
+
+
+I have found a bug!
+--------------------
+
+If you find serious bugs, instability, performance degradation:
+
+- look at the FlightGear Tickets page (on the SourceForge project page)
+- ask on the FlightGear forum (explicitly say that you're using unstable version)
+- look at the flightgear-devel mailing list
+
+Many problems are already known or reported, but don't be afraid to ask and check.

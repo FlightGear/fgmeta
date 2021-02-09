@@ -1,0 +1,21 @@
+﻿FlightGear Unstable
+===================
+
+Zawiera kod źródłowy FlightGear z repozytorium kodu źródłowego (gałąź 'next').
+Proszę, zauważ że to jest instalator, który zawiera najnowszy kod rozwojowy.
+Nie ma gwarancji, że ten kod nie zawiera poważnych błędów i innych problemów.
+Niemniej, to jest pakiet, który zawiera najwięcej nowej funkcjonalności, która
+nie jest jeszcze dostępna w oficjalnej, stabilnej wersji oprogramowania.
+Miłej zabawy i korzystania z niego !
+
+
+Znalazłem błąd !
+--------------------
+
+Jeśli znalazłeś poważny błąd, niestabilność, ograniczenie wydajności:
+
+- sprawdź stronę ze zgłoszeniami błędów FlightGear (na stronie projektu SourceForge)
+- zapytaj na forum FlightGear (wskaż jasno, że korzystasz z wersji niestabilnej/unstable)
+- sprawdź mailową listę dyskusyjną flightgear-devel
+
+Jest prawdopodobne, że programiści już pracują nad rozwiązaniem tego problemu !
