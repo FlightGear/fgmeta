@@ -41,7 +41,6 @@
 ;  - removes all from Download dir/Aircraft
 
 #include "InstallConfig.iss"
-#include "FlightGear-files.iss"
 #include "FlightGear-i18n.iss"
 
 #define FGSourcePath FgHarnessPath + "\flightgear"
@@ -53,6 +52,8 @@
 ; we copy everything in install/<arch>/bin except these, which aren't
 ; useful to the end-user to ship
 #define ExcludedBinaries "*smooth.exe,metar.exe"
+
+#include "FlightGear-files.iss"
 
 [Setup]
 AppId=FlightGear_{#FGVersionGroup}
