@@ -102,8 +102,8 @@ Name: "pl"; MessagesFile: "compiler:Languages\Polish.isl"; InfoBeforeFile: "{#Fg
 Name: "es"; MessagesFile: "compiler:Languages\Spanish.isl"; 
 Name: "nl"; MessagesFile: "compiler:Languages\Dutch.isl"; 
 Name: "de"; MessagesFile: "compiler:Languages\German.isl"; 
+Name: "fr"; MessagesFile: "compiler:Languages\French.isl"; 
 
-[Dirs]
 [Dirs]
 ; Make the user installable scenery directory
 Name: "{%USERPROFILE}\FlightGear\Downloads"; Permissions: creatorowner-modify; Check: not DirExists(ExpandConstant('{%USERPROFILE}\FlightGear\Downloads'))

@@ -4,6 +4,7 @@ pl.ConfirmUninstall=Czy na pewno chcesz całkowicie usunąć %1 {#FGVersion} i w
 es.ConfirmUninstall=¿ Estás seguro de que quieres borrar completamente %1 {#FGVersion} y todos sus componentes ?
 nl.ConfirmUninstall=Weet u zeker dat u %1 {#FGVersion} en alle bijbehorende onderdelen wilt verwijderen?
 de.ConfirmUninstall=Bist Du sicher, dass Du %1 {#FGVersion} und alle Komponenten entfernen willst?
+fr.ConfirmUninstall=Etes-vous certain de vouloir totalement désinstaller %1 {#FGVersion} et tous ses composants ?
 
 [CustomMessages]
 CreateDesktopIcon=Create a &desktop icon
@@ -37,3 +38,9 @@ de.RemoveAllSettings=Alle Einstellungen und heruntergeladene Daten löschen
 de.RemoveAllSettingsDescription=FlightGear speichert seine Einstellungen in deinem User-Verzeichnis. Zusätzlich heruntergeladene Flugzeuge und Szenerie-Daten können sich im Download-Verzeichnis befinden. Wähle diese Option, um alle Daten zu löschen.
 de.FirewallFgException=Erlaubt FlightGear die Verbindung zum Multiplayer-Netzwerk und den Download von METAR-Daten.
 de.FirewallFgcomException=Erlaubt FGCom die Verbindung zu FlightGear- und VoIP-Servern für den ATC-Sprechfunk.
+
+fr.CreateDesktopIcon=Créer une icône sur le bureau
+fr.RemoveAllSettings=Supprimer tous les paramètres, scènes et aéronefs téléchargés
+fr.RemoveAllSettingsDescription=FlightGear enregistre certains paramètres dans votre répertoire utilisateur. En complément, les scènes et les aéronefs peuvent avoir été installés dans le dossier Téléchargements. Pour supprimer totalement ces fichiers, choisissez cette option.
+fr.FirewallFgException=Autorise FlightGear à émettre et recevoir des données multijoueurs sur le réseau et à recevoir les METARs.
+fr.FirewallFgcomException=Autorise FGCom à établir une connexion vers FlightGear et le serveur VoIP pour les communications de contrôle aérien.
