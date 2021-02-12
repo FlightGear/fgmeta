@@ -57,9 +57,3 @@ make install
 make package_source
 cp flightgear-*.tar.bz2 ../output/.
 
-#####################################################################################
-
-echo "Assembling base package"
-cd $WORKSPACE
-
-tar cjf output/FlightGear-$VERSION-data.tar.bz2 fgdata/

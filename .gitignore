@@ -23,4 +23,5 @@ CMakeCache.txt
 build-*
 testOutput*
 md5sum.xml
+staging
 
