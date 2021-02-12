@@ -84,9 +84,3 @@ strip --strip-debug $WORKSPACE/dist/bin/fgfs
 strip --strip-debug $WORKSPACE/dist/bin/fgviewer
 strip --strip-debug $WORKSPACE/dist/bin/fgjs
 
-#####################################################################################
-
-echo "Assembling base package"
-cd $WORKSPACE
-
-tar cjf output/FlightGear-$VERSION-data.tar.bz2 fgdata/
