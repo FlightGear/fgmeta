@@ -12,6 +12,7 @@ Source: "{#ThirdPartyDir}\3rdParty\bin\sentry.dll"; DestDir: "{app}\bin"; Check:
 Source: "{#ThirdPartyDir}\3rdParty\bin\crashpad_handler.exe"; DestDir: "{app}\bin"; Check: not Is64BitInstallMode
 Source: "{#ThirdPartyDir}\3rdParty\bin\dbus-1-3.dll"; DestDir: "{app}\bin"; Check: not Is64BitInstallMode
 Source: "{#ThirdPartyDir}\3rdParty\bin\event_core.dll"; DestDir: "{app}\bin"; Check: not Is64BitInstallMode
+Source: "{#ThirdPartyDir}\3rdParty\bin\liblzma.dll"; DestDir: "{app}\bin"; Check: not Is64BitInstallMode
 
 ; 64 bits install
 Source: "{#InstallDir64}\bin\*.*"; DestDir: "{app}\bin"; Excludes: "{#ExcludedBinaries}"; Flags: ignoreversion recursesubdirs; Check: Is64BitInstallMode
@@ -26,6 +27,7 @@ Source: "{#ThirdPartyDir}\3rdParty.x64\bin\sentry.dll"; DestDir: "{app}\bin"; Ch
 Source: "{#ThirdPartyDir}\3rdParty.x64\bin\crashpad_handler.exe"; DestDir: "{app}\bin"; Check: Is64BitInstallMode
 Source: "{#ThirdPartyDir}\3rdParty.x64\bin\dbus-1-3.dll"; DestDir: "{app}\bin"; Check: Is64BitInstallMode
 Source: "{#ThirdPartyDir}\3rdParty.x64\bin\event_core.dll"; DestDir: "{app}\bin"; Check: Is64BitInstallMode
+Source: "{#ThirdPartyDir}\3rdParty.x64\bin\liblzma.dll"; DestDir: "{app}\bin"; Check: Is64BitInstallMode
 
 ; Include the base package
 #if IncludeData == "TRUE"
