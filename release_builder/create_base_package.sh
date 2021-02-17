@@ -54,6 +54,10 @@ tar -cJf output/$OUTPUT_NAME.txz --directory staging fgdata
 
 echo "Creating updates package"
 
-tar -cJf output/FlightGear-$VERSION-update-data.txz `git -C fgdata diff --name-only --line-prefix="fgdata/" $BASE_VERSION_TAG..HEAD`
+pushd fgdata
+git diff --name-only --line-prefix="fgdata/" $BASE_VERSION_TAG..HEAD > ../fgdata_changes
+popd
+
+tar -cJf output/FlightGear-$VERSION-update-data.txz -T fgdata_changes
 
 echo "Done, data TXZs are in output/"
