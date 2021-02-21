@@ -56,6 +56,7 @@
 #define OSG64PluginsDir OSG64InstallDir + "\bin\osgPlugins-" + OSGVersion
 
 #define ThirdPartyDir FgHarnessPath + "\windows-3rd-party\msvc140"
+#define DecompressDir FgHarnessPath + "\windows-3rd-party\decompress"
 
 ; we copy everything in install/<arch>/bin except these, which aren't
 ; useful to the end-user to ship
@@ -141,6 +142,30 @@ const
   NET_FW_PROFILE2_DOMAIN = 1;
   NET_FW_PROFILE2_PRIVATE = 2;
   NET_FW_PROFILE2_PUBLIC = 4;
+
+var
+  UninstallCheckCleanPage: TNewNotebookPage;
+  UninstallBackButton: TNewButton;
+  UninstallNextButton: TNewButton;
+  DoCleanCheckbox : TNewCheckBox;
+  CleanHelp : TNewStaticText;
+  DownloadPage: TDownloadWizardPage;
+  ExtractDownload: TOutputProgressWizardPage;
+
+  ResultCode: Integer;
+
+function OnDownloadProgress(const Url, FileName: String; const Progress, ProgressMax: Int64): Boolean;
+begin
+  if Progress = ProgressMax then
+    Log(Format('Successfully downloaded file to {tmp}: %s', [FileName]));
+  Result := True;
+end;
+
+procedure InitializeWizard;
+begin
+  DownloadPage := CreateDownloadPage(SetupMessage(msgWizardPreparing), SetupMessage(msgPreparingDesc), @OnDownloadProgress);
+  ExtractDownload := CreateOutputProgressPage(ExpandConstant('{cm:ExtractingDownloadContentTitle}'), ExpandConstant('{cm:ExtractingDownloadContentMessage}'));
+end;
 
 procedure URLLabelOnClick(Sender: TObject);
 var
@@ -245,12 +270,82 @@ begin
   end;
 end;
 
+function NextButtonClick(CurPageID: Integer): Boolean;
 var
-  UninstallCheckCleanPage: TNewNotebookPage;
-  UninstallBackButton: TNewButton;
-  UninstallNextButton: TNewButton;
-  DoCleanCheckbox : TNewCheckBox;
-  CleanHelp : TNewStaticText;
+  fgDataInstalled: Cardinal;
+begin
+  if CurPageID = wpReady then begin
+    DownloadPage.Clear;
+    
+    fgDataInstalled := 0;
+
+    // checking registry entry, if fgdata was installed
+    if RegKeyExists(HKEY_LOCAL_MACHINE, ExpandConstant('Software\FlightGear\{#FGVersionGroup}')) then
+    begin
+      if RegQueryDWordValue(HKEY_LOCAL_MACHINE, ExpandConstant('Software\FlightGear\{#FGVersionGroup}'), 'fgdata-installed', fgDataInstalled) then
+      begin
+        Log('Previous fgdata installed. Downloading delta package');
+      end;
+    end;
+
+    // selecting fgdata installation packages
+    if (fgDataInstalled = 1) then
+    begin
+      DownloadPage.Add('https://sourceforge.net/projects/flightgear/files/release-{#FGVersionGroup}/FlightGear-{#FGVersion}-data-delta.tar.bz2/download', 'fgdata-downloaded.tar.bz2', '');
+    end
+    else
+    begin
+      DownloadPage.Add('https://sourceforge.net/projects/flightgear/files/release-{#FGVersionGroup}/FlightGear-{#FGVersion}-data.tar.bz2/download', 'fgdata-downloaded.tar.bz2', '');
+    end;
+
+    DownloadPage.Show;
+    try
+      try
+        DownloadPage.Download;
+        // show extract progress page
+        try
+          ExtractDownload.Show;
+          ExtractDownload.SetText(ExpandConstant('{cm:ExtractingDownloadedFile}'), 'fgdata-downloaded.tar.bz2');
+          ExtractTemporaryFile('bunzip2.exe');
+          ExtractTemporaryFile('bzip2.dll');
+          if Exec(ExpandConstant('{tmp}\bunzip2.exe'), ExpandConstant('{tmp}\fgdata-downloaded.tar.bz2'), ExpandConstant('{tmp}'), SW_HIDE, ewWaitUntilTerminated, ResultCode) then
+          begin
+              Log(Format('Successfully bunzipped file: %s', [ExpandConstant('{tmp}\fgdata-downloaded.tar.bz2')]));
+              ExtractDownload.SetText(ExpandConstant('{cm:UntarringDownloadedFile}'), ExpandConstant('fgdata-downloaded.tar'));
+              ExtractTemporaryFile('tar.exe');
+              ExtractTemporaryFile('libiconv-2.dll');
+              ExtractTemporaryFile('libintl-2.dll');
+              CreateDir(ExpandConstant('{tmp}\fgdata-extracted'));
+              if Exec(ExpandConstant('{tmp}\tar.exe'), ExpandConstant('-xf fgdata-downloaded.tar -C fgdata-extracted'), ExpandConstant('{tmp}'), SW_HIDE, ewWaitUntilTerminated, ResultCode) then
+              begin
+                Log(Format('Successfully untarred file: %s', [ExpandConstant('{tmp}\fgdata-downloaded.tar')]));
+              end
+              else begin
+                Log(Format('ERROR untarring file: %s', [ExpandConstant('{tmp}\fgdata-downloaded.tar')]));
+              end;
+          end
+          else begin
+            Log(Format('ERROR bunzipping file: %s', [ExpandConstant('{tmp}\fgdata-downloaded.tar.bz2')]));
+          end;
+        finally
+          ExtractDownload.Hide;
+        end;
+        Result := True;
+      except
+        // FIXME - available in IS 6.1.3-dev
+        //if DownloadPage.AbortedByUser then
+        //  Log('Aborted by user.')
+        //else
+        SuppressibleMsgBox(AddPeriod(GetExceptionMessage), mbCriticalError, MB_OK, IDOK);
+        Result := False;
+      end;
+    finally
+      DownloadPage.Hide;
+    end;
+  end   
+  else
+    Result := True;
+end;
 
 procedure InitializeUninstallProgressForm();
 begin
@@ -307,6 +402,7 @@ var
 begin
   if CurStep = ssPostInstall then
     begin
+      // firewall rules
       GetWindowsVersionEx(Version);
       if (Version.Major >= 6) then
         begin
@@ -322,6 +418,9 @@ begin
           AddBasicFirewallException('FlightGear', ExpandConstant('{app}') + '\bin\fgfs.exe');
           AddBasicFirewallException('FlightGear FGCom', ExpandConstant('{app}') + '\bin\fgcom.exe');
         end;
+      
+      // registry entries
+      RegWriteDWordValue(HKEY_LOCAL_MACHINE, ExpandConstant('Software\FlightGear\{#FGVersionGroup}'), 'fgdata-installed', 1);
     end;
 end;
 
@@ -342,5 +441,8 @@ begin
     begin
       RemoveFirewallException('FlightGear', ExpandConstant('{app}') + '\bin\fgfs.exe');
       RemoveFirewallException('FlightGear FGCom', ExpandConstant('{app}') + '\bin\fgcom.exe');
+
+      // registry entries
+      RegDeleteValue(HKEY_LOCAL_MACHINE, ExpandConstant('Software\FlightGear\{#FGVersionGroup}'), 'fgdata-installed');
     end;
 end;

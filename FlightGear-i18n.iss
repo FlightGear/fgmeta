@@ -13,6 +13,10 @@ RemoveAllSettings=Remove all settings, downloaded scenery and aircraft
 RemoveAllSettingsDescription=FlightGear stores some settings in your user folder. In addition, scenery or aircraft data may have been downloaded to the download directory. To completely remove all these files, select this option.
 FirewallFgException=Allows FlightGear to send and receive data over the multiplayer network and to get METARs.
 FirewallFgcomException=Allows FGCom to establish a connection to FlightGear and the VoIP server for voice ATC communication.
+ExtractingDownloadContentTitle=Extracting downloaded content
+ExtractingDownloadContentMessage=This step will perform extraction of the downloaded content
+ExtractingDownloadedFile=Extracting file
+UntarringDownloadedFile=Untarring file
 
 pl.CreateDesktopIcon=Utwórz ikony na pulpicie
 pl.CreateDesktopIconGroup=Dodatkowe ikony:
@@ -20,6 +24,10 @@ pl.RemoveAllSettings=Usuń wszystkie ustawienia, pobraną scenerię i samoloty
 pl.RemoveAllSettingsDescription=FlightGear zapisuje niektóre ustawienia w katalogach użytkownika. Dodatkowo, sceneria lub dane statków powietrznych mogą być pobierane do katalogu pobrań. Aby całkowicie usunąć te ustawienia, wybierz tą opcję.
 pl.FirewallFgException=Pozwala aplikacji FlightGear na wysyłanie i pobieranie danych przez sieć multiplayer oraz aby pobrać dane pogodowe METAR.
 pl.FirewallFgcomException=Pozwala aplikacji FGCom na ustanowienie połączenia do aplikacji FlightGear i do serwerów VoIP dla komunikacji głosowej z ATC (kontrolerem lotów).
+pl.ExtractingDownloadContentTitle=Rozpakowywanie pobranej dodatkowej treści
+pl.ExtractingDownloadContentMessage=Ten krok rozpakuje pobraną dodatkową treść 
+pl.ExtractingDownloadedFile=Rozpakowywanie pliku
+pl.UntarringDownloadedFile=Roztarowanie pliku
 
 es.CreateDesktopIcon=Crear icono en el escritorio
 es.RemoveAllSettings=Borrar todos los ajustes, escenarios y aviones descargados

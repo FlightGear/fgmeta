@@ -34,6 +34,22 @@ Source: "{#ThirdPartyDir}\3rdParty.x64\bin\liblzma.dll"; DestDir: "{app}\bin"; C
 Source: "{#FgHarnessPath}\fgdata\*.*"; DestDir: "{app}\data"; Excludes: "{#FGDataExcludes}"; Flags: ignoreversion recursesubdirs skipifsourcedoesntexist
 #endif
 
+; Web installer for the base package
+#if IncludeWeb == "TRUE"
+; bzip2
+Source: "{#DecompressDir}\\bunzip2.exe"; Flags: dontcopy
+Source: "{#DecompressDir}\\bzip2.dll"; Flags: dontcopy
+; tar
+Source: "{#DecompressDir}\\tar.exe"; Flags: dontcopy
+Source: "{#DecompressDir}\\libiconv-2.dll"; Flags: dontcopy
+Source: "{#DecompressDir}\\libintl-2.dll"; Flags: dontcopy
+; txz
+Source: "{#DecompressDir}\\xzdec.exe"; Flags: dontcopy
+Source: "{#DecompressDir}\\liblzma.dll"; Flags: dontcopy
+; full code
+Source: "{tmp}\\fgdata-extracted\\fgdata\\*.*"; DestDir: "{app}\data"; Flags: external recursesubdirs
+#endif
+
 ; 32 bits install
 Source: "{#OSGInstallDir}\bin\osg{#OSGSoNumber}-osg.dll"; DestDir: "{app}\bin"; Check: not Is64BitInstallMode
 Source: "{#OSGInstallDir}\bin\osg{#OSGSoNumber}-osgDB.dll"; DestDir: "{app}\bin"; Check: not Is64BitInstallMode
