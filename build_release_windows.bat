@@ -155,6 +155,11 @@ IF %IS_NIGHTLY_BUILD% EQU 1 (
   CALL :writeBaseConfig
   CALL :writeReleaseConfig
   iscc /Q FlightGear.iss
+
+  REM FlightGear release: with fgdata web installer, output filename would be "FlightGear-x.x.x-web.exe"
+  CALL :writeBaseConfig
+  CALL :writeReleaseWebConfig
+  iscc /Q FlightGear.iss
 )
 GOTO End
 
@@ -171,6 +176,13 @@ GOTO End
 CALL :writeBaseConfig
 ECHO #define FGDetails "" >> InstallConfig.iss
 ECHO #define IncludeData "TRUE" >> InstallConfig.iss
+GOTO End
+
+:writeReleaseWebConfig
+CALL :writeBaseConfig
+ECHO #define FGDetails "-web" >> InstallConfig.iss
+ECHO #define IncludeData "FALSE" >> InstallConfig.iss
+ECHO #define IncludeWeb "TRUE" >> InstallConfig.iss
 GOTO End
 
 :writeNightlyFullConfig

@@ -33,6 +33,7 @@
 ;  #define OTSoNumber "3"
 ;  #define FGDetails "-nightly"
 ;  #define IncludeData "FALSE"
+;  #define IncludeWeb "FALSE"
 ;
 ; Uninstall procedure with --uninstall flag:
 ;  executed by fgfs.exe (fg_init.cxx):
@@ -150,6 +151,7 @@ var
   DoCleanCheckbox : TNewCheckBox;
   CleanHelp : TNewStaticText;
   DownloadPage: TDownloadWizardPage;
+  DownloadPageId: Integer;
   ExtractDownload: TOutputProgressWizardPage;
 
   ResultCode: Integer;
@@ -164,6 +166,7 @@ end;
 procedure InitializeWizard;
 begin
   DownloadPage := CreateDownloadPage(SetupMessage(msgWizardPreparing), SetupMessage(msgPreparingDesc), @OnDownloadProgress);
+  DownloadPageId := DownloadPage.ID;
   ExtractDownload := CreateOutputProgressPage(ExpandConstant('{cm:ExtractingDownloadContentTitle}'), ExpandConstant('{cm:ExtractingDownloadContentMessage}'));
 end;
 
@@ -270,11 +273,58 @@ begin
   end;
 end;
 
+function ShouldSkipPage(PageID: Integer): Boolean;
+begin;
+  if (PageID = DownloadPageId) then
+  begin
+    if (ExpandConstant('{#IncludeWeb}') = 'FALSE') then begin
+      Result := True;
+    end else begin
+      Result := False;
+    end
+  end
+  else
+  begin
+    Result := False;
+  end;  
+end;
+
 function NextButtonClick(CurPageID: Integer): Boolean;
 var
   fgDataInstalled: Cardinal;
+  diskFreeMB, diskTotalMB: Cardinal;
 begin
-  if CurPageID = wpReady then begin
+  if CurPageID = wpSelectDir then begin
+    // check disk free space - installationFolder
+    if GetSpaceOnDisk(ExpandConstant('{app}'), True, diskFreeMB, diskTotalMB) then
+    begin
+      if diskFreeMB < 6000 then begin
+        MsgBox(ExpandConstant('{cm:NotEnoughSpaceOnInstallationDisk}'), mbError, MB_OK);
+        Result := False;
+      end
+      else begin
+        Result := True;
+      end;      
+    end;
+
+    // check disk free space - tempFolder
+    if GetSpaceOnDisk(ExpandConstant('{tmp}'), True, diskFreeMB, diskTotalMB) then
+    begin
+      if diskFreeMB < 6000 then begin
+        MsgBox(ExpandConstant('{cm:NotEnoughSpaceOnTemporaryDisk}'), mbError, MB_OK);
+        Result := False;
+      end
+      else begin
+        Result := True;
+      end;      
+    end;
+    
+    // if cannot determine disk size, defaults to move on
+    if diskFreeMB = 0 then begin
+      Result := True;
+    end;
+  end
+  else if CurPageID = wpReady then begin
     DownloadPage.Clear;
     
     fgDataInstalled := 0;
@@ -336,7 +386,7 @@ begin
         //if DownloadPage.AbortedByUser then
         //  Log('Aborted by user.')
         //else
-        SuppressibleMsgBox(AddPeriod(GetExceptionMessage), mbCriticalError, MB_OK, IDOK);
+        SuppressibleMsgBox(Format(ExpandConstant('{cm:ErrorDownloadingFile}'), [AddPeriod(GetExceptionMessage)]), mbCriticalError, MB_OK, IDOK);
         Result := False;
       end;
     finally

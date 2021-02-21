@@ -17,6 +17,9 @@ ExtractingDownloadContentTitle=Extracting downloaded content
 ExtractingDownloadContentMessage=This step will perform extraction of the downloaded content
 ExtractingDownloadedFile=Extracting file
 UntarringDownloadedFile=Untarring file
+ErrorDownloadingFile=Error downloading file from the web repository. Error details: %s
+NotEnoughSpaceOnInstallationDisk=Not enough space on the destination disk. At least 6GB is needed.
+NotEnoughSpaceOnTemporaryDisk=Not enough space on the temporary folder disk. At least 6GB is needed.
 
 pl.CreateDesktopIcon=Utwórz ikony na pulpicie
 pl.CreateDesktopIconGroup=Dodatkowe ikony:
@@ -28,6 +31,7 @@ pl.ExtractingDownloadContentTitle=Rozpakowywanie pobranej dodatkowej treści
 pl.ExtractingDownloadContentMessage=Ten krok rozpakuje pobraną dodatkową treść 
 pl.ExtractingDownloadedFile=Rozpakowywanie pliku
 pl.UntarringDownloadedFile=Roztarowanie pliku
+pl.ErrorDownloadingFile=Błąd pobierania pliku z repozytorium web. Szczegóły błędu: %s
 
 es.CreateDesktopIcon=Crear icono en el escritorio
 es.RemoveAllSettings=Borrar todos los ajustes, escenarios y aviones descargados
