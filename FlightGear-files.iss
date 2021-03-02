@@ -31,7 +31,7 @@ Source: "{#ThirdPartyDir}\3rdParty.x64\bin\liblzma.dll"; DestDir: "{app}\bin"; C
 
 ; Include the base package
 #if IncludeData == "TRUE"
-Source: "{#FgHarnessPath}\fgdata\*.*"; DestDir: "{app}\data"; Flags: ignoreversion recursesubdirs skipifsourcedoesntexist
+Source: "{#FgHarnessPath}\fgdata\*.*"; DestDir: "{app}\data"; Excludes: "{#FGDataExcludes}"; Flags: ignoreversion recursesubdirs skipifsourcedoesntexist
 #endif
 
 ; 32 bits install
