@@ -62,7 +62,7 @@
 #define ExcludedBinaries "*smooth.exe,metar.exe"
 
 ; Exclude XCF files from FGData to keep the size down
-#define FGDataExcludes "*.xcf"
+#define FGDataExcludes "*.xcf,AI\Aircraft\Gee-Bee,*.dds"
 
 #include "FlightGear-files.iss"
 
