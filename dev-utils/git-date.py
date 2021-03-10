@@ -228,7 +228,7 @@ using the 'repositories' variable.""".format(progname=PROGNAME),
     # treat it before all other options.
     parser.add_argument('--config-file', metavar="FILE", default=defaultCfgFile,
                         help="""\
-      load configuration from FILE  (default: %(default)s""")
+      load configuration from FILE (default: %(default)s)""")
     parser.add_argument('-s', '--show-commits', action='store_true', help="""\
       run 'git show' for the commit that was found in each repository""")
     parser.add_argument('-S', '--show-commits-option', action='append',
