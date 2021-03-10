@@ -246,8 +246,9 @@ using the 'repositories' variable.""".format(progname=PROGNAME),
       find commits before this date""")
     parser.add_argument('cmdRepos', metavar="REPOSITORY", nargs='*',
                         help="""\
-      path to a repository to act on (as many arguments of this type as desired
-      can be given)""")
+      path to a repository to act on (actually, each REPOSITORY argument may be
+      of the form LABEL=PATH in order to assign a label to the repository).
+      There can be an arbitrary number of these arguments.""")
     parser.add_argument('--help', action="help",
                         help="display this message and exit")
     parser.add_argument('--version', action='version',
