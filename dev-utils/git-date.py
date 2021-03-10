@@ -49,7 +49,7 @@ This program is free software. It comes without any warranty, to
 the extent permitted by applicable law. See the top of {progname}
 for more details on the licensing conditions.""".format(progname=PROGNAME)
 
-# Very simple Repository class
+# Very simple Repository type
 Repository = namedtuple('Repository', ['label', 'path'])
 
 
@@ -129,10 +129,10 @@ def parseConfigFile(cfgFile, configFileOptSpecified, recognizedParams):
 
 
 def processCommandLineAndConfigFile():
-    defaultCfgFile = os.path.join(os.getenv('HOME'),
-                                  ".config", PROGNAME, "config.py")
+    defaultCfgFile = os.path.join(os.getenv('HOME'), ".config", PROGNAME,
+                                  "config.py")
     parser = argparse.ArgumentParser(
-usage="""\
+        usage="""\
 %(prog)s [OPTION ...] DATE [REPOSITORY...]
 Find Git commits before DATE in one or more repositories.""",
         description="""\
@@ -278,15 +278,17 @@ using the 'repositories' variable.""".format(progname=PROGNAME),
 
     # Process the rest of the command-line
     parser.parse_args(namespace=params)
-
     if "repositories" not in params:
-        sys.exit(f"{PROGNAME}: no repository was specified, neither in the "
-                 "configuration file\nnor on the command line; exiting.")
+        params.repositories = []
 
-    # Prepare the final list of repositories based on the config file and the
-    # command line arguments.
+    # Prepare the list of repositories based on the config file and the command
+    # line arguments.
     params.repositories = initListOfRepositories(
         params.repositories, params.cmdRepos, params.repo_args_are_just_paths)
+
+    if not params.repositories:
+        sys.exit(f"{PROGNAME}: no repository was specified, neither in the "
+                 "configuration file\nnor on the command line; exiting.")
     return params
 
 
@@ -304,7 +306,7 @@ def initListOfRepositories(reposFromCfgFile, reposFromCmdLineArgs,
         reposLeftToAdd.extend(reposFromCfgFile)
     else:
         sys.exit(f"{PROGNAME}: in the configuration file, 'repositories' must "
-                 "be either an OrderedDict or a list.")
+                 "be either an\nOrderedDict or a list.")
 
     repoNum = len(res)
     for elt in reposLeftToAdd + reposFromCmdLineArgs:
