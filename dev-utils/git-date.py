@@ -36,6 +36,7 @@
 import argparse
 import locale
 import os
+import platform
 import re
 import subprocess
 import sys
@@ -129,8 +130,12 @@ def parseConfigFile(cfgFile, configFileOptSpecified, recognizedParams):
 
 
 def processCommandLineAndConfigFile():
-    defaultCfgFile = os.path.join(os.getenv('HOME'), ".config", PROGNAME,
-                                  "config.py")
+    if platform.system() == "Windows":
+        defaultCfgFile = os.path.join(os.getenv("APPDATA", "C:/"), PROGNAME,
+                                      "config.py")
+    else:
+        defaultCfgFile = os.path.join(os.getenv('HOME'), ".config", PROGNAME,
+                                      "config.py")
     parser = argparse.ArgumentParser(
         usage="""\
 %(prog)s [OPTION ...] DATE [REPOSITORY...]
@@ -177,8 +182,8 @@ Examples (the backslashes just introduce continuation lines):
             "2021-02-28" SG=/path/to/SG \\
             FG=/path/to/FG FGData=/path/to/FGData
 
-Note: --show-commits et al. may be used in conjunction with --checkout
-      if so desired.
+Note: --show-commits and --show-commits-option may be used in conjunction with
+      --checkout if so desired.
 
 If $HOME/.config/{progname}/config.py exists or if the --config-file option
 has been given, a configuration file is read. This file is executed by
@@ -215,40 +220,40 @@ using the 'repositories' variable.""".format(progname=PROGNAME),
         # I want --help but not -h (it might be useful for something else)
         add_help=False)
 
-    parser.add_argument('--repo-args-are-just-paths',
-                        action='store_true', help="""\
-      don't try to recognize and special-case LABEL=PATH syntax for
-      repository arguments; treat them literally as paths and simply assign
-      labels 'Repo 1', 'Repo 2', etc., to the specified repositories""")
-    parser.add_argument('-b', '--branch', default="next", help="""\
-      search history of BRANCH (default: %(default)s)""")
-    parser.add_argument('-c', '--checkout', action='store_true', help="""\
-      run 'git checkout' for the commit that was found in each repository""")
     # This option is actually handled by configFileOptParser because we want to
     # treat it before all other options.
     parser.add_argument('--config-file', metavar="FILE", default=defaultCfgFile,
                         help="""\
       load configuration from FILE (default: %(default)s)""")
+    parser.add_argument('-b', '--branch', default="next", help="""\
+      search the history of BRANCH (default: %(default)s)""")
+    parser.add_argument('-c', '--checkout', action='store_true', help="""\
+      run 'git checkout' for the commit found in each repository""")
     parser.add_argument('-s', '--show-commits', action='store_true', help="""\
-      run 'git show' for the commit that was found in each repository""")
+      run 'git show' for the commit found in each repository""")
     parser.add_argument('-S', '--show-commits-option', action='append',
                         dest='show_commits_options', help="""\
       option passed to 'git show' when --show-commits is used (may be
       specified multiple times, as in: --show-commits-option='--no-patch'
       --show-commits-option='--format=medium')""")
+    parser.add_argument('--repo-args-are-just-paths',
+                        action='store_true', help="""\
+      don't try to recognize and special-case the LABEL=PATH syntax for
+      repository arguments; treat them literally as paths and simply assign
+      labels 'Repo 1', 'Repo 2', etc., to the specified repositories""")
     parser.add_argument('--let-me-breathe', action='store_true', help="""\
       add blank lines and other separators to make the output hopefully more
       readable when Git prints a lot of things""")
     parser.add_argument('--only-label', action='store_true', help="""\
       don't print the commit ID after the repository label (this is useful
-      when the Git output coming next already contains the commit ID)""")
+      when the Git output that comes next already contains the commit ID)""")
     parser.add_argument('date', metavar="DATE", help="""\
-      find commits before this date""")
+      find commits before this date (any format accepted by Git can be used)""")
     parser.add_argument('cmdRepos', metavar="REPOSITORY", nargs='*',
                         help="""\
       path to a repository to act on (actually, each REPOSITORY argument may be
       of the form LABEL=PATH in order to assign a label to the repository).
-      There can be an arbitrary number of these arguments.""")
+      There can be an arbitrary number of such arguments.""")
     parser.add_argument('--help', action="help",
                         help="display this message and exit")
     parser.add_argument('--version', action='version',
