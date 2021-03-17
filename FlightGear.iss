@@ -117,8 +117,7 @@ Name: "{%USERPROFILE}\FlightGear\Custom Scenery"; Permissions: creatorowner-modi
 Name: "{userdesktop}\FlightGear {#FGVersionGroup}"; Filename: "{app}\bin\fgfs.exe"; Parameters: "--launcher"; WorkingDir: "{app}\bin"; Tasks: desktopicon;
 Name: "{group}\FlightGear {#FGVersionGroup}"; Filename: "{app}\bin\fgfs.exe"; Parameters: "--launcher"; WorkingDir: "{app}\bin";
 Name: "{group}\FlightGear {#FGVersionGroup} - Compositor"; Filename: "{app}\bin\fgfs-compositor.exe"; Parameters: "--launcher"; WorkingDir: "{app}\bin";
-Name: "{group}\FlightGear Manual"; Filename: "{app}\data\Docs\getstart.pdf"
-Name: "{group}\FlightGear Documentation"; Filename: "{app}\data\Docs\index.html"
+Name: "{group}\FlightGear Manual"; Filename: "http://flightgear.sourceforge.net/manual/2020.3/"
 Name: "{group}\Flightgear Wiki"; Filename: "http://wiki.flightgear.org"
 Name: "{group}\Tools\Uninstall FlightGear"; Filename: "{uninstallexe}"
 Name: "{group}\Tools\fgjs"; Filename: "cmd"; Parameters: "/k fgjs.exe ""--fg-root={app}\data"""; WorkingDir: "{app}\bin"
