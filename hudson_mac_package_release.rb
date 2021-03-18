@@ -118,7 +118,7 @@ otherLibs.each do |l|
 end
 
 # copy LibLZMA from Homebrew XZ
-`cp /usr/local/liblzma.dylib #{$frameworksDir}`
+`cp /usr/local/lib/liblzma.dylib #{$frameworksDir}`
 
 $osgPlugins.each do |p|
   pluginFile = "osgdb_#{p}.dylib"
