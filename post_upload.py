@@ -7,13 +7,14 @@
 import os, sys, re, fnmatch
 from subprocess import call
 
-suffix = '.dmg'
+suffixes = ['dmg']
+
 release_version = "unknown"
 
 if sys.argv[1] == 'windows':
-    suffix = '.exe'
+    suffixes = ['exe']
 if sys.argv[1] == 'linux':
-    suffix = '.tar.bz2'
+    suffixes = ['tar.bz2', 'tar.xz', 'txz', 'AppImage']
 
 isRelease = False
 if len(sys.argv) > 2 and sys.argv[2] == 'release':
@@ -22,43 +23,45 @@ if len(sys.argv) > 2 and sys.argv[2] == 'release':
 if len(sys.argv) > 3:
     release_version = sys.argv[3]
 
-print "Post-upload running: suffix=" +  suffix
-print "are we doing an RC:" + str(isReleaseCandidate)
-
-allSuffix = '*' + suffix
-
-print "Wildcard pattern is:" + allSuffix
+print "are we doing an RC:" + str(isRelease)
 
 sys.stdout.flush()
 
-pattern = r'\w+-(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)([\w-]*)' + suffix
 sourceForgeUserHost = "jmturner@frs.sourceforge.net"
 sftpCommandFile = "sftp-commands"
 symbolDir = "/home/jenkins/symbols"
 
 if isRelease:
-    publicRoot = "/var/www/html/builds/rc"
+    publicRoot = "/var/www/downloads/builds/rc"
     incomingDir = "/home/jenkins/incoming"
     sourceForgePath = "/home/frs/project/f/fl/flightgear/release-" + release_version + "/"
 else:
-    publicRoot = "/var/www/html/builds/nightly"
+    publicRoot = "/var/www/downloads/builds/nightly"
     incomingDir = "/home/jenkins/nightly-incoming"
     sourceForgePath = "/home/frs/project/f/fl/flightgear/unstable/"
 
 os.chdir(publicRoot)
 
+def matchVersionWithSuffix(suffix, file):
+    pattern = r'\w+-(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)([\w-]*)\.' + suffix
+    m = re.match(pattern, file)
+    if (m is None):
+        return None
+    return (m.group('major'), m.group('minor'), m.group('patch'))
+
 def findFileVersion(dir):
     for file in os.listdir(dir):
-        if fnmatch.fnmatch(file, allSuffix):
-            m = re.match(pattern, file)
-            if (m is not None):
-                return (m.group('major'), m.group('minor'), m.group('patch'))
+        for suffix in suffixes:
+            if file.endswith(suffix):
+                v = matchVersionWithSuffix(suffix, file)
+                if v:
+                    return v
 
     return None
 
 incomingVer = findFileVersion(incomingDir)
 if incomingVer is None:
-    print "No incoming files found matching " + allSuffix
+    print "No incoming files found matching suffixes:" + ', '.join(suffixes)
     exit()
 
 existingVer = findFileVersion('.')
@@ -72,18 +75,40 @@ oldFiles = []
 incomingFiles = []
 newFiles = []
 
+# remove all files matching a suffix in the current director
+# record removed files (except symlinks) in global-var 
+# oldFiles, so we could also remove them from SourceForge
+def removeFilesMatching(suffix):
+    for file in os.listdir('.'):
+        if not fnmatch.fnmatch(file, '*' + suffix):
+            continue
+
+        if not os.path.islink(file):
+            oldFiles.append(file)
+        os.remove(file)
+
 if versionChange:
     print "Version number changing"
+    for suffix in suffixes:
+        removeFilesMatching(suffix)
 
-    for file in os.listdir('.'):
-        if fnmatch.fnmatch(file, allSuffix):
-            if not os.path.islink(file):
-                oldFiles.append(file)
-            os.remove(file)
+    if (sys.argv[1] == 'windows'):
+        removeFilesMatching('.pdb')
+                
 
+# collecting incoming files
 for file in os.listdir(incomingDir):
-    if fnmatch.fnmatch(file, allSuffix):
-        incomingFiles.append(file)
+    for suffix in suffixes:
+        if file.endswith(suffix):
+            incomingFiles.append(file)
+
+    if (sys.argv[1] == 'windows') and fnmatch.fnmatch(file, "*.pdb"):
+        # manually copy PDBs, don't add to incoming files
+        srcFile = os.path.join(incomingDir, file)
+        os.rename(srcFile, file)
+        newFiles.append(file)
+
+print "Incoming files:" + ', '.join(incomingFiles)
 
 # copy and symlink
 for file in incomingFiles:
@@ -91,26 +116,29 @@ for file in incomingFiles:
     srcFile = os.path.join(incomingDir, file)
 
     outFile = file
-    # insert -rc before suffix
-    #if isRelease:
-        #m = re.match(r'(\w+-\d+\.\d+\.\d+[\w-]*)' + suffix, file)
-        #outFile = m.group(1) + '-rc' + suffix
-        #print "RC out name is " + outFile
+    # insert -rc before file extension
+    if isRelease:
+        m = re.match(r'(\w+-\d+\.\d+\.\d+[\w-]*)\.(.*)', file)
+        outFile = m.group(1) + '-rc.' + m.group(2)
+        print "RC out name is " + outFile
 
     os.rename(srcFile, outFile)
     newFiles.append(outFile)
 
     if not isRelease:
         # symlink for stable web URL
-        m = re.match(r'(\w+)-\d+\.\d+\.\d+-([\w-]+)' + suffix, file)
-        latestName = m.group(1) + '-latest-' + m.group(2) + suffix
+        m = re.match(r'(\w+)-\d+\.\d+\.\d+(-[\w-]+)?\.(.*)' , file)
+
+        if m.group(2):
+            latestName = m.group(1) + '-latest' + m.group(2) + '.' + m.group(3) 
+        else:
+            latestName = m.group(1) + '-latest.' + m.group(3) 
 
         print "Creating symlink from " + file + " to " + latestName
         if os.path.exists(latestName):
             print "\tremoving existing target"
             os.remove(latestName)
         os.symlink(file, latestName)
-
 
 # remove files from SF
 #if len(oldFiles) > 0:
@@ -126,19 +154,12 @@ for file in incomingFiles:
 #    os.remove(sftpCommandFile)
 
 # upload to SourceForge
-for file in newFiles:
-    print "Uploading " + file + " to SourceForge"
-    print "Skipped until SF FRS is fixed"
-#    sys.stdout.flush()
-#    call(["scp", "-v", file, sourceForgeUserHost + ":" + sourceForgePath + file])
-#    call(["rsync", "-e", "ssh", file, sourceForgeUserHost + ":" + sourceForgePath + file])
-#    print "...Done"
-    sys.stdout.flush()
+# for file in newFiles:
+#     print "Uploading " + file + " to SourceForge"
+#     print "Skipped until SF FRS is fixed"
+# #    sys.stdout.flush()
+# #    call(["scp", "-v", file, sourceForgeUserHost + ":" + sourceForgePath + file])
+# #    call(["rsync", "-e", "ssh", file, sourceForgeUserHost + ":" + sourceForgePath + file])
+# #    print "...Done"
+#     sys.stdout.flush()
 
-if sys.argv[1] == 'windows':
-    print "Archiving PDB files"
-    for file in os.listdir(incomingDir):
-        if fnmatch.fnmatch(file, "*.pdb"):
-            srcFile = os.path.join(incomingDir, file)
-            outFile = os.path.join(symbolDir, file)
-            os.rename(srcFile, outFile)
