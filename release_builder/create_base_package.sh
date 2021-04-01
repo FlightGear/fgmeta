@@ -31,7 +31,7 @@ mkdir -p staging
 # wipe existing data TXZs
 rm output/FlightGear-$VERSION*data.txz
 
-rsync -az --exclude=".git" fgdata staging/
+rsync -az --exclude=".git" --exclude="Textures/Unused" --exclude="*.xcf" fgdata staging/
 
 # add all the scenery pack files into it
 
