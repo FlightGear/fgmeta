@@ -36,16 +36,13 @@ Source: "{#FgHarnessPath}\fgdata\*.*"; DestDir: "{app}\data"; Excludes: "{#FGDat
 
 ; Web installer for the base package
 #if IncludeWeb == "TRUE"
-; bzip2
-Source: "{#DecompressDir}\\bunzip2.exe"; Flags: dontcopy
-Source: "{#DecompressDir}\\bzip2.dll"; Flags: dontcopy
+; txz
+Source: "{#DecompressDir}\\xz.exe"; Flags: dontcopy
+Source: "{#DecompressDir}\\liblzma.dll"; Flags: dontcopy
 ; tar
 Source: "{#DecompressDir}\\tar.exe"; Flags: dontcopy
 Source: "{#DecompressDir}\\libiconv-2.dll"; Flags: dontcopy
 Source: "{#DecompressDir}\\libintl-2.dll"; Flags: dontcopy
-; txz
-Source: "{#DecompressDir}\\xzdec.exe"; Flags: dontcopy
-Source: "{#DecompressDir}\\liblzma.dll"; Flags: dontcopy
 ; full code
 Source: "{tmp}\\fgdata-extracted\\fgdata\\*.*"; DestDir: "{app}\data"; Flags: external recursesubdirs
 #endif

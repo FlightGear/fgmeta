@@ -119,7 +119,7 @@ Name: "{%USERPROFILE}\FlightGear\Custom Scenery"; Permissions: creatorowner-modi
 Name: "{userdesktop}\FlightGear {#FGVersionGroup}"; Filename: "{app}\bin\fgfs.exe"; Parameters: "--launcher"; WorkingDir: "{app}\bin"; Tasks: desktopicon;
 Name: "{group}\FlightGear {#FGVersionGroup}"; Filename: "{app}\bin\fgfs.exe"; Parameters: "--launcher"; WorkingDir: "{app}\bin";
 Name: "{group}\FlightGear {#FGVersionGroup} - Compositor"; Filename: "{app}\bin\fgfs-compositor.exe"; Parameters: "--launcher"; WorkingDir: "{app}\bin";
-Name: "{group}\FlightGear Manual"; Filename: "http://flightgear.sourceforge.net/manual/2020.3/"
+Name: "{group}\FlightGear Manual"; Filename: "http://flightgear.sourceforge.net/manual/{#FGVersionGroup}/"
 Name: "{group}\Flightgear Wiki"; Filename: "http://wiki.flightgear.org"
 Name: "{group}\Tools\Uninstall FlightGear"; Filename: "{uninstallexe}"
 Name: "{group}\Tools\fgjs"; Filename: "cmd"; Parameters: "/k fgjs.exe ""--fg-root={app}\data"""; WorkingDir: "{app}\bin"
@@ -341,11 +341,11 @@ begin
     // selecting fgdata installation packages
     if (fgDataInstalled = 1) then
     begin
-      DownloadPage.Add('https://sourceforge.net/projects/flightgear/files/release-{#FGVersionGroup}/FlightGear-{#FGVersion}-data-delta.tar.bz2/download', 'fgdata-downloaded.tar.bz2', '');
+      DownloadPage.Add('http://download.flightgear.org/builds/{#FGVersionGroup}/FlightGear-{#FGVersion}-update-data.txz', 'fgdata-downloaded.txz', '');
     end
     else
     begin
-      DownloadPage.Add('https://sourceforge.net/projects/flightgear/files/release-{#FGVersionGroup}/FlightGear-{#FGVersion}-data.tar.bz2/download', 'fgdata-downloaded.tar.bz2', '');
+      DownloadPage.Add('http://download.flightgear.org/builds/{#FGVersionGroup}/FlightGear-{#FGVersion}-data.txz', 'fgdata-downloaded.txz', '');
     end;
 
     DownloadPage.Show;
@@ -355,12 +355,12 @@ begin
         // show extract progress page
         try
           ExtractDownload.Show;
-          ExtractDownload.SetText(ExpandConstant('{cm:ExtractingDownloadedFile}'), 'fgdata-downloaded.tar.bz2');
-          ExtractTemporaryFile('bunzip2.exe');
-          ExtractTemporaryFile('bzip2.dll');
-          if Exec(ExpandConstant('{tmp}\bunzip2.exe'), ExpandConstant('{tmp}\fgdata-downloaded.tar.bz2'), ExpandConstant('{tmp}'), SW_HIDE, ewWaitUntilTerminated, ResultCode) then
+          ExtractDownload.SetText(ExpandConstant('{cm:ExtractingDownloadedFile}'), 'fgdata-downloaded.txz');
+          ExtractTemporaryFile('xz.exe');
+          ExtractTemporaryFile('liblzma.dll');
+          if Exec(ExpandConstant('{tmp}\xz.exe'), ExpandConstant('-d "{tmp}\fgdata-downloaded.txz"'), ExpandConstant('{tmp}'), SW_HIDE, ewWaitUntilTerminated, ResultCode) then
           begin
-              Log(Format('Successfully bunzipped file: %s', [ExpandConstant('{tmp}\fgdata-downloaded.tar.bz2')]));
+              Log(Format('Successfully expanded file: %s', [ExpandConstant('{tmp}\fgdata-downloaded.txz')]));
               ExtractDownload.SetText(ExpandConstant('{cm:UntarringDownloadedFile}'), ExpandConstant('fgdata-downloaded.tar'));
               ExtractTemporaryFile('tar.exe');
               ExtractTemporaryFile('libiconv-2.dll');
@@ -375,7 +375,7 @@ begin
               end;
           end
           else begin
-            Log(Format('ERROR bunzipping file: %s', [ExpandConstant('{tmp}\fgdata-downloaded.tar.bz2')]));
+            Log(Format('ERROR expanding file: %s', [ExpandConstant('{tmp}\fgdata-downloaded.txz')]));
           end;
         finally
           ExtractDownload.Hide;
