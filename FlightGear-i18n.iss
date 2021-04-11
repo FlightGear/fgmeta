@@ -32,6 +32,8 @@ pl.ExtractingDownloadContentMessage=Ten krok rozpakuje pobraną dodatkową treś
 pl.ExtractingDownloadedFile=Rozpakowywanie pliku
 pl.UntarringDownloadedFile=Roztarowanie pliku
 pl.ErrorDownloadingFile=Błąd pobierania pliku z repozytorium web. Szczegóły błędu: %s
+pl.NotEnoughSpaceOnInstallationDisk=Brak miejsca na dysku docelowym. Przynajmniej 6GB jest wymagane.
+pl.NotEnoughSpaceOnTemporaryDisk=Brak miejsca na dysku z folderem tymczasowym. Przynajmniej 6GB jest wymagane.
 
 es.CreateDesktopIcon=Crear icono en el escritorio
 es.RemoveAllSettings=Borrar todos los ajustes, escenarios y aviones descargados
