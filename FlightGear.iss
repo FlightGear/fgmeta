@@ -341,12 +341,12 @@ begin
 
     // selecting fgdata installation packages
     if (fgDataInstalled = 1) then
-    begin
-      DownloadPage.Add('http://download.flightgear.org/builds/{#FGVersionGroup}/FlightGear-{#FGVersion}-update-data.txz', 'fgdata-downloaded.txz', '');
+    begin   
+      DownloadPage.Add('https://sourceforge.net/projects/flightgear/files/release-{#FGVersionGroup}/FlightGear-{#FGVersion}-update-data.txz/download', 'fgdata-downloaded.txz', '');
     end
     else
     begin
-      DownloadPage.Add('http://download.flightgear.org/builds/{#FGVersionGroup}/FlightGear-{#FGVersion}-data.txz', 'fgdata-downloaded.txz', '');
+      DownloadPage.Add('https://sourceforge.net/projects/flightgear/files/release-{#FGVersionGroup}/FlightGear-{#FGVersion}-data.txz/download', 'fgdata-downloaded.txz', '');
     end;
 
     DownloadPage.Show;
