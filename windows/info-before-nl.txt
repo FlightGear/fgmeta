@@ -1,0 +1,23 @@
+FlightGear LTS
+==============
+
+Dit is de installatie voor de FlightGear versie met langdurige ondersteuning (LTS).
+Het bevat de meest stabiele en zorgvuldig geteste versie van FlightGear. Veel plezier!
+
+Op zoek naar de laatste ontwikkelingen?
+---------------------------------------
+
+Installeer hiervoor de onstabiele versie. Maar let op, deze bevat nieuwe, niet goed
+geteste code. Blijf de huidige LTS versie gebruiken voor de meest stabiele ervaring.
+
+
+Ik heb een fout gevonden!
+-------------------------
+
+Als er een fout, instabiliteit of prestatieprobleem optreedt:
+
+- kijk op de Tickets pagina op de SourceForge website van het project
+- vraag om hulp op het FlightGear forum (en vermeld daarbij dat om welke LTS versie het gaat)
+- kijk op de flightgear-devel mailinglijst
+
+De ontwikkelaars zijn misschien al bezig met het oplossen van het probleem!

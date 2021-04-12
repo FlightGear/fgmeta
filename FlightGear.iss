@@ -106,7 +106,7 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 Name: "en"; MessagesFile: "compiler:Default.isl"; InfoBeforeFile: "{#FgHarnessPath}\windows\info-before-en.txt"
 Name: "pl"; MessagesFile: "compiler:Languages\Polish.isl"; InfoBeforeFile: "{#FgHarnessPath}\windows\info-before-pl.txt"
 Name: "es"; MessagesFile: "compiler:Languages\Spanish.isl"; 
-Name: "nl"; MessagesFile: "compiler:Languages\Dutch.isl"; 
+Name: "nl"; MessagesFile: "compiler:Languages\Dutch.isl"; InfoBeforeFile: "{#FgHarnessPath}\windows\info-before-nl.txt"
 Name: "de"; MessagesFile: "compiler:Languages\German.isl"; 
 Name: "fr"; MessagesFile: "compiler:Languages\French.isl"; 
 

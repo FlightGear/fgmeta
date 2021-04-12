@@ -42,10 +42,18 @@ es.FirewallFgException=Permite a FlightGear mandar y recibir datos a la red mult
 es.FirewallFgcomException=Permite a FGCom establecer una conexión con FlightGear y el servidor VoIP para comunicaciones de voz con el ATC.
 
 nl.CreateDesktopIcon=Maak een snelkoppeling op het &bureaublad
+nl.CreateDesktopIconGroup=Overige snelkoppelingen:
 nl.RemoveAllSettings=Verwijder alle instellingen en gedownloade data
-nl.RemoveAllSettingsDescription=FlightGear bewaart een aantal instellingen in uw gebruikersmap. Mogelijk is er ook data in de downloadmap opgeslagen. Selecteer deze optie om die bestanden definitief te verwijderen.
+nl.RemoveAllSettingsDescription=FlightGear bewaart een aantal instellingen in de gebruikersmap. Mogelijk is er ook data in de downloadmap opgeslagen. Selecteer deze optie om die bestanden definitief te verwijderen.
 nl.FirewallFgException=Sta FlightGear toe om data te verzenden en ontvangen via het multiplayernetwerk en om live weergegevens te downloaden.
 nl.FirewallFgcomException=Sta FGCom toe om verbinding met FlightGear en de VoIP server te maken voor op stem gebaseerde ATC-communicatie.
+nl.ExtractingDownloadContentTitle=Gedownloade bestanden uitpakken
+nl.ExtractingDownloadContentMessage=In deze stap worden de gedownloade bestanden uitgepakt
+nl.ExtractingDownloadedFile=Bestand uitpakken
+nl.UntarringDownloadedFile=Bestand uitpakken
+nl.ErrorDownloadingFile=Fout bij het downloaden van een bestand. Foutinformatie: %s
+nl.NotEnoughSpaceOnInstallationDisk=Onvoldoende vrije ruimte op de gekozen schijf. FlightGear vereist tenminste 6GB.
+nl.NotEnoughSpaceOnTemporaryDisk=Onvoldoende vrije ruimte op de tijdelijke schijf. FlightGear vereist tenminste 6GB.
 
 de.CreateDesktopIcon=Ein Desktop-Icon anlegen
 de.RemoveAllSettings=Alle Einstellungen und heruntergeladene Daten löschen
