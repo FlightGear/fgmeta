@@ -601,7 +601,7 @@ function _installOrUpdateDistroPackages(){
     fi
     _mandatory_pkg_alternative libpng-dev libpng12-dev libpng16-dev
     # The following packages are needed for the built-in launcher
-    _optional_pkg_alternative qt5-default
+    _optional_pkg_alternative qt5-default qtchooser
     _optional_pkg_alternative qtdeclarative5-dev
     _optional_pkg_alternative qttools5-dev
     _optional_pkg_alternative qtbase5-dev-tools            # for rcc
