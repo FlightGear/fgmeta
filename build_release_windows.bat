@@ -14,7 +14,6 @@ REM SET QT5SDK32=C:\Qt\5.6\msvc2015
 REM SET QT5SDK64=C:\Qt\5.6\msvc2015_64
 REM SET IS_NIGHTLY_BUILD=1
 
-SET OSG32=%WORKSPACE%\install\msvc140\OpenSceneGraph
 SET OSG64=%WORKSPACE%\install\msvc140-64\OpenSceneGraph
 
 SET VSGEN="Visual Studio 16 2019"
@@ -69,7 +68,7 @@ REM ensure SENTRY_AUTH_TOKEN is set in the environment
 sentry-cli upload-dif --include-sources %WORKSPACE%\build-fg64\%FGFS_PDB%
 
 REM indirect way to get command output into an environment variable
-set PATH=%OSG32%\bin;%PATH%
+set PATH=%OSG64%\bin;%PATH%
 osgversion --so-number > %TEMP%\osg-so-number.txt
 osgversion --version-number > %TEMP%\osg-version.txt
 osgversion --openthreads-soversion-number > %TEMP%\openthreads-so-number.txt
