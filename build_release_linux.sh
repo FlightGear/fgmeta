@@ -22,38 +22,38 @@ rm -rf output/*
 #####################################################################################
 echo "Starting on SimGear"
 cd sgBuild
-cmake -DCMAKE_INSTALL_PREFIX:PATH=$WORKSPACE/dist -DENABLE_DNS:BOOL="ON" -DSIMGEAR_SHARED:BOOL="ON" ../simgear
+cmake -G Ninja -DCMAKE_INSTALL_PREFIX:PATH=$WORKSPACE/dist -DENABLE_DNS:BOOL="ON" -DSIMGEAR_SHARED:BOOL="ON" -DCMAKE_BUILD_TYPE=RelWithDebInfo ../simgear
 
 # compile
-make
+ninja
 
 if [ $? -ne '0' ]; then
     echo "make simgear failed"
     exit 1
 fi
 
-make install
+ninja install
 
 # build source package and copy to output
-make package_source
+ninja package_source
 cp simgear-*.tar.bz2 ../output/.
 
 #####################################################################################
 echo "Starting on FlightGear"
 cd ../fgBuild
-cmake -DCMAKE_INSTALL_PREFIX:PATH=$WORKSPACE/dist -DSIMGEAR_SHARED:BOOL="ON" -DENABLE_SWIFT:BOOL=ON -DFG_BUILD_TYPE=Release ../flightgear
+cmake -G Ninja -DCMAKE_INSTALL_PREFIX:PATH=$WORKSPACE/dist -DSIMGEAR_SHARED:BOOL="ON" -DENABLE_SWIFT:BOOL=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo -DFG_BUILD_TYPE=Release ../flightgear
 
 # compile
-make
+ninja
 
 if [ $? -ne '0' ]; then
     echo "make flightgear failed"
     exit 1
 fi
 
-make install
+ninja install
 
 # build source package and copy to output
-make package_source
+ninja package_source
 cp flightgear-*.tar.bz2 ../output/.
 

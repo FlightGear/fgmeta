@@ -40,7 +40,11 @@ mkdir -p appdir/usr/ssl
 
 cp dist/bin/* appdir/usr/bin
 cp -d dist/lib64/* appdir/usr/lib
-cp -a dist/lib64/osgPlugins-3.6.5 appdir/usr/lib
+
+# OSG 3.6 uses lib, not lib64
+cp -d dist/lib/* appdir/usr/lib
+cp -a dist/lib/osgPlugins-3.6.5 appdir/usr/lib
+
 cp -r dist/share appdir/usr
 
 # FIXME : only copy the QML plugins we actually need
