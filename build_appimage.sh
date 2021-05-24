@@ -75,10 +75,11 @@ EOF
 chmod +x appdir/AppRun
 
 #grab continuous linuxdeployqt
-wget -c https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage
-chmod +x linuxdeployqt-continuous-x86_64.AppImage
+wget -c https://github.com/probonopd/linuxdeployqt/releases/download/7/linuxdeployqt-7-x86_64.AppImage
+#wget -c https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage
+chmod +x linuxdeployqt-7-x86_64.AppImage
 
 #set VERSION for AppImage creation
 export VERSION=`cat flightgear/flightgear-version`
 
-./linuxdeployqt-continuous-x86_64.AppImage appdir/usr/share/applications/org.flightgear.FlightGear.desktop -appimage
+./linuxdeployqt-7-x86_64.AppImage appdir/usr/share/applications/org.flightgear.FlightGear.desktop -appimage
