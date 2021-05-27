@@ -47,12 +47,10 @@
 #define FGSourcePath FgHarnessPath + "\flightgear"
 
 #define InstallDir32 FgHarnessPath + "\install\msvc140"
-#define InstallCompositor32 FgHarnessPath + "\install\msvc140\compositor"
 #define OSGInstallDir InstallDir32 + "\OpenSceneGraph"
 #define OSGPluginsDir OSGInstallDir + "\bin\osgPlugins-" + OSGVersion
 
 #define InstallDir64 FgHarnessPath + "\install\msvc140-64"
-#define InstallCompositor64 FgHarnessPath + "\install\msvc140-64\compositor"
 #define OSG64InstallDir InstallDir64 + "\OpenSceneGraph"
 #define OSG64PluginsDir OSG64InstallDir + "\bin\osgPlugins-" + OSGVersion
 
@@ -119,7 +117,6 @@ Name: "{%USERPROFILE}\FlightGear\Custom Scenery"; Permissions: creatorowner-modi
 [Icons]
 Name: "{userdesktop}\FlightGear {#FGVersionGroup}"; Filename: "{app}\bin\fgfs.exe"; Parameters: "--launcher"; WorkingDir: "{app}\bin"; Tasks: desktopicon;
 Name: "{group}\FlightGear {#FGVersionGroup}"; Filename: "{app}\bin\fgfs.exe"; Parameters: "--launcher"; WorkingDir: "{app}\bin";
-Name: "{group}\FlightGear {#FGVersionGroup} - Compositor"; Filename: "{app}\bin\fgfs-compositor.exe"; Parameters: "--launcher"; WorkingDir: "{app}\bin";
 Name: "{group}\FlightGear Manual"; Filename: "http://flightgear.sourceforge.net/manual/{#FGVersionGroup}/"
 Name: "{group}\Flightgear Wiki"; Filename: "http://wiki.flightgear.org"
 Name: "{group}\Tools\Uninstall FlightGear"; Filename: "{uninstallexe}"

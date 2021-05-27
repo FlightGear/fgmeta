@@ -1,7 +1,6 @@
 ﻿[Files]
 ; 32 bits install
 Source: "{#InstallDir32}\bin\*.*"; DestDir: "{app}\bin"; Excludes: "{#ExcludedBinaries}"; Flags: ignoreversion recursesubdirs; Check: not Is64BitInstallMode
-Source: "{#InstallCompositor32}\bin\fgfs.exe"; DestDir: "{app}\bin"; DestName: "fgfs-compositor.exe"; Excludes: "{#ExcludedBinaries}"; Flags: ignoreversion recursesubdirs; Check: not Is64BitInstallMode
 
 Source: "{#ThirdPartyDir}\3rdParty\bin\zlib.dll"; DestDir: "{app}\bin"; Check: not Is64BitInstallMode
 Source: "{#ThirdPartyDir}\3rdParty\bin\OpenAL32.dll"; DestDir: "{app}\bin"; Check: not Is64BitInstallMode
@@ -16,7 +15,6 @@ Source: "{#ThirdPartyDir}\3rdParty\bin\liblzma.dll"; DestDir: "{app}\bin"; Check
 
 ; 64 bits install
 Source: "{#InstallDir64}\bin\*.*"; DestDir: "{app}\bin"; Excludes: "{#ExcludedBinaries}"; Flags: ignoreversion recursesubdirs; Check: Is64BitInstallMode
-Source: "{#InstallCompositor64}\bin\fgfs.exe"; DestDir: "{app}\bin"; DestName: "fgfs-compositor.exe"; Excludes: "{#ExcludedBinaries}"; Flags: ignoreversion recursesubdirs; Check: Is64BitInstallMode
 
 Source: "{#ThirdPartyDir}\3rdParty.x64\bin\zlib.dll"; DestDir: "{app}\bin"; Check: Is64BitInstallMode
 Source: "{#ThirdPartyDir}\3rdParty.x64\bin\OpenAL32.dll"; DestDir: "{app}\bin"; Check: Is64BitInstallMode
