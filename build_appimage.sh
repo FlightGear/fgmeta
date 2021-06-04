@@ -56,6 +56,10 @@ cp /usr/lib64/libfreebl* appdir/usr/lib
 cp -a /usr/lib64/liblzma* appdir/usr/lib
 cp /etc/pki/tls/certs/ca-bundle.crt appdir/usr/ssl/cacert.pem
 
+# HarfBuzz is in /lib64 on CentOS, but still copy it: see
+# https://sourceforge.net/p/flightgear/codetickets/2590/
+cp -a /lib64/libharfbuzz.so* appdir/usr/lib
+
 #modify the desktop file so that linuxdeployqt doesn't barf (version to 1.0, add semicolon to end of certain line types)
 sed -i 's/^Categor.*/&;/ ; s/^Keyword.*/&;/ ; s/1\.1/1\.0/' appdir/usr/share/applications/org.flightgear.FlightGear.desktop
 
