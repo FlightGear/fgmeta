@@ -53,7 +53,8 @@ patchelf --set-rpath \$ORIGIN/../ appdir/usr/lib/osgPlugins-3.6.5/*.so
 cp -r dist/share appdir/usr
 
 # FIXME : only copy the QML plugins we actually need
-cp -a /usr/lib64/qt5/qml/QtQuick* appdir/usr/qml
+#cp -a /usr/lib64/qt5/qml/QtQuick* appdir/usr/qml
+#cp -a /usr/lib64/qt5/qml/QtQml* appdir/usr/qml
 
 cp /usr/lib64/libsoftokn3.* appdir/usr/lib
 cp /usr/lib64/libnsspem.so appdir/usr/lib
@@ -96,4 +97,5 @@ chmod +x linuxdeployqt-7-x86_64.AppImage
 #set VERSION for AppImage creation
 export VERSION=`cat flightgear/flightgear-version`
 
-./linuxdeployqt-7-x86_64.AppImage appdir/usr/share/applications/org.flightgear.FlightGear.desktop -appimage
+./linuxdeployqt-7-x86_64.AppImage appdir/usr/share/applications/org.flightgear.FlightGear.desktop -appimage -qmldir=flightgear/src/GUI/qml/
+
