@@ -39,14 +39,13 @@ SCENERY_PACK_NAME=SceneryPack_${SCENERY_PACK_AIRPORT}.tgz
 
 # Should we re-download the SceneryPack periodically? Or just rely on doing a workspace wipe?
 if [ ! -f $SCENERY_PACK_NAME ]; then
-    echo "Downlaod scenery pack from ${SCENERY_PACK_URI}"
+    echo "Downloading scenery pack from ${SCENERY_PACK_URI}"
     # -L to follow the SF redirect
     curl -L $SCENERY_PACK_URI --output $SCENERY_PACK_NAME
 fi
 
-tar -xf $SCENERY_PACK_NAME --directory staging/fgdata
-pushd staging/fgdata
-mv SceneryPack.${SCENERY_PACK_AIRPORT} Scenery
+pushd staging/fgdata/Scenery
+tar -xf $WORKSPACE/$SCENERY_PACK_NAME --strip-components=1
 popd
 
 # Creating full base package TXZ 
