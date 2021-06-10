@@ -145,6 +145,7 @@ GOTO End
 CALL :writeBaseConfig
 ECHO #define FGDetails "" >> InstallConfig.iss
 ECHO #define IncludeData "TRUE" >> InstallConfig.iss
+ECHO #define IncludeWeb "FALSE" >> InstallConfig.iss
 GOTO End
 
 :writeReleaseWebConfig
