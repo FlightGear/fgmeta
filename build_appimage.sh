@@ -54,8 +54,6 @@ patchelf --set-rpath \$ORIGIN/../ appdir/usr/lib/osgPlugins-3.4.2/*.so
 
 cp -r dist/share appdir/usr
 
-cp -a /usr/lib64/qt5/qml/QtQuick.2 appdir/usr/qml
-
 cp /usr/lib64/libsoftokn3.* appdir/usr/lib
 cp /usr/lib64/libnsspem.so appdir/usr/lib
 cp /usr/lib64/libfreebl* appdir/usr/lib
@@ -101,4 +99,5 @@ chmod +x linuxdeployqt-7-x86_64.AppImage
 #set VERSION for AppImage creation
 export VERSION=`cat flightgear/flightgear-version`
 
-./linuxdeployqt-7-x86_64.AppImage appdir/usr/share/applications/org.flightgear.FlightGear.desktop -appimage
+./linuxdeployqt-7-x86_64.AppImage appdir/usr/share/applications/org.flightgear.FlightGear.desktop -appimage -qmldir=flightgear/src/GUI/qml/
+
