@@ -323,72 +323,80 @@ begin
     end;
   end
   else if CurPageID = wpReady then begin
-    DownloadPage.Clear;
-    
-    fgDataInstalled := 0;
 
-    // checking registry entry, if fgdata was installed
-    if RegKeyExists(HKEY_LOCAL_MACHINE, ExpandConstant('Software\FlightGear\{#FGVersionGroup}')) then
-    begin
-      if RegQueryDWordValue(HKEY_LOCAL_MACHINE, ExpandConstant('Software\FlightGear\{#FGVersionGroup}'), 'fgdata-installed', fgDataInstalled) then
+    if ShouldSkipPage(DownloadPageId) = false then begin
+      DownloadPage.Clear;
+      
+      fgDataInstalled := 0;
+
+      // checking registry entry, if fgdata was installed
+      if RegKeyExists(HKEY_LOCAL_MACHINE, ExpandConstant('Software\FlightGear\{#FGVersionGroup}')) then
       begin
-        Log('Previous fgdata installed. Downloading delta package');
+        if RegQueryDWordValue(HKEY_LOCAL_MACHINE, ExpandConstant('Software\FlightGear\{#FGVersionGroup}'), 'fgdata-installed', fgDataInstalled) then
+        begin
+          Log('Previous fgdata installed. Downloading delta package');
+        end;
       end;
-    end;
 
-    // selecting fgdata installation packages
-    if (fgDataInstalled = 1) then
-    begin   
-      DownloadPage.Add('https://sourceforge.net/projects/flightgear/files/release-{#FGVersionGroup}/FlightGear-{#FGVersion}-update-data.txz/download', 'fgdata-downloaded.txz', '');
+      // selecting fgdata installation packages
+      if (fgDataInstalled = 1) then
+      begin   
+        DownloadPage.Add('https://sourceforge.net/projects/flightgear/files/release-{#FGVersionGroup}/FlightGear-{#FGVersion}-update-data.txz/download', 'fgdata-downloaded.txz', '');
+      end
+      else
+      begin
+        DownloadPage.Add('https://sourceforge.net/projects/flightgear/files/release-{#FGVersionGroup}/FlightGear-{#FGVersion}-data.txz/download', 'fgdata-downloaded.txz', '');
+      end;
+
+      DownloadPage.Show;
+      try
+        try
+          DownloadPage.Download;
+          // show extract progress page
+          try
+            ExtractDownload.Show;
+            ExtractDownload.SetText(ExpandConstant('{cm:ExtractingDownloadedFile}'), 'fgdata-downloaded.txz');
+            ExtractTemporaryFile('xz.exe');
+            ExtractTemporaryFile('liblzma.dll');
+            if Exec(ExpandConstant('{tmp}\xz.exe'), ExpandConstant('-d "{tmp}\fgdata-downloaded.txz"'), ExpandConstant('{tmp}'), SW_HIDE, ewWaitUntilTerminated, ResultCode) then
+            begin
+                Log(Format('Successfully expanded file: %s', [ExpandConstant('{tmp}\fgdata-downloaded.txz')]));
+                ExtractDownload.SetText(ExpandConstant('{cm:UntarringDownloadedFile}'), ExpandConstant('fgdata-downloaded.tar'));
+                ExtractTemporaryFile('tar.exe');
+                ExtractTemporaryFile('libiconv-2.dll');
+                ExtractTemporaryFile('libintl-2.dll');
+                CreateDir(ExpandConstant('{tmp}\fgdata-extracted'));
+                if Exec(ExpandConstant('{tmp}\tar.exe'), ExpandConstant('-xf fgdata-downloaded.tar -C fgdata-extracted'), ExpandConstant('{tmp}'), SW_HIDE, ewWaitUntilTerminated, ResultCode) then
+                begin
+                  Log(Format('Successfully untarred file: %s', [ExpandConstant('{tmp}\fgdata-downloaded.tar')]));
+                end
+                else begin
+                  Log(Format('ERROR untarring file: %s', [ExpandConstant('{tmp}\fgdata-downloaded.tar')]));
+                end;
+            end
+            else begin
+              Log(Format('ERROR expanding file: %s', [ExpandConstant('{tmp}\fgdata-downloaded.txz')]));
+            end;
+          finally
+            ExtractDownload.Hide;
+          end;
+          Result := True;
+        except
+          // FIXME - available in IS 6.1.3-dev
+          //if DownloadPage.AbortedByUser then
+          //  Log('Aborted by user.')
+          //else
+          SuppressibleMsgBox(Format(ExpandConstant('{cm:ErrorDownloadingFile}'), [AddPeriod(GetExceptionMessage)]), mbCriticalError, MB_OK, IDOK);
+          Result := False;
+        end;
+      finally
+        DownloadPage.Hide;
+      end;
     end
     else
-    begin
-      DownloadPage.Add('https://sourceforge.net/projects/flightgear/files/release-{#FGVersionGroup}/FlightGear-{#FGVersion}-data.txz/download', 'fgdata-downloaded.txz', '');
-    end;
-
-    DownloadPage.Show;
-    try
-      try
-        DownloadPage.Download;
-        // show extract progress page
-        try
-          ExtractDownload.Show;
-          ExtractDownload.SetText(ExpandConstant('{cm:ExtractingDownloadedFile}'), 'fgdata-downloaded.txz');
-          ExtractTemporaryFile('xz.exe');
-          ExtractTemporaryFile('liblzma.dll');
-          if Exec(ExpandConstant('{tmp}\xz.exe'), ExpandConstant('-d "{tmp}\fgdata-downloaded.txz"'), ExpandConstant('{tmp}'), SW_HIDE, ewWaitUntilTerminated, ResultCode) then
-          begin
-              Log(Format('Successfully expanded file: %s', [ExpandConstant('{tmp}\fgdata-downloaded.txz')]));
-              ExtractDownload.SetText(ExpandConstant('{cm:UntarringDownloadedFile}'), ExpandConstant('fgdata-downloaded.tar'));
-              ExtractTemporaryFile('tar.exe');
-              ExtractTemporaryFile('libiconv-2.dll');
-              ExtractTemporaryFile('libintl-2.dll');
-              CreateDir(ExpandConstant('{tmp}\fgdata-extracted'));
-              if Exec(ExpandConstant('{tmp}\tar.exe'), ExpandConstant('-xf fgdata-downloaded.tar -C fgdata-extracted'), ExpandConstant('{tmp}'), SW_HIDE, ewWaitUntilTerminated, ResultCode) then
-              begin
-                Log(Format('Successfully untarred file: %s', [ExpandConstant('{tmp}\fgdata-downloaded.tar')]));
-              end
-              else begin
-                Log(Format('ERROR untarring file: %s', [ExpandConstant('{tmp}\fgdata-downloaded.tar')]));
-              end;
-          end
-          else begin
-            Log(Format('ERROR expanding file: %s', [ExpandConstant('{tmp}\fgdata-downloaded.txz')]));
-          end;
-        finally
-          ExtractDownload.Hide;
-        end;
-        Result := True;
-      except
-        // FIXME - available in IS 6.1.3-dev
-        //if DownloadPage.AbortedByUser then
-        //  Log('Aborted by user.')
-        //else
-        SuppressibleMsgBox(Format(ExpandConstant('{cm:ErrorDownloadingFile}'), [AddPeriod(GetExceptionMessage)]), mbCriticalError, MB_OK, IDOK);
-        Result := False;
-      end;
-    finally
-      DownloadPage.Hide;
+    begin 
+      // skipping downloading
+      Result := True;
     end;
   end   
   else
