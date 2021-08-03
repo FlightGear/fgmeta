@@ -1373,14 +1373,16 @@ class XliffFormatReader:
                 if sourceText is not None:
                     raise XliffParseError(
                         "{file}: several 'source' elements inside the same "
-                        "'trans-unit' element".format(file=self.file))
+                        "'trans-unit' element ({id})".format(
+                            file=self.file, id=tid))
 
                 sourceText = self._handleSourceOrTargetNode(subnode, node.tag)
             elif subnode.tag == self.qualTagName("target"):
                 if targetText is not None:
                     raise XliffParseError(
                         "{file}: several 'target' elements inside the same "
-                        "'trans-unit' element".format(file=self.file))
+                        "'trans-unit' element ({id})".format(
+                            file=self.file, id=tid))
 
                 targetText = self._handleSourceOrTargetNode(subnode, node.tag)
             elif subnode.tag == self.qualTagName("note"):
@@ -1392,8 +1394,8 @@ class XliffFormatReader:
 
         if sourceText is None:
             raise XliffParseError(
-                "{file}: invalid 'trans-unit' element: doesn't contain any "
-                "'source' element".format(file=self.file))
+                "{file}: invalid 'trans-unit' element ({id}): doesn't contain "
+                "any 'source' element".format(file=self.file, id=tid))
 
         # The 'else' clause handles two cases: no <target> element, or an empty
         # one.
@@ -1406,16 +1408,17 @@ class XliffFormatReader:
         if self.insidePluralGroup:
             if pluralIndex is None:
                 raise XliffParseError(
-                    "{file}: invalid plural group: the id attribute value for "
-                    "each form must end with the form's plural index inside "
-                    "brackets (an integer)".format(file=self.file))
+                    "{file}: invalid plural group for '{id}': the id attribute "
+                    "value for each form must end with the form's plural index "
+                    "inside brackets (an integer)".format(
+                        file=self.file, id=tid))
             # Related plural forms will be merged into one TranslationUnit when
             # the containing <group restype="x-gettext-plurals"> ends.
             self.pluralGroupContents.append((tid, pluralIndex, translUnit))
         elif tid.cat not in self.transl:
             raise XliffParseError(
-                "{file}: unknown category: '{cat}'"
-                .format(file=self.file, cat=tid.cat))
+                "{file}: unknown category '{cat}' for '{id}'"
+                .format(file=self.file, cat=tid.cat, id=tid))
         # Source text empty + inside an x-gettext-msgctxt -> context dev comment
         # (this is how Qt Linguist works)
         elif (not sourceText and
