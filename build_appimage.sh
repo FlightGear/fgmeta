@@ -74,13 +74,62 @@ sed -i 's/^Categor.*/&;/ ; s/^Keyword.*/&;/ ; s/1\.1/1\.0/' appdir/usr/share/app
 cat << 'EOF' > appdir/AppRun
 #!/bin/bash
 HERE="$(dirname "$(readlink -f "${0}")")"
+BIN_DIR="${HERE}/usr/bin"
+EXEC_OPT="--exec-app"
 
 export SIMGEAR_TLS_CERT_PATH=$HERE/usr/ssl/cacert.pem
 export OSG_LIBRARY_PATH=${HERE}/usr/lib
 
-if [[ $# -eq 0 ]]; then
+# Run launcher directly if no parameters are passed
+if [[ "$#" -eq "0" ]]; then
  echo "Started with no arguments; assuming --launcher"
  exec "${HERE}/usr/bin/fgfs" --launcher
+ exit "$?"
+fi
+
+# Check for special argument "--exec-app=" and execute selected application
+if [[ "$1" == ${EXEC_OPT}=* ]] || [[ "$1" == "${EXEC_OPT}" ]]; then
+ OPT_VAL="${1#*=}"
+ APP_PATH="${BIN_DIR}/${OPT_VAL}"
+
+ # Call without arguments
+ if [[ "$1" == "${EXEC_OPT}" ]] || [[ -z "${OPT_VAL}" ]]; then
+  ERROR="1"
+ # Make sure executable name does not contain any "/"
+ elif [[ "${OPT_VAL}" == */* ]]; then
+  echo "Error: path separator \"/\" was used in application name!"
+  ERROR="1"
+ # Check if resulting file exists and is executable
+ elif [[ -z "$(find "${APP_PATH}" -type f \( \( -perm -00005 -a ! -user "$(id -u)" -a ! -group "$(id -g)" \) -o \( -perm -00500 -a -user "$(id -u)" \) -o \( -perm -00050 -a -group "$(id -g)" \) \) 2>/dev/null)" ]]; then 
+  echo "Error: \"${OPT_VAL}\" is not a valid application name or cannot be executed by current user!"
+  ERROR="1"
+ fi
+
+ # In case of error or no arguments show help
+ if [[ ! -z "${ERROR}" ]]; then
+ 
+  # Determine AppImage's filename
+  IMAGE_FILE_NAME="$(basename "${APPIMAGE}" 2>/dev/null)"
+  if [[ -z "${IMAGE_FILE_NAME}" ]]; then
+   IMAGE_FILE_NAME="FlightGear.AppImage"
+  fi
+ 
+  # Print help
+  echo "Usage: ./${IMAGE_FILE_NAME} ${EXEC_OPT}=<application>"
+  echo "Pass ${EXEC_OPT} as first positional argument."
+  echo "Additional arguments are passed to the called application."
+  echo "Valid values for <application> are:"
+  while IFS= read -r -d $'\0' bin_exe; do
+   echo "  $(basename "${bin_exe}")"
+  done < <( find "${BIN_DIR}/" -maxdepth 1 -type f \( \( -perm -00005 -a ! -user "$(id -u)" -a ! -group "$(id -g)" \) -o \( -perm -00500 -a -user "$(id -u)" \) -o \( -perm -00050 -a -group "$(id -g)" \) \) -exec printf "%s\0" "{}" \; )
+  # We have to use these odd find conditions since "find -executable" also lists non-executables when AppImage is executed. The reason is most likely the way it is mounted.
+  exit 1
+ fi
+
+ # Execute selected application and pass remaining parameters
+ # "pop" the first argument
+ shift
+ exec "${APP_PATH}" "$@"
 else
  exec "${HERE}/usr/bin/fgfs" "$@"
 fi
@@ -97,5 +146,11 @@ chmod +x linuxdeployqt-7-x86_64.AppImage
 #set VERSION for AppImage creation
 export VERSION=`cat flightgear/flightgear-version`
 
-./linuxdeployqt-7-x86_64.AppImage appdir/usr/share/applications/org.flightgear.FlightGear.desktop -appimage -qmldir=flightgear/src/GUI/qml/
+# Add all executable binaries as additional binaries to AppImage and use special quoted array expansion
+ADDITIONAL_EXES=()
+while IFS= read -r -d $'\0' bin_exe; do
+ ADDITIONAL_EXES+=("-executable=${bin_exe}")
+done < <( find "appdir/usr/bin/" -maxdepth 1 -type f \( \( -perm -00500 -o -perm -00050 -o -perm -00005 \) -a ! -name "fgfs" \) -exec printf "%s\0" "{}" \; )
+# This find statement filters for all files with at least one executability bit set
 
+./linuxdeployqt-7-x86_64.AppImage appdir/usr/share/applications/org.flightgear.FlightGear.desktop -appimage -qmldir=flightgear/src/GUI/qml/ "${ADDITIONAL_EXES[@]}"
