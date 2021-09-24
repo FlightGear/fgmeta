@@ -72,9 +72,9 @@ cp -a /lib64/libharfbuzz.so* appdir/usr/lib
 cp -a /usr/lib64/libfontconfig.so* appdir/usr/lib
 cp -a /usr/lib64/libfreetype.so* appdir/usr/lib
 cp -a /usr/lib64/libpng15.so* appdir/usr/lib
-patchelf --set-rpath \$ORIGIN appdir/usr/lib/libfontconfig.so
-patchelf --set-rpath \$ORIGIN appdir/usr/lib/libfreetype.so
-patchelf --set-rpath \$ORIGIN appdir/usr/lib/libharfbuzz.so
+patchelf --set-rpath \$ORIGIN appdir/usr/lib/libfontconfig.so*
+patchelf --set-rpath \$ORIGIN appdir/usr/lib/libfreetype.so*
+patchelf --set-rpath \$ORIGIN appdir/usr/lib/libharfbuzz.so*
 
 #modify the desktop file so that linuxdeployqt doesn't barf (version to 1.0, add semicolon to end of certain line types)
 sed -i 's/^Categor.*/&;/ ; s/^Keyword.*/&;/ ; s/1\.1/1\.0/' appdir/usr/share/applications/org.flightgear.FlightGear.desktop
